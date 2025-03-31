@@ -19,6 +19,8 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - Implemented detailed tooltips for all charts with contextual information
 - Added percentage indicators directly on charts for quick insights
 - Improved Expense Categories visualization with donut charts and shadow effects
+- Added gender selection option in user profile settings
+- Added timezone selection for better personalization of reports and notifications
 
 ### User Experience Improvements
 - Redesigned BudgetCharts component with better UI/UX
@@ -26,6 +28,8 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - Added gradient fills and modern design elements to all visualizations
 - Improved empty states with helpful messages
 - Better color contrast and accessibility for data visualization
+- Improved budget creation with multiple access points on mobile
+- Enhanced button sizes for better touch interactions
 
 ### Technical Improvements
 - Optimized chart rendering with useMemo hooks

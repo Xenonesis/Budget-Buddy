@@ -24,6 +24,8 @@ interface Profile {
     sms: boolean;
   };
   profile_photo?: string;
+  gender?: string;
+  timezone?: string;
 }
 
 interface AuthUser {
@@ -59,6 +61,8 @@ export default function SettingsPage() {
     address: "",
     preferred_language: "en",
     profile_photo: "",
+    gender: "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     notification_preferences: {
       email: true,
       push: false,
@@ -129,6 +133,8 @@ export default function SettingsPage() {
               sms: false
             },
             profile_photo: userData.user.user_metadata?.profile_photo || '',
+            gender: userData.user.user_metadata?.gender || '',
+            timezone: userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -186,6 +192,8 @@ export default function SettingsPage() {
         sms: false
       };
       const profile_photo = data.profile_photo || userData.user.user_metadata?.profile_photo || '';
+      const gender = data.gender || userData.user.user_metadata?.gender || '';
+      const timezone = data.timezone || userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
       
       // Update the global store
       setUsername(username);
@@ -199,8 +207,10 @@ export default function SettingsPage() {
         phone,
         address,
         preferred_language,
+        notification_preferences,
         profile_photo,
-        notification_preferences
+        gender,
+        timezone
       });
       
       console.log("Form data set:", {
@@ -252,6 +262,8 @@ export default function SettingsPage() {
           preferred_language: formData.preferred_language,
           notification_preferences: formData.notification_preferences,
           profile_photo: formData.profile_photo,
+          gender: formData.gender,
+          timezone: formData.timezone,
           updated_at: new Date().toISOString(),
         },
       });
@@ -269,6 +281,8 @@ export default function SettingsPage() {
           preferred_language: formData.preferred_language,
           notification_preferences: formData.notification_preferences,
           profile_photo: formData.profile_photo,
+          gender: formData.gender,
+          timezone: formData.timezone,
           updated_at: new Date().toISOString(),
         })
         .eq("id", userData.user.id);
@@ -373,6 +387,12 @@ export default function SettingsPage() {
       
       yPosition += lineHeight;
       doc.text(`Theme: ${themeChoice}`, leftMargin, yPosition);
+
+      yPosition += lineHeight;
+      doc.text(`Gender: ${formData.gender || 'Not specified'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Timezone: ${formData.timezone || 'UTC'}`, leftMargin, yPosition);
       
       yPosition += lineHeight + 10;
       doc.setFontSize(14);
@@ -567,6 +587,53 @@ export default function SettingsPage() {
                       <option value="ar">Arabic</option>
                       <option value="ru">Russian</option>
                       <option value="pt">Portuguese</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="gender" className="mb-2 block text-sm font-medium">
+                      Gender (optional)
+                    </label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">Prefer not to say</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="non-binary">Non-binary</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="timezone" className="mb-2 block text-sm font-medium">
+                      Timezone
+                    </label>
+                    <select
+                      id="timezone"
+                      name="timezone"
+                      value={formData.timezone}
+                      onChange={handleInputChange}
+                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="UTC">UTC (Coordinated Universal Time)</option>
+                      <option value="America/New_York">Eastern Time (ET)</option>
+                      <option value="America/Chicago">Central Time (CT)</option>
+                      <option value="America/Denver">Mountain Time (MT)</option>
+                      <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                      <option value="America/Anchorage">Alaska Time</option>
+                      <option value="Pacific/Honolulu">Hawaii Time</option>
+                      <option value="Europe/London">London (GMT/BST)</option>
+                      <option value="Europe/Paris">Central European (CET/CEST)</option>
+                      <option value="Europe/Helsinki">Eastern European (EET/EEST)</option>
+                      <option value="Asia/Tokyo">Japan (JST)</option>
+                      <option value="Asia/Shanghai">China (CST)</option>
+                      <option value="Asia/Kolkata">India (IST)</option>
+                      <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
                     </select>
                   </div>
                   
