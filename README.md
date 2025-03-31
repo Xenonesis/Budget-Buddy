@@ -9,6 +9,20 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
+## Version 7.1 - Latest Updates
+
+**Released: April 3, 2024**
+
+### Bug Fixes
+- Fixed type error in settings page involving missing fields in profile updates
+- Resolved build failure caused by incorrect argument types
+- Ensured proper timezone and gender field handling
+
+### User Experience Improvements
+- Enhanced form data consistency in the settings page
+- Improved error handling and logging throughout the application
+- Added better type checking for data interfaces
+
 ## Version 7.0 - Latest Updates
 
 **Released: April 2, 2024**

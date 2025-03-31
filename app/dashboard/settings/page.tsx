@@ -161,6 +161,8 @@ export default function SettingsPage() {
               address: newProfile.address || '',
               preferred_language: newProfile.preferred_language || 'en',
               profile_photo: newProfile.profile_photo || '',
+              gender: newProfile.gender || '',
+              timezone: newProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
               notification_preferences: newProfile.notification_preferences || {
                 email: true,
                 push: false,
@@ -221,6 +223,8 @@ export default function SettingsPage() {
         address,
         preferred_language,
         profile_photo,
+        gender,
+        timezone,
         notification_preferences
       });
     } catch (error) {
