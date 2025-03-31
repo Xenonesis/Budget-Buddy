@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line,
-  ComposedChart, Area, RadialBarChart, RadialBar
+  ComposedChart, Area, RadialBarChart, RadialBar, PolarAngleAxis
 } from 'recharts';
 import { Budget, CategorySpending } from '../types';
 import { formatCurrency } from '@/lib/utils';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, BarChart2, PieChart as PieChartIcon, TrendingUp,
   DollarSign, ArrowUpCircle, AreaChart, GitBranch, 
-  ListChecks
+  ListChecks, Info as InfoIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +38,25 @@ interface BudgetChartsProps {
 export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
   const [activeChart, setActiveChart] = useState<'distribution' | 'spending' | 'trends'>('distribution');
   const [spendingChartType, setSpendingChartType] = useState<'bar' | 'pie' | 'radial'>('bar');
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Screen size detection for responsive layouts
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    // Check initially
+    checkScreenSize();
+    
+    // Set up listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, []);
 
   // Data for budget distribution chart
   const budgetDistributionData = useMemo(() => {
@@ -83,16 +102,35 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
     }));
   }, [spendingVsBudgetData]);
 
-  // Radial chart data
+  // Enhanced radial chart data with better color gradients
   const radialChartData = useMemo(() => {
-    return spendingVsBudgetData.map((item, index) => ({
-      name: item.name,
-      value: item.percentSpent,
-      fill: item.overBudget ? '#EF4444' : 
-           (item.percentSpent > 90 ? '#F59E0B' : '#10B981'),
-    }))
+    return spendingVsBudgetData.map((item, index) => {
+      // Create color gradients based on spend percentage
+      let fill;
+      if (item.overBudget) {
+        // Red gradient for over budget
+        fill = item.percentSpent > 130 ? '#EF4444' : '#F87171';
+      } else if (item.percentSpent > 90) {
+        // Amber gradient for close to budget
+        fill = item.percentSpent > 95 ? '#F59E0B' : '#FBBF24';
+      } else {
+        // Green gradient for under budget
+        fill = item.percentSpent > 70 ? '#10B981' : '#34D399';
+      }
+      
+      return {
+        name: item.name,
+        value: item.percentSpent,
+        fill: fill,
+        budget: item.budget,
+        spent: item.spent,
+        remaining: item.remaining,
+        percentSpent: item.percentSpent,
+        index: index
+      };
+    })
     .sort((a, b) => b.value - a.value)
-    .slice(0, 5); // Top 5 for better visibility
+    .slice(0, 6); // Show top 6 for better visibility
   }, [spendingVsBudgetData]);
 
   // Monthly trends with better data visualization
@@ -198,11 +236,14 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
             <div className="flex items-center justify-between mt-1 pt-1 border-t">
               <span className="text-sm text-muted-foreground">Percent used:</span>
               <span className={cn(
-                "font-semibold",
-                categoryData?.percentSpent > 100 ? "text-red-500" : 
-                categoryData?.percentSpent > 90 ? "text-amber-500" : "text-green-500"
+                "font-medium",
+                (categoryData?.percentSpent || 0) > 100 
+                  ? "text-red-500" 
+                  : (categoryData?.percentSpent || 0) > 90 
+                    ? "text-amber-500" 
+                    : "text-emerald-500"
               )}>
-                {categoryData?.percentSpent.toFixed(1)}%
+                {Math.round(categoryData?.percentSpent || 0)}%
               </span>
             </div>
           </div>
@@ -296,99 +337,70 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
   };
 
   return (
-    <div className="rounded-xl border bg-card shadow-md overflow-hidden mb-6 hover:shadow-lg transition-all">
-      <div className="border-b p-5 bg-gradient-to-r from-primary/5 to-primary/10">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <GitBranch className="h-5 w-5 text-primary" />
-          Budget Insights
-        </h2>
+    <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <div className="border-b p-4 sm:p-5">
+        <h2 className="text-xl font-bold">Budget Analytics</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Visualize your budget allocation and spending patterns
+          Visualize and analyze your budget allocation and spending
         </p>
       </div>
 
-      {/* Chart Type Selector */}
-      <div className="flex flex-wrap justify-center gap-2 p-4 border-b">
-        <Button
-          variant={activeChart === 'distribution' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveChart('distribution')}
-          className="flex items-center gap-1.5"
-        >
-          <PieChartIcon size={16} />
-          <span className="hidden sm:inline">Budget Distribution</span>
-          <span className="sm:hidden">Distribution</span>
-        </Button>
-        <Button
-          variant={activeChart === 'spending' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveChart('spending')}
-          className="flex items-center gap-1.5"
-        >
-          <BarChart2 size={16} />
-          <span className="hidden sm:inline">Spending vs Budget</span>
-          <span className="sm:hidden">Spending</span>
-        </Button>
-        <Button
-          variant={activeChart === 'trends' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveChart('trends')}
-          className="flex items-center gap-1.5"
-        >
-          <TrendingUp size={16} />
-          <span className="hidden sm:inline">Monthly Trends</span>
-          <span className="sm:hidden">Trends</span>
-        </Button>
+      {/* Mobile-optimized chart navigation */}
+      <div className="p-3 sm:p-4 border-b overflow-x-auto scrollbar-hide">
+        <div className="flex min-w-max space-x-2">
+          <Button
+            variant={activeChart === 'distribution' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveChart('distribution')}
+            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+          >
+            <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            Budget Distribution
+          </Button>
+          <Button
+            variant={activeChart === 'spending' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveChart('spending')}
+            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+          >
+            <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            Spending vs Budget
+          </Button>
+          <Button
+            variant={activeChart === 'trends' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveChart('trends')}
+            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+          >
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            Monthly Trends
+          </Button>
+        </div>
       </div>
 
-      {/* Chart Display Area */}
-      <div className="p-4">
-        {budgets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <AlertTriangle className="h-12 w-12 text-muted-foreground mb-3" />
-            <h3 className="text-lg font-medium">No budget data available</h3>
-            <p className="text-muted-foreground text-sm mt-1">
-              Create budgets to see visual insights and analysis
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Budget Distribution Chart */}
-            {activeChart === 'distribution' && (
+      {/* Chart display area */}
+      <div className="p-2 sm:p-4 md:p-6">
+        {/* Budget Distribution Chart */}
+        {activeChart === 'distribution' && (
+          <div>
+            {budgetDistributionData.length > 0 ? (
               <div>
-                <div className="mb-2 text-sm text-muted-foreground italic text-center">
-                  See how your budget is allocated across different categories
-                </div>
-                <div className="h-80 md:h-96">
+                <div className="h-[300px] sm:h-[350px] md:h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <defs>
-                        {budgetDistributionData.map((entry, index) => (
-                          <filter key={`shadow-${index}`} id={`shadow-${index}`} height="200%">
-                            <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor={entry.color} floodOpacity="0.5"/>
-                          </filter>
-                        ))}
-                      </defs>
                       <Pie
                         data={budgetDistributionData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={110}
-                        innerRadius={60}
-                        paddingAngle={3}
+                        outerRadius="90%"
+                        innerRadius="0%"
                         fill="#8884d8"
                         dataKey="value"
                         label={renderCustomizedLabel}
-                        stroke="var(--background)"
-                        strokeWidth={2}
                       >
                         {budgetDistributionData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.color}
-                            style={{ filter: `url(#shadow-${index})` }}
-                          />
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
@@ -396,11 +408,13 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                         layout="vertical"
                         align="right"
                         verticalAlign="middle"
+                        iconSize={8}
+                        iconType="circle"
                         formatter={(value, entry: any, index) => {
                           const item = budgetDistributionData[index];
                           const percentage = ((item.value / totalBudget) * 100).toFixed(1);
                           return (
-                            <span className="text-sm">
+                            <span className="text-xs sm:text-sm">
                               {value}: <span className="font-medium">{percentage}%</span>
                             </span>
                           );
@@ -410,101 +424,99 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                   </ResponsiveContainer>
                 </div>
                 <div className="flex items-center justify-center mt-2">
-                  <div className="bg-primary/10 rounded-full px-4 py-1.5 text-sm font-medium text-primary flex items-center gap-1.5">
+                  <div className="bg-primary/10 rounded-full px-3 py-1 text-xs sm:text-sm font-medium text-primary flex items-center gap-1.5">
                     <DollarSign size={16} />
                     Total Budget: {formatCurrency(totalBudget)}
                   </div>
                 </div>
               </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <PieChartIcon className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">No budget data available</h3>
+                <p className="text-sm text-muted-foreground mb-6">Add some budgets to see your distribution</p>
+              </div>
             )}
+          </div>
+        )}
 
-            {/* Spending vs Budget Chart */}
-            {activeChart === 'spending' && (
+        {/* Spending vs Budget Chart */}
+        {activeChart === 'spending' && (
+          <div>
+            {spendingVsBudgetData.length > 0 ? (
               <div>
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  <Button
-                    variant={spendingChartType === 'bar' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSpendingChartType('bar')}
-                    className="flex items-center gap-1.5"
-                  >
-                    <BarChart2 size={14} />
-                    <span>Bar Chart</span>
-                  </Button>
-                  <Button
-                    variant={spendingChartType === 'pie' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSpendingChartType('pie')}
-                    className="flex items-center gap-1.5"
-                  >
-                    <PieChartIcon size={14} />
-                    <span>Pie Chart</span>
-                  </Button>
-                  <Button
-                    variant={spendingChartType === 'radial' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSpendingChartType('radial')}
-                    className="flex items-center gap-1.5"
-                  >
-                    <AreaChart size={14} />
-                    <span>Budget Usage</span>
-                  </Button>
+                {/* Chart Type Selector - More compact for mobile */}
+                <div className="flex justify-center mb-3 sm:mb-6">
+                  <div className="flex border rounded-lg overflow-hidden">
+                    <Button 
+                      variant={spendingChartType === 'bar' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setSpendingChartType('bar')}
+                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                    >
+                      <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      Bar
+                    </Button>
+                    <Button 
+                      variant={spendingChartType === 'pie' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setSpendingChartType('pie')}
+                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                    >
+                      <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      Pie
+                    </Button>
+                    <Button 
+                      variant={spendingChartType === 'radial' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setSpendingChartType('radial')}
+                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                    >
+                      <GitBranch className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      Radial
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="mb-2 text-sm text-muted-foreground italic text-center">
-                  {spendingChartType === 'bar' && "Compare your spending against your budget for each category"}
-                  {spendingChartType === 'pie' && "Visualize how your spending is distributed across categories"}
-                  {spendingChartType === 'radial' && "See which categories are using the most of their budget allocation"}
-                </div>
-                
-                <div className="h-80 md:h-96">
-                  {spendingChartType === 'bar' && (
+
+                {/* Bar Chart View */}
+                {spendingChartType === 'bar' && (
+                  <div className="h-[350px] sm:h-[400px] md:h-[450px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={spendingVsBudgetData}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                        data={spendingVsBudgetData.slice(0, 7)} // Limit to top 7 for mobile
+                        margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
+                        layout="vertical"
                       >
-                        <defs>
-                          <linearGradient id="colorBudget" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="colorSpent" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#EF4444" stopOpacity={0.3}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis 
-                          dataKey="name" 
-                          angle={-45} 
-                          textAnchor="end" 
-                          height={70} 
-                          tick={{ fill: 'var(--muted-foreground)' }}
-                        />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                        <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
                         <YAxis 
-                          tickFormatter={(value) => formatCurrency(value)} 
-                          tick={{ fill: 'var(--muted-foreground)' }}
+                          type="category" 
+                          dataKey="name" 
+                          width={100} 
+                          tickFormatter={(value) => 
+                            value.length > 12 ? `${value.substring(0, 12)}...` : value
+                          }
+                          tick={{ fontSize: 12 }}
                         />
                         <Tooltip content={<SpendingTooltip />} />
                         <Legend />
-                        <Bar 
-                          dataKey="budget" 
-                          name="Budget" 
-                          fill="url(#colorBudget)" 
-                          radius={[4, 4, 0, 0]}
-                        />
+                        <Bar dataKey="budget" name="Budget" fill="#6366F1" />
                         <Bar 
                           dataKey="spent" 
                           name="Spent" 
-                          fill="url(#colorSpent)"
-                          radius={[4, 4, 0, 0]}
+                          fill="#EF4444"
+                          background={{ fill: '#eee' }}
                         />
                       </BarChart>
                     </ResponsiveContainer>
-                  )}
-                  
-                  {spendingChartType === 'pie' && (
+                  </div>
+                )}
+
+                {/* Pie Chart View */}
+                {spendingChartType === 'pie' && (
+                  <div className="h-[300px] sm:h-[350px] md:h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -512,48 +524,35 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          outerRadius={110}
-                          innerRadius={60}
+                          outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
                           label={renderCustomizedLabel}
-                          paddingAngle={3}
-                          stroke="var(--background)"
-                          strokeWidth={2}
                         >
                           {spendingPieData.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={entry.color}
-                            />
+                            <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip 
-                          formatter={(value) => formatCurrency(value as number)}
-                          contentStyle={{
-                            background: 'var(--card)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '0.5rem',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                          }}
-                        />
+                        <Tooltip content={<SpendingTooltip />} />
                         <Legend 
                           layout="vertical"
                           align="right"
                           verticalAlign="middle"
+                          iconSize={8}
+                          iconType="circle"
                           formatter={(value, entry: any, index) => {
                             const item = spendingPieData[index];
+                            const percentage = item.percentSpent;
                             return (
-                              <span className="text-sm">
-                                {value}{' '}
-                                <span 
-                                  className={
-                                    item.percentSpent > 100 ? "text-red-500" :
-                                    item.percentSpent > 90 ? "text-amber-500" : 
-                                    "text-green-500"
-                                  }
-                                >
-                                  ({item.percentSpent.toFixed(0)}%)
+                              <span className="text-xs sm:text-sm">
+                                {value}
+                                <span className={cn(
+                                  "ml-2 text-xs font-medium",
+                                  percentage > 100 ? "text-red-500" : 
+                                  percentage > 90 ? "text-amber-500" : 
+                                  "text-emerald-500"
+                                )}>
+                                  {Math.round(percentage)}%
                                 </span>
                               </span>
                             );
@@ -561,152 +560,157 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                         />
                       </PieChart>
                     </ResponsiveContainer>
-                  )}
-                  
-                  {spendingChartType === 'radial' && (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RadialBarChart 
-                        cx="50%" 
-                        cy="50%" 
-                        innerRadius="20%" 
-                        outerRadius="80%" 
-                        barSize={20} 
-                        data={radialChartData}
-                      >
-                        <RadialBar
-                          background
-                          clockWise
-                          dataKey="value"
-                          cornerRadius={12}
-                          label={{
-                            position: 'insideStart',
-                            fill: '#fff',
-                            formatter: (value: number) => `${Math.round(value)}%`,
-                          }}
-                        />
-                        <Legend
-                          iconSize={10}
-                          layout="vertical"
-                          verticalAlign="middle"
-                          align="right"
-                          formatter={(value, entry: any, index) => {
-                            const item = radialChartData[index];
-                            return (
-                              <span className="text-sm">
-                                {value}: <span className="font-medium">{item.value.toFixed(0)}%</span>
-                              </span>
-                            );
-                          }}
-                        />
-                        <Tooltip
-                          formatter={(value) => [`${value}% of budget used`, 'Usage']}
-                          contentStyle={{
-                            background: 'var(--card)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '0.5rem',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                          }}
-                        />
-                      </RadialBarChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
+                  </div>
+                )}
                 
-                <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-                  <div className="bg-green-500/10 rounded-full px-3 py-1 text-sm font-medium text-green-600 flex items-center gap-1.5">
-                    <ListChecks size={14} />
-                    On Budget: {spendingVsBudgetData.filter(i => !i.overBudget).length} categories
+                {/* Radial Chart View */}
+                {spendingChartType === 'radial' && (
+                  <div className="flex flex-col h-[350px] sm:h-[400px] md:h-[450px] w-full">
+                    <div className="text-center mb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Budget Utilization by Category (%)
+                      </h3>
+                    </div>
+                    <div className="flex-1 relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart 
+                          cx="50%" 
+                          cy="50%" 
+                          innerRadius={isMobile ? "20%" : "15%"} 
+                          outerRadius={isMobile ? "85%" : "90%"} 
+                          barSize={isMobile ? 16 : 20}
+                          data={radialChartData} 
+                          startAngle={180} 
+                          endAngle={0}
+                        >
+                          <RadialBar
+                            background
+                            dataKey="value"
+                            cornerRadius={12}
+                            label={{ 
+                              position: 'insideStart', 
+                              fill: '#fff',
+                              fontWeight: 'bold',
+                              fontSize: isMobile ? 10 : 12,
+                              formatter: (value: number) => `${Math.round(value)}%`,
+                            }}
+                            animationBegin={200}
+                            animationDuration={1000}
+                            animationEasing="ease-out"
+                          />
+                          <Legend 
+                            iconSize={isMobile ? 8 : 10}
+                            layout={isMobile ? "horizontal" : "vertical"}
+                            verticalAlign={isMobile ? "bottom" : "middle"}
+                            align={isMobile ? "center" : "right"}
+                            wrapperStyle={{
+                              paddingLeft: isMobile ? '0' : '20px',
+                              paddingTop: isMobile ? '15px' : '0',
+                              fontSize: isMobile ? '10px' : '12px',
+                              maxWidth: '100%'
+                            }}
+                            formatter={(value, entry: any, index) => {
+                              const item = radialChartData[index];
+                              return (
+                                <span className="text-xs sm:text-sm flex items-center whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] md:max-w-[150px]">
+                                  <span className="truncate">{value}</span>
+                                  <span className={cn(
+                                    "ml-2 text-xs font-medium",
+                                    (item.percentSpent || 0) > 100 ? "text-red-500" : 
+                                    (item.percentSpent || 0) > 90 ? "text-amber-500" : 
+                                    "text-emerald-500"
+                                  )}>
+                                    {Math.round(item.percentSpent || 0)}%
+                                  </span>
+                                </span>
+                              );
+                            }}
+                          />
+                          <Tooltip
+                            content={<SpendingTooltip />}
+                            cursor={{ fill: 'transparent' }}
+                            wrapperStyle={{
+                              backgroundColor: 'var(--background)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '8px',
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                              padding: '8px 12px',
+                              maxWidth: '250px'
+                            }}
+                          />
+                          <PolarAngleAxis
+                            type="number"
+                            domain={[0, 150]}
+                            angleAxisId={0}
+                            tick={false}
+                          />
+                        </RadialBarChart>
+                      </ResponsiveContainer>
+                      
+                      {/* Gradient legend */}
+                      <div className="absolute bottom-0 left-0 right-0 flex justify-center mt-4 pb-2 space-x-3 pt-2">
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-emerald-500 rounded-full mr-1.5"></span>
+                          <span className="text-xs">Under</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-amber-500 rounded-full mr-1.5"></span>
+                          <span className="text-xs">Near</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-red-500 rounded-full mr-1.5"></span>
+                          <span className="text-xs">Over</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-center text-xs text-muted-foreground">
+                      Showing top {radialChartData.length} categories by percentage spent
+                    </div>
                   </div>
-                  <div className="bg-red-500/10 rounded-full px-3 py-1 text-sm font-medium text-red-600 flex items-center gap-1.5">
-                    <AlertTriangle size={14} />
-                    Over Budget: {spendingVsBudgetData.filter(i => i.overBudget).length} categories
-                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <BarChart2 className="h-8 w-8 text-primary" />
                 </div>
+                <h3 className="text-lg font-medium mb-1">No spending data available</h3>
+                <p className="text-sm text-muted-foreground mb-6">Track your expenses to see spending vs budget</p>
               </div>
             )}
+          </div>
+        )}
 
-            {/* Monthly Trend Chart */}
-            {activeChart === 'trends' && (
-              <div>
-                <div className="mb-2 text-sm text-muted-foreground italic text-center">
-                  Track your spending patterns over the last 6 months
-                </div>
-                <div className="h-80 md:h-96">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
-                      data={monthlyTrendData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorSavings" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
-                        </linearGradient>
-                        <linearGradient id="colorOverBudget" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#EF4444" stopOpacity={0.1}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
-                      <XAxis 
-                        dataKey="name"
-                        tick={{ fill: 'var(--muted-foreground)' }}
-                      />
-                      <YAxis 
-                        tickFormatter={(value) => formatCurrency(value)}
-                        tick={{ fill: 'var(--muted-foreground)' }}
-                      />
-                      <Tooltip content={<TrendTooltip />} />
-                      <Legend wrapperStyle={{ paddingTop: 10 }} />
-                      <Bar 
-                        dataKey="budget" 
-                        name="Budget" 
-                        barSize={20}
-                        fill="#3B82F6"
-                        fillOpacity={0.7}
-                        stroke="#3B82F6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Bar 
-                        dataKey="spent" 
-                        name="Spent" 
-                        barSize={20}
-                        fill="#F59E0B"
-                        fillOpacity={0.7}
-                        stroke="#F59E0B"
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="savings"
-                        name="Savings"
-                        fill="url(#colorSavings)"
-                        stroke="#10B981"
-                        fillOpacity={0.3}
-                        strokeWidth={2}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="overBudget"
-                        name="Over Budget"
-                        fill="url(#colorOverBudget)"
-                        stroke="#EF4444"
-                        fillOpacity={0.3}
-                        strokeWidth={2}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-                
-                <div className="flex items-center justify-center mt-2">
-                  <div className="bg-primary/10 rounded-full px-4 py-1.5 text-sm font-medium text-primary flex items-center gap-1.5">
-                    <ArrowUpCircle size={16} />
-                    Trend Analysis: {monthlyTrendData[monthlyTrendData.length - 1].spent > monthlyTrendData[monthlyTrendData.length - 2].spent ? 'Increasing' : 'Decreasing'} Spending
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+        {/* Monthly Trends Chart */}
+        {activeChart === 'trends' && (
+          <div>
+            <div className="h-[300px] sm:h-[350px] md:h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={monthlyTrendData}
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <CartesianGrid stroke="#f5f5f5" strokeDasharray="3 3" />
+                  <XAxis dataKey="name" scale="band" />
+                  <YAxis tickFormatter={(value) => `$${value}`} />
+                  <Tooltip content={<TrendTooltip />} />
+                  <Legend 
+                    iconSize={8}
+                    formatter={(value, entry: any) => (
+                      <span className="text-xs sm:text-sm">{value}</span>
+                    )}
+                  />
+                  <Area type="monotone" dataKey="budget" fill="#A5B4FC" stroke="#6366F1" fillOpacity={0.3} />
+                  <Bar dataKey="spent" barSize={20} fill="#F87171" />
+                  <Line type="monotone" dataKey="savings" stroke="#10B981" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center items-center mt-3 text-xs sm:text-sm text-muted-foreground">
+              <InfoIcon className="h-4 w-4 mr-1.5" />
+              <span>This is a simulated 6-month trend based on your current data</span>
+            </div>
+          </div>
         )}
       </div>
     </div>

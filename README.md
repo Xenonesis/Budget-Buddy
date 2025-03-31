@@ -9,6 +9,31 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
+## Version 7.0 - Latest Updates
+
+**Released: April 2, 2024**
+
+### New Features
+- Enhanced category management with improved deletion functionality
+- Optimized radial charts for better display on both mobile and desktop
+- Added dynamic screen size detection for responsive chart layouts
+- Implemented colorful gradients in charts based on budget usage
+- Added category deletion capability with prominent DELETE buttons
+
+### User Experience Improvements
+- Completely redesigned category deletion UI with clear instructions
+- Improved visualization of custom categories section with prominent styling
+- Fixed date handling to ensure proper date format for database constraints
+- Enhanced error messages with detailed information for better troubleshooting
+- Added more visual cues and instructions for managing categories
+
+### Technical Improvements
+- Fixed transaction submission issues with improved date validation
+- Enhanced error handling with detailed console logging
+- Improved data validation before submission to database
+- Fixed constraint violations with proper data formatting
+- Added robust error recovery mechanisms
+
 ## Version 6.0 - Latest Updates
 
 **Released: March 31, 2024**

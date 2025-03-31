@@ -65,34 +65,37 @@ export function validateDate(value: string | null | undefined): ValidationResult
     return requiredCheck;
   }
   
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$|^\d{2}\/\d{2}\/\d{4}$|^\d{2}\.\d{2}\.\d{4}$/;
-  if (!dateRegex.test(value as string)) {
+  // Strict YYYY-MM-DD format check
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!isoDateRegex.test(value as string)) {
     return {
       isValid: false,
-      message: 'Date must be in a valid format (YYYY-MM-DD or MM/DD/YYYY)'
+      message: 'Date must be in YYYY-MM-DD format'
     };
   }
   
-  const date = new Date(value as string);
-  if (isNaN(date.getTime())) {
+  // Validate it's an actual valid date
+  const dateObj = new Date(value as string);
+  if (isNaN(dateObj.getTime())) {
     return {
       isValid: false,
       message: 'Invalid date'
     };
   }
   
+  // Check if date is within reasonable range
   const today = new Date();
   const hundredYearsAgo = new Date();
   hundredYearsAgo.setFullYear(today.getFullYear() - 100);
   
-  if (date > new Date(today.getFullYear() + 10, today.getMonth(), today.getDate())) {
+  if (dateObj > new Date(today.getFullYear() + 10, today.getMonth(), today.getDate())) {
     return {
       isValid: false,
       message: 'Date cannot be more than 10 years in the future'
     };
   }
   
-  if (date < hundredYearsAgo) {
+  if (dateObj < hundredYearsAgo) {
     return {
       isValid: false,
       message: 'Date cannot be more than 100 years in the past'
@@ -214,6 +217,17 @@ export function validateCategory(value: string | null | undefined): ValidationRe
       isValid: false,
       message: 'Category name cannot exceed 50 characters'
     };
+  }
+  
+  // If it looks like a UUID, validate the format
+  if ((value as string).includes('-') && (value as string).length > 30) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(value as string)) {
+      return {
+        isValid: false,
+        message: 'Invalid category ID format'
+      };
+    }
   }
   
   return { isValid: true, message: '' };
