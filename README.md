@@ -9,7 +9,23 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
-## Version 7.2 - Latest Updates
+## Version 7.3 - Latest Updates
+
+**Released: April 8, 2024**
+
+### Bug Fixes
+- Fixed build failure caused by `getRandomColor` import error in the analytics page
+- Resolved circular dependency by creating a dedicated color utilities file
+- Fixed module path resolution issues with proper file organization
+- Improved code organization for better maintainability
+
+### Technical Improvements
+- Separated color utility functions into dedicated module
+- Enhanced module structure to prevent circular dependencies
+- Improved type checking and error handling in chart visualization
+- Optimized color generation for consistent category visualization
+
+## Version 7.2 - Previous Updates
 
 **Released: April 5, 2024**
 

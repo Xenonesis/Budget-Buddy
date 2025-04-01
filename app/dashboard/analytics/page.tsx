@@ -31,7 +31,7 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { supabase } from "@/lib/supabase";
-import { getRandomColor } from "@/lib/utils";
+import { getRandomColor } from "@/lib/colors";
 
 // Custom styles for enhanced chart interactions
 const styles = {

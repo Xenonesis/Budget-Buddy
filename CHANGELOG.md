@@ -2,6 +2,23 @@
 
 All notable changes to the Budget Tracker app will be documented in this file.
 
+## [7.3.0] - 2024-04-08
+
+### Fixed
+- Build failure caused by `getRandomColor` import error in the analytics page
+- Circular dependency issues in utility functions by creating a dedicated colors module
+- Module path resolution issues with proper file organization
+
+### Added
+- New dedicated `colors.ts` utility file for color-related functions
+- Improved code organization for better maintainability
+
+### Technical
+- Separated color utility functions into dedicated module
+- Enhanced module structure to prevent circular dependencies
+- Improved type checking and error handling in chart visualization
+- Optimized color generation for consistent category visualization
+
 ## [7.2.0] - 2024-04-05
 
 ### Fixed
