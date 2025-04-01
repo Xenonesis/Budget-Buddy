@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useUserPreferences } from "@/lib/store";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
+import type { AIProvider, AIModel } from "@/lib/ai";
 
 interface Profile {
   id: string;
@@ -116,8 +117,8 @@ export default function SettingsPage() {
       mistral_model: "mistral-small",
       enabled: false,
       defaultModel: {
-        provider: 'mistral' as const,
-        model: 'mistral-small' as const
+        provider: 'mistral' as AIProvider,
+        model: 'mistral-small' as AIModel
       }
     }
   });
@@ -201,8 +202,8 @@ export default function SettingsPage() {
               mistral_model: 'mistral-small',
               enabled: false,
               defaultModel: {
-                provider: 'mistral' as const,
-                model: 'mistral-small' as const
+                provider: 'mistral' as AIProvider,
+                model: 'mistral-small' as AIModel
               }
             },
             created_at: new Date().toISOString(),
@@ -252,8 +253,8 @@ export default function SettingsPage() {
                 mistral_model: "mistral-small",
                 enabled: false,
                 defaultModel: {
-                  provider: 'mistral' as const,
-                  model: 'mistral-small' as const
+                  provider: 'mistral' as AIProvider,
+                  model: 'mistral-small' as AIModel
                 }
               }
             });
@@ -290,8 +291,8 @@ export default function SettingsPage() {
             mistral_model: "mistral-small",
             enabled: false,
             defaultModel: {
-              provider: 'mistral' as const,
-              model: 'mistral-small' as const
+              provider: 'mistral' as AIProvider,
+              model: 'mistral-small' as AIModel
             }
           }
         });
@@ -370,8 +371,8 @@ export default function SettingsPage() {
             mistral_model: "mistral-small",
             enabled: false,
             defaultModel: {
-              provider: 'mistral' as const,
-              model: 'mistral-small' as const
+              provider: 'mistral' as AIProvider,
+              model: 'mistral-small' as AIModel
             }
           }
         });
@@ -742,6 +743,7 @@ export default function SettingsPage() {
                         value={formData.currency}
                         onChange={handleInputChange}
                         className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                        title="Select currency"
                       >
                         <option value="USD">US Dollar (USD)</option>
                         <option value="EUR">Euro (EUR)</option>
@@ -766,6 +768,7 @@ export default function SettingsPage() {
                         value={formData.preferred_language}
                         onChange={handleInputChange}
                         className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                        title="Select language"
                       >
                         <option value="en">English</option>
                         <option value="es">Spanish</option>
@@ -790,6 +793,7 @@ export default function SettingsPage() {
                         value={formData.gender}
                         onChange={handleInputChange}
                         className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                        title="Select gender"
                       >
                         <option value="">Prefer not to say</option>
                         <option value="male">Male</option>
@@ -809,6 +813,7 @@ export default function SettingsPage() {
                         value={formData.timezone}
                         onChange={handleInputChange}
                         className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                        title="Select timezone"
                       >
                         <option value="UTC">UTC (Coordinated Universal Time)</option>
                         <option value="America/New_York">Eastern Time (ET)</option>
@@ -970,13 +975,19 @@ export default function SettingsPage() {
                             type="checkbox"
                             id="ai_enabled"
                             checked={formData.ai_settings?.enabled ?? false}
-                            onChange={(e) => setFormData({
-                              ...formData,
-                              ai_settings: {
-                                ...formData.ai_settings,
-                                enabled: e.target.checked
-                              }
-                            })}
+                            onChange={(e) => {
+                              setFormData({
+                                ...formData,
+                                ai_settings: {
+                                  ...formData.ai_settings,
+                                  enabled: e.target.checked,
+                                  defaultModel: formData.ai_settings?.defaultModel || {
+                                    provider: 'mistral' as AIProvider,
+                                    model: 'mistral-small' as AIModel
+                                  }
+                                }
+                              });
+                            }}
                             className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
                           />
                           <label htmlFor="ai_enabled" className="ml-2 text-sm">
@@ -996,10 +1007,10 @@ export default function SettingsPage() {
                                 ai_settings: {
                                   ...formData.ai_settings,
                                   defaultModel: {
-                                    ...formData.ai_settings?.defaultModel,
-                                    provider: e.target.value as any,
+                                    provider: (e.target.value || 'mistral') as AIProvider,
                                     model: getDefaultModelForProvider(e.target.value)
-                                  }
+                                  },
+                                  enabled: formData.ai_settings?.enabled ?? false
                                 }
                               })}
                               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1023,9 +1034,10 @@ export default function SettingsPage() {
                                 ai_settings: {
                                   ...formData.ai_settings,
                                   defaultModel: {
-                                    ...formData.ai_settings?.defaultModel,
+                                    provider: (formData.ai_settings?.defaultModel?.provider || 'mistral') as AIProvider,
                                     model: e.target.value
-                                  }
+                                  },
+                                  enabled: formData.ai_settings?.enabled ?? false
                                 }
                               })}
                               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1051,13 +1063,20 @@ export default function SettingsPage() {
                                 id="google_api_key"
                                 type="password"
                                 value={formData.ai_settings?.google_api_key ?? ""}
-                                onChange={(e) => setFormData({
-                                  ...formData,
-                                  ai_settings: {
-                                    ...formData.ai_settings,
-                                    google_api_key: e.target.value
-                                  }
-                                })}
+                                onChange={(e) => {
+                                  setFormData({
+                                    ...formData,
+                                    ai_settings: {
+                                      ...formData.ai_settings,
+                                      google_api_key: e.target.value,
+                                      enabled: formData.ai_settings?.enabled ?? false,
+                                      defaultModel: formData.ai_settings?.defaultModel || {
+                                        provider: 'mistral' as AIProvider,
+                                        model: 'mistral-small' as AIModel
+                                      }
+                                    }
+                                  });
+                                }}
                                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 placeholder="Enter your Google AI API key"
                               />
@@ -1074,13 +1093,20 @@ export default function SettingsPage() {
                                 id="mistral_api_key"
                                 type="password"
                                 value={formData.ai_settings?.mistral_api_key ?? ""}
-                                onChange={(e) => setFormData({
-                                  ...formData,
-                                  ai_settings: {
-                                    ...formData.ai_settings,
-                                    mistral_api_key: e.target.value
-                                  }
-                                })}
+                                onChange={(e) => {
+                                  setFormData({
+                                    ...formData,
+                                    ai_settings: {
+                                      ...formData.ai_settings,
+                                      mistral_api_key: e.target.value,
+                                      enabled: formData.ai_settings?.enabled ?? false,
+                                      defaultModel: formData.ai_settings?.defaultModel || {
+                                        provider: 'mistral' as AIProvider,
+                                        model: 'mistral-small' as AIModel
+                                      }
+                                    }
+                                  });
+                                }}
                                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 placeholder="Enter your Mistral AI API key"
                               />
@@ -1094,13 +1120,20 @@ export default function SettingsPage() {
                                 id="anthropic_api_key"
                                 type="password"
                                 value={formData.ai_settings?.anthropic_api_key ?? ""}
-                                onChange={(e) => setFormData({
-                                  ...formData,
-                                  ai_settings: {
-                                    ...formData.ai_settings,
-                                    anthropic_api_key: e.target.value
-                                  }
-                                })}
+                                onChange={(e) => {
+                                  setFormData({
+                                    ...formData,
+                                    ai_settings: {
+                                      ...formData.ai_settings,
+                                      anthropic_api_key: e.target.value,
+                                      enabled: formData.ai_settings?.enabled ?? false,
+                                      defaultModel: formData.ai_settings?.defaultModel || {
+                                        provider: 'mistral' as AIProvider,
+                                        model: 'mistral-small' as AIModel
+                                      }
+                                    }
+                                  });
+                                }}
                                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 placeholder="Enter your Claude API key"
                               />
@@ -1114,13 +1147,20 @@ export default function SettingsPage() {
                                 id="groq_api_key"
                                 type="password"
                                 value={formData.ai_settings?.groq_api_key ?? ""}
-                                onChange={(e) => setFormData({
-                                  ...formData,
-                                  ai_settings: {
-                                    ...formData.ai_settings,
-                                    groq_api_key: e.target.value
-                                  }
-                                })}
+                                onChange={(e) => {
+                                  setFormData({
+                                    ...formData,
+                                    ai_settings: {
+                                      ...formData.ai_settings,
+                                      groq_api_key: e.target.value,
+                                      enabled: formData.ai_settings?.enabled ?? false,
+                                      defaultModel: formData.ai_settings?.defaultModel || {
+                                        provider: 'mistral' as AIProvider,
+                                        model: 'mistral-small' as AIModel
+                                      }
+                                    }
+                                  });
+                                }}
                                 className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 placeholder="Enter your Groq API key"
                               />
