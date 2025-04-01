@@ -40,7 +40,7 @@ export default function AboutPage() {
               </p>
               <p>
                 Developed with modern web technologies, Budget Buddy offers a seamless and responsive experience 
-                across all your devices.
+                across all your devices, with a focus on security, performance, and user experience.
               </p>
             </CardContent>
           </Card>
@@ -62,11 +62,11 @@ export default function AboutPage() {
                 </li>
                 <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
                   <span className="mr-2 text-primary">•</span>
-                  <span>Custom budget creation</span>
+                  <span>Custom budget creation and visualization</span>
                 </li>
                 <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
                   <span className="mr-2 text-primary">•</span>
-                  <span>Financial analytics and reporting</span>
+                  <span>Financial analytics with multiple chart types</span>
                 </li>
                 <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
                   <span className="mr-2 text-primary">•</span>
@@ -74,11 +74,15 @@ export default function AboutPage() {
                 </li>
                 <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
                   <span className="mr-2 text-primary">•</span>
-                  <span>Secure data storage</span>
+                  <span>AI-powered financial insights</span>
                 </li>
                 <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
                   <span className="mr-2 text-primary">•</span>
-                  <span>Cross-device synchronization</span>
+                  <span>Dark & light theme support</span>
+                </li>
+                <li className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors">
+                  <span className="mr-2 text-primary">•</span>
+                  <span>Responsive mobile design</span>
                 </li>
               </ul>
             </CardContent>
@@ -110,7 +114,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3 className="font-medium">Budget Buddy</h3>
-                <p className="text-sm text-muted-foreground">Version 5.0</p>
+                <p className="text-sm text-muted-foreground">Version 7.3</p>
               </div>
             </div>
             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Latest</Badge>
@@ -120,56 +124,56 @@ export default function AboutPage() {
             <div>
               <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M16 12l-4 4-4-4"></path><path d="M12 16V2"></path></svg>
-                Released: March 30, 2024
+                Released: April 8, 2024
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h5 className="text-sm font-medium mb-2">New Features</h5>
+                  <h5 className="text-sm font-medium mb-2">Version 7.3 Updates</h5>
                   <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Added notification preferences</span>
+                      <span>Fixed build failure caused by import error</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Implemented timezone selection</span>
+                      <span>Resolved circular dependency issues</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Enhanced transaction categories</span>
+                      <span>Fixed module path resolution</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Added phone number verification</span>
+                      <span>Improved code organization</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Improved recurring transactions</span>
+                      <span>Enhanced type checking and error handling</span>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h5 className="text-sm font-medium mb-2">Improvements</h5>
+                  <h5 className="text-sm font-medium mb-2">Version 7.2 Updates (April 5, 2024)</h5>
                   <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Redesigned dashboard navigation</span>
+                      <span>Fixed dark mode text visibility in charts</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Optimized mobile experience</span>
+                      <span>Resolved Next.js compatibility issues</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Added keyboard shortcuts</span>
+                      <span>Fixed savings rate calculation</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Improved accessibility</span>
+                      <span>Enhanced chart readability in dark mode</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
-                      <span>Enhanced error handling</span>
+                      <span>Improved handling of empty transaction data</span>
                     </li>
                   </ul>
                 </div>
@@ -179,9 +183,74 @@ export default function AboutPage() {
             <Separator />
             
             <div>
-              <h4 className="text-sm font-semibold mb-2">Technical Updates</h4>
+              <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M16 12l-4 4-4-4"></path><path d="M12 16V2"></path></svg>
+                Previous Updates
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h5 className="text-sm font-medium mb-2">Version 7.1 (April 3, 2024)</h5>
+                  <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Fixed type error in settings page</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Resolved build failures</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Improved timezone and gender field handling</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Enhanced form data consistency</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Better type checking for data interfaces</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium mb-2">Version 7.0 (April 2, 2024)</h5>
+                  <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Enhanced category management</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Optimized radial charts for mobile and desktop</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Added dynamic screen size detection</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Implemented colorful chart gradients</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Redesigned category deletion UI</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="text-sm font-semibold mb-2">Performance Optimizations</h4>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="rounded-md">Next.js 14.2.26</Badge>
+                <Badge variant="secondary" className="rounded-md">DOM Optimization</Badge>
+                <Badge variant="secondary" className="rounded-md">Efficient Data Processing</Badge>
+                <Badge variant="secondary" className="rounded-md">Reduced Network Overhead</Badge>
+                <Badge variant="secondary" className="rounded-md">UI Responsiveness</Badge>
+                <Badge variant="secondary" className="rounded-md">Next.js 14.2</Badge>
                 <Badge variant="secondary" className="rounded-md">React 18</Badge>
                 <Badge variant="secondary" className="rounded-md">TypeScript 5.2</Badge>
                 <Badge variant="secondary" className="rounded-md">Tailwind CSS</Badge>
@@ -192,6 +261,119 @@ export default function AboutPage() {
           </div>
         </CardContent>
       </Card>
+      
+      <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2 mt-10">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
+        Technical Information
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
+              Performance Optimizations
+            </CardTitle>
+            <CardDescription>
+              Techniques used to ensure optimal application performance
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div>
+                <h5 className="text-sm font-medium mb-2">DOM Manipulation Optimization</h5>
+                <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>React.memo for component memoization</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Optimized stateless functional components</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Event delegation for transaction lists</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Virtualization for long lists</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h5 className="text-sm font-medium mb-2">Efficient Data Processing</h5>
+                <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Maps and Sets for O(1) lookups</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>useMemo for expensive operations</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Single-pass algorithms for data transformation</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Batched React state updates</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              Technical Requirements
+            </CardTitle>
+            <CardDescription>
+              Setup information for developers
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div>
+                <h5 className="text-sm font-medium mb-2">Environment Setup</h5>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Before building or deploying this project:
+                </p>
+                <div className="bg-primary/5 p-3 rounded-md text-sm font-mono mb-2">
+                  <p className="mb-1">NEXT_PUBLIC_SUPABASE_URL=your-supabase-url</p>
+                  <p>NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key</p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  These environment variables are required for the application to function properly.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="text-sm font-medium mb-2">Installation Requirements</h5>
+                <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Node.js (v18 or newer)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>npm or yarn</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="mr-1.5 text-primary">•</span>
+                    <span>Supabase account</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       
       <h2 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
