@@ -764,7 +764,7 @@ export default function AnalyticsPage() {
                               }}
                             />
                             <Tooltip 
-                              formatter={(value) => [formatCurrency(value), ""]}
+                              formatter={(value) => [formatCurrency(Number(value)), ""]}
                               contentStyle={{
                                 ...styles.tooltipStyles,
                                 color: 'var(--foreground)',
@@ -867,7 +867,7 @@ export default function AnalyticsPage() {
                               }}
                             />
                             <Tooltip 
-                              formatter={(value) => [formatCurrency(value), ""]}
+                              formatter={(value) => [formatCurrency(Number(value)), ""]}
                               contentStyle={styles.tooltipStyles}
                               itemStyle={styles.tooltipItemStyles}
                               labelStyle={styles.tooltipLabelStyles}
@@ -951,7 +951,7 @@ export default function AnalyticsPage() {
                                   ))}
                                 </Pie>
                                 <Tooltip 
-                                  formatter={(value) => [formatCurrency(value), "Amount"]}
+                                  formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
                                   contentStyle={styles.tooltipStyles}
                                   itemStyle={styles.tooltipItemStyles}
                                   labelStyle={styles.tooltipLabelStyles}
@@ -1101,7 +1101,7 @@ export default function AnalyticsPage() {
                                 ))}
                               </Pie>
                               <Tooltip 
-                                formatter={(value) => [formatCurrency(value), "Amount"]}
+                                formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
                                 contentStyle={styles.tooltipStyles}
                                 itemStyle={styles.tooltipItemStyles}
                                 labelStyle={styles.tooltipLabelStyles}
