@@ -5,6 +5,11 @@
  * @returns The formatted currency string
  */
 export const formatCurrency = (amount: number, abbreviated: boolean | string = false): string => {
+  // Handle undefined, null, or NaN inputs
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return abbreviated ? '$0' : '$0.00';
+  }
+  
   if (abbreviated) {
     if (amount === 0) return '$0';
     if (Math.abs(amount) >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;

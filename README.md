@@ -9,7 +9,25 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
-## Version 7.1 - Latest Updates
+## Version 7.2 - Latest Updates
+
+**Released: April 5, 2024**
+
+### Bug Fixes
+- Fixed dark mode text visibility issues in Financial Snapshot and Income vs Expense Trend charts
+- Resolved compatibility issues with Next.js and React versions
+- Fixed calculation issues in savings rate display
+- Added safety checks for NaN and undefined values in currency formatting
+- Improved calculation accuracy in monthly data processing
+
+### User Experience Improvements
+- Enhanced chart readability in dark mode with proper text contrast
+- More robust error handling for calculation edge cases
+- Improved handling of empty transaction data
+- Better type checking in chart components
+- Optimized monthly data processing for more accurate financial trends
+
+## Version 7.1 - Previous Updates
 
 **Released: April 3, 2024**
 

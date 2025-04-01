@@ -10,7 +10,7 @@ import {
   PlusCircle, 
   Calendar, 
   Edit2, 
-  Trash2, 
+  Trash, 
   Search, 
   ChevronLeft, 
   ChevronRight,
@@ -24,7 +24,17 @@ import {
   FileSpreadsheet,
   FileText,
   RefreshCw,
-  X
+  X,
+  PieChart, 
+  Wallet, 
+  FileDown, 
+  FileUp, 
+  Plus, 
+  Clock, 
+  AlertTriangle,
+  ListFilter,
+  FileSearch,
+  ArrowUpDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { AddTransactionButton } from "@/components/ui/bottom-navigation";
@@ -57,6 +67,7 @@ import {
   validateForm 
 } from "@/lib/validation";
 import { ValidatedInput, ValidatedTextarea } from "@/components/ui/validated-input";
+import AddTransactionForm from "./add-transaction-form";  // Import the new component
 
 interface Transaction {
   id: string;
@@ -157,7 +168,7 @@ const TransactionRow = memo(({ transaction, onEdit, onDelete }: {
             <Edit2 className="w-4 h-4" />
           </button>
           <button className="text-red-500 hover:text-red-700" aria-label="Delete">
-            <Trash2 className="w-4 h-4" />
+            <Trash className="w-4 h-4" />
           </button>
         </div>
       </td>
@@ -302,6 +313,9 @@ export default function TransactionsPage() {
   const [scheduleExportFrequency, setScheduleExportFrequency] = useState<"none" | "weekly" | "monthly">("none");
   const [scheduleExportDay, setScheduleExportDay] = useState<number>(1);
   const [scheduleExportFormat, setScheduleExportFormat] = useState<"csv" | "excel" | "pdf">("csv");
+  const [showDeleteCategoryConfirm, setShowDeleteCategoryConfirm] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
 
   // Add this useEffect to handle unwanted dropdowns globally
   useEffect(() => {
@@ -739,11 +753,24 @@ export default function TransactionsPage() {
   }
 
   const calculateSummary = (transactionsData: Transaction[]) => {
+    // Handle case when no transactions are provided
+    if (!transactionsData || transactionsData.length === 0) {
+      setSummary({
+        totalIncome: 0,
+        totalExpense: 0,
+        balance: 0
+      });
+      return;
+    }
+    
     const summary = transactionsData.reduce((acc, transaction) => {
+      // Ensure amount is a valid number
+      const amount = Number(transaction.amount) || 0;
+      
       if (transaction.type === "income") {
-        acc.totalIncome += transaction.amount;
+        acc.totalIncome += amount;
       } else {
-        acc.totalExpense += transaction.amount;
+        acc.totalExpense += amount;
       }
       return acc;
     }, {
@@ -752,7 +779,14 @@ export default function TransactionsPage() {
       balance: 0
     });
     
+    // Calculate balance after all transactions are processed
     summary.balance = summary.totalIncome - summary.totalExpense;
+    
+    // Ensure we don't have any negative zeros in the UI
+    if (summary.balance === 0) summary.balance = 0;
+    if (summary.totalIncome === 0) summary.totalIncome = 0;
+    if (summary.totalExpense === 0) summary.totalExpense = 0;
+    
     setSummary(summary);
   };
 
@@ -950,9 +984,11 @@ export default function TransactionsPage() {
       console.log("Custom category selected, showing custom category form");
       setShowCustomCategoryForm(true);
       // Set newCategory type to match current transaction type
+      const categoryType = formData.type === "income" ? "income" : "expense";
       setNewCategory(prev => ({
         ...prev,
-        type: formData.type
+        name: "",
+        type: categoryType
       }));
       
       // Schedule a cleanup after the form renders
@@ -1074,10 +1110,8 @@ export default function TransactionsPage() {
     
     setShowForm(true);
     
-    // Add a class to the html element to prevent scrolling on mobile
-    if (window.innerWidth < 768) {
-      document.documentElement.classList.add("form-drawer-open");
-    }
+    // Add a class to enable modal styling while preserving scrolling
+    document.documentElement.classList.add("form-drawer-open");
   };
   
   const closeTransactionForm = () => {
@@ -2191,6 +2225,87 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleDeleteCategory = async (category: Category) => {
+    try {
+      setCategoryToDelete(category);
+      setShowDeleteCategoryConfirm(true);
+    } catch (error) {
+      console.error("Error preparing to delete category:", error);
+      toast.error("Failed to prepare category deletion");
+    }
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    
+    try {
+      setIsDeletingCategory(true);
+      
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("You must be logged in to delete categories");
+        return;
+      }
+      
+      // First check if category is in use
+      const { data: transactionsUsingCategory, error: checkError } = await supabase
+        .from("transactions")
+        .select("id")
+        .eq("category_id", categoryToDelete.id)
+        .eq("user_id", userData.user.id)
+        .limit(1);
+        
+      if (checkError) {
+        console.error("Error checking if category is in use:", checkError);
+      }
+      
+      if (transactionsUsingCategory && transactionsUsingCategory.length > 0) {
+        toast.error("Cannot delete category that is in use by transactions");
+        setShowDeleteCategoryConfirm(false);
+        setCategoryToDelete(null);
+        return;
+      }
+      
+      // Instead of actually deleting, mark as inactive
+      const { error } = await supabase
+        .from("categories")
+        .update({ is_active: false })
+        .eq("id", categoryToDelete.id)
+        .eq("user_id", userData.user.id);
+        
+      if (error) {
+        console.error("Error deleting category:", error);
+        toast.error(`Failed to delete category: ${error.message}`);
+        return;
+      }
+      
+      toast.success(`Category "${categoryToDelete.name}" deleted successfully`);
+      
+      // Update the categories list
+      setCategories(prevCategories => 
+        prevCategories.filter(c => c.id !== categoryToDelete.id)
+      );
+      
+      // If the deleted category was selected in the form, reset it
+      if (formData.category_id === categoryToDelete.id) {
+        setFormData(prevForm => ({
+          ...prevForm,
+          category_id: ""
+        }));
+      }
+      
+      // Refresh categories
+      await fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      toast.error("An error occurred while deleting the category");
+    } finally {
+      setIsDeletingCategory(false);
+      setShowDeleteCategoryConfirm(false);
+      setCategoryToDelete(null);
+    }
+  };
+
   const CardRenderer = useCallback(({ index, style }: { index: number, style: React.CSSProperties }) => {
     const transaction = paginatedTransactions[index];
     if (!transaction) return null;
@@ -2257,7 +2372,7 @@ export default function TransactionsPage() {
                       onClick={() => handleDelete(transaction.id)}
                       aria-label={`Delete transaction: ${transaction.description}`}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -2274,6 +2389,43 @@ export default function TransactionsPage() {
 
   const CustomCategoryForm = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const [inputValue, setInputValue] = useState(""); // Local state for input value
+    
+    // Sync with newCategory when component mounts or when category type changes
+    useEffect(() => {
+      setInputValue(newCategory.name);
+    }, [formData.type, newCategory.name]);
+    
+    // Filter categories to only show user's custom categories of the current type
+    const userCustomCategories = useMemo(() => 
+      categories.filter(c => 
+        c.user_id && // Only user's custom categories
+        (c.type === formData.type || c.type === 'both')
+      ).sort((a, b) => a.name.localeCompare(b.name)),
+    [categories, formData.type]);
+    
+    // Update parent state less frequently to avoid re-renders during typing
+    const updateParentState = useCallback((value: string) => {
+      const categoryType = formData.type === "income" ? "income" : "expense";
+      setNewCategory(prev => ({
+        ...prev,
+        name: value,
+        type: categoryType
+      }));
+    }, [formData.type, setNewCategory]);
+
+    // Handle input change locally first
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setInputValue(value);
+      
+      // Debounce the update to parent state
+      if (e.nativeEvent.inputType === 'insertText' || 
+          e.nativeEvent.inputType === 'deleteContentBackward' || 
+          e.nativeEvent.inputType === 'deleteContentForward') {
+        updateParentState(value);
+      }
+    };
     
     // Use useLayoutEffect to ensure DOM manipulation happens before render
     useLayoutEffect(() => {
@@ -2306,52 +2458,116 @@ export default function TransactionsPage() {
     const categoryType = isIncome ? "income" : "expense";
     
     return (
-      <div ref={dropdownRef} className={`space-y-2 ${styles.customCategoryForm}`}>
-        <input
-          type="text"
-          value={newCategory.name}
-          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-          placeholder={`New ${categoryType} category name`}
-          className={`w-full rounded-md border-2 ${customCategoryError ? 'border-red-500' : 'border-input'} bg-transparent px-3 py-2 text-sm font-medium`}
-        />
-        
-        {/* This hidden input ensures we maintain the correct category type */}
-        <input 
-          type="hidden" 
-          name="categoryType"
-          value={categoryType} 
-        />
-        
-        {/* Single button for adding the category with appropriate styling */}
-        <Button 
-          type="button" 
-          onClick={() => {
-            // Explicitly ensure the newCategory type matches the transaction type before calling handleAddCustomCategory
-            setNewCategory(prev => ({
-              ...prev,
-              type: formData.type === "income" ? "income" : "expense"
-            }));
-            
-            // Call with slight delay to ensure state is updated
-            setTimeout(handleAddCustomCategory, 0);
-          }}
-          disabled={isSavingCategory || !newCategory.name.trim()}
-          className={`w-full ${isIncome ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'} text-primary-foreground`}
-        >
-          {isSavingCategory ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
-              Saving {isIncome ? "Income" : "Expense"} Category...
-            </>
-          ) : (
-            `Add ${isIncome ? "Income" : "Expense"} Category`
+      <div ref={dropdownRef} className="space-y-4">
+        <div className={`space-y-2 ${styles.customCategoryForm}`}>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={() => updateParentState(inputValue)}
+            placeholder={`New ${categoryType} category name`}
+            className={`w-full rounded-md border-2 ${customCategoryError ? 'border-red-500' : 'border-input'} bg-transparent px-3 py-2 text-sm font-medium`}
+          />
+          
+          {/* This hidden input ensures we maintain the correct category type */}
+          <input 
+            type="hidden" 
+            name="categoryType"
+            value={categoryType} 
+          />
+          
+          {/* Button for adding the category with appropriate styling */}
+          <Button 
+            type="button" 
+            onClick={() => {
+              // Explicitly ensure the category type is correct
+              const updatedType = formData.type === "income" ? "income" : "expense";
+              
+              // Sync the local state with parent state
+              updateParentState(inputValue);
+              
+              // Then add the category
+              setTimeout(() => handleAddCustomCategory(), 50);
+            }}
+            disabled={isSavingCategory || !inputValue.trim()}
+            className={`w-full ${isIncome ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'} text-primary-foreground`}
+          >
+            {isSavingCategory ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
+                Saving {isIncome ? "Income" : "Expense"} Category...
+              </>
+            ) : (
+              `Add ${isIncome ? "Income" : "Expense"} Category`
+            )}
+          </Button>
+          
+          {customCategoryError && (
+            <p className="text-sm text-red-500">
+              Please create a category or select an existing one
+            </p>
           )}
-        </Button>
+        </div>
         
-        {customCategoryError && (
-          <p className="text-sm text-red-500">
-            Please create a category or select an existing one
-          </p>
+        {/* Display user's custom categories with delete option */}
+        {userCustomCategories.length > 0 && (
+          <div className="mt-4">
+            <h5 className="text-sm font-medium mb-2">Your Custom Categories</h5>
+            <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+              {userCustomCategories.map(category => (
+                <div key={category.id} className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-muted/50 group">
+                  <span className="text-sm truncate flex-1">{category.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleDeleteCategory(category)}
+                  >
+                    <Trash className="h-3.5 w-3.5 text-red-500" />
+                    <span className="sr-only">Delete {category.name}</span>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Confirmation dialog for deleting categories */}
+        {showDeleteCategoryConfirm && categoryToDelete && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-lg p-6 max-w-md w-full shadow-lg">
+              <h3 className="text-lg font-bold mb-2">Delete Category</h3>
+              <p className="mb-4">
+                Are you sure you want to delete the category "{categoryToDelete.name}"?
+              </p>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteCategoryConfirm(false);
+                    setCategoryToDelete(null);
+                  }}
+                  disabled={isDeletingCategory}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDeleteCategory}
+                  disabled={isDeletingCategory}
+                >
+                  {isDeletingCategory ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -2689,7 +2905,7 @@ export default function TransactionsPage() {
                                       size="sm"
                                       onClick={() => deactivateRecurring(recurringTx.id)}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash className="h-4 w-4" />
                                     </Button>
                                   </td>
                                 </tr>
@@ -2724,233 +2940,17 @@ export default function TransactionsPage() {
 
         {/* Transaction Form Drawer */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-            <div className="max-h-[90vh] w-[90vw] max-w-md overflow-y-auto rounded-lg border bg-card p-6 shadow-lg md:p-8">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold">
-                  {isEditing ? "Edit Transaction" : "Add Transaction"}
-                  {hasSavedDraft && !isEditing && (
-                    <span className="ml-2 text-xs text-muted-foreground">(Draft saved)</span>
-                  )}
-                </h2>
-                <button
-                  type="button"
-                  onClick={closeTransactionForm}
-                  className="rounded-full p-2 text-muted-foreground hover:bg-muted"
-                  aria-label="Close form"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Type and Amount */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="transaction-type" className="mb-2 block text-sm font-medium">
-                      Type <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="transaction-type"
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      disabled={formLoading}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary"
-                      required
-                    >
-                      <option value="expense">Expense</option>
-                      <option value="income">Income</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="transaction-amount" className="mb-2 block text-sm font-medium">
-                      Amount <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="transaction-amount"
-                      name="amount"
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      min="0"
-                      placeholder="0.00"
-                      value={formData.amount}
-                      onChange={handleInputChange}
-                      disabled={formLoading}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary"
-                      required
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Enter amount in {currency}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label htmlFor="transaction-category" className="mb-2 block text-sm font-medium">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="transaction-category"
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleInputChange}
-                    disabled={formLoading}
-                    className={`w-full rounded-md border ${customCategoryError ? 'border-red-500' : 'border-input'} bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary`}
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {categories
-                      .filter(category => category.type === formData.type || category.type === 'both')
-                      .map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    <option value="custom">+ Add new category</option>
-                  </select>
-                  {customCategoryError && (
-                    <p className="mt-1 text-xs text-red-500" role="alert">
-                      Please select a valid category or create a new one
-                    </p>
-                  )}
-                  
-                  {/* Show custom category form when "custom" is selected */}
-                  {formData.category_id === "custom" && (
-                    <div className="mt-3 p-3 border rounded-md bg-background/50">
-                      <h4 className="text-sm font-medium mb-2">Create New Category</h4>
-                      <CustomCategoryForm />
-                    </div>
-                  )}
-                </div>
-
-                {/* Date */}
-                <div>
-                  <label htmlFor="transaction-date" className="mb-2 block text-sm font-medium">
-                    Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="transaction-date"
-                    name="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    disabled={formLoading}
-                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label htmlFor="transaction-description" className="mb-2 block text-sm font-medium">
-                    Description
-                  </label>
-                  <textarea
-                    id="transaction-description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    disabled={formLoading}
-                    placeholder="Enter transaction details"
-                    rows={3}
-                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Optional - Add details about this transaction (max 500 characters)
-                  </p>
-                </div>
-
-                {/* Add recurring transaction toggle */}
-                {!isEditing && (
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="is_recurring"
-                      checked={formData.is_recurring}
-                      onChange={(e) => setFormData({ ...formData, is_recurring: e.target.checked })}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <label htmlFor="is_recurring" className="text-sm font-medium">
-                      This is a recurring transaction
-                    </label>
-                  </div>
-                )}
-                
-                {/* Show recurring options if recurring is checked */}
-                {formData.is_recurring && (
-                  <div className="space-y-4 rounded-lg border bg-background p-4">
-                    <div>
-                      <label htmlFor="recurring_frequency" className="mb-2 block text-sm font-medium">
-                        Frequency
-                      </label>
-                      <select
-                        id="recurring_frequency"
-                        name="recurring_frequency"
-                        value={formData.recurring_frequency}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="biweekly">Bi-weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="annually">Annually</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="recurring_end_date" className="mb-2 block text-sm font-medium">
-                        End Date (Optional)
-                      </label>
-                      <input
-                        type="date"
-                        id="recurring_end_date"
-                        name="recurring_end_date"
-                        value={formData.recurring_end_date}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Leave blank for indefinite recurring transactions
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeTransactionForm}
-                    className="px-4"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={formLoading}
-                    className="px-4"
-                  >
-                    {formLoading ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white mr-2"></div>
-                        {isEditing ? "Updating..." : "Saving..."}
-                      </>
-                    ) : (
-                      <>{isEditing ? "Update" : "Save"}</>
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
+          <AddTransactionForm 
+            isOpen={showForm}
+            onClose={closeTransactionForm}
+            onTransactionAdded={() => {
+              fetchTransactions();
+              fetchCategories();
+            }}
+            categories={categories}
+            isEditing={isEditing}
+            editTransaction={isEditing ? transactions.find(t => t.id === editId) : null}
+          />
         )}
 
         {/* Quick Filters */}
@@ -3286,7 +3286,7 @@ export default function TransactionsPage() {
                                       onClick={() => handleDelete(transaction.id)}
                                       aria-label={`Delete transaction: ${transaction.description}`}
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <Trash className="h-4 w-4" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>

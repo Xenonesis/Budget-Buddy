@@ -317,48 +317,53 @@ IncomeExpenseChart.displayName = 'IncomeExpenseChart';
 
 // Optimize the monthly data calculation with memoization and efficient date handling
 function getMonthlyData(transactions: any[]) {
-  const months = [];
-  const today = new Date();
+  // If no transactions, return empty array
+  if (!transactions || transactions.length === 0) {
+    return [];
+  }
   
-  // Create a map for quick lookups instead of repeated filtering
-  const transactionsByMonth = new Map();
+  const now = new Date();
+  const monthsMap: Record<string, { name: string; income: number; expense: number; balance: number }> = {};
   
-  // Pre-process transactions to group by month
-  transactions.forEach(t => {
-    const tDate = new Date(t.date);
-    const monthYear = `${tDate.getMonth()}-${tDate.getFullYear()}`;
+  // Get the past 6 months in YYYY-MM format
+  for (let i = 0; i < 6; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const monthName = date.toLocaleString('default', { month: 'short' });
     
-    if (!transactionsByMonth.has(monthYear)) {
-      transactionsByMonth.set(monthYear, {
-        income: 0,
-        expense: 0
-      });
-    }
+    monthsMap[monthKey] = {
+      name: monthName,
+      income: 0,
+      expense: 0,
+      balance: 0 // Will calculate after summing income and expense
+    };
+  }
+  
+  // Add transaction amounts to the respective months
+  transactions.forEach(tx => {
+    if (!tx.date) return; // Skip if date is missing
     
-    const monthData = transactionsByMonth.get(monthYear);
-    if (t.type === 'income') {
-      monthData.income += t.amount;
-    } else {
-      monthData.expense += t.amount;
+    const monthKey = tx.date.substring(0, 7); // Get YYYY-MM part
+    if (monthsMap[monthKey]) {
+      // Parse amount to ensure it's a number
+      const amount = Number(tx.amount) || 0;
+      
+      if (tx.type === 'income') {
+        monthsMap[monthKey].income += amount;
+      } else if (tx.type === 'expense') {
+        monthsMap[monthKey].expense += amount;
+      }
     }
   });
   
-  // Generate the last 6 months data
-  for (let i = 5; i >= 0; i--) {
-    const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const monthStr = month.toLocaleString('default', { month: 'short' });
-    const monthYear = `${month.getMonth()}-${month.getFullYear()}`;
-    
-    const monthData = transactionsByMonth.get(monthYear) || { income: 0, expense: 0 };
-    
-    months.push({
-      name: monthStr,
-      income: monthData.income,
-      expense: monthData.expense
-    });
-  }
+  // Calculate balance for each month and convert to array
+  const result = Object.values(monthsMap).map(month => {
+    month.balance = month.income - month.expense;
+    return month;
+  });
   
-  return months;
+  // Sort by most recent month first
+  return result.reverse();
 }
 
 // Optimize category data calculation with a single pass through transactions
