@@ -125,7 +125,7 @@ const sampleTransactions = [
 ];
 
 // Helper function to format currency values
-const formatCurrency = (value) => {
+const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -135,7 +135,7 @@ const formatCurrency = (value) => {
 };
 
 // Helper function to filter data by time period
-const filterDataByTimeframe = (data, timeframe) => {
+const filterDataByTimeframe = <T extends { date: string }>(data: T[], timeframe: string): T[] => {
   const today = new Date();
   let startDate = new Date();
   
