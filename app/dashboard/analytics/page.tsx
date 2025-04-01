@@ -251,14 +251,17 @@ export default function AnalyticsPage() {
     const expensesByCategory: Record<string, any> = {};
     filteredTransactions.forEach(t => {
       if (t.type === 'expense') {
-        if (!expensesByCategory[t.category_name]) {
-          expensesByCategory[t.category_name] = {
-            name: t.category_name,
+        // Use a fallback value if category_name is undefined
+        const categoryName = t.category_name || "Uncategorized";
+        
+        if (!expensesByCategory[categoryName]) {
+          expensesByCategory[categoryName] = {
+            name: categoryName,
             value: 0,
-            color: getRandomColor(t.category_name)
+            color: getRandomColor(categoryName)
           };
         }
-        expensesByCategory[t.category_name].value += t.amount;
+        expensesByCategory[categoryName].value += t.amount;
       }
     });
     
@@ -269,14 +272,17 @@ export default function AnalyticsPage() {
     const incomeByCategory: Record<string, any> = {};
     filteredTransactions.forEach(t => {
       if (t.type === 'income') {
-        if (!incomeByCategory[t.category_name]) {
-          incomeByCategory[t.category_name] = {
-            name: t.category_name,
+        // Use a fallback value if category_name is undefined
+        const categoryName = t.category_name || "Uncategorized";
+        
+        if (!incomeByCategory[categoryName]) {
+          incomeByCategory[categoryName] = {
+            name: categoryName,
             value: 0,
-            color: getRandomColor(t.category_name)
+            color: getRandomColor(categoryName)
           };
         }
-        incomeByCategory[t.category_name].value += t.amount;
+        incomeByCategory[categoryName].value += t.amount;
       }
     });
     
@@ -354,7 +360,7 @@ export default function AnalyticsPage() {
   const totalIncome = transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : 0), 0);
   const totalExpenses = transactions.reduce((sum, t) => sum + (t.type === 'expense' ? t.amount : 0), 0);
   const netBalance = totalIncome - totalExpenses;
-  const categoryCount = Array.from(new Set(transactions.map(t => t.category_name))).length;
+  const categoryCount = Array.from(new Set(transactions.map(t => t.category_name || "Uncategorized"))).length;
   
   // Calculate percentage change month-over-month
   const calculateMonthlyChange = () => {
