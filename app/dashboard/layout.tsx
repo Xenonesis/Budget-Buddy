@@ -76,12 +76,27 @@ export default function DashboardLayout({
 
   // Memoize the sidebar toggle handler
   const toggleSidebar = useCallback(() => {
+    // Add a class to show the sidebar but preserve scrolling
     document.documentElement.classList.toggle("sidebar-open");
+    
+    // Toggle ARIA expanded state for accessibility
+    const menuButton = document.querySelector('[aria-label="Toggle menu"]');
+    if (menuButton) {
+      const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+      menuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+    }
   }, []);
 
   // Memoize the sidebar close handler 
   const closeSidebar = useCallback(() => {
+    // Remove the sidebar class to hide it
     document.documentElement.classList.remove("sidebar-open");
+    
+    // Update ARIA expanded state
+    const menuButton = document.querySelector('[aria-label="Toggle menu"]');
+    if (menuButton) {
+      menuButton.setAttribute('aria-expanded', 'false');
+    }
   }, []);
 
   useEffect(() => {
@@ -198,7 +213,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 shadow-sm md:hidden">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <img 
             src="/logo.svg" 
@@ -210,12 +225,14 @@ export default function DashboardLayout({
             <span className="text-[10px] text-muted-foreground leading-tight">Smart Money Management</span>
           </div>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle iconOnly />
           <button
-            className="inline-flex h-12 w-12 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
             onClick={toggleSidebar}
             aria-label="Toggle menu"
+            aria-expanded="false"
+            aria-controls="mobile-sidebar"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -237,8 +254,12 @@ export default function DashboardLayout({
       </header>
 
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform overflow-y-auto border-r bg-card transition-transform duration-300 ease-in-out md:sticky md:translate-x-0 md:flex md:flex-col sidebar-open:translate-x-0">
-        <div className="flex h-16 items-center justify-between border-b px-6">
+      <aside 
+        id="mobile-sidebar"
+        className="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform overflow-y-auto border-r bg-card/95 backdrop-blur-md transition-transform duration-300 ease-in-out pt-safe md:sticky md:translate-x-0 md:flex md:flex-col sidebar-open:translate-x-0 modal-container"
+        aria-label="Main navigation"
+      >
+        <div className="flex h-16 items-center justify-between border-b px-6 sticky top-0 bg-card/95 backdrop-blur-md z-10">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <img 
               src="/logo.svg" 
@@ -252,7 +273,7 @@ export default function DashboardLayout({
           </Link>
           {/* Close button for mobile */}
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform md:hidden"
             onClick={closeSidebar}
             aria-label="Close menu"
           >
@@ -291,16 +312,16 @@ export default function DashboardLayout({
                 {user?.user_metadata?.name?.[0] || user?.email?.[0] || "U"}
               </div>
               <div>
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium truncate max-w-[130px]">
                   {user?.user_metadata?.name || user?.email}
                 </p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[130px]">{user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle iconOnly size="sm" />
               <button
-                className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
                 onClick={handleSignOut}
                 title="Sign out"
                 aria-label="Sign out"
@@ -421,6 +442,30 @@ const navItems: NavItem[] = [
         <line x1="18" y1="20" x2="18" y2="10"></line>
         <line x1="12" y1="20" x2="12" y2="4"></line>
         <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+    ),
+  },
+  {
+    title: "AI Insights",
+    href: "/dashboard/ai-insights",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M15.5 2c1.53 0 2.5 1.67 2.5 3v3c0 1.33-.97 3-2.5 3S13 9.33 13 8V5c0-1.33.97-3 2.5-3Z"></path>
+        <path d="M10 9v1a5 5 0 0 0 5 5h2a5 5 0 0 0 5-5V9"></path>
+        <path d="M17 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3Z"></path>
+        <path d="M2 12v1a5 5 0 0 0 5 5h2a5 5 0 0 0 5-5v-1"></path>
+        <path d="M8.5 9c-1.53 0-2.5-1.67-2.5-3V3c0-1.33.97-3 2.5-3S11 1.67 11 3v3c0 1.33-.97 3-2.5 3Z"></path>
+        <path d="M7 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H7Z"></path>
       </svg>
     ),
   },

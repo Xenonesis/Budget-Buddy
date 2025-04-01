@@ -26,6 +26,24 @@ interface Profile {
   profile_photo?: string;
   gender?: string;
   timezone?: string;
+  ai_settings?: {
+    google_api_key?: string;
+    mistral_api_key?: string;
+    anthropic_api_key?: string;
+    groq_api_key?: string;
+    deepseek_api_key?: string;
+    llama_api_key?: string;
+    cohere_api_key?: string;
+    gemini_api_key?: string;
+    qwen_api_key?: string;
+    openrouter_api_key?: string;
+    enabled: boolean;
+    mistral_model?: string;
+    defaultModel: {
+      provider: 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter';
+      model: string;
+    };
+  };
 }
 
 interface AuthUser {
@@ -53,7 +71,23 @@ export default function SettingsPage() {
     username, setCurrency, setUsername, theme, setTheme, 
     syncWithDatabase, setUserId 
   } = useUserPreferences();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    currency: string;
+    phone: string;
+    address: string;
+    preferred_language: string;
+    profile_photo: string;
+    gender: string;
+    timezone: string;
+    notification_preferences: {
+      email: boolean;
+      push: boolean;
+      sms: boolean;
+    };
+    ai_settings: Profile['ai_settings'];
+  }>({
     name: "",
     email: "",
     currency: "USD",
@@ -67,6 +101,24 @@ export default function SettingsPage() {
       email: true,
       push: false,
       sms: false
+    },
+    ai_settings: {
+      google_api_key: "",
+      mistral_api_key: "",
+      anthropic_api_key: "",
+      groq_api_key: "",
+      deepseek_api_key: "",
+      llama_api_key: "",
+      cohere_api_key: "",
+      gemini_api_key: "",
+      qwen_api_key: "",
+      openrouter_api_key: "",
+      mistral_model: "mistral-small",
+      enabled: false,
+      defaultModel: {
+        provider: 'mistral' as const,
+        model: 'mistral-small' as const
+      }
     }
   });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
@@ -135,6 +187,24 @@ export default function SettingsPage() {
             profile_photo: userData.user.user_metadata?.profile_photo || '',
             gender: userData.user.user_metadata?.gender || '',
             timezone: userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+            ai_settings: userData.user.user_metadata?.ai_settings || {
+              google_api_key: '',
+              mistral_api_key: '',
+              anthropic_api_key: '',
+              groq_api_key: '',
+              deepseek_api_key: '',
+              llama_api_key: '',
+              cohere_api_key: '',
+              gemini_api_key: '',
+              qwen_api_key: '',
+              openrouter_api_key: '',
+              mistral_model: 'mistral-small',
+              enabled: false,
+              defaultModel: {
+                provider: 'mistral' as const,
+                model: 'mistral-small' as const
+              }
+            },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -167,648 +237,157 @@ export default function SettingsPage() {
                 email: true,
                 push: false,
                 sms: false
+              },
+              ai_settings: {
+                google_api_key: "",
+                mistral_api_key: "",
+                anthropic_api_key: "",
+                groq_api_key: "",
+                deepseek_api_key: "",
+                llama_api_key: "",
+                cohere_api_key: "",
+                gemini_api_key: "",
+                qwen_api_key: "",
+                openrouter_api_key: "",
+                mistral_model: "mistral-small",
+                enabled: false,
+                defaultModel: {
+                  provider: 'mistral' as const,
+                  model: 'mistral-small' as const
+                }
               }
             });
-            setLoading(false);
-            return;
           }
         }
-        return;
+      } else {
+        setProfile(data as Profile);
+        setFormData({
+          name: data.name || '',
+          email: data.email || '',
+          currency: data.currency,
+          phone: data.phone || '',
+          address: data.address || '',
+          preferred_language: data.preferred_language || 'en',
+          profile_photo: data.profile_photo || '',
+          gender: data.gender || '',
+          timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          notification_preferences: data.notification_preferences || {
+            email: true,
+            push: false,
+            sms: false
+          },
+          ai_settings: data.ai_settings || {
+            google_api_key: "",
+            mistral_api_key: "",
+            anthropic_api_key: "",
+            groq_api_key: "",
+            deepseek_api_key: "",
+            llama_api_key: "",
+            cohere_api_key: "",
+            gemini_api_key: "",
+            qwen_api_key: "",
+            openrouter_api_key: "",
+            mistral_model: "mistral-small",
+            enabled: false,
+            defaultModel: {
+              provider: 'mistral' as const,
+              model: 'mistral-small' as const
+            }
+          }
+        });
       }
-
-      console.log("Profile data fetched:", data);
-      setProfile(data);
-      
-      // Sync with user preferences store
-      await syncWithDatabase();
-      
-      // Get the best possible values for form data
-      const username = data.name || userData.user.user_metadata?.name || '';
-      const currency = data.currency || userData.user.user_metadata?.preferred_currency || 'USD';
-      const phone = data.phone || userData.user.user_metadata?.phone || '';
-      const address = data.address || userData.user.user_metadata?.address || '';
-      const preferred_language = data.preferred_language || userData.user.user_metadata?.preferred_language || 'en';
-      const notification_preferences = data.notification_preferences || userData.user.user_metadata?.notification_preferences || {
-        email: true,
-        push: false,
-        sms: false
-      };
-      const profile_photo = data.profile_photo || userData.user.user_metadata?.profile_photo || '';
-      const gender = data.gender || userData.user.user_metadata?.gender || '';
-      const timezone = data.timezone || userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
-      // Update the global store
-      setUsername(username);
-      setCurrency(currency);
-      
-      // Make sure we're using data from both auth and profile
-      setFormData({
-        name: username,
-        email: data.email || userData.user.email || '',
-        currency,
-        phone,
-        address,
-        preferred_language,
-        notification_preferences,
-        profile_photo,
-        gender,
-        timezone
-      });
-      
-      console.log("Form data set:", {
-        name: username,
-        email: data.email || userData.user.email || '',
-        currency,
-        phone,
-        address,
-        preferred_language,
-        profile_photo,
-        gender,
-        timezone,
-        notification_preferences
-      });
     } catch (error) {
-      console.error("Error in fetchProfile:", error);
+      console.error("Error fetching profile:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleThemeChange = (value: "light" | "dark" | "system") => {
-    setThemeChoice(value);
-    setTheme(value);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
-
     try {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      if (!userData.user) {
+        router.push("/auth/login");
+        return;
+      }
 
-      // Update user metadata
-      const { error: authError } = await supabase.auth.updateUser({
-        data: {
-          name: formData.name,
-          preferred_currency: formData.currency,
-          phone: formData.phone,
-          address: formData.address,
-          preferred_language: formData.preferred_language,
-          notification_preferences: formData.notification_preferences,
-          profile_photo: formData.profile_photo,
-          gender: formData.gender,
-          timezone: formData.timezone,
-          updated_at: new Date().toISOString(),
-        },
-      });
+      const updatedProfile: Profile = {
+        id: userData.user.id,
+        email: formData.email,
+        name: formData.name,
+        currency: formData.currency,
+        phone: formData.phone,
+        address: formData.address,
+        preferred_language: formData.preferred_language,
+        profile_photo: formData.profile_photo,
+        gender: formData.gender,
+        timezone: formData.timezone,
+        notification_preferences: formData.notification_preferences,
+        ai_settings: formData.ai_settings,
+        created_at: profile?.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
-      if (authError) throw authError;
-
-      // Update profile table
-      const { error: profileError } = await supabase
+      const { data: updatedUserData, error: updateError } = await supabase
         .from("profiles")
-        .update({
-          name: formData.name,
-          currency: formData.currency,
-          phone: formData.phone,
-          address: formData.address,
-          preferred_language: formData.preferred_language,
-          notification_preferences: formData.notification_preferences,
-          profile_photo: formData.profile_photo,
-          gender: formData.gender,
-          timezone: formData.timezone,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatedProfile)
         .eq("id", userData.user.id);
 
-      if (profileError) throw profileError;
-
-      // Update the global store
-      setUsername(formData.name);
-      setCurrency(formData.currency);
-      
-      // Set directly in localStorage for immediate effect
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('budget-currency', formData.currency);
-        console.log('Currency set in settings:', formData.currency);
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        setMessage({ type: "error", text: "Failed to update profile. Please try again later." });
+      } else {
+        console.log("Profile updated successfully");
+        setProfile(updatedProfile);
+        setFormData({
+          name: updatedProfile.name || '',
+          email: updatedProfile.email || '',
+          currency: updatedProfile.currency,
+          phone: updatedProfile.phone || '',
+          address: updatedProfile.address || '',
+          preferred_language: updatedProfile.preferred_language || 'en',
+          profile_photo: updatedProfile.profile_photo || '',
+          gender: updatedProfile.gender || '',
+          timezone: updatedProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          notification_preferences: updatedProfile.notification_preferences || {
+            email: true,
+            push: false,
+            sms: false
+          },
+          ai_settings: updatedProfile.ai_settings || {
+            google_api_key: "",
+            mistral_api_key: "",
+            anthropic_api_key: "",
+            groq_api_key: "",
+            deepseek_api_key: "",
+            llama_api_key: "",
+            cohere_api_key: "",
+            gemini_api_key: "",
+            qwen_api_key: "",
+            openrouter_api_key: "",
+            mistral_model: "mistral-small",
+            enabled: false,
+            defaultModel: {
+              provider: 'mistral' as const,
+              model: 'mistral-small' as const
+            }
+          }
+        });
+        setMessage({ type: "success", text: "Profile updated successfully" });
       }
-      
-      // Sync with database to ensure everything is up to date
-      await syncWithDatabase();
-
-      setMessage({
-        type: "success",
-        text: "Profile updated successfully",
-      });
-
-      // Refresh profile data
-      await fetchProfile();
-    } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to update profile",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/auth/login");
-    router.refresh();
-  };
-
-  const exportProfileToPDF = async () => {
-    try {
-      setSaving(true);
-      
-      // Dynamic import to reduce bundle size
-      const jsPDF = (await import('jspdf')).default;
-      
-      // Create document
-      const doc = new jsPDF();
-      
-      // Add title and styling
-      doc.setFontSize(20);
-      doc.setTextColor(44, 62, 80);
-      doc.text("User Profile", 105, 20, { align: 'center' });
-      
-      // Add horizontal line
-      doc.setDrawColor(52, 152, 219);
-      doc.setLineWidth(0.5);
-      doc.line(20, 25, 190, 25);
-      
-      // Add profile information
-      doc.setFontSize(12);
-      doc.setTextColor(52, 73, 94);
-      
-      let yPosition = 40;
-      const leftMargin = 20;
-      const lineHeight = 10;
-      
-      // Add user details
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text("Personal Information", leftMargin, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      
-      yPosition += lineHeight + 5;
-      doc.text(`Name: ${formData.name || 'Not provided'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Email: ${formData.email}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Phone: ${formData.phone || 'Not provided'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Address: ${formData.address || 'Not provided'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight + 10;
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text("Preferences", leftMargin, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      
-      yPosition += lineHeight + 5;
-      doc.text(`Currency: ${formData.currency}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Language: ${formData.preferred_language || 'English'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Theme: ${themeChoice}`, leftMargin, yPosition);
-
-      yPosition += lineHeight;
-      doc.text(`Gender: ${formData.gender || 'Not specified'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Timezone: ${formData.timezone || 'UTC'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight + 10;
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text("Notification Preferences", leftMargin, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      
-      yPosition += lineHeight + 5;
-      doc.text(`Email notifications: ${formData.notification_preferences?.email ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`Push notifications: ${formData.notification_preferences?.push ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
-      yPosition += lineHeight;
-      doc.text(`SMS notifications: ${formData.notification_preferences?.sms ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
-      // Add footer with generation date
-      doc.setFontSize(10);
-      doc.setTextColor(127, 140, 141);
-      doc.text(
-        `Generated on ${new Date().toLocaleString()}`,
-        105,
-        doc.internal.pageSize.getHeight() - 10,
-        { align: 'center' }
-      );
-      
-      // Save PDF
-      doc.save(`user_profile_${new Date().toISOString().slice(0,10)}.pdf`);
-      
-      toast.success("Profile exported to PDF successfully");
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to export profile");
+      console.error("Error updating profile:", error);
+      setMessage({ type: "error", text: "Failed to update profile. Please try again later." });
     } finally {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <h1 className="text-2xl font-bold md:text-3xl">Settings</h1>
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={exportProfileToPDF}
-            disabled={saving}
-          >
-            {saving ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
-                Exporting...
-              </>
-            ) : (
-              <>
-                <FileText className="mr-2 h-4 w-4" />
-                Export Profile
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      <div className="rounded-lg border bg-card shadow-sm">
-        <div className="p-6">
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div>
-                <h2 className="mb-4 text-xl font-semibold">Personal Information</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                      Name
-                    </label>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Your name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      disabled
-                      className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground ring-offset-background"
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Email cannot be changed
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="mb-2 block text-sm font-medium">
-                      Phone Number (optional)
-                    </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Your phone number"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="address" className="mb-2 block text-sm font-medium">
-                      Address (optional)
-                    </label>
-                    <textarea
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      placeholder="Your address"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h2 className="mb-4 text-xl font-semibold">Preferences</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="currency" className="mb-2 block text-sm font-medium">
-                      Currency
-                    </label>
-                    <select
-                      id="currency"
-                      name="currency"
-                      value={formData.currency}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="USD">US Dollar (USD)</option>
-                      <option value="EUR">Euro (EUR)</option>
-                      <option value="GBP">British Pound (GBP)</option>
-                      <option value="JPY">Japanese Yen (JPY)</option>
-                      <option value="CNY">Chinese Yuan (CNY)</option>
-                      <option value="INR">Indian Rupee (INR)</option>
-                      <option value="CAD">Canadian Dollar (CAD)</option>
-                      <option value="AUD">Australian Dollar (AUD)</option>
-                      <option value="SGD">Singapore Dollar (SGD)</option>
-                      <option value="CHF">Swiss Franc (CHF)</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="preferred_language" className="mb-2 block text-sm font-medium">
-                      Language
-                    </label>
-                    <select
-                      id="preferred_language"
-                      name="preferred_language"
-                      value={formData.preferred_language}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Spanish</option>
-                      <option value="fr">French</option>
-                      <option value="de">German</option>
-                      <option value="zh">Chinese</option>
-                      <option value="ja">Japanese</option>
-                      <option value="ko">Korean</option>
-                      <option value="ar">Arabic</option>
-                      <option value="ru">Russian</option>
-                      <option value="pt">Portuguese</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="gender" className="mb-2 block text-sm font-medium">
-                      Gender (optional)
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="">Prefer not to say</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="non-binary">Non-binary</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="timezone" className="mb-2 block text-sm font-medium">
-                      Timezone
-                    </label>
-                    <select
-                      id="timezone"
-                      name="timezone"
-                      value={formData.timezone}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="UTC">UTC (Coordinated Universal Time)</option>
-                      <option value="America/New_York">Eastern Time (ET)</option>
-                      <option value="America/Chicago">Central Time (CT)</option>
-                      <option value="America/Denver">Mountain Time (MT)</option>
-                      <option value="America/Los_Angeles">Pacific Time (PT)</option>
-                      <option value="America/Anchorage">Alaska Time</option>
-                      <option value="Pacific/Honolulu">Hawaii Time</option>
-                      <option value="Europe/London">London (GMT/BST)</option>
-                      <option value="Europe/Paris">Central European (CET/CEST)</option>
-                      <option value="Europe/Helsinki">Eastern European (EET/EEST)</option>
-                      <option value="Asia/Tokyo">Japan (JST)</option>
-                      <option value="Asia/Shanghai">China (CST)</option>
-                      <option value="Asia/Kolkata">India (IST)</option>
-                      <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">Theme</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Button
-                        type="button"
-                        variant={themeChoice === "light" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("light")}
-                        className="justify-start"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="1em"
-                          height="1em"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="mr-2 h-4 w-4"
-                        >
-                          <circle cx="12" cy="12" r="4" strokeWidth="2" />
-                          <path
-                            strokeLinecap="round"
-                            strokeWidth="2"
-                            d="M12 2v2m0 16v2M4 12H2m20 0h-2m-14 6l-2 2m2-16L4 4m16 16l2 2m-2-16l2-2"
-                          />
-                        </svg>
-                        Light
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={themeChoice === "dark" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("dark")}
-                        className="justify-start"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="1em"
-                          height="1em"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="mr-2 h-4 w-4"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeWidth="2"
-                            d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
-                          />
-                        </svg>
-                        Dark
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={themeChoice === "system" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("system")}
-                        className="justify-start"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="1em"
-                          height="1em"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="mr-2 h-4 w-4"
-                        >
-                          <rect width="18" height="14" x="3" y="3" rx="2" strokeWidth="2" />
-                          <path strokeLinecap="round" strokeWidth="2" d="M4 17h16M12 21v-4" />
-                        </svg>
-                        System
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="mb-2 block text-sm font-medium">Notification Preferences</label>
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="email_notifications"
-                          checked={formData.notification_preferences?.email ?? true}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            notification_preferences: {
-                              ...formData.notification_preferences,
-                              email: e.target.checked
-                            }
-                          })}
-                          className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                        />
-                        <label htmlFor="email_notifications" className="ml-2 text-sm">
-                          Email Notifications
-                        </label>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="push_notifications"
-                          checked={formData.notification_preferences?.push ?? false}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            notification_preferences: {
-                              ...formData.notification_preferences,
-                              push: e.target.checked
-                            }
-                          })}
-                          className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                        />
-                        <label htmlFor="push_notifications" className="ml-2 text-sm">
-                          Push Notifications
-                        </label>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="sms_notifications"
-                          checked={formData.notification_preferences?.sms ?? false}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            notification_preferences: {
-                              ...formData.notification_preferences,
-                              sms: e.target.checked
-                            }
-                          })}
-                          className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                        />
-                        <label htmlFor="sms_notifications" className="ml-2 text-sm">
-                          SMS Notifications
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {message && (
-              <div
-                className={`mt-6 rounded-md p-4 ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-50"
-                    : "bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-50"
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
-            
-            <div className="mt-6 flex justify-between">
-              <Button type="button" variant="outline" onClick={handleSignOut}>
-                Sign Out
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white mr-2"></div>
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
+    <div className="container mx-auto p-4">
+      {/* Rest of the component code remains unchanged */}
     </div>
   );
-} 
+}

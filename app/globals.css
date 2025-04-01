@@ -157,6 +157,49 @@
     @apply bg-gray-800 text-white;
     color-scheme: dark;
   }
+
+  /* Safe area utilities for mobile devices */
+  .h-safe-area-top {
+    height: env(safe-area-inset-top, 0px);
+  }
+
+  .h-safe-area-bottom {
+    height: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .py-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mt-safe {
+    margin-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 @layer utilities {
@@ -197,19 +240,69 @@
     @apply shadow-md -translate-y-0.5;
   }
   
-  .sidebar-open {
-    overflow: hidden;
+  .touch-manipulation {
+    touch-action: manipulation;
   }
   
-  html.sidebar-open {
-    overflow: hidden;
+  .tap-highlight-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .mobile-text-adjust {
+    @apply text-[16px] md:text-base;
+  }
+  
+  .mobile-heading-adjust {
+    @apply text-xl md:text-2xl;
+  }
+  
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+  
+  .touch-target-expand {
+    @apply relative;
+  }
+  
+  .touch-target-expand::before {
+    content: '';
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[44px] h-[44px] min-w-full min-h-full rounded-full;
+  }
+  
+  .sidebar-open {
+    /* Allow scrolling within content but prevent body scrolling */
     position: relative;
   }
   
+  html.sidebar-open {
+    /* Use overflow-y: auto instead of hidden to allow scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    /* Keep the position relative to allow normal document flow */
+    position: relative;
+    
+    /* Add a class to enable scrolling with touch devices */
+    -webkit-overflow-scrolling: touch;
+  }
+  
   html.form-drawer-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
+    /* Use overflow-y: auto instead of hidden to allow scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    /* Remove fixed position that locks the entire page */
+    position: relative;
+    
+    /* Enable touch scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Add a new class for modal containers that should scroll independently */
+  .modal-container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 90vh;
   }
   
   .bg-glass {

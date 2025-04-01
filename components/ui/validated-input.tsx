@@ -10,6 +10,7 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   onValidationChange?: (isValid: boolean) => void;
   prefix?: string | ReactNode;
   validationFn?: (value: string) => ValidationResult;
+  fullWidth?: boolean;
 };
 
 const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
@@ -26,6 +27,7 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
     onBlur,
     required,
     prefix,
+    fullWidth = true,
     ...props 
   }, ref) => {
     const [validationError, setValidationError] = useState<string | undefined>(error);
@@ -75,18 +77,32 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
     const hasError = touched && !!validationError;
     const describedBy = hasError ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined;
     
+    // Determine if this is likely a mobile/touch device
+    const isTouchDevice = typeof window !== 'undefined' && (
+      'ontouchstart' in window || 
+      navigator.maxTouchPoints > 0 || 
+      (navigator as any).msMaxTouchPoints > 0
+    );
+    
     const inputProps = {
       ...props,
       type,
       className: cn(
-        "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        "w-full rounded-md border border-input bg-transparent px-3 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 tap-highlight-transparent",
+        isTouchDevice ? "h-11 py-2.5 text-base" : "h-9 py-1 text-sm",
         prefix && "pl-8",
         hasError && "border-red-500 focus-visible:ring-red-500",
         className
       ),
       onChange: handleChange,
       onBlur: handleBlur,
-    };
+      // Improve mobile keyboard experience based on input type
+      inputMode: type === 'number' ? 'numeric' as const : type === 'email' ? 'email' as const : type === 'tel' ? 'tel' as const : undefined,
+      // Add autocomplete attributes to help browsers
+      autoComplete: type === 'email' ? 'email' : type === 'password' ? 'current-password' : type === 'tel' ? 'tel' : props.autoComplete,
+      // Add accessibility
+      "aria-required": required ? 'true' : undefined,
+    } as React.InputHTMLAttributes<HTMLInputElement>;
     
     if (hasError) {
       inputProps['aria-invalid'] = 'true';
@@ -97,11 +113,11 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
     }
     
     return (
-      <div className="space-y-1">
+      <div className={cn("space-y-2", fullWidth ? "w-full" : "")}>
         {label && (
           <label 
             htmlFor={props.id} 
-            className="block text-sm font-medium leading-6 text-muted-foreground"
+            className="block text-sm font-medium leading-none text-foreground mb-1.5"
           >
             {label}
             {required && <span className="ml-1 text-red-500">*</span>}
@@ -120,7 +136,7 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
         </div>
         {hasError ? (
           <p 
-            className="text-xs text-red-500 mt-1" 
+            className="text-xs text-red-500 mt-1.5" 
             id={`${props.id}-error`}
             role="alert"
           >
@@ -128,7 +144,7 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
           </p>
         ) : helperText ? (
           <p 
-            className="text-xs text-muted-foreground mt-1" 
+            className="text-xs text-muted-foreground mt-1.5" 
             id={`${props.id}-helper`}
           >
             {helperText}
@@ -150,6 +166,7 @@ type TextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   helperText?: string;
   validate?: (value: string) => ValidationResult;
   onValidationChange?: (isValid: boolean) => void;
+  fullWidth?: boolean;
 };
 
 const ValidatedTextarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -163,6 +180,7 @@ const ValidatedTextarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     onChange,
     onBlur,
     required,
+    fullWidth = true,
     ...props
   }, ref) => {
     const [validationError, setValidationError] = useState<string | undefined>(error);

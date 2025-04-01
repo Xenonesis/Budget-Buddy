@@ -56,17 +56,17 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border rounded-lg mb-4 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
+      className={`bg-card border rounded-lg mb-3 sm:mb-4 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
         isDragging ? 'shadow-lg border-primary' : ''
       }`}
     >
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
           <div className="flex items-center gap-2">
             <div
               {...attributes}
               {...listeners}
-              className="touch-manipulation cursor-grab active:cursor-grabbing p-1 rounded hover:bg-muted"
+              className="touch-manipulation cursor-grab active:cursor-grabbing p-1.5 rounded hover:bg-muted"
               title="Drag to reorder"
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
@@ -104,7 +104,7 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
         </div>
 
         {categorySpending && (
-          <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
+          <div className="h-2 bg-muted rounded-full overflow-hidden mb-2 sm:mb-3">
             <motion.div
               className={`h-full ${getProgressBarColor(percentage)}`}
               initial={{ width: 0 }}
@@ -131,7 +131,7 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
             )}
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="sm"
@@ -215,10 +215,10 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Filter Controls */}
-      <div className="flex justify-between items-center mb-4 px-4">
-        <h3 className="text-lg font-medium">Budget Progress</h3>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 sm:mb-4 px-3 sm:px-4">
+        <h3 className="text-base sm:text-lg font-medium">Budget Progress</h3>
         
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
@@ -227,7 +227,7 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
               variant={activeFilter === 'all' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveFilter('all')}
-              className="h-8 rounded-none px-2.5"
+              className="h-9 rounded-none px-2 text-xs sm:text-sm"
             >
               All
             </Button>
@@ -235,7 +235,7 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
               variant={activeFilter === 'over-budget' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveFilter('over-budget')}
-              className="h-8 rounded-none px-2.5"
+              className="h-9 rounded-none px-2 text-xs sm:text-sm"
             >
               Over Budget
             </Button>
@@ -243,7 +243,7 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
               variant={activeFilter === 'under-budget' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveFilter('under-budget')}
-              className="h-8 rounded-none px-2.5"
+              className="h-9 rounded-none px-2 text-xs sm:text-sm"
             >
               Under Budget
             </Button>
@@ -251,14 +251,28 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
         </div>
       </div>
 
-      {filteredBudgets.length > 0 ? (
-        <DndContext
+      {/* Display empty state if no budgets match the filter */}
+      {filteredBudgets.length === 0 ? (
+        <div className="text-center p-6">
+          <div className="h-12 w-12 bg-muted rounded-full mx-auto flex items-center justify-center mb-3">
+            <Filter className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h3 className="text-base font-medium mb-1">No matching budgets</h3>
+          <p className="text-muted-foreground text-sm">
+            Try changing your filter selection
+          </p>
+        </div>
+      ) : (
+        <DndContext 
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={filteredBudgets.map(b => b.id)} strategy={verticalListSortingStrategy}>
-            <div className="divide-y p-4">
+          <SortableContext
+            items={filteredBudgets.map(b => b.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="px-3 sm:px-4 pb-3 sm:pb-4">
               {filteredBudgets.map((budget) => (
                 <SortableBudgetItem
                   key={budget.id}
@@ -271,27 +285,6 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
             </div>
           </SortableContext>
         </DndContext>
-      ) : (
-        <div className="p-8 text-center">
-          <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-3">
-            <DollarSign className="h-6 w-6 text-muted-foreground" />
-          </div>
-          {budgets.length > 0 ? (
-            <>
-              <h3 className="text-lg font-medium">No budgets match the filter</h3>
-              <p className="text-muted-foreground text-sm mt-1 mb-4">
-                Try changing the filter or add more budgets
-              </p>
-            </>
-          ) : (
-            <>
-              <h3 className="text-lg font-medium">No budgets set yet</h3>
-              <p className="text-muted-foreground text-sm mt-1 mb-4">
-                Start by creating your first budget to track your spending
-              </p>
-            </>
-          )}
-        </div>
       )}
     </div>
   );

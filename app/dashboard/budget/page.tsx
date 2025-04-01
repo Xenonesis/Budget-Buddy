@@ -210,25 +210,35 @@ export default function BudgetPage() {
     setFormError(null);
     
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        setFormError("You must be logged in to save a budget");
-        return;
-      }
-
-      // Validate the form data
-      if (!formData.category_id) {
-        setFormError("Please select a category");
+      // Validate required fields
+      if (!formData.category_id || !formData.amount) {
+        toast.error("Please fill all required fields", {
+          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
+        });
+        setFormLoading(false);
         return;
       }
       
-      const amountValidation = validateAmount(formData.amount);
-      if (!amountValidation.isValid) {
-        setFormError(amountValidation.message || "Invalid amount");
+      // Validate amount is a number and > 0
+      const budgetAmount = parseFloat(formData.amount);
+      if (isNaN(budgetAmount) || budgetAmount <= 0) {
+        toast.error("Please enter a valid amount greater than zero", {
+          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
+        });
+        setFormLoading(false);
         return;
       }
-
-      const amount = parseFloat(formData.amount);
+      
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in to manage budgets", {
+          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
+        });
+        setFormLoading(false);
+        return;
+      }
 
       if (isEditing && editId) {
         // Update existing budget
@@ -236,11 +246,11 @@ export default function BudgetPage() {
           .from("budgets")
           .update({
             category_id: formData.category_id,
-            amount,
+            amount: budgetAmount,
             period: formData.period as "monthly" | "weekly" | "yearly",
           })
           .eq("id", editId)
-          .eq("user_id", userData.user.id);
+          .eq("user_id", user.id);
 
         if (error) {
           console.error("Error updating budget:", error);
@@ -271,11 +281,11 @@ export default function BudgetPage() {
                 const { error } = await supabase
                   .from("budgets")
                   .update({
-                    amount,
+                    amount: budgetAmount,
                     period: formData.period as "monthly" | "weekly" | "yearly",
                   })
                   .eq("id", existingBudgetToUpdate.id)
-                  .eq("user_id", userData.user.id);
+                  .eq("user_id", user.id);
 
                 if (error) {
                   console.error("Error updating existing budget:", error);
@@ -311,9 +321,9 @@ export default function BudgetPage() {
           // Create new budget
           const { error } = await supabase.from("budgets").insert([
             {
-              user_id: userData.user.id,
+              user_id: user.id,
               category_id: formData.category_id,
-              amount,
+              amount: budgetAmount,
               period: formData.period,
             },
           ]);
@@ -589,26 +599,26 @@ export default function BudgetPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4">
         <div className="flex items-center gap-3">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="relative h-10 w-10 flex-shrink-0"
+            className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
           >
             <Image 
               src="/logo.svg" 
               alt="Budget Tracker Logo" 
               width={40} 
               height={40} 
-              className="h-10 w-10" 
+              className="h-8 w-8 md:h-10 md:w-10" 
             />
           </motion.div>
           <div>
             <motion.h1 
-              className="text-2xl font-bold"
+              className="text-xl md:text-2xl font-bold"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
@@ -616,7 +626,7 @@ export default function BudgetPage() {
               Budget Planner
             </motion.h1>
             <motion.p 
-              className="text-muted-foreground text-sm"
+              className="text-muted-foreground text-xs md:text-sm"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.2 }}
@@ -625,6 +635,26 @@ export default function BudgetPage() {
             </motion.p>
           </div>
         </div>
+        
+        {/* Mobile Add Budget Button */}
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="md:hidden"
+        >
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            size="lg"
+            className="w-full h-14 gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-md hover:shadow-lg transition-all"
+          >
+            <Plus className="h-6 w-6" />
+            <span className="font-medium text-base">Add New Budget</span>
+          </Button>
+        </motion.div>
         
         {/* Hide New Budget button on mobile - will show FAB instead */}
         <motion.div
@@ -671,10 +701,10 @@ export default function BudgetPage() {
               resetForm();
               setShowForm(!showForm);
             }}
-            className="relative overflow-hidden group"
+            className="relative overflow-hidden group h-12 px-5 text-base"
           >
-            <span className="relative z-10 flex items-center gap-1">
-              {showForm ? <X size={16} /> : <Plus size={16} />}{" "}
+            <span className="relative z-10 flex items-center gap-1.5">
+              {showForm ? <X size={18} /> : <Plus size={18} />}{" "}
               {showForm ? "Cancel" : "New Budget"}
             </span>
             <motion.div 
@@ -699,13 +729,13 @@ export default function BudgetPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 mb-6 border border-red-200 dark:border-red-800"
+            className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 sm:p-4 mb-4 sm:mb-6 border border-red-200 dark:border-red-800"
           >
             <div className="flex">
               <div className="flex-shrink-0">
                 <AlertTriangle className="h-5 w-5 text-red-500" aria-hidden="true" />
               </div>
-              <div className="ml-3">
+              <div className="ml-3 flex-1">
                 <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                   {formError}
                 </h3>
@@ -728,65 +758,74 @@ export default function BudgetPage() {
       </AnimatePresence>
 
       {/* Budget Overview Cards - Improved with better visual hierarchy and responsive design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
         {/* Total Budget Card */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
+        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Total Budget</h3>
-              <p className="text-2xl font-bold mt-1">
+              <p className="text-xl sm:text-2xl font-bold mt-1">
                 {formatCurrency(budgets.reduce((sum, budget) => sum + budget.amount, 0))}
               </p>
               <div className="mt-1 text-xs text-muted-foreground">
                 {budgets.length} budget{budgets.length !== 1 ? 's' : ''} set
               </div>
             </div>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-primary" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
           </div>
         </div>
 
         {/* Total Spent Card */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
+        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Total Spent</h3>
-              <p className="text-2xl font-bold mt-1 text-red-500">
+              <p className="text-xl sm:text-2xl font-bold mt-1 text-red-500">
                 {formatCurrency(categorySpending.reduce((sum, cat) => sum + cat.spent, 0))}
               </p>
               <div className="mt-1 text-xs text-muted-foreground">
                 Across {categorySpending.length} categor{categorySpending.length !== 1 ? 'ies' : 'y'}
               </div>
             </div>
-            <div className="h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-red-500" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-red-500/10 flex items-center justify-center">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
             </div>
           </div>
         </div>
 
         {/* Budget Status Card */}
-        <div className="rounded-xl border bg-card p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
+        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
           <div className={`absolute top-0 right-0 w-24 h-24 ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500/5' : 'bg-emerald-500/5'} rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform`}></div>
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Budget Status</h3>
-              <p className="text-2xl font-bold mt-1">
-                {categorySpending.some(cat => cat.percentage > 100) 
-                  ? <span className="text-red-500">Over Budget</span> 
-                  : <span className="text-emerald-500">On Track</span>}
+              <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+              <p className={`text-xl sm:text-2xl font-bold mt-1 ${
+                categorySpending.some(cat => cat.percentage > 100) 
+                  ? 'text-red-500' 
+                  : 'text-emerald-500'
+              }`}>
+                {getBudgetStatusMessage()}
               </p>
               <div className="mt-1 text-xs text-muted-foreground">
-                {getBudgetStatusMessage()}
+                {categorySpending.some(cat => cat.percentage > 90 && cat.percentage <= 100) 
+                  ? `${categorySpending.filter(cat => cat.percentage > 90 && cat.percentage <= 100).length} approaching limit` 
+                  : 'Your budgets are healthy'}
               </div>
             </div>
-            <div className={`h-10 w-10 rounded-full ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500/10' : 'bg-emerald-500/10'} flex items-center justify-center`}>
-              {categorySpending.some(cat => cat.percentage > 100) 
-                ? <AlertTriangle className="h-5 w-5 text-red-500" />
-                : <CheckCircle className="h-5 w-5 text-emerald-500" />
-              }
+            <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full ${
+              categorySpending.some(cat => cat.percentage > 100) 
+                ? 'bg-red-500/10' 
+                : 'bg-emerald-500/10'
+            } flex items-center justify-center`}>
+              {categorySpending.some(cat => cat.percentage > 100) ? (
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              ) : (
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
+              )}
             </div>
           </div>
         </div>
@@ -802,31 +841,16 @@ export default function BudgetPage() {
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-card border rounded-lg p-4 md:p-6 mb-8 overflow-hidden shadow-md"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden mb-6"
           >
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium">
-                  {isEditing ? "Edit Budget" : "Add New Budget"}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    resetForm();
-                  }}
-                  className="text-muted-foreground hover:text-foreground touch-manipulation"
-                  aria-label="Close form"
-                  title="Close form"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+            <form onSubmit={handleSubmit} className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
+              <h3 className="text-xl font-bold mb-5">{isEditing ? "Edit Budget" : "Create New Budget"}</h3>
               
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 <div>
                   <label htmlFor="category_id" className="block text-sm font-medium mb-1">
                     Category
@@ -836,7 +860,7 @@ export default function BudgetPage() {
                     name="category_id"
                     value={formData.category_id}
                     onChange={handleInputChange}
-                    className="w-full rounded-md border border-input bg-background px-3 py-3 md:py-2 touch-manipulation"
+                    className="w-full rounded-md border border-input bg-background px-3 py-3 text-base md:py-2 touch-manipulation"
                     disabled={formLoading || !hasExpenseCategories}
                   >
                     <option value="">Select a category</option>
@@ -882,7 +906,7 @@ export default function BudgetPage() {
                       name="period"
                       value={formData.period}
                       onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-background px-3 py-3 md:py-2 appearance-none touch-manipulation"
+                      className="w-full rounded-md border border-input bg-background px-3 py-3 text-base md:py-2 appearance-none touch-manipulation"
                       disabled={formLoading}
                     >
                       <option value="monthly">Monthly</option>
@@ -894,7 +918,7 @@ export default function BudgetPage() {
                 </div>
               </div>
               
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-6">
                 <Button
                   type="button"
                   variant="outline"
@@ -903,14 +927,14 @@ export default function BudgetPage() {
                     resetForm();
                   }}
                   disabled={formLoading}
-                  className="w-full md:w-auto min-h-[44px]"
+                  className="w-full mt-3 sm:mt-0 sm:w-auto min-h-[44px] h-12 px-5 text-base"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={formLoading}
-                  className="w-full md:w-auto min-h-[44px]"
+                  className="w-full sm:w-auto min-h-[44px] h-12 px-5 text-base"
                 >
                   {formLoading ? (
                     <>
@@ -954,9 +978,14 @@ export default function BudgetPage() {
               Start by creating your first budget to track your spending
             </p>
             {!showForm && (
-              <Button onClick={() => setShowForm(true)} className="min-h-[44px]">
-                <Plus className="mr-2 h-4 w-4" /> Add Your First Budget
-              </Button>
+              <div className="space-y-4">
+                <Button onClick={() => setShowForm(true)} className="min-h-[44px] h-12 px-5 text-base bg-gradient-to-r from-primary to-primary/80 shadow-md hover:shadow-lg transition-all">
+                  <Plus className="mr-2 h-5 w-5" /> Add Your First Budget
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  <p>You can also use the "Add Budget" button at the top of the page</p>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -1023,11 +1052,14 @@ export default function BudgetPage() {
           </div>
           
           {/* Mobile card view */}
-          <div className="md:hidden p-4 space-y-3">
+          <div className="md:hidden p-3 sm:p-4 space-y-2 sm:space-y-3">
             {budgets.map((budget) => (
               <div 
                 key={budget.id} 
-                className="bg-card border rounded-lg p-4 hover:shadow-md transition-all"
+                className="bg-card border rounded-lg p-3 sm:p-4 hover:shadow-md transition-all"
+                onTouchStart={(e) => handleTouchStart(e, budget.category_id)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 <div className="flex items-center mb-2">
                   <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
@@ -1049,7 +1081,7 @@ export default function BudgetPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-10 w-10 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    className="h-11 w-11 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     onClick={() => handleEdit(budget)}
                     aria-label={`Edit budget for ${budget.category_name}`}
                   >
@@ -1058,7 +1090,7 @@ export default function BudgetPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-10 w-10 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="h-11 w-11 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                     onClick={() => handleDelete(budget.id)}
                     aria-label={`Delete budget for ${budget.category_name}`}
                   >
@@ -1147,96 +1179,6 @@ export default function BudgetPage() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Floating Action Button */}
-      <AnimatePresence>
-        {!showForm && (
-          <motion.div
-            className="fixed bottom-6 right-6 md:hidden z-30"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", duration: 0.4 }}
-          >
-            <div className="relative">
-              {/* Speed dial menu options */}
-              <AnimatePresence>
-                {expandedFab && (
-                  <>
-                    <motion.div
-                      className="absolute bottom-16 right-0 mb-2"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      transition={{ type: "spring", duration: 0.2 }}
-                    >
-                      <Button
-                        onClick={() => copyFromLastPeriod()}
-                        disabled={copyLoading}
-                        size="sm"
-                        className="h-12 px-3 rounded-full shadow-lg touch-manipulation flex items-center gap-1 bg-primary hover:bg-primary/90"
-                        aria-label="Copy budgets from last period"
-                      >
-                        {copyLoading ? (
-                          <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                        ) : (
-                          <Copy className="h-5 w-5" />
-                        )}
-                        <span className="ml-1">Copy Last Period</span>
-                      </Button>
-                    </motion.div>
-                    
-                    <motion.div
-                      className="absolute bottom-28 right-0 mb-2"
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      transition={{ type: "spring", duration: 0.2, delay: 0.05 }}
-                    >
-                      <Button
-                        onClick={() => {
-                          resetForm();
-                          setShowForm(true);
-                          setExpandedFab(false);
-                        }}
-                        size="sm"
-                        className="h-12 px-3 rounded-full shadow-lg touch-manipulation flex items-center gap-1 bg-primary hover:bg-primary/90"
-                        aria-label="Add new budget"
-                      >
-                        <Plus className="h-5 w-5" />
-                        <span className="ml-1">New Budget</span>
-                      </Button>
-                    </motion.div>
-                    
-                    {/* Backdrop to close the menu when clicking outside */}
-                    <motion.div
-                      className="fixed inset-0 bg-black/20 z-10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setExpandedFab(false)}
-                    />
-                  </>
-                )}
-              </AnimatePresence>
-              
-              {/* Main FAB button */}
-              <Button
-                onClick={() => setExpandedFab(!expandedFab)}
-                size="lg"
-                className="h-14 w-14 rounded-full shadow-lg p-0 touch-manipulation relative z-20"
-                aria-label={expandedFab ? "Close menu" : "Open budget options"}
-              >
-                {expandedFab ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <DollarSign className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Budget Selector Modal */}
       <AnimatePresence>
         {showBudgetSelector && (
@@ -1301,6 +1243,33 @@ export default function BudgetPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Sticky Add Budget Button - Replacement for the FAB */}
+      {!showForm && (
+        <div className="fixed bottom-6 left-0 right-0 px-4 z-30 md:hidden pointer-events-none">
+          <div className="pointer-events-auto mx-auto max-w-md">
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: "spring", delay: 0.5 }}
+            >
+              <Button
+                onClick={() => {
+                  resetForm();
+                  setShowForm(true);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-full py-6 shadow-lg rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:shadow-xl transition-all"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  <span className="font-medium">Create Budget</span>
+                </div>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

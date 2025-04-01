@@ -2420,9 +2420,9 @@ export default function TransactionsPage() {
       setInputValue(value);
       
       // Debounce the update to parent state
-      if (e.nativeEvent.inputType === 'insertText' || 
-          e.nativeEvent.inputType === 'deleteContentBackward' || 
-          e.nativeEvent.inputType === 'deleteContentForward') {
+      if ((e.nativeEvent as InputEvent).inputType === 'insertText' || 
+          (e.nativeEvent as InputEvent).inputType === 'deleteContentBackward' || 
+          (e.nativeEvent as InputEvent).inputType === 'deleteContentForward') {
         updateParentState(value);
       }
     };
