@@ -32,6 +32,8 @@ import {
 } from "recharts";
 import { supabase } from "@/lib/supabase";
 import { getRandomColor } from "@/lib/colors";
+import { useUserPreferences } from "@/lib/store";
+import { Currency } from "@/components/ui/currency";
 
 // Custom styles for enhanced chart interactions
 const styles = {
@@ -126,9 +128,15 @@ const sampleTransactions = [
 
 // Helper function to format currency values
 const formatCurrency = (value: number) => {
+  // Get currency from user preferences via localStorage
+  let currencyCode = 'USD';
+  if (typeof window !== 'undefined') {
+    currencyCode = localStorage.getItem('budget-currency') || 'USD';
+  }
+  
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: currencyCode,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(value);
@@ -184,6 +192,7 @@ export default function AnalyticsPage() {
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [expenseData, setExpenseData] = useState<any[]>([]);
   const [incomeData, setIncomeData] = useState<any[]>([]);
+  const userPreferences = useUserPreferences();
 
   // Function to fetch transactions from the database
   const fetchTransactions = async () => {
@@ -356,6 +365,17 @@ export default function AnalyticsPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Add effect to update UI when currency changes
+  useEffect(() => {
+    // Force a re-render when currency changes
+    if (!isDataLoading) {
+      // This will trigger a refresh of all currency displays
+      setMonthlyData([...monthlyData]);
+      setExpenseData([...expenseData]);
+      setIncomeData([...incomeData]);
+    }
+  }, [userPreferences.currency, isDataLoading]);
+
   // Calculate total income, expenses, and categories
   const totalIncome = transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : 0), 0);
   const totalExpenses = transactions.reduce((sum, t) => sum + (t.type === 'expense' ? t.amount : 0), 0);
@@ -425,7 +445,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="h-8 px-3 rounded-lg border bg-card/80 backdrop-blur-sm shadow-sm text-xs font-medium flex items-center">
                 <span className="text-green-500 mr-2">💰</span>
-                <span>Net: {formatCurrency(netBalance)}</span>
+                <span>Net: <Currency value={netBalance} /></span>
               </div>
             </div>
           </div>
@@ -439,7 +459,9 @@ export default function AnalyticsPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground/80">Total Income</p>
-                    <p className="font-semibold text-green-600 dark:text-green-300">{formatCurrency(totalIncome)}</p>
+                    <p className="font-semibold text-green-600 dark:text-green-300">
+                      <Currency value={totalIncome} />
+                    </p>
                   </div>
                 </div>
                 {monthlyChange.income !== 0 && (
@@ -456,7 +478,9 @@ export default function AnalyticsPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground dark:text-muted-foreground/80">Total Expenses</p>
-                    <p className="font-semibold text-red-600 dark:text-red-300">{formatCurrency(totalExpenses)}</p>
+                    <p className="font-semibold text-red-600 dark:text-red-300">
+                      <Currency value={totalExpenses} />
+                    </p>
                   </div>
                 </div>
                 {monthlyChange.expense !== 0 && (
@@ -633,7 +657,7 @@ export default function AnalyticsPage() {
                     <div>
                       <div className="text-xs sm:text-sm font-medium text-muted-foreground">Income</div>
                       <p className="text-lg sm:text-2xl font-bold mt-0.5 text-green-600">
-                        {formatCurrency(totalIncome)}
+                        <Currency value={totalIncome} />
                       </p>
                     </div>
                   </div>
@@ -648,7 +672,7 @@ export default function AnalyticsPage() {
                     <div>
                       <div className="text-xs sm:text-sm font-medium text-muted-foreground">Expenses</div>
                       <p className="text-lg sm:text-2xl font-bold mt-0.5 text-red-600">
-                        {formatCurrency(totalExpenses)}
+                        <Currency value={totalExpenses} />
                       </p>
                     </div>
                   </div>
@@ -764,7 +788,12 @@ export default function AnalyticsPage() {
                               }}
                             />
                             <Tooltip 
-                              formatter={(value) => [formatCurrency(Number(value)), ""]}
+                              formatter={(value) => {
+                                const formattedValue = typeof window !== 'undefined' ? 
+                                  formatCurrency(Number(value)) :
+                                  `$${Number(value).toLocaleString()}`;
+                                return [formattedValue, ""];
+                              }}
                               contentStyle={{
                                 ...styles.tooltipStyles,
                                 color: 'var(--foreground)',
@@ -867,7 +896,12 @@ export default function AnalyticsPage() {
                               }}
                             />
                             <Tooltip 
-                              formatter={(value) => [formatCurrency(Number(value)), ""]}
+                              formatter={(value) => {
+                                const formattedValue = typeof window !== 'undefined' ? 
+                                  formatCurrency(Number(value)) :
+                                  `$${Number(value).toLocaleString()}`;
+                                return [formattedValue, ""];
+                              }}
                               contentStyle={styles.tooltipStyles}
                               itemStyle={styles.tooltipItemStyles}
                               labelStyle={styles.tooltipLabelStyles}
@@ -951,7 +985,12 @@ export default function AnalyticsPage() {
                                   ))}
                                 </Pie>
                                 <Tooltip 
-                                  formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
+                                  formatter={(value) => {
+                                    const formattedValue = typeof window !== 'undefined' ? 
+                                      formatCurrency(Number(value)) :
+                                      `$${Number(value).toLocaleString()}`;
+                                    return [formattedValue, "Amount"];
+                                  }}
                                   contentStyle={styles.tooltipStyles}
                                   itemStyle={styles.tooltipItemStyles}
                                   labelStyle={styles.tooltipLabelStyles}
@@ -1018,7 +1057,7 @@ export default function AnalyticsPage() {
                                         </div>
                                       </td>
                                       <td className="py-3 px-4 text-right font-medium text-sm">
-                                        {formatCurrency(category.value)}
+                                        <Currency value={category.value} />
                                       </td>
                                       <td className="py-3 px-4 text-right text-sm">
                                         <div className="flex items-center justify-end gap-2">
@@ -1101,7 +1140,12 @@ export default function AnalyticsPage() {
                                 ))}
                               </Pie>
                               <Tooltip 
-                                formatter={(value) => [formatCurrency(Number(value)), "Amount"]}
+                                formatter={(value) => {
+                                  const formattedValue = typeof window !== 'undefined' ? 
+                                    formatCurrency(Number(value)) :
+                                    `$${Number(value).toLocaleString()}`;
+                                  return [formattedValue, "Amount"];
+                                }}
                                 contentStyle={styles.tooltipStyles}
                                 itemStyle={styles.tooltipItemStyles}
                                 labelStyle={styles.tooltipLabelStyles}
@@ -1127,7 +1171,7 @@ export default function AnalyticsPage() {
                                         ></span>
                                         <span className="text-foreground">{category.name}</span>
                                       </div>
-                                      <span className="font-medium text-foreground">{formatCurrency(category.value)}</span>
+                                      <span className="font-medium text-foreground"><Currency value={category.value} /></span>
                                     </div>
                                     <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                                       <div 
@@ -1187,7 +1231,7 @@ export default function AnalyticsPage() {
                                 <span className="text-sm">Total Income</span>
                               </div>
                               <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                                {formatCurrency(totalIncome)}
+                                <Currency value={totalIncome} />
                               </span>
                             </div>
                             
@@ -1197,7 +1241,7 @@ export default function AnalyticsPage() {
                                 <span className="text-sm">Total Expense</span>
                               </div>
                               <span className="text-sm font-medium text-red-600 dark:text-red-400">
-                                {formatCurrency(totalExpenses)}
+                                <Currency value={totalExpenses} />
                               </span>
                             </div>
                             
@@ -1209,7 +1253,7 @@ export default function AnalyticsPage() {
                                 <span className="text-sm">Net Balance</span>
                               </div>
                               <span className="text-sm font-medium text-primary">
-                                {formatCurrency(netBalance)}
+                                <Currency value={netBalance} />
                               </span>
                             </div>
                             
@@ -1262,7 +1306,7 @@ export default function AnalyticsPage() {
                                       </span>
                                     </div>
                                     <span className="text-sm font-medium whitespace-nowrap">
-                                      {formatCurrency(category.value)}
+                                      <Currency value={category.value} />
                                     </span>
                                   </div>
                                   <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
@@ -1334,7 +1378,7 @@ export default function AnalyticsPage() {
                                   </td>
                                   <td className="py-3 px-4 text-right font-medium whitespace-nowrap">
                                     <span className={transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                                      {transaction.type === 'income' ? '+' : '-'}<Currency value={transaction.amount} />
                                     </span>
                                   </td>
                                 </tr>

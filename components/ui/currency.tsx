@@ -28,5 +28,6 @@ export function Currency({ value, className, currencyOverride, showSign = false,
 
 // For server components or non-React contexts
 export function formatAmount(amount: number, currencyCode?: string) {
+  // If no currencyCode is provided, this will use the user's preference from the store
   return formatCurrency(amount, currencyCode);
 } 

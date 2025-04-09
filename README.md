@@ -9,7 +9,23 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
-## Version 7.3 - Latest Updates
+## Version 7.4 - Latest Updates
+
+**Released: April 9, 2024**
+
+### Bug Fixes
+- Fixed currency display issues in Analytics Dashboard to correctly respect user preferences
+- Enhanced currency formatting to maintain consistency across all application pages
+- Improved real-time updates of currency displays when preferences change
+- Fixed chart tooltips to display correct currency symbols based on user settings
+
+### Technical Improvements
+- Implemented robust currency preference handling throughout the application
+- Added dynamic currency updates via localStorage for consistency
+- Enhanced Currency component usage across analytics visualizations
+- Added fallback mechanisms for server-side rendering of currency values
+
+## Version 7.3 - Previous Updates
 
 **Released: April 8, 2024**
 
@@ -138,7 +154,7 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 
 ## Version 4.0
 
-**Released: March 30, 2023**
+**Released: March 30, 2025**
 
 ### New Features
 - Enhanced transaction filtering and sorting capabilities
