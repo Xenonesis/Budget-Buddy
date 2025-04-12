@@ -12,14 +12,19 @@ export function formatCurrency(amount: number, currency?: string) {
   return formatCurrencyFromStore(amount, currency);
 }
 
-export function formatDate(date: Date | string) {
+export function formatDate(date: Date | string, timezone?: string) {
   if (typeof date === 'string') {
     date = new Date(date)
   }
+  
+  // Use the provided timezone or the user's current timezone
+  const userTimezone = timezone || getUserTimezone();
+  
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: userTimezone
   }).format(date)
 }
 

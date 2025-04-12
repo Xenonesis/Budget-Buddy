@@ -406,6 +406,76 @@ export default function TransactionsPage() {
     };
   }, []);
 
+  // Combine cleanup functions for DOM-related issues into a single useEffect
+  useEffect(() => {
+    // Function to remove unwanted dropdown elements
+    const cleanupDOMElements = () => {
+      // 1. Remove unwanted dropdowns
+      const unwantedDropdowns = document.querySelectorAll('.flex-1.rounded-md.border.border-input.bg-transparent.px-3.py-2.text-sm.high-contrast-dropdown');
+      unwantedDropdowns.forEach(dropdown => {
+        const parent = dropdown.closest('.custom-category-form');
+        if (parent) {
+          (dropdown as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // 2. Remove duplicate dropdowns from custom category forms
+      const customForms = document.querySelectorAll(`.${styles.customCategoryForm}`);
+      customForms.forEach(form => {
+        const selects = form.querySelectorAll('select');
+        if (selects.length > 0) {
+          selects.forEach(select => {
+            if (select.classList.contains('flex-1')) {
+              select.remove();
+            }
+          });
+        }
+      });
+    };
+
+    // Run cleanup immediately to fix any existing issues
+    cleanupDOMElements();
+    
+    // Setup a single MutationObserver to handle all DOM changes
+    const observer = new MutationObserver((mutations) => {
+      let shouldCleanup = false;
+      
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+          // Check for relevant DOM changes that might require cleanup
+          Array.from(mutation.addedNodes).forEach(node => {
+            if (node.nodeType === 1) { // Element node
+              const element = node as Element;
+              if (
+                element.querySelector('select.flex-1') || 
+                element.querySelector('.high-contrast-dropdown') ||
+                element.closest('.custom-category-form')
+              ) {
+                shouldCleanup = true;
+              }
+            }
+          });
+        }
+      });
+      
+      // Only run cleanup if necessary
+      if (shouldCleanup) {
+        cleanupDOMElements();
+      }
+    });
+    
+    // Observe the entire document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Cleanup on component unmount
+    return () => {
+      observer.disconnect();
+    };
+  }, [styles.customCategoryForm]);
+
   const exportToCSV = () => {
     // Get selected columns
     const selectedColumns = Object.entries(exportColumns)
@@ -1656,7 +1726,8 @@ export default function TransactionsPage() {
     };
   }, [onTouchStart, onTouchMove, onTouchEnd]);
   
-  const loadMoreTransactions = async () => {
+  // Create a memoized version of loadMoreTransactions to avoid infinite loops
+  const loadMoreTransactions = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     
     try {
@@ -1693,7 +1764,7 @@ export default function TransactionsPage() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [transactions, hasMore, loadingMore, itemsPerPage, calculateSummary]);
 
   // 6. Use intersection observer more efficiently
   useEffect(() => {
@@ -1717,7 +1788,7 @@ export default function TransactionsPage() {
         observer.disconnect();
       }
     };
-  }, [hasMore, loadingMore]);
+  }, [hasMore, loadingMore, loadMoreTransactions]);
 
   // Improved skeleton loader component
   const TransactionSkeleton = ({ view = "table" }: { view?: "table" | "card" }) => {
@@ -1869,11 +1940,21 @@ export default function TransactionsPage() {
   
   // Save draft transaction to localStorage
   const saveDraftTransaction = (data: FormData) => {
+    // Clear any existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
     try {
-      localStorage.setItem('transactionDraft', JSON.stringify(data));
+      localStorage.setItem('transaction_draft', JSON.stringify(data));
       setHasSavedDraft(true);
+      
+      // Set a timeout to clear the "Saved" indicator
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        setHasSavedDraft(false);
+      }, 2000);
     } catch (error) {
-      console.error("Error saving draft transaction:", error);
+      console.error('Failed to save draft', error);
     }
   };
   
@@ -2387,7 +2468,8 @@ export default function TransactionsPage() {
     );
   }, [paginatedTransactions, handleEdit, handleDelete]);
 
-  const CustomCategoryForm = () => {
+  // Optimize the CustomCategoryForm with memo and useCallback
+  const CustomCategoryForm = memo(() => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [inputValue, setInputValue] = useState(""); // Local state for input value
     
@@ -2415,7 +2497,7 @@ export default function TransactionsPage() {
     }, [formData.type, setNewCategory]);
 
     // Handle input change locally first
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setInputValue(value);
       
@@ -2425,7 +2507,7 @@ export default function TransactionsPage() {
           (e.nativeEvent as InputEvent).inputType === 'deleteContentForward') {
         updateParentState(value);
       }
-    };
+    }, [updateParentState]);
     
     // Use useLayoutEffect to ensure DOM manipulation happens before render
     useLayoutEffect(() => {
@@ -2571,7 +2653,9 @@ export default function TransactionsPage() {
         )}
       </div>
     );
-  };
+  });
+
+  CustomCategoryForm.displayName = 'CustomCategoryForm';
 
   // 5. Implement event delegation for transaction list
   useEffect(() => {
@@ -2637,6 +2721,17 @@ export default function TransactionsPage() {
     
     return () => {
       document.head.removeChild(style);
+    };
+  }, []);
+
+  // Properly handle the autoSave timeout by clearing it when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear any pending autosave timeouts to prevent memory leaks
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = null;
+      }
     };
   }, []);
 

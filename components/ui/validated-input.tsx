@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, ReactNode } from 'react';
+import React, { useState, useEffect, forwardRef, ReactNode, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ValidationResult } from '@/lib/validation';
 
@@ -35,7 +35,7 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
     const [value, setValue] = useState(props.value || props.defaultValue || '');
     
     // Use either validate or validationFn prop (for backward compatibility)
-    const validationFunction = validate || validationFn;
+    const validationFunction = useMemo(() => validate || validationFn, [validate, validationFn]);
     
     // Handle external error prop changes
     useEffect(() => {
@@ -53,14 +53,14 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
       }
     }, [value, touched, validationFunction, onValidationChange]);
     
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setValue(e.target.value);
       if (onChange) {
         onChange(e);
       }
-    };
+    }, [onChange]);
     
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
       setTouched(true);
       if (validationFunction) {
         const result = validationFunction(e.target.value);
@@ -72,17 +72,20 @@ const ValidatedInput = forwardRef<HTMLInputElement, InputProps>(
       if (onBlur) {
         onBlur(e);
       }
-    };
+    }, [validationFunction, onValidationChange, onBlur]);
     
-    const hasError = touched && !!validationError;
-    const describedBy = hasError ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined;
+    const hasError = useMemo(() => touched && !!validationError, [touched, validationError]);
+    const describedBy = useMemo(() => 
+      hasError ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined,
+      [hasError, props.id, helperText]
+    );
     
     // Determine if this is likely a mobile/touch device
-    const isTouchDevice = typeof window !== 'undefined' && (
+    const isTouchDevice = useMemo(() => typeof window !== 'undefined' && (
       'ontouchstart' in window || 
       navigator.maxTouchPoints > 0 || 
       (navigator as any).msMaxTouchPoints > 0
-    );
+    ), []);
     
     const inputProps = {
       ...props,
@@ -203,14 +206,14 @@ const ValidatedTextarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       }
     }, [value, touched, validate, onValidationChange]);
     
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setValue(e.target.value);
       if (onChange) {
         onChange(e);
       }
-    };
+    }, [onChange]);
     
-    const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    const handleBlur = useCallback((e: React.FocusEvent<HTMLTextAreaElement>) => {
       setTouched(true);
       if (validate) {
         const result = validate(e.target.value);
@@ -222,10 +225,13 @@ const ValidatedTextarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       if (onBlur) {
         onBlur(e);
       }
-    };
+    }, [validate, onValidationChange, onBlur]);
     
-    const hasError = touched && !!validationError;
-    const describedBy = hasError ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined;
+    const hasError = useMemo(() => touched && !!validationError, [touched, validationError]);
+    const describedBy = useMemo(() => 
+      hasError ? `${props.id}-error` : helperText ? `${props.id}-helper` : undefined,
+      [hasError, props.id, helperText]
+    );
     
     const textareaProps = {
       ...props,

@@ -2,6 +2,30 @@
 
 All notable changes to the Budget Tracker app will be documented in this file.
 
+## [9.0.0] - 2024-04-25
+
+### Performance Improvements
+- Significant performance optimizations across the entire application
+- Optimized React component rendering with proper memoization
+- Enhanced state management to reduce unnecessary re-renders
+- Fixed memory leaks in components and useEffect hooks
+- Improved infinite scrolling performance in the transactions list
+
+### Fixed
+- Fixed missing dependencies in useEffect hooks that caused stale data
+- Resolved timezone inconsistencies with proper date handling
+- Fixed multiple DOM manipulation issues with duplicate elements
+- Properly cleaned up timers and observers to prevent memory leaks
+- Fixed autosave functionality in transaction forms
+
+### Improved
+- Better handling of user timezone preferences
+- Enhanced form validation with optimized validation functions
+- More consistent error handling throughout the application
+- Optimized DOM manipulation with proper cleanup 
+- Combined duplicate MutationObserver implementations for better performance
+- Added proper useCallback and useMemo usage to prevent unnecessary re-renders
+
 ## [7.3.0] - 2024-04-08
 
 ### Fixed

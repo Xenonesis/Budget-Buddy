@@ -114,7 +114,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3 className="font-medium">Budget Buddy</h3>
-                <p className="text-sm text-muted-foreground">Version 7.3</p>
+                <p className="text-sm text-muted-foreground">Version 9.0</p>
               </div>
             </div>
             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Latest</Badge>
@@ -124,11 +124,36 @@ export default function AboutPage() {
             <div>
               <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M16 12l-4 4-4-4"></path><path d="M12 16V2"></path></svg>
-                Released: April 8, 2024
+                Released: April 25, 2024
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h5 className="text-sm font-medium mb-2">Version 7.3 Updates</h5>
+                  <h5 className="text-sm font-medium mb-2">Version 9.0 Updates</h5>
+                  <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Major performance optimizations across the app</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Fixed memory leaks in components</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Resolved timezone inconsistencies</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Improved component rendering efficiency</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-1.5 text-primary">•</span>
+                      <span>Enhanced form validation and submission</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium mb-2">Version 7.3 Updates (April 8, 2024)</h5>
                   <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
@@ -152,6 +177,17 @@ export default function AboutPage() {
                     </li>
                   </ul>
                 </div>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M16 12l-4 4-4-4"></path><path d="M12 16V2"></path></svg>
+                Previous Updates
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-sm font-medium mb-2">Version 7.2 Updates (April 5, 2024)</h5>
                   <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
@@ -177,17 +213,6 @@ export default function AboutPage() {
                     </li>
                   </ul>
                 </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M16 12l-4 4-4-4"></path><path d="M12 16V2"></path></svg>
-                Previous Updates
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h5 className="text-sm font-medium mb-2">Version 7.1 (April 3, 2024)</h5>
                   <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
@@ -210,31 +235,6 @@ export default function AboutPage() {
                     <li className="flex items-start">
                       <span className="mr-1.5 text-primary">•</span>
                       <span>Better type checking for data interfaces</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h5 className="text-sm font-medium mb-2">Version 7.0 (April 2, 2024)</h5>
-                  <ul className="text-sm space-y-1.5 text-muted-foreground ml-1">
-                    <li className="flex items-start">
-                      <span className="mr-1.5 text-primary">•</span>
-                      <span>Enhanced category management</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-1.5 text-primary">•</span>
-                      <span>Optimized radial charts for mobile and desktop</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-1.5 text-primary">•</span>
-                      <span>Added dynamic screen size detection</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-1.5 text-primary">•</span>
-                      <span>Implemented colorful chart gradients</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mr-1.5 text-primary">•</span>
-                      <span>Redesigned category deletion UI</span>
                     </li>
                   </ul>
                 </div>
