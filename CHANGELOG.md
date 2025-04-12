@@ -1,6 +1,29 @@
 # Changelog
 
-All notable changes to the Budget Tracker app will be documented in this file.
+All notable changes to the Budget Buddy app will be documented in this file.
+
+## [7.5.0] - 2024-04-20
+
+### Added
+- Enhanced About page UI with modern animations using Framer Motion
+- Updated developer profile with current information and professional links
+- Interactive certification cards with hover effects
+- Featured projects section with highlighted developer work
+- Professional experience timeline with detailed information
+
+### Improved
+- Completely redesigned About page with better responsive layout
+- Enhanced accessibility with improved contrast and focus states
+- Optimized image loading for better performance
+- Updated copyright information for 2025
+- Improved social links with hover animations
+
+### Technical
+- Integrated Framer Motion animations throughout the About page
+- Refactored UI components with better code organization
+- Updated component structure for better maintainability
+- Enhanced motion effects for better user experience
+- Improved grid layouts with responsive breakpoints
 
 ## [7.3.0] - 2024-04-08
 
