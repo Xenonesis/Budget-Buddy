@@ -9,6 +9,7 @@ import { ensureUserProfile } from "@/lib/utils";
 import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import { useUserPreferences } from "@/lib/store";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Logo } from "@/components/ui/logo";
 
 interface NavItem {
   title: string;
@@ -214,16 +215,8 @@ export default function DashboardLayout({
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Mobile Header */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <img 
-            src="/logo.svg" 
-            alt="Budget Buddy Logo" 
-            className="h-8 w-8" 
-          />
-          <div className="flex flex-col">
-            <span className="text-lg font-bold bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">Budget Buddy</span>
-            <span className="text-[10px] text-muted-foreground leading-tight">Smart Money Management</span>
-          </div>
+        <Link href="/dashboard" className="brand-link">
+          <Logo withText withCaption animated />
         </Link>
         <div className="flex items-center gap-3">
           <ThemeToggle iconOnly />
@@ -260,16 +253,8 @@ export default function DashboardLayout({
         aria-label="Main navigation"
       >
         <div className="flex h-16 items-center justify-between border-b px-6 sticky top-0 bg-card/95 backdrop-blur-md z-10">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-            <img 
-              src="/logo.svg" 
-              alt="Budget Buddy Logo" 
-              className="h-8 w-8" 
-            />
-            <div className="flex flex-col">
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">Budget Buddy</span>
-              <span className="text-[10px] text-muted-foreground leading-tight">Smart Money Management</span>
-            </div>
+          <Link href="/dashboard" className="brand-link">
+            <Logo withText withCaption animated />
           </Link>
           {/* Close button for mobile */}
           <button

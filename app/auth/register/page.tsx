@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useUserPreferences } from "@/lib/store";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, UserPlus, ChevronLeft, AlertCircle, Info, CheckCircle } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -158,7 +159,7 @@ export default function RegisterPage() {
             transition={{ delay: 0.1, duration: 0.4 }}
           >
             <motion.div
-              className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4"
+              className="mx-auto rounded-full logo-badge flex items-center justify-center text-primary mb-4 w-14 h-14 relative"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ 
@@ -168,11 +169,13 @@ export default function RegisterPage() {
                 stiffness: 200 
               }}
             >
-              <UserPlus size={24} />
+              <div className="logo-glow"></div>
+              <div className="logo-ring"></div>
+              <UserPlus size={24} className="z-10" />
             </motion.div>
-            <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+            <h1 className="text-2xl font-bold tracking-tight brand-text">Create an account</h1>
             <p className="text-muted-foreground text-sm">
-              Join thousands of users managing their finances with Budget Tracker
+              Join thousands of users managing their finances with Budget Buddy
             </p>
           </motion.div>
 

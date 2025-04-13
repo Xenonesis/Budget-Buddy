@@ -14,6 +14,9 @@ import { BudgetCharts } from './components/BudgetCharts';
 import { SortableBudgetList } from './components/SortableBudgetList';
 import { AnnualBudgetSummary } from './components/AnnualBudgetSummary';
 import { Budget, CategorySpending, Category, BudgetFilter } from './types';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Logo } from "@/components/ui/logo";
 
 export default function BudgetPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -602,23 +605,10 @@ export default function BudgetPage() {
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4">
         <div className="flex items-center gap-3">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="relative h-8 w-8 md:h-10 md:w-10 flex-shrink-0"
-          >
-            <Image 
-              src="/logo.svg" 
-              alt="Budget Tracker Logo" 
-              width={40} 
-              height={40} 
-              className="h-8 w-8 md:h-10 md:w-10" 
-            />
-          </motion.div>
+          <Logo size="md" />
           <div>
             <motion.h1 
-              className="text-xl md:text-2xl font-bold"
+              className="text-xl md:text-2xl font-bold brand-text"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}

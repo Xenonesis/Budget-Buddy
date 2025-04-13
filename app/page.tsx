@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { motion, useScroll, useTransform, useInView, useAnimation, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, useAnimation, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import { 
   PieChart, 
   LineChart, 
@@ -41,6 +41,9 @@ import {
   UserPlus
 } from "lucide-react";
 import { HeroBubbles, FeatureBubbles, TestimonialBubbles, CTABubbles } from "./page-animations";
+import { supabase } from "@/lib/supabase";
+import { useUserPreferences } from "@/lib/store";
+import { Logo } from "@/components/ui/logo";
 
 // Parallax wrapper component
 const ParallaxWrapper: React.FC<{ children: React.ReactNode; speed?: number }> = ({ children, speed = 0.05 }) => {
@@ -132,49 +135,12 @@ export default function Home() {
             <motion.div 
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
-              className="font-bold text-2xl flex items-center gap-2"
+              className={`font-bold text-2xl flex items-center gap-2 ${mobileMenuOpen ? 'md:flex hidden' : 'flex'}`}
               onHoverStart={() => setIsLogoHovered(true)}
               onHoverEnd={() => setIsLogoHovered(false)}
             >
-              <Link href="/" className="flex items-center gap-2 relative">
-                <motion.div
-                  className="relative h-8 w-8"
-                  whileHover={{ 
-                    scale: 1.1,
-                    rotate: [0, 5, 0, -5, 0],
-                  }}
-                  transition={{ 
-                    duration: 0.5,
-                  }}
-                >
-                  <Image 
-                    src="/logo.svg" 
-                    alt="Budget Tracker Logo" 
-                    width={32} 
-                    height={32} 
-                    className="h-8 w-8" 
-                  />
-                  <motion.div
-                    className="absolute inset-0 bg-primary/10 rounded-full"
-                    initial={{ scale: 0 }}
-                    animate={isLogoHovered ? { scale: 1.5, opacity: 0 } : { scale: 0 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </motion.div>
-                <motion.span 
-                  className="text-foreground"
-                  whileHover={{ 
-                    color: "var(--primary)",
-                    textShadow: "0 0 8px rgba(var(--primary-rgb), 0.3)"
-                  }}
-                  animate={isLogoHovered ? { 
-                    color: "var(--primary)",
-                    textShadow: "0 0 8px rgba(var(--primary-rgb), 0.3)"
-                  } : {}}
-                  transition={{ duration: 0.2 }}
-                >
-                  BudgetTracker
-                </motion.span>
+              <Link href="/" className="flex items-center gap-2 relative brand-link">
+                <Logo size="md" withText textClassName="text-2xl" />
               </Link>
             </motion.div>
             
@@ -1813,7 +1779,7 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ delay: 0.7, duration: 0.4 }}
                   >
-                    "Budget Tracker helped me save for my dream vacation in just 6 months. The visual insights made all the difference!"
+                    "Budget Buddy helped me save for my dream vacation in just 6 months. The visual insights made all the difference!"
                   </motion.blockquote>
                   
                   <motion.div
@@ -1852,7 +1818,7 @@ export default function Home() {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet The Developer</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Passion, innovation, and expertise driving the Budget Tracker to help you achieve financial freedom
+              Passion, innovation, and expertise driving Budget Buddy to help you achieve financial freedom
             </p>
           </motion.div>
 
@@ -2067,16 +2033,7 @@ export default function Home() {
             {/* Brand column */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="relative h-10 w-10 bg-primary/10 rounded-xl p-2 flex items-center justify-center">
-                  <Image 
-                    src="/logo.svg" 
-                    alt="Budget Tracker Logo" 
-                    width={24} 
-                    height={24} 
-                    className="h-6 w-6" 
-                  />
-                </div>
-                <span className="font-bold text-xl">Budget Tracker</span>
+                <Logo size="sm" withText />
               </div>
               
               <p className="text-sm text-muted-foreground mb-5 max-w-xs">
@@ -2152,7 +2109,7 @@ export default function Home() {
           {/* Footer bottom with copyright and links */}
           <div className="mt-12 pt-6 border-t border-border/30 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-              <p className="text-xs text-muted-foreground">© 2023 Budget Tracker. All rights reserved.</p>
+              <p className="text-xs text-muted-foreground">© 2024 Budget Buddy. All rights reserved.</p>
               <div className="flex items-center gap-4 md:border-l md:border-border/30 md:pl-4">
                 <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</a>
                 <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</a>
@@ -2208,13 +2165,13 @@ const testimonials = [
   {
     name: "Alex Johnson",
     title: "Small Business Owner",
-    quote: "Budget Tracker completely transformed how I manage both my personal and business finances. The insights have helped me save over $5,000 in the past year alone.",
+    quote: "Budget Buddy completely transformed how I manage both my personal and business finances. The insights have helped me save over $5,000 in the past year alone.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
   },
   {
     name: "Sarah Williams",
     title: "Financial Planner",
-    quote: "I recommend Budget Tracker to all my clients. It's intuitive, comprehensive, and makes financial planning accessible to everyone.",
+    quote: "I recommend Budget Buddy to all my clients. It's intuitive, comprehensive, and makes financial planning accessible to everyone.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
   },
   {
@@ -2226,7 +2183,7 @@ const testimonials = [
   {
     name: "Priya Patel",
     title: "Graduate Student",
-    quote: "Living on a student budget was challenging until I found Budget Tracker. Now I can see exactly where my money goes and make informed decisions.",
+    quote: "Living on a student budget was challenging until I found Budget Buddy. Now I can see exactly where my money goes and make informed decisions.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya"
   },
   {

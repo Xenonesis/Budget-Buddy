@@ -1,4 +1,4 @@
-# Budget Tracker App by Aditya Kumar Tiwari
+# Budget Buddy App by Aditya Kumar Tiwari
 
 A fully responsive budget tracking application built with Next.js, React, ShadCN UI, and Supabase.
 
@@ -206,7 +206,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 3. These environment variables are required for the application to function properly. Without them, the build will fail.
 
-![Budget Tracker App](https://i.imgur.com/placeholder-image.png)
+![Budget Buddy App](https://i.imgur.com/placeholder-image.png)
 
 ## Features
 

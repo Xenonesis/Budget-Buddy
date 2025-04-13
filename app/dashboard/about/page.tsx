@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Logo } from "@/components/ui/logo";
 
 export default function AboutPage() {
   return (
@@ -17,7 +18,7 @@ export default function AboutPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold tracking-tight mb-2 bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent inline-block">About Budget Buddy</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2 brand-text inline-block">About Budget Buddy</h1>
         <p className="text-muted-foreground mb-8">Your personal finance companion for smarter decisions and financial freedom</p>
       </motion.div>
       
@@ -120,21 +121,10 @@ export default function AboutPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="h-14 w-14 bg-gradient-to-br from-primary to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Image 
-                  src="/logo.svg" 
-                  alt="Budget Buddy Logo" 
-                  width={32} 
-                  height={32} 
-                  className="h-8 w-8 drop-shadow-md" 
-                />
-              </div>
-              <div>
-                <h3 className="font-semibold text-xl bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">Budget Buddy</h3>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">Version 8.0.0</p>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">Latest</Badge>
-                </div>
+              <Logo size="lg" withText />
+              <div className="flex items-center gap-2 ml-2">
+                <p className="text-sm text-muted-foreground">Version 8.1.0</p>
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">Latest</Badge>
               </div>
             </motion.div>
             <motion.div

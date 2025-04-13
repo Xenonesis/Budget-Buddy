@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useUserPreferences } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, LogIn, ChevronLeft, AlertCircle } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -129,7 +130,7 @@ export default function LoginPage() {
             transition={{ delay: 0.1, duration: 0.4 }}
           >
             <motion.div
-              className="mx-auto w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center mb-4 relative"
+              className="mx-auto mb-6 relative"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ 
@@ -139,27 +140,9 @@ export default function LoginPage() {
                 stiffness: 200 
               }}
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.3 }}
-              >
-                <Image 
-                  src="/logo.svg" 
-                  alt="Budget Tracker Logo" 
-                  width={32} 
-                  height={32} 
-                  className="h-8 w-8" 
-                />
-              </motion.div>
-              <motion.div 
-                className="absolute inset-0 rounded-full border-2 border-primary/30"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: [0.8, 1.2, 1] }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-              />
+              <Logo size="xl" animated />
             </motion.div>
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+            <h1 className="text-2xl font-bold tracking-tight brand-text">Welcome back</h1>
             <p className="text-muted-foreground text-sm">
               Enter your credentials to sign in to your account
             </p>
