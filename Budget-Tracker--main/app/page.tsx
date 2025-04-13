@@ -1921,7 +1921,7 @@ export default function Home() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full" />
                   <Image 
-                    src="/developer-profile.svg" 
+                    src="/developer-profile.jpg" 
                     alt="Aditya Kumar Tiwari" 
                     width={144} 
                     height={144} 

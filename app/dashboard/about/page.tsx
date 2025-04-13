@@ -277,7 +277,7 @@ export default function AboutPage() {
               className="relative h-36 w-36 rounded-xl overflow-hidden shadow-lg border-2 border-primary/30"
             >
               <Image
-                src="/1.png"
+                src="/developer-profile.svg"
                 alt="Aditya Kumar Tiwari"
                 fill
                 className="object-cover"
