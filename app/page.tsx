@@ -1589,25 +1589,33 @@ export default function Home() {
                 </motion.div>
                 
                 <motion.h2 
-                  className="text-4xl md:text-5xl font-bold tracking-tight mb-6"
+                  className="text-4xl md:text-5xl font-bold tracking-tight mb-6 relative"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2, duration: 0.5 }}
                 >
+                  <motion.span
+                    className="absolute -left-4 md:-left-8 top-0 text-6xl opacity-20"
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 0.2, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                  >
+                    "
+                  </motion.span>
                   Ready to take control of your{" "}
                   <motion.span 
-                    className="relative inline-block"
+                    className="relative inline-block bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80"
                     initial={{ color: "white" }}
                     animate={{ 
-                      color: ["rgba(255,255,255,1)", "rgba(255,255,255,0.85)", "rgba(255,255,255,1)"],
                       textShadow: ["0 0 10px rgba(255,255,255,0)", "0 0 20px rgba(255,255,255,0.5)", "0 0 10px rgba(255,255,255,0)"]
                     }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
                     finances?
                     <motion.div 
-                      className="absolute -bottom-1 left-0 right-0 h-1 bg-white/40 rounded-full"
+                      className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
                       initial={{ width: 0 }}
                       whileInView={{ width: "100%" }}
                       viewport={{ once: true }}
@@ -1617,12 +1625,19 @@ export default function Home() {
                 </motion.h2>
                 
                 <motion.p 
-                  className="mb-8 text-lg text-white/90 max-w-xl mx-auto md:mx-0"
+                  className="mb-8 text-lg text-white/90 max-w-xl mx-auto md:mx-0 relative"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
+                  <motion.span 
+                    className="absolute -left-2 top-0 w-1 h-full bg-gradient-to-b from-white/40 to-transparent rounded-full"
+                    initial={{ height: 0 }}
+                    whileInView={{ height: "100%" }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                  />
                   Start your journey to financial freedom today. Our powerful tools make
                   budgeting simple, intuitive, and even enjoyable. Join thousands who've
                   already transformed their financial future.
@@ -1636,22 +1651,22 @@ export default function Home() {
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
                   <motion.div
-                    className="group relative overflow-hidden rounded-lg"
+                    className="group relative overflow-hidden rounded-xl"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
                     <motion.div
-                      className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"
+                      className="absolute inset-0 bg-gradient-to-r from-purple-500/70 to-pink-500/70 group-hover:from-purple-500/90 group-hover:to-pink-500/90 transition-colors duration-300"
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.6, duration: 0.5 }}
                     />
                     <motion.div
-                      className="absolute -inset-full h-32 w-32 z-0 rotate-45 transform bg-white opacity-20 group-hover:opacity-30 transition-opacity blur-xl"
+                      className="absolute -inset-full h-40 w-40 z-0 rotate-45 transform bg-white opacity-20 group-hover:opacity-30 transition-opacity blur-xl"
                       animate={{ 
-                        left: ["-100%", "200%"], 
+                        left: ["-120%", "200%"], 
                       }}
                       transition={{ 
                         duration: 2, 
@@ -1659,15 +1674,15 @@ export default function Home() {
                         repeatDelay: 3 
                       }}
                     />
-                    <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 border-0 px-8 relative z-10">
+                    <Button asChild size="lg" className="bg-transparent text-white hover:bg-transparent border-0 px-10 py-6 relative z-10 shadow-lg">
                       <Link href="/auth/register">
                         <motion.span 
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-3 text-lg"
                           whileHover={{ x: 3 }}
                           transition={{ duration: 0.2 }}
                         >
                           Get Started — Free
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="h-5 w-5" />
                         </motion.span>
                       </Link>
                     </Button>
@@ -1677,16 +1692,35 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.2 }}
+                    className="relative overflow-hidden rounded-xl"
                   >
-                    <Button asChild variant="outline" size="lg" className="border-white/40 text-white hover:bg-white/10 px-8 backdrop-blur-sm">
+                    <motion.div 
+                      className="absolute inset-0 bg-white/5 hover:bg-white/10 transition-colors duration-300"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.7, duration: 0.5 }}
+                    />
+                    <Button asChild variant="outline" size="lg" className="border-white/40 text-white hover:text-white hover:bg-transparent px-10 py-6 backdrop-blur-sm relative z-10">
                       <Link href="/dashboard">
                         <motion.span 
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-3 text-lg"
                           whileHover={{ x: 3 }}
                           transition={{ duration: 0.2 }}
                         >
                           View Demo
-                          <ChevronRight className="h-4 w-4 transition-transform" />
+                          <motion.div
+                            animate={{
+                              x: [0, 4, 0],
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                            }}
+                          >
+                            <ChevronRight className="h-5 w-5" />
+                          </motion.div>
                         </motion.span>
                       </Link>
                     </Button>
@@ -1703,36 +1737,57 @@ export default function Home() {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 whileHover={{ scale: 1.02, rotateY: -2 }}
               >
-                <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 shadow-xl relative overflow-hidden">
+                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-xl border border-white/20 p-6 shadow-2xl relative overflow-hidden">
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-tr from-white/5 to-white/10"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
+                    className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full filter blur-3xl opacity-50"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.5, 0.3, 0.5],
+                    }}
+                    transition={{
+                      duration: 8,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                    }}
+                  />
+                  <motion.div
+                    className="absolute bottom-0 left-0 w-60 h-60 bg-gradient-to-tr from-blue-500/10 to-teal-500/10 rounded-full filter blur-3xl opacity-50"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      opacity: [0.5, 0.3, 0.5],
+                    }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                    }}
                   />
                   
                   <motion.div 
-                    className="flex items-center justify-between mb-8"
+                    className="flex items-center justify-between mb-8 relative"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4, duration: 0.4 }}
                   >
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-300" />
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500/20">
+                        <CheckCircle className="h-4 w-4 text-green-300" />
+                      </div>
                       <span className="text-sm font-medium text-white">Verified Results</span>
                     </div>
-                    <div className="flex -space-x-2">
+                    <div className="flex -space-x-3">
                       {[...Array(3)].map((_, i) => (
                         <motion.div 
                           key={i}
-                          className="w-6 h-6 rounded-full border border-white/40 bg-white/20"
+                          className="w-7 h-7 rounded-full border border-white/40 bg-white/20 flex items-center justify-center text-xs font-medium"
                           initial={{ x: 10, opacity: 0 }}
                           whileInView={{ x: 0, opacity: 1 }}
                           viewport={{ once: true }}
                           transition={{ delay: 0.6 + (i * 0.1), duration: 0.3 }}
-                        />
+                        >
+                          {["A", "B", "C"][i]}
+                        </motion.div>
                       ))}
                     </div>
                   </motion.div>

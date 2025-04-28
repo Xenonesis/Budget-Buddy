@@ -911,29 +911,59 @@ async function chatWithOpenRouterAI(
 // Save an AI conversation
 export async function saveAIConversation(
   userId: string, 
-  messages: AIMessage[]
-): Promise<boolean> {
+  messages: AIMessage[],
+  conversationId?: string | null,
+  title?: string | null
+): Promise<string | null> {
   try {
-    // Simply try to insert the conversation directly
-    const { error } = await supabase
-      .from('ai_conversations')
-      .insert({
-        user_id: userId,
-        messages: messages,
-        created_at: new Date().toISOString(),
-        last_updated: new Date().toISOString()
-      });
+    let result;
     
-    if (error) {
-      // Don't consider this a critical error, just log it
-      console.log('Could not save AI conversation:', error);
-      return false;
+    // If we have a conversation ID, update the existing conversation
+    if (conversationId) {
+      const { data, error } = await supabase
+        .from('ai_conversations')
+        .update({
+          messages: messages,
+          last_updated: new Date().toISOString(),
+          ...(title ? { title } : {})
+        })
+        .eq('id', conversationId)
+        .eq('user_id', userId)
+        .select('id')
+        .single();
+      
+      if (error) {
+        console.log('Could not update AI conversation:', error);
+        return null;
+      }
+      
+      result = data;
+    } else {
+      // Otherwise, create a new conversation
+      const { data, error } = await supabase
+        .from('ai_conversations')
+        .insert({
+          user_id: userId,
+          messages: messages,
+          created_at: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          title: title || null
+        })
+        .select('id')
+        .single();
+      
+      if (error) {
+        console.log('Could not save AI conversation:', error);
+        return null;
+      }
+      
+      result = data;
     }
     
-    return true;
+    return result ? result.id : null;
   } catch (error) {
     console.error('Error in saveAIConversation:', error);
-    return false;
+    return null;
   }
 }
 
