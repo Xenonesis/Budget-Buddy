@@ -2,6 +2,24 @@
 
 All notable changes to the Budget Buddy app will be documented in this file.
 
+## [7.8.0] - 2024-05-01
+
+### Added
+- GitHub integration for better collaboration and version control
+- Enhanced repository URL with main branch as v7.8
+
+### Improved
+- Updated documentation with version information in README.md
+- Streamlined deployment workflow for easier releases
+- Enhanced version tracking and release management
+- Improved code documentation and organization
+
+### Technical
+- Set GitHub repository at https://github.com/Xenonesis/Budget-Tracker-.git
+- Configured main branch as the default for deployment
+- Updated version references throughout the project documentation
+- Streamlined configuration management for consistency
+
 ## [7.5.0] - 2024-04-20
 
 ### Added

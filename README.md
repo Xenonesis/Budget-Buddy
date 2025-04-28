@@ -9,7 +9,23 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
-## Version 7.7 - Latest Updates
+## Version 7.8 - Latest Updates
+
+**Released: May 1, 2024**
+
+### New Features
+- GitHub integration for better collaboration and version control
+- Enhanced repository management with main branch as v7.8
+- Improved documentation with updated README
+- Streamlined deployment workflow
+
+### Technical Improvements
+- Updated repository URL to GitHub
+- Enhanced version tracking and release management
+- Improved code documentation and organization
+- Streamlined configuration management
+
+## Version 7.7 - Previous Updates
 
 **Released: April 13, 2024**
 
