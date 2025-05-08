@@ -2,6 +2,34 @@
 
 All notable changes to the Budget Buddy app will be documented in this file.
 
+## [8.9.0] - 2023-07-15
+
+### Added
+- GitHub integration with improved version control system
+- Enhanced transaction filtering with advanced search capabilities
+- Multi-currency support for international users
+- Dark mode optimization with improved contrast ratios
+- Performance metrics dashboard for system administrators
+- New data visualization components with improved accessibility
+
+### Improved
+- Application loading speed with optimized asset delivery
+- Mobile responsiveness with better touch controls for charts
+- Database query performance with optimized indexes
+- Error handling with detailed user feedback
+- Memory usage optimization for better performance on low-end devices
+- React component architecture with better code splitting
+- Security with additional input validation throughout the application
+- Accessibility with ARIA compliance and keyboard navigation improvements
+
+### Fixed
+- Currency formatting inconsistencies across different locales
+- Chart rendering issues on specific mobile devices
+- Date format handling for international users
+- Authentication token refresh mechanism
+- Database connection pooling for better stability
+- Cache invalidation issues causing stale data display
+
 ## [8.8.0] - 2023-06-30
 
 ### Added

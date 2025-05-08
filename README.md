@@ -9,7 +9,40 @@ A fully responsive budget tracking application built with Next.js, React, ShadCN
 - **Instagram:** [https://www.instagram.com/i__aditya7/](https://www.instagram.com/i__aditya7/)
 - **Portfolio:** [https://iaddy.netlify.app/](https://iaddy.netlify.app/)
 
-## Version 8.8.0 - Latest Updates
+## Version 8.9.0 - Latest Updates
+
+**Released: July 15, 2023**
+
+### New Features
+- GitHub integration with improved version control system
+- Enhanced transaction filtering with advanced search capabilities
+- Multi-currency support for international users
+- Dark mode optimization with improved contrast ratios
+- Performance metrics dashboard for system administrators
+- New data visualization components with improved accessibility
+
+### Performance Improvements
+- Application loading speed with optimized asset delivery
+- Mobile responsiveness with better touch controls for charts
+- Database query performance with optimized indexes
+- Memory usage optimization for better performance on low-end devices
+- React component architecture with better code splitting
+
+### User Experience Enhancements
+- Improved error handling with detailed user feedback
+- Enhanced security with additional input validation
+- Accessibility improvements with ARIA compliance and keyboard navigation
+- Fixed currency formatting inconsistencies across different locales
+- Resolved chart rendering issues on specific mobile devices
+- Fixed date format handling for international users
+
+### Technical Improvements
+- Authentication token refresh mechanism
+- Database connection pooling for better stability
+- Cache invalidation issues causing stale data display
+- Added GitHub repository integration at https://github.com/Xenonesis/Budget-Tracker-.git
+
+## Version 8.8.0 - Previous Updates
 
 **Released: June 30, 2023**
 
