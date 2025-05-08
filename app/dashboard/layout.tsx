@@ -63,7 +63,6 @@ export default function DashboardLayout({
     setInitialized
   } = useUserPreferences();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const sidebarToggleRef = useRef<HTMLButtonElement>(null);
   const firstNavItemRef = useRef<HTMLAnchorElement>(null);
   const lastNavItemRef = useRef<HTMLAnchorElement>(null);
   const appVersion = getAppVersion();
@@ -286,14 +285,11 @@ export default function DashboardLayout({
     };
   }, [isMobileSidebarOpen]);
 
-  // Focus management for mobile sidebar
+  // Focus management for keyboard navigation
   useEffect(() => {
     if (isMobileSidebarOpen && firstNavItemRef.current) {
       // Set focus to first nav item when sidebar opens
       setTimeout(() => firstNavItemRef.current?.focus(), 100);
-    } else if (!isMobileSidebarOpen && sidebarToggleRef.current) {
-      // Return focus to toggle button when sidebar closes
-      setTimeout(() => sidebarToggleRef.current?.focus(), 100);
     }
   }, [isMobileSidebarOpen]);
 
@@ -516,33 +512,6 @@ export default function DashboardLayout({
           </button>
         </div>
       </header>
-
-      {/* Mobile sidebar toggle button - improve accessibility and visual feedback */}
-      <button
-        type="button"
-        ref={sidebarToggleRef}
-        className="fixed bottom-6 right-6 md:hidden z-50 bg-primary text-primary-foreground p-4 rounded-full shadow-lg sidebar-toggle-button hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center group"
-        onClick={() => setIsMobileSidebarOpen(prev => !prev)}
-        aria-expanded="false"
-        aria-controls="mobile-sidebar"
-        aria-label={isMobileSidebarOpen ? "Close navigation menu" : "Open navigation menu"}
-      >
-        <div className="relative">
-          {isMobileSidebarOpen ? 
-            <X className="h-6 w-6" /> : 
-            <Menu className="h-6 w-6" />
-          }
-          {!isMobileSidebarOpen && (
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-secondary rounded-full animate-pulse"></span>
-          )}
-        </div>
-        <span className="sr-only">{isMobileSidebarOpen ? "Close Menu" : "Open Menu"}</span>
-        
-        {/* Tooltip for mobile */}
-        <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          {isMobileSidebarOpen ? "Close Menu" : "Open Menu"}
-        </span>
-      </button>
 
       {/* Backdrop for mobile sidebar */}
       {isMobileSidebarOpen && (

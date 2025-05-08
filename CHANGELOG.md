@@ -1,6 +1,79 @@
 # Changelog
 
-All notable changes to the Budget Buddy app will be documented in this file.
+All notable changes to the Budget Buddy application will be documented in this file.
+
+## [9.0.0] - 2025-05-08
+
+### Added
+- AI-powered financial insights engine
+  - Smart spending pattern detection with personalized recommendations
+  - Automated categorization of transactions with machine learning
+  - Predictive budget forecasting based on historical data
+  - Natural language query support for transaction search
+  - Anomaly detection for unusual spending patterns
+- Completely redesigned user interface
+  - Modern, cleaner aesthetic throughout the application
+  - Customizable dashboard layouts with drag-and-drop widgets
+  - Improved data visualization components with animated transitions
+  - Adaptive color schemes based on user preferences
+  - Streamlined navigation with improved information architecture
+- Enhanced mobile experience
+  - Fully redesigned mobile interface optimized for one-handed use
+  - Native-feeling interactions and animations on mobile devices
+  - Offline transaction recording with background sync
+  - Improved touch targets and gesture controls
+  - Optimized data loading for slower connections
+- Expanded international support
+  - Support for 25+ international currencies (up from 15)
+  - Localized UI in 10 languages with regional formatting
+  - International banking integration options
+  - Region-specific tax and financial regulation awareness
+  - Multi-timezone support for global teams
+- Enhanced security features
+  - Passwordless authentication options
+  - Two-factor authentication support
+  - Enhanced data encryption for sensitive financial information
+  - Improved session management and token handling
+- New testing infrastructure
+  - Automated end-to-end testing suite with Playwright
+  - Component testing with React Testing Library
+  - Continuous integration pipeline for quality assurance
+  - Performance regression testing workflow
+  - Accessibility testing automation
+- Accessibility improvements
+  - WCAG 2.1 AA compliance across all core functionality
+  - Improved screen reader compatibility with semantic HTML
+  - High contrast mode for visually impaired users
+  - Dyslexia-friendly font options
+
+### Changed
+- Completely rebuilt UI components for better performance and accessibility
+- Enhanced data visualization libraries with better responsiveness
+- Improved state management with optimized Zustand stores
+- Updated authentication flow with enhanced security
+- Redesigned transaction management interface
+- Enhanced category management with improved UX
+- Upgraded to Next.js 15.x with app router optimizations
+- Improved database query patterns for better performance
+
+### Fixed
+- Resolved synchronization issues between online and offline data
+- Fixed currency conversion edge cases with decimal precision
+- Corrected category assignment for recurring transactions
+- Addressed layout inconsistencies on ultra-wide displays
+- Fixed data visualization issues in certain locales
+- Resolved authentication persistence issues on some browsers
+- Fixed tab order inconsistencies for keyboard navigation
+- Resolved several React hydration issues with SSR
+
+### Performance
+- Reduced bundle size by 35% through improved code splitting
+- Server-side rendering optimizations for faster initial load
+- Implemented streaming server components for improved UX
+- Enhanced caching strategy with Supabase integration
+- Improved database query performance with advanced indexing
+- Optimized React rendering with better state isolation
+- Reduced API calls with improved caching strategies
 
 ## [8.9.0] - 2023-07-15
 
