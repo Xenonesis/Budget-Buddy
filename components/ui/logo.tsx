@@ -222,7 +222,7 @@ export function Logo({
       >
         <LogoContent />
         <motion.div 
-          className="absolute inset-0 rounded-full bg-primary/20 blur-sm -z-10"
+          className="absolute inset-0 rounded-full bg-primary/10 blur-sm -z-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}

@@ -2151,7 +2151,7 @@ export default function Home() {
                     ["Terms of Service", "Privacy Policy", "Cookie Policy", "Compliance"]).map((item) => (
                     <li key={item}>
                       <a 
-                        href="#" 
+                        href={`/${section.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
                         className="text-sm text-muted-foreground hover:text-primary hover:translate-x-1 transition-all inline-block"
                       >
                         {item}
@@ -2168,9 +2168,9 @@ export default function Home() {
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
               <p className="text-xs text-muted-foreground">© 2024 Budget Buddy. All rights reserved.</p>
               <div className="flex items-center gap-4 md:border-l md:border-border/30 md:pl-4">
-                <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</a>
-                <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</a>
-                <a href="#" className="text-xs text-muted-foreground hover:text-primary transition-colors">Cookies</a>
+                <a href="/legal/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</a>
+                <a href="/legal/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</a>
+                <a href="/legal/cookie-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Cookies</a>
               </div>
             </div>
             <div className="flex items-center gap-4">
