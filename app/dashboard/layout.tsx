@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useRef, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ensureUserProfile } from "@/lib/utils";
@@ -10,39 +10,37 @@ import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import { useUserPreferences } from "@/lib/store";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/ui/logo";
+import {
+  LayoutGrid,
+  BarChart3,
+  GanttChartSquare,
+  ArrowRightLeft,
+  Lightbulb,
+  Settings,
+  ChevronLeft,
+  User,
+  LogOut,
+  LifeBuoy,
+  Ban,
+  Menu,
+  X
+} from 'lucide-react'
+import Image from 'next/image'
+import { cn, getAppVersion } from '@/lib/utils'
+
+// Group definition for sidebar navigation
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
 
 interface NavItem {
   title: string;
   href: string;
   icon: React.ReactNode;
+  label: string;
+  shortcutKey?: string;
 }
-
-// Memoized sidebar navigation item to prevent unnecessary renders
-function NavItemComponent({ item, pathname, onClick }: { 
-  item: NavItem; 
-  pathname: string;
-  onClick?: () => void;
-}) {
-  return (
-    <li>
-      <Link
-        href={item.href}
-        className={`flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-colors ${
-          pathname === item.href
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-        }`}
-        onClick={onClick}
-      >
-        {item.icon}
-        {item.title}
-      </Link>
-    </li>
-  );
-}
-
-const NavItem = memo(NavItemComponent);
-NavItem.displayName = 'NavItem';
 
 export default function DashboardLayout({
   children,
@@ -53,6 +51,8 @@ export default function DashboardLayout({
   const router = useRouter();
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const { 
     setUserId, 
     setUsername, 
@@ -62,8 +62,13 @@ export default function DashboardLayout({
     syncWithDatabase,
     setInitialized
   } = useUserPreferences();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const sidebarToggleRef = useRef<HTMLButtonElement>(null);
+  const firstNavItemRef = useRef<HTMLAnchorElement>(null);
+  const lastNavItemRef = useRef<HTMLAnchorElement>(null);
+  const appVersion = getAppVersion();
 
-  // Memoize the sign out handler to prevent recreating it on each render
+  // Define all useCallback hooks at component level, not conditionally
   const handleSignOut = useCallback(async () => {
     // Clear user preferences when signing out
     setUserId(null);
@@ -75,8 +80,20 @@ export default function DashboardLayout({
     router.refresh();
   }, [router, setUserId, setUsername, setCurrency]);
 
-  // Memoize the sidebar toggle handler
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed(prev => {
+      const newState = !prev;
+      // Save state to localStorage for persistence
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar-collapsed', newState.toString());
+      }
+      return newState;
+    });
+  }, []);
+
   const toggleSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(prev => !prev);
+    
     // Add a class to show the sidebar but preserve scrolling
     document.documentElement.classList.toggle("sidebar-open");
     
@@ -88,8 +105,9 @@ export default function DashboardLayout({
     }
   }, []);
 
-  // Memoize the sidebar close handler 
   const closeSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(false);
+    
     // Remove the sidebar class to hide it
     document.documentElement.classList.remove("sidebar-open");
     
@@ -99,6 +117,185 @@ export default function DashboardLayout({
       menuButton.setAttribute('aria-expanded', 'false');
     }
   }, []);
+
+  const handleSidebarToggleForMobile = useCallback(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      closeSidebar();
+    }
+  }, [closeSidebar]);
+
+  // Define component functions with useCallback to ensure consistent hook order
+  const NavItemComponent = useCallback(({ item, pathname, onClick, collapsed, isLast }: { 
+    item: NavItem; 
+    pathname: string;
+    onClick?: () => void;
+    collapsed?: boolean;
+    isLast?: boolean;
+  }) => {
+    const isActive = pathname === item.href;
+    const itemRef = isLast ? lastNavItemRef : null;
+    
+    return (
+      <li>
+        <Link
+          href={item.href}
+          className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 relative group overflow-hidden ${
+            isActive
+              ? "bg-primary/15 text-primary shadow-sm"
+              : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+          }`}
+          onClick={onClick}
+          title={collapsed ? item.title : undefined}
+          data-testid={`nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+          aria-current={isActive ? 'page' : undefined}
+          ref={itemRef}
+          aria-label={`${item.title}${item.shortcutKey ? ` (Shortcut: ${item.shortcutKey})` : ''}`}
+        >
+          {/* Hover animation background */}
+          <span 
+            className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`} 
+            aria-hidden="true"
+          ></span>
+          
+          {/* Icon with animation */}
+          <span 
+            className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
+              isActive 
+                ? 'scale-110 text-primary' 
+                : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
+            }`} 
+            aria-hidden="true"
+          >
+            {item.icon}
+          </span>
+          
+          {/* Title text */}
+          <span 
+            className={`relative z-10 transition-all duration-300 ${
+              collapsed 
+                ? 'opacity-0 w-0 overflow-hidden' 
+                : 'opacity-100'
+            }`}
+          >
+            {item.title}
+          </span>
+          
+          {/* Active indicator */}
+          {isActive && (
+            <span 
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" 
+              aria-hidden="true"
+            ></span>
+          )}
+          
+          {/* Collapsed hover indicator */}
+          {collapsed && (
+            <span 
+              className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300" 
+              aria-hidden="true"
+            ></span>
+          )}
+          
+          {/* Keyboard shortcut */}
+          {item.shortcutKey && !collapsed && (
+            <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
+              {item.shortcutKey}
+            </kbd>
+          )}
+        </Link>
+      </li>
+    );
+  }, []);
+  
+  const NavSectionHeaderComponent = useCallback(({ title, collapsed }: { 
+    title: string; 
+    collapsed: boolean 
+  }) => {
+    if (collapsed) return null;
+    
+    return (
+      <div className="mb-2 px-4 transition-all duration-300">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">{title}</p>
+      </div>
+    );
+  }, []);
+
+  // Create memoized components
+  const NavItem = memo(NavItemComponent);
+  NavItem.displayName = 'NavItem';
+  
+  const NavSectionHeader = memo(NavSectionHeaderComponent);
+  NavSectionHeader.displayName = 'NavSectionHeader';
+
+  // Keyboard shortcut for toggling sidebar
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      // Toggle sidebar with Alt+S
+      if (e.altKey && e.key === 's') {
+        e.preventDefault();
+        toggleCollapsed();
+      }
+      
+      // Escape key to close sidebar on mobile
+      if (e.key === 'Escape' && document.documentElement.classList.contains('sidebar-open')) {
+        closeSidebar();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
+  }, [toggleCollapsed, closeSidebar]);
+
+  // Focus trap for mobile sidebar
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return;
+    
+    const handleFocusTrap = (e: KeyboardEvent) => {
+      if (!sidebarRef.current || e.key !== 'Tab') return;
+      
+      const focusableElements = sidebarRef.current.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+      
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    };
+    
+    document.addEventListener('keydown', handleFocusTrap);
+    return () => document.removeEventListener('keydown', handleFocusTrap);
+  }, [isMobileSidebarOpen]);
+
+  // Handle body scroll lock when mobile sidebar is open
+  useEffect(() => {
+    if (isMobileSidebarOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isMobileSidebarOpen]);
+
+  // Focus management for mobile sidebar
+  useEffect(() => {
+    if (isMobileSidebarOpen && firstNavItemRef.current) {
+      // Set focus to first nav item when sidebar opens
+      setTimeout(() => firstNavItemRef.current?.focus(), 100);
+    } else if (!isMobileSidebarOpen && sidebarToggleRef.current) {
+      // Return focus to toggle button when sidebar closes
+      setTimeout(() => sidebarToggleRef.current?.focus(), 100);
+    }
+  }, [isMobileSidebarOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -121,6 +318,14 @@ export default function DashboardLayout({
         
         // Set the user ID in the store
         setUserId(data.user.id);
+        
+        // Add detailed console logging to debug user information
+        console.log("User authenticated:", {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name,
+          metadata: data.user.user_metadata
+        });
         
         // Extract preferred currency from user metadata if it exists
         const preferredCurrency = data.user.user_metadata?.preferred_currency;
@@ -196,6 +401,16 @@ export default function DashboardLayout({
     };
   }, [router, setUserId, setCurrency, syncWithDatabase, initialized, userId, setInitialized]);
 
+  // Load sidebar state from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('sidebar-collapsed');
+      if (savedState !== null) {
+        setCollapsed(savedState === 'true');
+      }
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -205,18 +420,88 @@ export default function DashboardLayout({
   }
 
   // Mobile sidebar toggle handler with window width check
-  const handleSidebarToggleForMobile = () => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      closeSidebar();
-    }
-  };
+  // Remove this duplicate function since we already have a useCallback version
+  // const handleSidebarToggleForMobile = () => {
+  //   if (typeof window !== 'undefined' && window.innerWidth < 768) {
+  //     closeSidebar();
+  //   }
+  // };
+
+  // Organize navigation items into groups
+  const navGroups: NavGroup[] = [
+    {
+      title: "Main Navigation",
+      items: [
+        {
+          title: "Dashboard",
+          href: "/dashboard",
+          icon: <LayoutGrid className="h-5 w-5" />,
+          label: "Dashboard",
+          shortcutKey: 'Alt+1'
+        },
+        {
+          title: "Transactions",
+          href: "/dashboard/transactions",
+          icon: <ArrowRightLeft className="h-5 w-5" />,
+          label: "Transactions",
+          shortcutKey: 'Alt+4'
+        },
+        {
+          title: "Budget",
+          href: "/dashboard/budget",
+          icon: <GanttChartSquare className="h-5 w-5" />,
+          label: "Budget",
+          shortcutKey: 'Alt+3'
+        },
+        {
+          title: "Analytics",
+          href: "/dashboard/analytics",
+          icon: <BarChart3 className="h-5 w-5" />,
+          label: "Analytics",
+          shortcutKey: 'Alt+2'
+        },
+        {
+          title: "AI Insights",
+          href: "/dashboard/ai-insights",
+          icon: <Lightbulb className="h-5 w-5" />,
+          label: "AI Insights",
+          shortcutKey: 'Alt+5'
+        },
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        {
+          title: "Settings",
+          href: "/dashboard/settings",
+          icon: <Settings className="h-5 w-5" />,
+          label: "Settings",
+          shortcutKey: 'Alt+,'
+        },
+        {
+          title: "About",
+          href: "/dashboard/about",
+          icon: <LifeBuoy className="h-5 w-5" />,
+          label: "About"
+        },
+      ],
+    },
+  ];
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="relative min-h-screen">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      
       {/* Mobile Header */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
-        <Link href="/dashboard" className="brand-link">
-          <Logo withText withCaption animated />
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+          <div className="flex flex-col items-center">
+            <Logo size="sm" className="transition-transform duration-300 hover:scale-105" animated />
+            <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 tracking-wide">Smart Money Management</span>
+          </div>
         </Link>
         <div className="flex items-center gap-3">
           <ThemeToggle iconOnly />
@@ -227,90 +512,184 @@ export default function DashboardLayout({
             aria-expanded="false"
             aria-controls="mobile-sidebar"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+            <Menu className="h-6 w-6" />
           </button>
         </div>
       </header>
 
-      {/* Sidebar */}
-      <aside 
-        id="mobile-sidebar"
-        className="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full transform overflow-y-auto border-r bg-card/95 backdrop-blur-md transition-transform duration-300 ease-in-out pt-safe md:sticky md:translate-x-0 md:flex md:flex-col sidebar-open:translate-x-0 modal-container"
-        aria-label="Main navigation"
+      {/* Mobile sidebar toggle button - improve accessibility and visual feedback */}
+      <button
+        type="button"
+        ref={sidebarToggleRef}
+        className="fixed bottom-6 right-6 md:hidden z-50 bg-primary text-primary-foreground p-4 rounded-full shadow-lg sidebar-toggle-button hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center group"
+        onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+        aria-expanded="false"
+        aria-controls="mobile-sidebar"
+        aria-label={isMobileSidebarOpen ? "Close navigation menu" : "Open navigation menu"}
       >
-        <div className="flex h-16 items-center justify-between border-b px-6 sticky top-0 bg-card/95 backdrop-blur-md z-10">
-          <Link href="/dashboard" className="brand-link">
-            <Logo withText withCaption animated />
-          </Link>
-          {/* Close button for mobile */}
-          <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform md:hidden"
-            onClick={closeSidebar}
-            aria-label="Close menu"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
+        <div className="relative">
+          {isMobileSidebarOpen ? 
+            <X className="h-6 w-6" /> : 
+            <Menu className="h-6 w-6" />
+          }
+          {!isMobileSidebarOpen && (
+            <span className="absolute -top-1 -right-1 h-3 w-3 bg-secondary rounded-full animate-pulse"></span>
+          )}
         </div>
-        <nav className="flex-1 overflow-auto py-6 px-4">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <NavItem 
-                key={item.href} 
-                item={item} 
-                pathname={pathname} 
-                onClick={handleSidebarToggleForMobile}
-              />
-            ))}
-          </ul>
-        </nav>
-        <div className="border-t p-4">
-          <div className="flex items-center justify-between">
+        <span className="sr-only">{isMobileSidebarOpen ? "Close Menu" : "Open Menu"}</span>
+        
+        {/* Tooltip for mobile */}
+        <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          {isMobileSidebarOpen ? "Close Menu" : "Open Menu"}
+        </span>
+      </button>
+
+      {/* Backdrop for mobile sidebar */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm sidebar-backdrop md:hidden z-40"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile sidebar */}
+      <div
+        ref={sidebarRef}
+        id="mobile-sidebar"
+        className={cn(
+          "fixed top-0 left-0 z-40 h-full bg-background/95 border-r backdrop-blur-sm md:hidden",
+          "transition-transform duration-300 ease-in-out transform",
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
+      >
+        <div className="flex flex-col h-full w-72 pt-5 pb-4 px-4 overflow-y-auto">
+          <div className="flex items-center justify-between mb-6 px-3">
+            <div className="flex flex-col items-center">
+              <Logo size="md" className="transition-transform duration-300 hover:scale-105" animated />
+              <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 tracking-wide">Smart Money Management</span>
+            </div>
+            <button 
+              type="button"
+              className="text-muted-foreground rounded-full p-2 hover:bg-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 transition-colors"
+              onClick={() => setIsMobileSidebarOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* User section */}
+          <div className="flex items-center justify-between px-3 py-4 mb-2 bg-accent/20 rounded-lg border border-accent/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary transition-all duration-300 hover:bg-primary/20 user-avatar ring-2 ring-primary/20">
                 {user?.user_metadata?.name?.[0] || user?.email?.[0] || "U"}
               </div>
               <div>
                 <p className="text-sm font-medium truncate max-w-[130px]">
-                  {user?.user_metadata?.name || user?.email}
+                  {user?.user_metadata?.name || user?.email?.split('@')[0] || "User"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate max-w-[130px]">{user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[130px]">{user?.email || ""}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle iconOnly size="sm" />
               <button
-                className="rounded p-2 text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
+                className="rounded-full p-2 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
                 onClick={handleSignOut}
                 title="Sign out"
                 aria-label="Sign out"
               >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <nav className="flex-1 space-y-2 py-2">
+            <div className="mb-1 px-4 py-1 bg-accent/10 rounded-md">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">MAIN NAVIGATION</p>
+            </div>
+            <ul className="space-y-1">
+              {navGroups[0].items.map((item, index) => (
+                <NavItem 
+                  key={item.href} 
+                  item={item} 
+                  pathname={pathname} 
+                  onClick={handleSidebarToggleForMobile}
+                  collapsed={collapsed}
+                  isLast={index === navGroups[0].items.length - 1}
+                />
+              ))}
+            </ul>
+
+            <div className="mb-1 px-4 py-1 mt-6 bg-accent/10 rounded-md">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">SYSTEM</p>
+            </div>
+            <ul className="space-y-1">
+              {navGroups[1].items.map((item, index) => (
+                <NavItem 
+                  key={item.href} 
+                  item={item} 
+                  pathname={pathname} 
+                  onClick={handleSidebarToggleForMobile}
+                  collapsed={collapsed}
+                  isLast={index === navGroups[1].items.length - 1}
+                />
+              ))}
+            </ul>
+          </nav>
+
+          <div className="pt-4 mt-auto">
+            <div className="px-3 py-3 bg-primary/5 rounded-lg text-center">
+              <span className="text-xs text-muted-foreground">Budget Buddy v{appVersion}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop sidebar */}
+      <div 
+        className={cn(
+          "hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col border-r z-30 bg-background/95 backdrop-blur-sm shadow-sm",
+          "transition-all duration-300 ease-in-out",
+          collapsed ? "w-[70px]" : "w-64"
+        )}
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        <div className="relative flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-thin">
+          {/* Sidebar header with toggle */}
+          <div className={cn(
+            "flex items-center h-16 flex-shrink-0 px-4",
+            collapsed ? "justify-center" : "justify-between"
+          )}>
+            {!collapsed && (
+              <div className="flex flex-col items-center">
+                <Logo size="md" className="transition-transform duration-300 hover:scale-105" animated />
+                <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 tracking-wide">Smart Money Management</span>
+              </div>
+            )}
+            {collapsed && (
+              <div className="flex flex-col items-center">
+                <Logo size="xs" className="transition-transform duration-300 hover:scale-105" animated />
+                <span className="text-[8px] text-muted-foreground mt-0.5 tracking-wide opacity-70">SMM</span>
+              </div>
+            )}
+            <button
+              className="hidden md:flex h-10 w-10 items-center justify-center rounded-md bg-accent/30 hover:bg-accent/60 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 group relative sidebar-toggle-indicator overflow-hidden"
+              onClick={toggleCollapsed}
+              aria-label="Toggle sidebar"
+              aria-expanded="false"
+              title={collapsed ? "Expand sidebar (Alt+S)" : "Collapse sidebar (Alt+S)"}
+            >
+              {/* Background highlight effect */}
+              <span className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></span>
+              
+              <div className="relative z-10">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -321,178 +700,138 @@ export default function DashboardLayout({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  className="transition-transform duration-300"
+                  style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
                 >
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                  <polyline points="16 17 21 12 16 7"></polyline>
-                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                  <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
-              </button>
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full opacity-70 group-hover:animate-ping"></span>
+              </div>
+              <div className="absolute left-full ml-2 px-2 py-1 bg-card/90 backdrop-blur-sm rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap border">
+                {collapsed ? "Expand sidebar" : "Collapse sidebar"} <kbd className="bg-muted/50 px-1.5 ml-1 rounded text-[10px]">Alt+S</kbd>
+              </div>
+            </button>
+          </div>
+
+          {/* User section */}
+          <div className={cn(
+            "px-3 py-4 flex",
+            collapsed ? "justify-center mt-2" : ""
+          )}>
+            <div className={cn(
+              "flex items-center",
+              collapsed ? "flex-col" : "space-x-3 bg-accent/20 rounded-lg border border-accent/10 p-3 w-full"
+            )}>
+              <div className="relative">
+                <div className={cn(
+                  "rounded-full overflow-hidden border-2 border-primary/30",
+                  collapsed ? "w-10 h-10" : "w-12 h-12"
+                )}>
+                  {user?.user_metadata?.avatar_url ? (
+                    <Image 
+                      src={user.user_metadata.avatar_url}
+                      alt="User avatar" 
+                      width={collapsed ? 40 : 48} 
+                      height={collapsed ? 40 : 48} 
+                      className="object-cover" 
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary/15 text-primary">
+                      {user?.user_metadata?.name?.[0] || user?.email?.[0] || "U"}
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse purely-decorative" />
+              </div>
+              {!collapsed && (
+                <div>
+                  <div className="font-medium">{user?.user_metadata?.name || user?.email?.split('@')[0] || "User"}</div>
+                  <div className="text-sm text-muted-foreground">{user?.email || ""}</div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </aside>
 
-      {/* Main content overlay for mobile */}
-      <div 
-        className="fixed inset-0 z-30 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden sidebar-open:opacity-100 sidebar-open:pointer-events-auto"
-        onClick={closeSidebar}
-      ></div>
-      
-      {/* Bottom Mobile Navigation - replaced with BottomNavigation component */}
-      <BottomNavigation />
+          {/* Navigation Items */}
+          <nav className="flex-1 px-3 py-2">
+            {!collapsed && (
+              <div className="mb-1 px-4 py-1 bg-accent/10 rounded-md">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">MAIN NAVIGATION</p>
+              </div>
+            )}
+            {collapsed && <div className="h-4"></div>}
+            <ul className="space-y-1">
+              {navGroups[0].items.map((item, index) => (
+                <NavItem 
+                  key={item.href} 
+                  item={item} 
+                  pathname={pathname} 
+                  onClick={handleSidebarToggleForMobile}
+                  collapsed={collapsed}
+                  isLast={index === navGroups[0].items.length - 1}
+                />
+              ))}
+            </ul>
+
+            {!collapsed && (
+              <div className="mb-1 px-4 py-1 mt-6 bg-accent/10 rounded-md">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">SYSTEM</p>
+              </div>
+            )}
+            {collapsed && <div className="h-8"></div>}
+            <ul className="space-y-1">
+              {navGroups[1].items.map((item, index) => (
+                <NavItem 
+                  key={item.href} 
+                  item={item} 
+                  pathname={pathname} 
+                  onClick={handleSidebarToggleForMobile}
+                  collapsed={collapsed}
+                  isLast={index === navGroups[1].items.length - 1}
+                />
+              ))}
+            </ul>
+          </nav>
+
+          {/* Sidebar footer */}
+          <div className={cn(
+            "py-4 flex-shrink-0",
+            collapsed ? "text-center px-2" : "px-4"
+          )}>
+            {collapsed ? (
+              <div className="flex flex-col items-center gap-3">
+                <ThemeToggle iconOnly size="sm" />
+                <div className="text-xs text-muted-foreground bg-primary/5 py-2 rounded-md">v{appVersion}</div>
+              </div>
+            ) : (
+              <>
+                <div className="text-xs text-muted-foreground bg-primary/5 rounded-lg py-3 text-center">
+                  Budget Buddy v{appVersion} • <Link href="/dashboard/about" className="hover:underline text-primary/80">About</Link>
+                </div>
+              
+                <div className="flex items-center justify-between mt-4 px-2">
+                  <ThemeToggle iconOnly size="sm" />
+                  <button
+                    className="rounded-full p-2 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
+                    onClick={handleSignOut}
+                    title="Sign out"
+                    aria-label="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Main content */}
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${collapsed ? 'md:ml-[70px]' : 'md:ml-64'}`}>
+        <div id="main-content" tabIndex={-1}>
+          {children}
+        </div>
+      </main>
     </div>
   );
-}
-
-const navItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="3" y1="9" x2="21" y2="9"></line>
-        <line x1="9" y1="21" x2="9" y2="9"></line>
-      </svg>
-    ),
-  },
-  {
-    title: "Transactions",
-    href: "/dashboard/transactions",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="12" y1="1" x2="12" y2="23"></line>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-      </svg>
-    ),
-  },
-  {
-    title: "Budget",
-    href: "/dashboard/budget",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-      </svg>
-    ),
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard/analytics",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-      </svg>
-    ),
-  },
-  {
-    title: "AI Insights",
-    href: "/dashboard/ai-insights",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15.5 2c1.53 0 2.5 1.67 2.5 3v3c0 1.33-.97 3-2.5 3S13 9.33 13 8V5c0-1.33.97-3 2.5-3Z"></path>
-        <path d="M10 9v1a5 5 0 0 0 5 5h2a5 5 0 0 0 5-5V9"></path>
-        <path d="M17 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3Z"></path>
-        <path d="M2 12v1a5 5 0 0 0 5 5h2a5 5 0 0 0 5-5v-1"></path>
-        <path d="M8.5 9c-1.53 0-2.5-1.67-2.5-3V3c0-1.33.97-3 2.5-3S11 1.67 11 3v3c0 1.33-.97 3-2.5 3Z"></path>
-        <path d="M7 22a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H7Z"></path>
-      </svg>
-    ),
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-    ),
-  },
-  {
-    title: "About",
-    href: "/dashboard/about",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
-    ),
-  },
-]; 
+} 

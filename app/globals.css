@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "./tailwind-theme.css";
  
 @layer base {
   :root {
@@ -120,7 +119,7 @@
  
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[#e5e7eb] dark:border-[#2e2e2e];
   }
   body {
     @apply bg-background text-foreground;
@@ -791,30 +790,65 @@ html {
   transform: translateY(0);
 }
 
-/* Logo styling enhancements */
-.logo-container {
+/* Logo styles - comprehensive definition with fallbacks */
+.logo-badge {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.15);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.dark .logo-badge {
+  background: rgba(167, 139, 250, 0.2);
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.1);
+}
+
+.logo-badge:hover {
+  transform: scale(1.05);
+  background: rgba(124, 58, 237, 0.2);
 }
 
 .logo-glow {
   position: absolute;
-  inset: -15%;
-  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.3) 0%, rgba(var(--primary-rgb), 0) 70%);
-  border-radius: 50%;
-  filter: blur(8px);
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.6) 0%, rgba(124, 58, 237, 0) 70%);
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
-.logo-container:hover .logo-glow {
+.logo-badge:hover .logo-glow {
+  opacity: 0.8;
+}
+
+.logo-ring {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  border: 2px solid rgba(124, 58, 237, 0.3);
+  border-radius: 50%;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  z-index: 0;
+}
+
+.logo-badge:hover .logo-ring {
+  transform: scale(1.1);
   opacity: 1;
 }
 
 .logo-pulse {
-  animation: logoPulse 3s infinite ease-in-out;
+  animation: logoPulse 2s infinite ease-in-out;
 }
 
 @keyframes logoPulse {
@@ -822,77 +856,643 @@ html {
   50% { transform: scale(1.05); }
 }
 
-.logo-badge {
-  position: relative;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.15) 0%, rgba(var(--primary-rgb), 0.05) 100%);
-  padding: 12px;
-  box-shadow: 
-    0 4px 12px -2px rgba(var(--primary-rgb), 0.15),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.dark .logo-badge {
-  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.25) 0%, rgba(var(--primary-rgb), 0.1) 100%);
-  box-shadow: 
-    0 4px 12px -2px rgba(var(--primary-rgb), 0.3),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-}
-
-.logo-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 24px -4px rgba(var(--primary-rgb), 0.25),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
-}
-
-/* Enhanced brand text styling */
 .brand-text {
   font-weight: 700;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 45%, #8b5cf6 100%);
-  background-size: 200% auto;
-  background-clip: text;
+  letter-spacing: -0.025em;
+  background: linear-gradient(to right, #9333ea, #7c3aed, #8b5cf6);
   -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 2px 10px rgba(var(--primary-rgb), 0.3);
-  animation: gradientShift 8s ease infinite;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .brand-text {
+  background: linear-gradient(to right, #a78bfa, #8b5cf6, #7c3aed);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure backward compatibility */
+.logo-badge, .logo-pulse, .logo-glow, .logo-ring, .brand-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fallback styles to ensure visibility */
+.logo-badge img {
+  position: relative;
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.3s ease;
 }
 
 .brand-caption {
-  font-size: 0.65rem;
+  display: block;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.025em;
+  color: #6b7280;
+  transition: color 0.3s ease;
   opacity: 0.9;
-  transition: all 0.3s ease;
+  margin-top: -0.2rem;
+}
+
+.dark .brand-caption {
+  color: #9ca3af;
 }
 
 .brand-link:hover .brand-caption {
-  color: hsl(var(--primary));
-  opacity: 1;
+  color: #7c3aed;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Media query for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-pulse {
+    animation: none;
+  }
+  
+  .brand-text {
+    background: none;
+    -webkit-text-fill-color: #7c3aed;
+    text-fill-color: #7c3aed;
+    color: #7c3aed;
+    text-shadow: none;
+  }
+  
+  .dark .brand-text {
+    -webkit-text-fill-color: #a78bfa;
+    text-fill-color: #a78bfa;
+    color: #a78bfa;
+  }
+  
+  .logo-badge:hover {
+    transform: none;
+  }
+  
+  .logo-badge:hover .logo-glow,
+  .logo-badge:hover .logo-ring {
+    transform: none;
+    opacity: 0.5;
+  }
 }
 
-/* Logo ring effect */
-.logo-ring {
+/* Logo container for specific contexts */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Super fallback styles for browsers without CSS variable support */
+.logo-badge {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+}
+
+.dark .logo-badge {
+  background-color: #4c1d95;
+  border: 1px solid #6d28d9;
+}
+
+/* Ensure logo images are visible if SVG fails */
+.logo-badge img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+/* Safari fix for gradient text */
+@supports (-webkit-background-clip: text) and not (background-clip: text) {
+  .brand-text {
+    color: transparent;
+  }
+}
+
+/* Firefox fix for gradient text */
+@supports (background-clip: text) and not (-webkit-background-clip: text) {
+  .brand-text {
+    color: transparent;
+  }
+}
+
+/* Fallback for browsers that don't support gradient text */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .brand-text {
+    background: none;
+    color: #7c3aed;
+  }
+  
+  .dark .brand-text {
+    color: #a78bfa;
+  }
+}
+
+/* Improved sidebar animations and styling */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+/* Apply animations to sidebar elements */
+.sidebar-open #mobile-sidebar {
+  animation: slideInLeft 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Sidebar item styling and effects */
+#mobile-sidebar {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark #mobile-sidebar {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#mobile-sidebar li a {
+  position: relative;
+  overflow: hidden;
+}
+
+#mobile-sidebar li a::before {
+  content: '';
   position: absolute;
-  inset: -2px;
-  border-radius: 12px;
-  border: 1px solid rgba(var(--primary-rgb), 0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: currentColor;
   opacity: 0;
-  transform: scale(0.9);
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+#mobile-sidebar li a:hover::before {
+  opacity: 0.04;
+}
+
+#mobile-sidebar li a:active::before {
+  opacity: 0.08;
+}
+
+.dark #mobile-sidebar li a:hover::before {
+  opacity: 0.06;
+}
+
+.dark #mobile-sidebar li a:active::before {
+  opacity: 0.1;
+}
+
+/* Hover effects for sidebar items */
+#mobile-sidebar li a {
+  transition: all 0.2s ease;
+}
+
+#mobile-sidebar li a:hover {
+  transform: translateX(2px);
+}
+
+/* Mobile sidebar backdrop blur enhancement */
+.sidebar-open .sidebar-backdrop {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Subtle bounce animation for active indicator */
+@keyframes subtleBounce {
+  0%, 100% { transform: translateY(-50%) scaleY(1); }
+  50% { transform: translateY(-50%) scaleY(1.2); }
+}
+
+#mobile-sidebar li a .active-indicator {
+  animation: subtleBounce 2s ease-in-out infinite;
+}
+
+/* Enhanced hover state for user avatar */
+.user-avatar {
   transition: all 0.3s ease;
 }
 
-.logo-badge:hover .logo-ring {
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+}
+
+/* Improved backdrop for mobile sidebar */
+.sidebar-backdrop {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Indicator animation for sidebar toggling */
+.sidebar-toggle-indicator {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-toggle-indicator::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-toggle-indicator:hover::after {
+  transform: scaleX(1);
+}
+
+/* Enhance scrollbar styling in sidebar */
+#mobile-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--primary-rgb), 0.2) transparent;
+}
+
+#mobile-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+#mobile-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#mobile-sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--primary-rgb), 0.2);
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+#mobile-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--primary-rgb), 0.4);
+}
+
+/* Enhanced styling for collapsed sidebar */
+.sidebar-collapsed li a {
+  @apply justify-center;
+}
+
+.sidebar-collapsed li a svg {
+  @apply w-5 h-5; /* Slightly larger icons in collapsed mode */
+}
+
+.sidebar-collapsed li a.bg-primary\/15 {
+  @apply bg-primary/25; /* Stronger highlight for active items in collapsed mode */
+}
+
+.sidebar-collapsed .expand-indicator {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.2);
+}
+
+.sidebar-collapsed:hover .expand-indicator {
   opacity: 1;
-  transform: scale(1.1);
+  transform: translateX(0);
+}
+
+/* Improve the animation for active indicators */
+.active-indicator {
+  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Hover effect for nav items in collapsed mode */
+.sidebar-collapsed li a:hover {
+  transform: translateX(0) scale(1.05);
+}
+
+/* Tooltip styling for collapsed sidebar items */
+.sidebar-collapsed li a::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 50;
+  margin-left: 8px;
+}
+
+.sidebar-collapsed li a:hover::after {
+  opacity: 1;
+}
+
+/* Enhanced styles for RTL language support */
+[dir="rtl"] #mobile-sidebar {
+  left: auto;
+  right: 0;
+  transform: translateX(100%);
+}
+
+[dir="rtl"] .sidebar-open #mobile-sidebar {
+  transform: translateX(0);
+}
+
+[dir="rtl"] #mobile-sidebar li a .active-indicator {
+  left: auto;
+  right: 0;
+  border-radius: 0 0 0 4px;
+}
+
+[dir="rtl"] #mobile-sidebar li a:hover {
+  transform: translateX(-2px);
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  #mobile-sidebar,
+  #mobile-sidebar *,
+  .sidebar-backdrop,
+  .expand-indicator,
+  .active-indicator {
+    transition-duration: 0.1s !important;
+    animation-duration: 0.1s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Custom scrollbar for Firefox */
+* {
+  scrollbar-color: rgba(var(--primary-rgb), 0.2) transparent;
+  scrollbar-width: thin;
+}
+
+/* Micro-interactions for navigation items */
+.nav-group-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.nav-group-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.nav-item-enter {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.nav-item-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms, transform 200ms;
+}
+
+/* Improved focus styles for keyboard users */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.4);
+}
+
+/* Accessibility improvements for active sidebar elements */
+.active-indicator {
+  box-shadow: 0 0 12px 0 rgba(var(--primary-rgb), 0.5);
+}
+
+/* Right-to-left language support */
+[dir="rtl"] .active-indicator {
+  left: auto;
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Respect user's reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .transition-all, .transition-transform, .transition-opacity {
+    transition: none !important;
+  }
+}
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Enhanced keyboard navigation for sidebar items */
+.nav-item:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.3);
+}
+
+/* Better visual feedback for sidebar toggle */
+.sidebar-toggle-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-toggle-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--primary-rgb), 0.1);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.sidebar-toggle-button:active::after {
+  opacity: 1;
+  transform: scale(1);
+  transition: transform 0s, opacity 0s;
+}
+
+/* Hide decorative elements from screen readers */
+.purely-decorative {
+  aria-hidden: true;
+}
+
+/* Override any conflicting styles */
+@media (prefers-reduced-motion: reduce) {
+  .logo-pulse {
+    animation: none;
+  }
+}
+
+/* Chart styles for light and dark mode */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--foreground);
+  font-weight: 500;
+}
+
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.recharts-default-tooltip {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.recharts-tooltip-label {
+  color: var(--foreground) !important;
+  font-weight: 600 !important;
+}
+
+.recharts-tooltip-item-name, 
+.recharts-tooltip-item-value {
+  color: var(--foreground) !important;
+}
+
+.recharts-wrapper .recharts-tooltip-cursor {
+  stroke: var(--border);
+  stroke-dasharray: 3 3;
+}
+
+.recharts-legend-item-text {
+  color: var(--foreground) !important;
+}
+
+/* Enhance month label visibility on axis */
+.recharts-xAxis .recharts-cartesian-axis-tick-value {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* Ensure dark tooltip text in light mode */
+.light .recharts-tooltip-wrapper text,
+.light .recharts-text {
+  fill: #000000;
+}
+
+/* Ensure light tooltip text in dark mode */
+.dark .recharts-tooltip-wrapper text,
+.dark .recharts-text {
+  fill: #ffffff;
+}
+
+/* Focus style for a11y */
+.recharts-tooltip:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Tooltip background in light and dark mode */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Styles for months on the x-axis */
+.month-label {
+  fill: var(--foreground);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Make sure chart month black text in light mode */
+@media (prefers-color-scheme: light) {
+  .recharts-cartesian-axis-tick-value {
+    fill: #000000 !important;
+  }
+  
+  .recharts-tooltip text {
+    fill: #000000 !important;
+  }
+}
+
+/* Make sure chart month white text in dark mode */
+@media (prefers-color-scheme: dark) {
+  .recharts-cartesian-axis-tick-value {
+    fill: #ffffff !important;
+  }
+  
+  .recharts-tooltip text {
+    fill: #ffffff !important;
+  }
+}
+
+/* Enhanced month label visibility for both modes */
+.recharts-cartesian-axis-tick-value {
+  fill: currentColor !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+/* Specific dark mode overrides with !important to enforce visibility */
+.dark .recharts-cartesian-axis-tick text,
+.dark .recharts-cartesian-axis-tick-value {
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+/* Specific light mode overrides with !important to enforce visibility */
+:root:not(.dark) .recharts-cartesian-axis-tick text,
+:root:not(.dark) .recharts-cartesian-axis-tick-value {
+  fill: #000000 !important;
+  stroke: none !important;
+}
+
+/* Enhanced tooltip styling for better visibility */
+.recharts-default-tooltip {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+.dark .recharts-default-tooltip {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 } 

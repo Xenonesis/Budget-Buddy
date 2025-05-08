@@ -432,4 +432,12 @@ export function getRandomColor(text: string): string {
   // Get a color from the array using the hash
   const index = Math.abs(hash) % colors.length;
   return colors[index];
+}
+
+/**
+ * Get the current application version
+ * @returns The current app version as a string
+ */
+export function getAppVersion(): string {
+  return process.env.NEXT_PUBLIC_APP_VERSION || '8.0.0';
 } 

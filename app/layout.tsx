@@ -89,11 +89,9 @@ export default function RootLayout({
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
+        <ThemeProvider 
           defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+          storageKey="budget-buddy-theme"
         >
           {children}
         </ThemeProvider>

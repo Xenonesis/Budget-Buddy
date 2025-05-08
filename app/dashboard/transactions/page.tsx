@@ -39,7 +39,14 @@ import {
 import { toast } from "sonner";
 import { AddTransactionButton } from "@/components/ui/bottom-navigation";
 import { FixedSizeList as VirtualizedList } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import dynamic from 'next/dynamic';
+
+// Comment out the regular import and use dynamic import instead
+// import AutoSizer from 'react-virtualized-auto-sizer';
+const AutoSizer = dynamic(
+  () => import('react-virtualized-auto-sizer').then(mod => mod.default),
+  { ssr: false }
+);
 import {
   DropdownMenu,
   DropdownMenuContent,

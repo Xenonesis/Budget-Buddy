@@ -163,7 +163,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg">
+        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
           <p className="font-medium border-b pb-1 mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4 mb-1">
@@ -198,7 +198,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       const categoryData = spendingVsBudgetData.find(item => item.name === label);
       
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg">
+        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
           <p className="font-semibold border-b pb-1 mb-2">{label}</p>
           
           <div className="space-y-2">
@@ -259,7 +259,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       const data = payload[0].payload;
       
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg">
+        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
           <p className="font-semibold border-b pb-1 mb-2">{label}</p>
           
           <div className="space-y-2">
@@ -490,7 +490,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                         layout="vertical"
                       >
                         <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                        <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} />
+                        <XAxis type="number" tickFormatter={(value) => formatCurrency(value)} tick={{ fill: 'var(--foreground)' }} />
                         <YAxis 
                           type="category" 
                           dataKey="name" 
@@ -498,7 +498,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                           tickFormatter={(value) => 
                             value.length > 12 ? `${value.substring(0, 12)}...` : value
                           }
-                          tick={{ fontSize: 12 }}
+                          tick={{ fontSize: 12, fill: 'var(--foreground)' }}
                         />
                         <Tooltip content={<SpendingTooltip />} />
                         <Legend />
@@ -635,7 +635,8 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                               borderRadius: '8px',
                               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                               padding: '8px 12px',
-                              maxWidth: '250px'
+                              maxWidth: '250px',
+                              color: 'var(--foreground)'
                             }}
                           />
                           <PolarAngleAxis
@@ -691,8 +692,20 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                   margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
                 >
                   <CartesianGrid stroke="#f5f5f5" strokeDasharray="3 3" />
-                  <XAxis dataKey="name" scale="band" />
-                  <YAxis tickFormatter={(value) => `$${value}`} />
+                  <XAxis 
+                    dataKey="name" 
+                    scale="band" 
+                    tick={{ 
+                      fill: 'var(--foreground)', 
+                      fontWeight: 600,
+                      fontSize: 12,
+                      className: 'month-label'
+                    }} 
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `$${value}`} 
+                    tick={{ fill: 'var(--foreground)' }} 
+                  />
                   <Tooltip content={<TrendTooltip />} />
                   <Legend 
                     iconSize={8}

@@ -603,12 +603,12 @@ export default function BudgetPage() {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4 pb-4 border-b">
         <div className="flex items-center gap-3">
           <Logo size="md" />
           <div>
             <motion.h1 
-              className="text-xl md:text-2xl font-bold brand-text"
+              className="text-xl md:text-2xl font-bold text-foreground"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}

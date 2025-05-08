@@ -249,7 +249,12 @@ function IncomeExpenseChartComponent({ monthlyData }: { monthlyData: { name: str
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
                 <XAxis 
                   dataKey="name" 
-                  tick={{ fill: 'var(--muted-foreground)' }}
+                  tick={{ 
+                    fill: 'var(--foreground)', 
+                    fontWeight: 600,
+                    fontSize: 12,
+                    className: 'month-label'
+                  }}
                   tickLine={{ stroke: 'var(--border)' }}
                   axisLine={{ stroke: 'var(--border)' }}
                 />
@@ -267,8 +272,10 @@ function IncomeExpenseChartComponent({ monthlyData }: { monthlyData: { name: str
                     borderColor: 'var(--border)',
                     borderRadius: '0.5rem',
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    padding: '0.5rem'
+                    padding: '0.5rem',
+                    color: 'var(--foreground)'
                   }}
+                  labelStyle={{ color: 'var(--foreground)', fontWeight: 'bold' }}
                   itemStyle={{ color: 'var(--foreground)' }}
                   cursor={{ strokeDasharray: '3 3' }}
                 />

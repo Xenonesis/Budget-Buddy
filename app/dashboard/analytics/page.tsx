@@ -37,28 +37,31 @@ import { Currency } from "@/components/ui/currency";
 
 // Custom styles for enhanced chart interactions
 const styles = {
-  chartCard: "rounded-xl border bg-card p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden",
+  chartCard: "rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 relative overflow-hidden",
   chartTitle: "text-base sm:text-lg font-semibold text-foreground",
   tooltipStyles: { 
-    backgroundColor: 'var(--card)', 
-    borderColor: 'var(--border)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)', 
+    borderColor: '#ffffff',
     borderRadius: '0.75rem',
     padding: '0.75rem 1rem',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    border: '1px solid var(--border)',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
+    border: '1.5px solid #ffffff',
     fontSize: '1rem',
     fontWeight: '500'
   },
   tooltipItemStyles: { 
-    color: 'var(--foreground)', 
+    color: '#ffffff', 
     padding: '0.25rem 0',
-    fontSize: '0.95rem'
+    fontSize: '0.95rem',
+    fontWeight: '600'
   },
   tooltipLabelStyles: { 
-    color: 'var(--foreground)', 
+    color: '#ffffff', 
     fontWeight: 'bold', 
     marginBottom: '0.5rem',
-    fontSize: '1rem'
+    fontSize: '1.1rem',
+    borderBottom: '1px solid #ffffff',
+    paddingBottom: '0.5rem'
   },
   fadeUp: "animate-in fade-in-50 slide-in-from-bottom-5",
   hoverCard: "hover:shadow-lg hover:translate-y-[-2px] transition-all duration-300",
@@ -76,9 +79,11 @@ const styles = {
   // Add gradient overlay to cards
   cardGradientOverlay: "before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent before:opacity-50 before:rounded-xl before:-z-10",
   // Card headers with subtle gradient
-  cardHeader: "bg-gradient-to-r from-muted/50 to-transparent p-4 rounded-t-xl border-b",
+  cardHeader: "bg-gradient-to-r from-muted/60 to-transparent p-4 rounded-t-xl border-b border-primary/20",
   customScroll: "scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20",
   shimmer: "animate-shimmer bg-gradient-to-r from-transparent via-muted-foreground/10 to-transparent bg-[length:400%_100%]",
+  // New enhanced legend style
+  chartLegend: "flex flex-wrap items-center gap-4 mb-5 justify-center sm:justify-end bg-card/80 p-3 rounded-lg border border-primary/30 shadow-md"
 };
 
 // Sample data for the charts
@@ -726,24 +731,24 @@ export default function AnalyticsPage() {
                   <div className={`${styles.chartCard} ${styles.cardGradientOverlay} ${styles.hoverCard}`}>
                     <div className={`${styles.cardHeader}`}>
                       <h2 className={styles.chartTitle}>Financial Snapshot</h2>
-                      <p className="text-sm text-foreground/80 mt-1 font-medium">
+                      <p className="text-sm text-blue-400 mt-1 font-semibold">
                         Monthly income vs. expenses for the selected period
                       </p>
                     </div>
                     
                     <div className="p-4">
-                      <div className="flex flex-wrap items-center gap-4 mb-5 justify-center sm:justify-end">
+                      <div className={styles.chartLegend}>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                          <span className="text-sm font-medium text-foreground">Income</span>
+                          <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
+                          <span className="text-sm font-semibold text-foreground">Income</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                          <span className="text-sm font-medium text-foreground">Expenses</span>
+                          <div className="w-4 h-4 rounded-full bg-rose-500"></div>
+                          <span className="text-sm font-semibold text-foreground">Expenses</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                          <span className="text-sm font-medium text-foreground">Net Balance</span>
+                          <span className="text-sm font-semibold text-foreground">Net Balance</span>
                         </div>
                       </div>
                       
@@ -751,39 +756,79 @@ export default function AnalyticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
                             data={monthlyData}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                            barGap={0}
-                            barCategoryGap="20%"
+                            margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+                            barGap={4}
+                            barCategoryGap="25%"
                           >
                             <defs>
                               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.9}/>
-                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.3}/>
+                                <stop offset="0%" stopColor="#10b981" stopOpacity={1.0}/>
+                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.6}/>
                               </linearGradient>
                               <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.9}/>
-                                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3}/>
+                                <stop offset="0%" stopColor="#f43f5e" stopOpacity={1.0}/>
+                                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.6}/>
                               </linearGradient>
                               <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                <stop offset="0%" stopColor="#3b82f6" stopOpacity={1.0}/>
+                                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6}/>
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.7} />
+                            <CartesianGrid 
+                              strokeDasharray="3 3" 
+                              stroke="#4b5563" 
+                              strokeOpacity={0.8}
+                              vertical={true}
+                              horizontalPoints={[40, 80, 120]} 
+                            />
                             <XAxis 
                               dataKey="name" 
-                              axisLine={{ stroke: 'var(--border)', strokeWidth: 1.5 }}
-                              tick={{ fill: 'var(--foreground)', fontSize: 13, fontWeight: 500 }}
-                              tickLine={{ stroke: 'var(--border)' }}
-                              dy={10}
+                              axisLine={{ stroke: '#ffffff', strokeWidth: 2 }}
+                              tick={{ 
+                                fill: '#ffffff', 
+                                fontSize: 14, 
+                                fontWeight: 700,
+                                background: 'rgba(0,0,0,0.5)'
+                              }}
+                              tickLine={{ stroke: '#ffffff', strokeWidth: 1.5 }}
+                              height={50}
+                              padding={{ left: 10, right: 10 }}
+                              label={{ 
+                                value: 'Month', 
+                                position: 'insideBottom', 
+                                offset: -10,
+                                fill: '#ffffff',
+                                fontSize: 14,
+                                fontWeight: 700
+                              }}
                             />
                             <YAxis 
-                              axisLine={{ stroke: 'var(--border)', strokeWidth: 1.5 }}
-                              tick={{ fill: 'var(--foreground)', fontSize: 13, fontWeight: 500 }}
-                              tickLine={{ stroke: 'var(--border)' }}
-                              dx={-5}
+                              axisLine={{ stroke: 'var(--primary)', strokeWidth: 2 }}
+                              tick={{ 
+                                fill: '#10b981', 
+                                fontSize: 13, 
+                                fontWeight: 700
+                              }}
+                              tickLine={{ stroke: '#10b981', strokeWidth: 1.5 }}
+                              width={50}
+                              tickCount={5}
+                              domain={[0, 'auto']}
+                              label={{ 
+                                value: 'Amount', 
+                                angle: -90, 
+                                position: 'insideLeft',
+                                style: { 
+                                  textAnchor: 'middle',
+                                  fill: '#10b981',
+                                  fontSize: 13,
+                                  fontWeight: 700
+                                },
+                                dx: -35
+                              }}
                               tickFormatter={(value) => {
-                                if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+                                if (value >= 1000) {
+                                  return `${(value / 1000).toFixed(0)}K`;
+                                }
                                 return value;
                               }}
                             />
@@ -795,42 +840,52 @@ export default function AnalyticsPage() {
                                 return [formattedValue, ""];
                               }}
                               contentStyle={{
-                                ...styles.tooltipStyles,
-                                color: 'var(--foreground)',
-                                fontWeight: 500
+                                ...styles.tooltipStyles
                               }}
                               itemStyle={{
-                                ...styles.tooltipItemStyles,
-                                color: 'var(--foreground)',
+                                ...styles.tooltipItemStyles
                               }}
                               labelStyle={{
-                                ...styles.tooltipLabelStyles,
-                                color: 'var(--foreground)',
-                                fontSize: '1rem'
+                                ...styles.tooltipLabelStyles
                               }}
-                              cursor={{ fill: 'var(--muted)', opacity: 0.2, radius: 4 }}
+                              cursor={{ fill: 'rgba(255, 255, 255, 0.15)', opacity: 0.7, radius: 4 }}
                             />
                             <Legend 
                               verticalAlign="top"
                               height={36}
-                              iconSize={12}
+                              iconSize={14}
                               iconType="circle"
+                              wrapperStyle={{
+                                paddingBottom: '10px'
+                              }}
                               formatter={(value) => (
-                                <span style={{ color: 'var(--foreground)', fontSize: '14px', fontWeight: 'bold' }}>{value}</span>
+                                <span style={{ 
+                                  color: value === 'Income' ? '#10b981' : 
+                                         value === 'Expense' ? '#f43f5e' : 
+                                         '#3b82f6', 
+                                  fontSize: '14px', 
+                                  fontWeight: 'bold' 
+                                }}>
+                                  {value}
+                                </span>
                               )}
                             />
                             <Bar 
                               dataKey="income" 
                               name="Income" 
                               fill="url(#incomeGradient)" 
-                              radius={[4, 4, 0, 0]}
+                              stroke="#10b981"
+                              strokeWidth={1}
+                              radius={[6, 6, 0, 0]}
                               animationDuration={1500}
                             />
                             <Bar 
                               dataKey="expense" 
                               name="Expense" 
                               fill="url(#expenseGradient)" 
-                              radius={[4, 4, 0, 0]}
+                              stroke="#f43f5e"
+                              strokeWidth={1}
+                              radius={[6, 6, 0, 0]}
                               animationDuration={1500}
                               animationBegin={300}
                             />
@@ -840,8 +895,8 @@ export default function AnalyticsPage() {
                               name="Balance"
                               stroke="#3b82f6" 
                               strokeWidth={3} 
-                              dot={{ r: 5, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
-                              activeDot={{ r: 7, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+                              dot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+                              activeDot={{ r: 8, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
                               animationDuration={2000}
                               animationBegin={600}
                             />
@@ -855,7 +910,7 @@ export default function AnalyticsPage() {
                   <div className={`${styles.chartCard} ${styles.cardGradientOverlay} ${styles.hoverCard}`}>
                     <div className={`${styles.cardHeader}`}>
                       <h2 className={styles.chartTitle}>Income vs Expense Trend</h2>
-                      <p className="text-sm text-foreground/80 mt-1 font-medium">
+                      <p className="text-sm text-blue-400 mt-1 font-semibold">
                         Visualize your income and expense patterns over time
                       </p>
                     </div>
@@ -869,29 +924,70 @@ export default function AnalyticsPage() {
                           >
                             <defs>
                               <linearGradient id="incomeAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.3}/>
-                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.05}/>
+                                <stop offset="0%" stopColor="#10b981" stopOpacity={0.4}/>
+                                <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
                               </linearGradient>
                               <linearGradient id="expenseAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3}/>
-                                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.05}/>
+                                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.4}/>
+                                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.1}/>
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} />
+                            <CartesianGrid 
+                              strokeDasharray="3 3" 
+                              stroke="#4b5563" 
+                              strokeOpacity={0.7}
+                              horizontal={true}
+                              vertical={true}
+                            />
                             <XAxis 
                               dataKey="name" 
-                              axisLine={{ stroke: 'var(--border)' }}
-                              tick={{ fill: 'var(--muted-foreground)' }}
-                              tickLine={{ stroke: 'var(--border)' }}
-                              fontSize={12}
+                              axisLine={{ stroke: '#ffffff', strokeWidth: 2 }}
+                              tick={{ 
+                                fill: '#ffffff', 
+                                fontSize: 14, 
+                                fontWeight: 700,
+                                background: 'rgba(0,0,0,0.5)' 
+                              }}
+                              tickLine={{ stroke: '#ffffff', strokeWidth: 1.5 }}
+                              height={50}
+                              padding={{ left: 10, right: 10 }}
+                              label={{ 
+                                value: 'Month', 
+                                position: 'insideBottom', 
+                                offset: -10,
+                                fill: '#ffffff',
+                                fontSize: 14,
+                                fontWeight: 700
+                              }}
                             />
                             <YAxis 
-                              axisLine={{ stroke: 'var(--border)' }}
-                              tick={{ fill: 'var(--muted-foreground)' }}
-                              tickLine={{ stroke: 'var(--border)' }}
-                              fontSize={12}
+                              axisLine={{ stroke: 'var(--primary)', strokeWidth: 2 }}
+                              tick={{ 
+                                fill: '#10b981', 
+                                fontSize: 13, 
+                                fontWeight: 700
+                              }}
+                              tickLine={{ stroke: '#10b981', strokeWidth: 1.5 }}
+                              width={50}
+                              tickCount={5}
+                              domain={[0, 'auto']}
+                              label={{ 
+                                value: 'Amount', 
+                                angle: -90, 
+                                position: 'insideLeft',
+                                style: { 
+                                  textAnchor: 'middle',
+                                  fill: '#10b981',
+                                  fontSize: 13,
+                                  fontWeight: 700
+                                },
+                                dx: -35
+                              }}
                               tickFormatter={(value) => {
-                                if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+                                if (value >= 1000) {
+                                  const k = `${(value / 1000).toFixed(0)}k`;
+                                  return k;
+                                }
                                 return value;
                               }}
                             />
@@ -902,26 +998,51 @@ export default function AnalyticsPage() {
                                   `$${Number(value).toLocaleString()}`;
                                 return [formattedValue, ""];
                               }}
-                              contentStyle={styles.tooltipStyles}
-                              itemStyle={styles.tooltipItemStyles}
-                              labelStyle={styles.tooltipLabelStyles}
+                              contentStyle={{
+                                ...styles.tooltipStyles
+                              }}
+                              itemStyle={{
+                                ...styles.tooltipItemStyles
+                              }}
+                              labelStyle={{
+                                ...styles.tooltipLabelStyles
+                              }}
+                              cursor={{ fill: 'rgba(255, 255, 255, 0.15)', opacity: 0.7, radius: 4 }}
+                            />
+                            <Legend 
+                              iconType="circle"
+                              iconSize={12}
+                              wrapperStyle={{
+                                paddingBottom: '10px'
+                              }}
+                              formatter={(value) => (
+                                <span style={{ 
+                                  color: value === 'Income' ? '#10b981' : '#f43f5e', 
+                                  fontSize: '13px', 
+                                  fontWeight: 'bold' 
+                                }}>
+                                  {value}
+                                </span>
+                              )}
                             />
                             <Area 
                               type="monotone" 
                               dataKey="income" 
                               name="Income" 
                               stroke="#10b981" 
-                              strokeWidth={2}
+                              strokeWidth={2.5}
                               fill="url(#incomeAreaGradient)" 
+                              activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
                               animationDuration={1500}
                             />
                             <Area 
                               type="monotone" 
                               dataKey="expense" 
                               name="Expense" 
-                              stroke="#ef4444" 
-                              strokeWidth={2}
+                              stroke="#f43f5e" 
+                              strokeWidth={2.5}
                               fill="url(#expenseAreaGradient)" 
+                              activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}
                               animationDuration={1500}
                               animationBegin={300}
                             />
@@ -994,6 +1115,7 @@ export default function AnalyticsPage() {
                                   contentStyle={styles.tooltipStyles}
                                   itemStyle={styles.tooltipItemStyles}
                                   labelStyle={styles.tooltipLabelStyles}
+                                  cursor={{ fill: 'rgba(255, 255, 255, 0.15)', opacity: 0.7, radius: 4 }}
                                 />
                               </PieChart>
                             </ResponsiveContainer>
@@ -1149,6 +1271,7 @@ export default function AnalyticsPage() {
                                 contentStyle={styles.tooltipStyles}
                                 itemStyle={styles.tooltipItemStyles}
                                 labelStyle={styles.tooltipLabelStyles}
+                                cursor={{ fill: 'rgba(255, 255, 255, 0.15)', opacity: 0.7, radius: 4 }}
                               />
                             </PieChart>
                           </ResponsiveContainer>

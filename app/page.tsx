@@ -782,7 +782,7 @@ export default function Home() {
             </motion.p>
           </motion.div>
           
-          <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => {
               const featureRef = useRef(null);
               const isInView = useInView(featureRef, { once: true, amount: 0.3 });
@@ -791,7 +791,7 @@ export default function Home() {
                 <motion.div
                   key={feature.title}
                   ref={featureRef}
-                  className="relative group"
+                  className="relative group p-6 bg-background/10 backdrop-blur rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                   initial={{ opacity: 0, y: 30 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
@@ -1556,8 +1556,10 @@ export default function Home() {
         </motion.div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-5 gap-8 items-center">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to take control of your finances?</h2>
+            <p className="mb-8 text-lg text-white/90">Sign up now and start budgeting like a pro with our AI-powered tools.</p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
               <motion.div 
                 className="md:col-span-3 text-center md:text-left"
                 initial={{ opacity: 0, y: 20 }}

@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import tailwindcssAnimate from 'tailwindcss-animate';
+
+const config = {
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -64,17 +66,47 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        "slide-in-left": {
+          from: { 
+            transform: "translateX(-100%)",
+            opacity: 0 
+          },
+          to: { 
+            transform: "translateX(0)",
+            opacity: 1 
+          },
+        },
+        "slide-out-left": {
+          from: { 
+            transform: "translateX(0)",
+            opacity: 1 
+          },
+          to: { 
+            transform: "translateX(-100%)",
+            opacity: 0 
+          },
+        },
+        "fade-in": {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slide-in-left": "slide-in-left 0.3s ease-out forwards",
+        "slide-out-left": "slide-out-left 0.3s ease-in forwards",
+        "fade-in": "fade-in 0.3s ease-in-out",
       },
     },
   },
   plugins: [
-    require("tailwindcss-animate"),
+    tailwindcssAnimate,
     function({ addVariant }) {
       addVariant('sidebar-open', 'html.sidebar-open &');
+      addVariant('sidebar-collapsed', '.sidebar-collapsed &');
     }
   ],
-} 
+};
+
+export default config; 

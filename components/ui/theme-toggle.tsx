@@ -23,13 +23,19 @@ interface ThemeToggleProps {
 
 // Memoized theme menu items to avoid re-rendering
 const ThemeMenuItems = memo(function ThemeMenuItems({ 
-  onSelectTheme 
+  onSelectTheme,
+  currentTheme
 }: { 
-  onSelectTheme: (theme: string) => void 
+  onSelectTheme: (theme: string) => void;
+  currentTheme: string; 
 }) {
   return (
     <>
-      <DropdownMenuItem onClick={() => onSelectTheme("light")} className="focus:bg-amber-50 dark:focus:bg-amber-950/30">
+      <DropdownMenuItem 
+        onClick={() => onSelectTheme("light")} 
+        className="focus:bg-amber-50 dark:focus:bg-amber-950/30"
+        aria-current={currentTheme === 'light' ? 'true' : undefined}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 mr-2.5 text-white">
@@ -37,10 +43,14 @@ const ThemeMenuItems = memo(function ThemeMenuItems({
             </div>
             <span>Light</span>
           </div>
-          <span className="text-xs text-muted-foreground">⌘+L</span>
+          <kbd className="hidden sm:inline-flex text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">⌘+L</kbd>
         </div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onSelectTheme("dark")} className="focus:bg-violet-50 dark:focus:bg-violet-950/30">
+      <DropdownMenuItem 
+        onClick={() => onSelectTheme("dark")} 
+        className="focus:bg-violet-50 dark:focus:bg-violet-950/30"
+        aria-current={currentTheme === 'dark' ? 'true' : undefined}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 mr-2.5 text-white">
@@ -48,10 +58,14 @@ const ThemeMenuItems = memo(function ThemeMenuItems({
             </div>
             <span>Dark</span>
           </div>
-          <span className="text-xs text-muted-foreground">⌘+D</span>
+          <kbd className="hidden sm:inline-flex text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">⌘+D</kbd>
         </div>
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onSelectTheme("system")} className="focus:bg-blue-50 dark:focus:bg-blue-950/30">
+      <DropdownMenuItem 
+        onClick={() => onSelectTheme("system")} 
+        className="focus:bg-blue-50 dark:focus:bg-blue-950/30"
+        aria-current={currentTheme === 'system' ? 'true' : undefined}
+      >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-sky-500 mr-2.5 text-white">
@@ -59,12 +73,14 @@ const ThemeMenuItems = memo(function ThemeMenuItems({
             </div>
             <span>System</span>
           </div>
-          <span className="text-xs text-muted-foreground">⌘+S</span>
+          <kbd className="hidden sm:inline-flex text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">⌘+S</kbd>
         </div>
       </DropdownMenuItem>
     </>
   );
 });
+
+ThemeMenuItems.displayName = 'ThemeMenuItems';
 
 // Define as a function component first, then create a memoized version
 function ThemeToggleComponent({
@@ -77,6 +93,7 @@ function ThemeToggleComponent({
 }: ThemeToggleProps) {
   const { theme, setTheme } = useUserPreferences();
   const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
 
   // Avoid hydration mismatch by waiting until component is mounted
   useEffect(() => {
@@ -86,6 +103,7 @@ function ThemeToggleComponent({
   // Memoize the theme change handler
   const handleThemeChange = useCallback((newTheme: string) => {
     setTheme(newTheme as 'light' | 'dark' | 'system');
+    setOpen(false);
   }, [setTheme]);
 
   // Add keyboard shortcuts 
@@ -109,94 +127,83 @@ function ThemeToggleComponent({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [setTheme]);
 
-  // Memoize the button content based on current theme and iconOnly prop
+  // Simplified button content for better performance
   const buttonContent = useMemo(() => {
+    const getThemeIcon = () => {
+      switch(theme) {
+        case 'light':
+          return <Sun className="h-4 w-4 text-amber-600" />;
+        case 'dark':
+          return <Moon className="h-4 w-4 text-violet-300" />;
+        default:
+          return <Laptop className="h-4 w-4 text-sky-600 dark:text-sky-400" />;
+      }
+    };
+
     if (!mounted) {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-300 to-yellow-500 dark:from-violet-500 dark:to-purple-600 opacity-0 dark:opacity-0 rounded-full transition-all duration-300"></div>
-          <Sun className="absolute h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500 dark:text-white" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-violet-500 dark:text-white" />
+        <div className="flex items-center justify-center">
+          <Sun className="h-4 w-4 dark:hidden" />
+          <Moon className="h-4 w-4 hidden dark:block" />
           <span className="sr-only">Toggle theme</span>
         </div>
       );
     }
 
-    if (theme === "light") {
-      return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-300 to-yellow-500 opacity-15 rounded-full"></div>
-          <Sun className="h-[18px] w-[18px] rotate-0 scale-100 transition-all text-amber-600" />
-          {!iconOnly && <span className="ml-2 text-sm font-medium">Light</span>}
-          <span className="sr-only">Light theme</span>
-        </div>
-      );
-    }
-    
-    if (theme === "dark") {
-      return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 opacity-20 rounded-full"></div>
-          <Moon className="h-[18px] w-[18px] rotate-0 scale-100 transition-all text-violet-300" />
-          {!iconOnly && <span className="ml-2 text-sm font-medium">Dark</span>}
-          <span className="sr-only">Dark theme</span>
-        </div>
-      );
-    }
-    
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-300 to-blue-500 opacity-15 rounded-full"></div>
-        <Laptop className="h-[18px] w-[18px] rotate-0 scale-100 transition-all text-sky-600 dark:text-sky-400" />
-        {!iconOnly && <span className="ml-2 text-sm font-medium">System</span>}
-        <span className="sr-only">System theme</span>
+      <div className="flex items-center justify-center">
+        {getThemeIcon()}
+        {!iconOnly && (
+          <span className="ml-2 text-sm font-medium">
+            {theme.charAt(0).toUpperCase() + theme.slice(1)}
+          </span>
+        )}
+        <span className="sr-only">
+          {`Current theme: ${theme}. Click to change theme.`}
+        </span>
       </div>
     );
   }, [theme, iconOnly, mounted]);
 
   if (!mounted) {
+    // Return a placeholder button with no functionality until mounted
     return (
       <Button 
         variant="ghost" 
         size={size} 
         className={cn(
-          "relative w-10 h-10 p-0 overflow-hidden rounded-full",
-          "bg-background/0 hover:bg-background/0",
-          "border border-border/40 hover:border-primary/50 shadow-sm",
-          "transition-all duration-300 ease-in-out hover:shadow-md",
+          "relative w-9 h-9 p-0 rounded-full opacity-0",
           className
         )}
+        aria-hidden="true"
+        tabIndex={-1}
       >
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-300 to-yellow-500 dark:from-violet-500 dark:to-purple-600 opacity-0 dark:opacity-0 rounded-full transition-all duration-300"></div>
-          <Sun className="absolute h-[18px] w-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500 dark:text-white" />
-          <Moon className="absolute h-[18px] w-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-violet-500 dark:text-white" />
-          <span className="sr-only">Toggle theme</span>
-        </div>
+        <span className="sr-only">Theme toggle - Loading</span>
       </Button>
     );
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
           size={size} 
           className={cn(
-            "relative w-10 h-10 p-0 overflow-hidden rounded-full",
-            "bg-background/0 hover:bg-background/0",
-            "border border-border/40 hover:border-primary/40 shadow-sm",
-            "transition-all duration-300 ease-in-out hover:shadow-md hover:scale-105",
+            "relative w-9 h-9 p-0 overflow-hidden rounded-full",
+            "bg-accent/10 hover:bg-accent/20",
+            "border border-accent-foreground/10 hover:border-accent-foreground/20",
+            "transition-all duration-200 ease-in-out",
             iconOnly ? "" : "w-auto px-3",
             className
           )}
+          aria-label={`Theme: ${theme}. Click to change`}
         >
           {buttonContent}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} side={side} className="w-56 p-2">
-        <ThemeMenuItems onSelectTheme={handleThemeChange} />
+        <ThemeMenuItems onSelectTheme={handleThemeChange} currentTheme={theme} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
