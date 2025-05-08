@@ -193,15 +193,26 @@ export function Logo({
   // Render static version if animations are disabled
   if (!shouldAnimate) {
     return (
-      <div className={`flex items-center gap-3 ${className}`}>
-        <LogoContent />
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="relative">
+          <LogoContent />
+          <div className="absolute inset-0 rounded-full bg-primary/10 blur-sm -z-10"></div>
+        </div>
+        {withText && (
+          <div className="relative">
+            <span className={`font-bold tracking-tight bg-gradient-to-r from-primary via-violet-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] ${sizeMap[size].text} ${textClassName}`}>
+              Budget Buddy
+            </span>
+            <div className="absolute -inset-1 bg-primary/5 blur-sm rounded-lg -z-10"></div>
+          </div>
+        )}
       </div>
     );
   }
 
   // Animated version
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       <motion.div
         className="relative"
         variants={containerVariants}
@@ -210,7 +221,38 @@ export function Logo({
         whileHover="hover"
       >
         <LogoContent />
+        <motion.div 
+          className="absolute inset-0 rounded-full bg-primary/20 blur-sm -z-10"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        ></motion.div>
       </motion.div>
+      {withText && (
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+        >
+          <motion.span
+            className={`font-bold tracking-tight bg-gradient-to-r from-primary via-violet-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] ${sizeMap[size].text} ${textClassName}`}
+            whileHover={{ 
+              textShadow: "0 0 8px rgba(124, 58, 237, 0.5)",
+              scale: 1.02,
+              transition: { duration: 0.2 }
+            }}
+          >
+            Budget Buddy
+          </motion.span>
+          <motion.div 
+            className="absolute -inset-1 bg-primary/5 blur-sm rounded-lg -z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          ></motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { TechLogo } from "@/components/ui/tech-logo";
 import { 
   BarChart4, 
   BookOpen, 
@@ -28,25 +29,50 @@ import {
   UserCircle,
   Users,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Table,
+  Cpu,
+  Check,
+  X,
+  ArrowUpRight,
+  DollarSign,
+  BarChart,
+  Layers,
+  Database
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table as UITable, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+// Add CSS for grid pattern background
+const gridPatternStyle = {
+  backgroundSize: '40px 40px',
+  backgroundImage: `
+    linear-gradient(to right, rgba(128, 128, 128, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.05) 1px, transparent 1px)
+  `,
+  backgroundAttachment: 'fixed'
+};
 
 export default function AboutPage() {
   return (
     <div className="animate-fade-in">
-      <div className="w-full bg-gradient-to-r from-primary/20 to-violet-500/20 mb-8">
-        <div className="container max-w-5xl px-4 py-8 sm:py-12">
+      <div className="w-full bg-gradient-to-r from-primary/20 via-primary/10 to-violet-500/20 mb-8 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-60 h-60 bg-primary/5 rounded-full blur-[100px] opacity-60"></div>
+        <div className="absolute -bottom-10 right-0 w-40 h-40 bg-violet-500/10 rounded-full blur-[80px]"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full" style={gridPatternStyle}></div>
+        
+        <div className="container max-w-5xl px-4 py-10 sm:py-14 relative z-10">
           <div className="relative">
             <div className="absolute -top-1 -left-1 w-20 h-20 bg-primary/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-4 -right-8 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl"></div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-primary relative z-10">About Budget Buddy</h1>
-            <p className="text-muted-foreground max-w-2xl text-lg relative z-10">Your personal finance companion for smarter decisions and financial freedom</p>
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-3 text-primary relative z-10 bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">About Budget Buddy</h1>
+            <p className="text-muted-foreground max-w-2xl text-lg relative z-10 sm:text-xl">Your personal finance companion for smarter decisions and financial freedom</p>
           </div>
         </div>
       </div>
       
       <div className="container max-w-5xl px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 mb-10 sm:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-16">
           <div className="md:col-span-2">
             <Card className="h-full overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <CardHeader className="bg-gradient-to-r from-primary/5 to-violet-500/5 border-b border-primary/10 p-6">
@@ -141,7 +167,7 @@ export default function AboutPage() {
                   <Logo size="lg" withText animated={false} className="relative z-10" />
                 </div>
                 <div className="flex items-center gap-2 ml-2">
-                  <p className="text-sm text-muted-foreground">Version 8.7.0</p>
+                  <p className="text-sm text-muted-foreground">Version 8.8.0</p>
                   <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">Latest</Badge>
                 </div>
               </div>
@@ -163,28 +189,28 @@ export default function AboutPage() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium flex items-center gap-2 text-primary">
                     <GitBranch className="w-4 h-4" />
-                    Version 8.7.0 key update:
+                    Version 8.8.0 key update:
                   </h3>
                   <ul className="space-y-2.5 text-sm">
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Redesigned About page with enhanced UI/UX</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Enhanced brand identity with improved logo and text styling</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Added FAQs section for common user questions</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Added subtle animation effects to brand elements</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Updated developer profile with current information</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Improved brand visibility and contrast across all themes</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Improved mobile responsiveness and animations</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Added interactive hover animations to brand elements</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Added interactive elements for better user engagement</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Implemented custom gradient effects for brand text</span>
                     </li>
                   </ul>
                 </div>
@@ -197,23 +223,23 @@ export default function AboutPage() {
                   <ul className="space-y-2.5 text-sm">
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Improved compatibility with modern browsers</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Added custom shadow effects for better depth perception</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Enhanced performance with latest React features</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Optimized animations for reduced motion preferences</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Replaced internal SVG with native SVG avatar</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Enhanced text gradient with improved color transitions</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Added gradient touches and glow effects</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Added subtle glow effects to logo and text components</span>
                     </li>
                     <li className="flex items-start gap-2 group">
                       <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-0.5 transition-transform">Fixed SVG image rendering issues</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">Fixed text visibility issues on dark backgrounds</span>
                     </li>
                   </ul>
                 </div>
@@ -223,63 +249,152 @@ export default function AboutPage() {
             <div className="space-y-6">
               <h3 className="text-sm font-medium flex items-center gap-2 text-primary">
                 <Calendar className="w-4 h-4" />
-                Version History
+                Previous updates:
               </h3>
               
-              <div className="relative before:absolute before:h-full before:w-[2px] before:bg-gradient-to-b before:from-primary/50 before:to-muted before:left-2.5 before:top-0">
-                <div className="mb-6 pl-7 relative group">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-primary to-violet-500 absolute left-0 top-0.5 shadow-md shadow-primary/25 group-hover:scale-110 transition-transform"></div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-sm font-medium group-hover:text-primary transition-colors">Version 7.5.0</h4>
-                    <Badge variant="outline" className="text-xs bg-primary/5">April 20, 2024</Badge>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary transition-colors">•</span> Enhanced About page UI with modern animations
+              <div className="p-4 bg-muted/30 rounded-lg border">
+                <h4 className="text-sm font-medium mb-3 flex items-center">
+                  <Badge variant="outline" className="mr-2 bg-muted text-muted-foreground border-muted">v8.7.0</Badge>
+                  Released on June 15, 2023
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Redesigned About page with enhanced UI/UX</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary transition-colors">•</span> Added developer profile with current information
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added FAQs section for common user questions</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary transition-colors">•</span> Improved notification display with interactive cards
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Updated developer profile with current information</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Improved mobile responsiveness and animations</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Fixed SVG image rendering issues</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Enhanced performance with latest React features</span>
                     </li>
                   </ul>
                 </div>
-                
-                <div className="mb-6 pl-7 relative group">
-                  <div className="w-5 h-5 rounded-full bg-muted absolute left-0 top-0.5 shadow-sm group-hover:bg-primary/30 transition-colors"></div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-sm font-medium group-hover:text-primary/70 transition-colors">Version 7.0.0</h4>
-                    <Badge variant="outline" className="text-xs">April 8, 2024</Badge>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Introduced new modular dependency system
+              </div>
+
+              <div className="p-4 bg-muted/30 rounded-lg border">
+                <h4 className="text-sm font-medium mb-3 flex items-center">
+                  <Badge variant="outline" className="mr-2 bg-muted text-muted-foreground border-muted">v8.6.0</Badge>
+                  Released on May 30, 2023
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Initial brand identity implementation</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Added custom color utility for better visualization
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Created brand color scheme and typography system</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Improved mobile structure and code organization
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Established consistency in UI elements</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Designed original logo and brand components</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Implemented basic animations for UI feedback</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added support for light and dark themes</span>
                     </li>
                   </ul>
                 </div>
-                
-                <div className="pl-7 relative group">
-                  <div className="w-5 h-5 rounded-full bg-muted absolute left-0 top-0.5 group-hover:bg-primary/30 transition-colors"></div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-sm font-medium group-hover:text-primary/70 transition-colors">Version 7.2.0</h4>
-                    <Badge variant="outline" className="text-xs">April 3, 2024</Badge>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Fixed core icons not loading in charts
+              </div>
+
+              <div className="p-4 bg-muted/30 rounded-lg border">
+                <h4 className="text-sm font-medium mb-3 flex items-center">
+                  <Badge variant="outline" className="mr-2 bg-muted text-muted-foreground border-muted">v8.5.0</Badge>
+                  Released on May 15, 2023
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Introduced gradient backgrounds across UI</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Compatibility fixes for React and Next.js
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Improved accessibility with better contrast</span>
                     </li>
-                    <li className="group/item">
-                      <span className="inline-block group-hover/item:text-primary/70 transition-colors">•</span> Enhanced chart rendering and screen contrast
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added responsive layout optimizations</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Implemented motion effects for interactive elements</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Enhanced shadow effects for depth perception</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added reduced motion support for accessibility</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="p-4 bg-muted/30 rounded-lg border">
+                <h4 className="text-sm font-medium mb-3 flex items-center">
+                  <Badge variant="outline" className="mr-2 bg-muted text-muted-foreground border-muted">v8.4.0</Badge>
+                  Released on April 28, 2023
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Implemented basic Logo component structure</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added fallback behavior for logo loading</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Created responsive sizing system for brand elements</span>
+                    </li>
+                  </ul>
+                  <ul className="space-y-1.5">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Established brand-text class for consistent styling</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Added browser compatibility fixes</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Optimized SVG assets for performance</span>
                     </li>
                   </ul>
                 </div>
@@ -655,7 +770,7 @@ export default function AboutPage() {
           </Card>
         </div>
         
-        <Card className="mb-8 sm:mb-10 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+        <Card className="mb-10 sm:mb-12 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2">
               <Award className="w-4.5 h-4.5" />
@@ -692,6 +807,313 @@ export default function AboutPage() {
               <Button variant="link" size="sm" className="text-xs">
                 View All Certifications
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="mb-10 sm:mb-12 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Cpu className="w-5 h-5" />
+              Tech Stack
+            </CardTitle>
+            <CardDescription className="text-base">
+              The powerful technologies behind Budget Buddy
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-sm font-medium flex items-center gap-2 text-primary mb-4">
+                  <Layers className="w-4 h-4" />
+                  Frontend Technologies
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+                  {[
+                    { name: "Next.js", logo: "/tech/nextjs.svg", desc: "React framework for production" },
+                    { name: "React", logo: "/tech/react.svg", desc: "UI component library" },
+                    { name: "TypeScript", logo: "/tech/typescript.svg", desc: "Type-safe JavaScript" },
+                    { name: "Tailwind CSS", logo: "/tech/tailwind.svg", desc: "Utility-first CSS framework" },
+                    { name: "Shadcn UI", logo: "/tech/shadcn.png", desc: "UI component system" }
+                  ].map((tech, i) => (
+                    <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
+                      <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary/5 rounded-full blur-md group-hover:bg-primary/10 transition-colors"></div>
+                        <div className="relative z-10 w-10 h-10">
+                          <TechLogo
+                            name={tech.name}
+                            logo={tech.logo}
+                            size={40}
+                            className="w-full h-full group-hover:scale-110 transition-transform"
+                          />
+                        </div>
+                      </div>
+                      <h4 className="text-xs font-medium text-center group-hover:text-primary transition-colors">{tech.name}</h4>
+                      <p className="text-[10px] text-center text-muted-foreground mt-1">{tech.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium flex items-center gap-2 text-primary mb-4">
+                  <Database className="w-4 h-4" />
+                  Backend Technologies
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+                  {[
+                    { name: "Supabase", logo: "/tech/supabase.svg", desc: "Open source Firebase alternative" },
+                    { name: "PostgreSQL", logo: "/tech/postgres.svg", desc: "Relational database" },
+                    { name: "Node.js", logo: "/tech/nodejs.svg", desc: "JavaScript runtime" },
+                    { name: "Auth.js", logo: "/tech/authjs.svg", desc: "Authentication for Next.js" },
+                    { name: "REST API", logo: "/tech/api.svg", desc: "API architecture" }
+                  ].map((tech, i) => (
+                    <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
+                      <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary/5 rounded-full blur-md group-hover:bg-primary/10 transition-colors"></div>
+                        <div className="relative z-10 w-10 h-10">
+                          <TechLogo
+                            name={tech.name}
+                            logo={tech.logo}
+                            size={40}
+                            className="w-full h-full group-hover:scale-110 transition-transform"
+                          />
+                        </div>
+                      </div>
+                      <h4 className="text-xs font-medium text-center group-hover:text-primary transition-colors">{tech.name}</h4>
+                      <p className="text-[10px] text-center text-muted-foreground mt-1">{tech.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium flex items-center gap-2 text-primary mb-4">
+                  <ArrowUpRight className="w-4 h-4" />
+                  Deployment & Tools
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+                  {[
+                    { name: "Vercel", logo: "/tech/vercel.svg", desc: "Deployment platform" },
+                    { name: "GitHub", logo: "/tech/github.svg", desc: "Version control" },
+                    { name: "Chart.js", logo: "/tech/chartjs.svg", desc: "Data visualization" },
+                    { name: "Framer Motion", logo: "/tech/framer.svg", desc: "Animation library" },
+                    { name: "OpenAI", logo: "/tech/openai.svg", desc: "AI insights integration" }
+                  ].map((tech, i) => (
+                    <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
+                      <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary/5 rounded-full blur-md group-hover:bg-primary/10 transition-colors"></div>
+                        <div className="relative z-10 w-10 h-10">
+                          <TechLogo
+                            name={tech.name}
+                            logo={tech.logo}
+                            size={40}
+                            className="w-full h-full group-hover:scale-110 transition-transform"
+                          />
+                        </div>
+                      </div>
+                      <h4 className="text-xs font-medium text-center group-hover:text-primary transition-colors">{tech.name}</h4>
+                      <p className="text-[10px] text-center text-muted-foreground mt-1">{tech.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full h-9 px-4 gap-1.5 border-primary/20 hover:bg-primary/5 text-xs w-full sm:w-auto"
+                  asChild
+                >
+                  <Link href="https://github.com/Xenonesis" target="_blank" rel="noopener noreferrer">
+                    <Github className="h-3.5 w-3.5" />
+                    <span>View Source Code</span>
+                    <ExternalLink className="h-3 w-3 ml-1 opacity-70" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="mb-10 sm:mb-12 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Table className="w-5 h-5" />
+              Comparison
+            </CardTitle>
+            <CardDescription className="text-base">
+              How Budget Buddy compares to traditional budget managers
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-primary/5 to-violet-500/5 p-4 rounded-lg border border-primary/10 mb-6">
+                <p className="text-sm leading-relaxed">
+                  Budget Buddy sets itself apart from traditional budget managers with its intuitive design, powerful AI-driven insights, and comprehensive feature set - all while maintaining bank-level security and privacy.
+                </p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <UITable>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-[250px]">Feature</TableHead>
+                      <TableHead className="text-center">
+                        <div className="flex flex-col items-center">
+                          <span className="font-bold text-primary">Budget Buddy</span>
+                          <span className="text-xs text-muted-foreground font-normal">Modern Finance App</span>
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-center">
+                        <div className="flex flex-col items-center">
+                          <span className="font-medium">Traditional Apps</span>
+                          <span className="text-xs text-muted-foreground font-normal">Legacy Budget Managers</span>
+                        </div>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { 
+                        feature: "AI-Powered Insights", 
+                        budgetBuddy: true, 
+                        traditional: false,
+                        description: "Smart recommendations and spending pattern analysis"
+                      },
+                      { 
+                        feature: "Modern UI/UX", 
+                        budgetBuddy: true, 
+                        traditional: false,
+                        description: "Intuitive design with responsive animations"
+                      },
+                      { 
+                        feature: "Transaction Categorization", 
+                        budgetBuddy: true, 
+                        traditional: true,
+                        description: "Auto-categorize transactions for easier tracking"
+                      },
+                      { 
+                        feature: "Budget Planning", 
+                        budgetBuddy: true, 
+                        traditional: true,
+                        description: "Create and manage budgets across categories"
+                      },
+                      { 
+                        feature: "Predictive Analysis", 
+                        budgetBuddy: true, 
+                        traditional: false,
+                        description: "Forecast future spending based on patterns"
+                      },
+                      { 
+                        feature: "Data Visualization", 
+                        budgetBuddy: true, 
+                        traditional: { partial: true },
+                        description: "Interactive charts and visual analytics"
+                      },
+                      { 
+                        feature: "Cross-Device Sync", 
+                        budgetBuddy: true, 
+                        traditional: { partial: true },
+                        description: "Seamless experience across all devices"
+                      },
+                      { 
+                        feature: "Bank Connection", 
+                        budgetBuddy: true, 
+                        traditional: { partial: true },
+                        description: "Secure linking with financial institutions"
+                      },
+                      { 
+                        feature: "Learning Algorithms", 
+                        budgetBuddy: true, 
+                        traditional: false,
+                        description: "Gets smarter with more usage"
+                      },
+                    ].map((row, i) => (
+                      <TableRow key={i} className="hover:bg-muted/30">
+                        <TableCell className="font-medium">
+                          <div className="flex flex-col">
+                            <span>{row.feature}</span>
+                            <span className="text-xs text-muted-foreground">{row.description}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {row.budgetBuddy === true ? (
+                            <div className="flex justify-center">
+                              <span className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
+                                <Check className="w-3.5 h-3.5" />
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex justify-center">
+                              <span className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+                                <X className="w-3.5 h-3.5" />
+                              </span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {row.traditional === true ? (
+                            <div className="flex justify-center">
+                              <span className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
+                                <Check className="w-3.5 h-3.5" />
+                              </span>
+                            </div>
+                          ) : row.traditional && row.traditional.partial ? (
+                            <div className="flex justify-center">
+                              <span className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
+                                <Check className="w-3.5 h-3.5 opacity-70" />
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex justify-center">
+                              <span className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+                                <X className="w-3.5 h-3.5" />
+                              </span>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </UITable>
+              </div>
+              
+              <div className="p-5 bg-gradient-to-r from-primary/5 to-violet-500/5 rounded-lg border border-primary/10 space-y-4">
+                <h3 className="text-sm font-medium">Why Choose Budget Buddy?</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <BarChart className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Advanced Analytics</h4>
+                      <p className="text-xs text-muted-foreground">Powerful visualization tools and insights not available in traditional apps</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <Cpu className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">AI-Powered Insights</h4>
+                      <p className="text-xs text-muted-foreground">Smart recommendations learn from your habits to provide personalized advice</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">Financial Growth</h4>
+                      <p className="text-xs text-muted-foreground">Tools designed not just for tracking but for growing your wealth long-term</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
