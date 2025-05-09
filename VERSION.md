@@ -1,4 +1,4 @@
-# Budget Buddy Version 9.0.0
+# Budget Buddy Version 9.5.0
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 

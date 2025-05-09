@@ -4,8 +4,8 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Inter } from 'next/font/google'
 
 // Optimize font loading with display swap
-const inter = Inter({ 
-  subsets: ['latin'], 
+const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap'
 })
@@ -87,9 +87,20 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
+
+        {/* Performance optimization meta tags */}
+        <meta httpEquiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';" />
+        <meta name="referrer" content="no-referrer-when-downgrade" />
+        <meta httpEquiv="Cache-Control" content="max-age=31536000, immutable" />
+        <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
+        <meta name="preload" content="true" />
+        <meta name="preconnect" content="true" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider 
+        <ThemeProvider
           defaultTheme="system"
           storageKey="budget-buddy-theme"
         >
@@ -98,4 +109,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-} 
+}
