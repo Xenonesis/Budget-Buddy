@@ -399,6 +399,20 @@
   .stagger-3 { animation-delay: 0.3s; }
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
+  
+  /* Add the animate-grid keyframes for the RetroGrid component */
+  .animate-grid {
+    animation: grid 10s linear infinite;
+  }
+  
+  @keyframes grid {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(var(--cell-size), var(--cell-size));
+    }
+  }
 }
 
 @keyframes float {
@@ -1524,4 +1538,4 @@ html {
   border: 1px solid #334155 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-} 
+}
