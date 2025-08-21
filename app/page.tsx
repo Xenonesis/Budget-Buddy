@@ -44,8 +44,8 @@ export default function Home() {
         ctaText="Get Started"
         ctaHref="/auth/register"
         bottomImage={{
-          light: "/dashboard.png",
-          dark: "/dashboard.png",
+          light: "/banner.png",
+          dark: "/banner.png",
         }}
         gridOptions={{
           angle: 65,
