@@ -1,12 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Adding optimization for CSS loading
-  experimental: {
-    optimizeCss: true,
-    // Enable memory optimization
-    optimizeServerReact: true,
-  },
-
   // Improve image loading configuration
   images: {
     // Optimize image sizes for better performance
@@ -21,15 +14,11 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
-    // Enable React optimizations
-    styledComponents: true,
   },
 
   // Enable React strict mode for better development experience
@@ -42,30 +31,6 @@ const nextConfig = {
 
   eslint: {
     ignoreDuringBuilds: true,
-  },
-
-  // Configure headers for better caching
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/(.*).(jpg|jpeg|png|webp|avif|svg)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
   },
 
   // Configure compression
