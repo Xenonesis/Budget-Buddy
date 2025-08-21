@@ -5,20 +5,6 @@ const nextConfig = {
     optimizeCss: true,
     // Enable memory optimization
     optimizeServerReact: true,
-    // Enable code splitting optimization
-    optimizePackageImports: ['framer-motion', 'lucide-react', '@/components'],
-    // Enable font optimization
-    fontLoaders: [
-      { loader: '@next/font/google', options: { subsets: ['latin'] } },
-    ],
-  },
-
-  // Turbopack configuration for Next.js
-  turbopack: {
-    rules: {
-      // Add rules for different file types
-      '*.css': ['style-loader', 'css-loader'],
-    },
   },
 
   // Improve image loading configuration
@@ -57,9 +43,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-
-  // Enable performance optimizations
-  swcMinify: true,
 
   // Configure headers for better caching
   async headers() {
