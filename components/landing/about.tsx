@@ -7,6 +7,9 @@ import { Building, Mail, Award, Users, Zap, Target, Shield, DollarSign, Trending
 import Link from "next/link";
 
 export function AboutSection() {
+  // Meet The Developer section commented out as requested
+  return null;
+  /*
   return (
     <section id="about" className="py-20 md:py-28 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
@@ -224,4 +227,5 @@ export function AboutSection() {
       </div>
     </section>
   );
+  */
 }
