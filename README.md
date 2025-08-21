@@ -82,22 +82,65 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
 
 ## 🛠️ Modern Tech Stack
 
+Budget Buddy is built with a modern, scalable tech stack that ensures performance, security, and developer experience:
+
 <div align="center">
 
-| Category | Technology | Purpose | Version |
-|----------|------------|---------|---------|
-| **Frontend** | ![Next.js](public/tech/nextjs.svg) Next.js | React Framework | 15.5.0 |
-| **Language** | ![TypeScript](public/tech/typescript.svg) TypeScript | Type Safety | 5.9.2 |
-| **Styling** | ![Tailwind](public/tech/tailwind.svg) Tailwind CSS | Utility-First CSS | 4.1.12 |
-| **UI Components** | Radix UI | Accessible Components | Latest |
-| **State Management** | Zustand | Lightweight State | 5.0.8 |
-| **Animations** | ![Framer Motion](public/tech/framer.svg) Framer Motion | Smooth Interactions | 12.23.12 |
-| **Charts** | Recharts | Data Visualization | 3.1.2 |
-| **Backend** | ![Supabase](public/tech/supabase.svg) Supabase | Backend-as-a-Service | 2.55.0 |
-| **Database** | ![PostgreSQL](public/tech/postgres.svg) PostgreSQL | Reliable Data Storage | Latest |
-| **Authentication** | Supabase Auth | Secure User Management | Latest |
-| **AI Integration** | ![Google AI](public/tech/openai.svg) Multiple Providers | Financial Insights | Latest |
-| **Deployment** | ![Vercel](public/tech/vercel.svg) Netlify | Global CDN | Latest |
+### 🚀 Frontend
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| ![Next.js](public/tech/nextjs.svg) **Next.js** | React Framework with App Router | 15.5.0 |
+| ![TypeScript](public/tech/typescript.svg) **TypeScript** | Type Safety & Developer Experience | 5.9.2 |
+| ![Tailwind](public/tech/tailwind.svg) **Tailwind CSS** | Utility-First CSS Framework | 4.1.12 |
+| **Radix UI** | Accessible Component Primitives | Latest |
+| ![Framer Motion](public/tech/framer.svg) **Framer Motion** | Smooth Animations & Transitions | 12.23.12 |
+| **Zustand** | Lightweight State Management | 5.0.8 |
+| **Recharts** | Interactive Data Visualization | 3.1.2 |
+
+### 🔧 Backend & Infrastructure
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| ![Supabase](public/tech/supabase.svg) **Supabase** | Backend-as-a-Service Platform | 2.55.0 |
+| ![PostgreSQL](public/tech/postgres.svg) **PostgreSQL** | Reliable Data Storage | Latest |
+| **Supabase Auth** | Secure User Authentication | Latest |
+| ![Google AI](public/tech/openai.svg) **Multiple AI Providers** | Financial Insights & Assistance | Latest |
+| ![Vercel](public/tech/vercel.svg) **Netlify** | Global CDN & Deployment | Latest |
+
+</div>
+
+<details>
+<summary>✨ Why This Tech Stack?</summary>
+
+<div align="left">
+
+### 🚀 Frontend Excellence
+- **Next.js 15** - The latest React framework with App Router for optimal performance and SEO
+- **TypeScript** - Ensures type safety and reduces runtime errors for a robust codebase
+- **Tailwind CSS** - Rapid UI development with a utility-first approach and JIT compilation
+- **Radix UI** - Accessible, WAI-ARIA compliant component primitives with zero runtime styles
+- **Framer Motion** - Production-ready animations and gestures for delightful user experiences
+- **Zustand** - Minimal, modern state management solution without boilerplate
+- **Recharts** - Declarative charting library built on D3 for beautiful data visualizations
+
+### 🔧 Backend Power
+- **Supabase** - Open-source Firebase alternative with real-time capabilities and PostgreSQL
+- **PostgreSQL** - Advanced, reliable, and feature-rich open-source database
+- **Supabase Auth** - Secure, standards-compliant authentication with row-level security
+- **Multiple AI Providers** - Flexibility to choose the best AI model for each use case (Google Gemini, Claude, Mistral, etc.)
+- **Netlify** - Global CDN with automated deployments and serverless functions
+
+This stack provides the perfect balance of performance, developer experience, and scalability while maintaining enterprise-grade security.
+
+</div>
+</details>
+
+<div align="center">
+
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.12-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.55.0-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.23.12-0055FF?style=for-the-badge)](https://www.framer.com/motion/)
 
 </div>
 
