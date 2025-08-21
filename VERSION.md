@@ -1,12 +1,12 @@
-# Budget Buddy Version 9.5.0
+# Budget Buddy Version 10.0.0
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 
-**Released: May 8, 2025**
+**Released: August 21, 2025**
 
 ## 🚀 Overview
 
-Version 9.0.0 brings a major update to the Budget Buddy application with significant UI/UX improvements, AI-powered financial insights, enhanced data visualization, and expanded international support. This release focuses on making financial management more intuitive, personalized, and accessible to users worldwide.
+Version 10.0.0 brings a major update to the Budget Buddy application with significant UI/UX improvements, AI-powered financial insights, enhanced data visualization, and expanded international support. This release focuses on making financial management more intuitive, personalized, and accessible to users worldwide.
 
 ## ✨ New Features
 

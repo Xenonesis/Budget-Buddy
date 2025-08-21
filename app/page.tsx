@@ -39,7 +39,19 @@ import {
   FileText,
   Settings,
   UserPlus,
-  Mail
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Award,
+  Zap,
+  Target,
+  Shield,
+  DollarSign,
+  TrendingDown,
+  Plus,
+  Minus,
+  HelpCircle
 } from "lucide-react";
 import dynamic from 'next/dynamic';
 import { supabase } from "@/lib/supabase";
@@ -188,45 +200,27 @@ export default function Home() {
             </motion.div>
 
             {/* Desktop navigation */}
-            <div className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex items-center gap-8">
               {[
-                { name: "Features", icon: <Sparkles className="h-3.5 w-3.5" /> },
-                { name: "Pricing", icon: <BadgeDollarSign className="h-3.5 w-3.5" /> },
-                { name: "Testimonials", icon: <Star className="h-3.5 w-3.5" /> },
-                { name: "About", icon: <Users className="h-3.5 w-3.5" /> },
-                { name: "Contact", icon: <Mail className="h-3.5 w-3.5" /> }
+                { name: "Features", href: "#features" },
+                { name: "Pricing", href: "#pricing" },
+                { name: "Testimonials", href: "#testimonials" },
+                { name: "About", href: "#about" },
               ].map((item) => (
                 <motion.a
                   key={item.name}
-                  href={`#${item.name.toLowerCase()}`}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative"
-                  whileHover={{ color: "var(--primary)" }}
-                  transition={{ duration: 0.2 }}
+                  href={item.href}
+                  className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                   onClick={(e) => {
                     e.preventDefault();
-                    scrollToSection(item.name.toLowerCase());
+                    scrollToSection(item.href.substring(1));
                   }}
+                  whileHover={{ y: -2 }}
                 >
-                  <div className="relative overflow-hidden group flex items-center gap-1.5">
-                    <motion.span
-                      className="text-primary/0 group-hover:text-primary/80"
-                      initial={{ opacity: 0, x: -5, scale: 0.8 }}
-                      whileHover={{ opacity: 1, x: 0, scale: 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {item.icon}
-                    </motion.span>
-                    <motion.span className="block">{item.name}</motion.span>
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-0.5 w-full bg-primary"
-                      initial={{ scaleX: 0, originX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
+                  {item.name}
                 </motion.a>
               ))}
-            </div>
+            </nav>
 
             {/* Sign in and Sign up buttons */}
             <div className="hidden md:flex items-center space-x-4">
@@ -415,7 +409,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Hero section */}
-      <section className="relative overflow-hidden border-b bg-gradient-hero">
+      <section className="relative overflow-hidden border-b bg-gradient-hero pt-24 md:pt-32">
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-30">
             {/* Replace random bubbles with client component */}
@@ -451,9 +445,9 @@ export default function Home() {
         </motion.div>
 
         <div className="container mx-auto relative">
-          <div className="flex flex-col lg:flex-row items-center py-12 md:py-20 lg:py-32 gap-12">
+          <div className="flex flex-col lg:flex-row items-center py-12 md:py-20 lg:py-32 gap-12 px-4">
             <motion.div
-              className="flex-1 max-w-2xl"
+              className="flex-1 max-w-2xl text-center lg:text-left"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -1006,10 +1000,11 @@ export default function Home() {
                 <motion.div
                   key={feature.title}
                   ref={featureRef}
-                  className="relative group p-6 bg-background/10 backdrop-blur rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+                  className="relative group p-6 bg-background/10 backdrop-blur rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                   initial={{ opacity: 0, y: 30 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
                 >
                   <motion.div
                     className="absolute -inset-4 scale-95 bg-gradient-to-r from-primary/5 to-primary/0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -1025,6 +1020,18 @@ export default function Home() {
                       repeatDelay: 2
                     }}
                   />
+                  
+                  {/* Highlight Badge */}
+                  <motion.div
+                    className="absolute -top-3 -right-3 bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ delay: index * 0.1 + 0.5, duration: 0.4 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {feature.highlight}
+                  </motion.div>
+
                   <div className="flex items-start gap-5 sm:block">
                     <motion.div
                       className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary relative overflow-hidden"
@@ -1067,7 +1074,7 @@ export default function Home() {
                       </motion.h3>
 
                       <motion.p
-                        className="text-muted-foreground"
+                        className="text-muted-foreground mb-4"
                         initial={{ opacity: 0 }}
                         animate={isInView ? {
                           opacity: 1,
@@ -1078,11 +1085,35 @@ export default function Home() {
                         {feature.description}
                       </motion.p>
 
+                      {/* Benefits List */}
                       <motion.div
-                        className="h-0.5 w-0 bg-gradient-to-r from-primary/40 to-primary/0 mt-4 rounded-full"
+                        className="space-y-2 mb-4"
+                        initial={{ opacity: 0 }}
+                        animate={isInView ? { opacity: 1 } : {}}
+                        transition={{ delay: index * 0.1 + 0.3, duration: 0.5 }}
+                      >
+                        {feature.benefits.map((benefit, idx) => (
+                          <motion.div
+                            key={idx}
+                            className="flex items-center gap-2 text-sm"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={isInView ? { opacity: 1, x: 0 } : {}}
+                            transition={{ delay: index * 0.1 + 0.4 + (idx * 0.1), duration: 0.3 }}
+                          >
+                            <motion.div
+                              className="w-1.5 h-1.5 rounded-full bg-primary"
+                              whileHover={{ scale: 1.5 }}
+                            />
+                            <span className="text-muted-foreground">{benefit}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+
+                      <motion.div
+                        className="h-0.5 w-0 bg-gradient-to-r from-primary/40 to-primary/0 rounded-full"
                         initial={{ width: 0 }}
                         animate={isInView ? { width: "3rem" } : {}}
-                        transition={{ delay: index * 0.1 + 0.4, duration: 0.6 }}
+                        transition={{ delay: index * 0.1 + 0.6, duration: 0.6 }}
                       />
                     </div>
                   </div>
@@ -1100,7 +1131,7 @@ export default function Home() {
             whileHover={{ y: -5 }}
           >
             <div className="grid md:grid-cols-2">
-              <div className="p-8 md:p-12 flex flex-col justify-center">
+              <div className="p-8 md:p-12 flex flex-col justify-center order-2 md:order-1">
                 <motion.h3
                   className="text-2xl font-bold mb-4"
                   initial={{ opacity: 0, x: -20 }}
@@ -1192,7 +1223,7 @@ export default function Home() {
                 </motion.div>
               </div>
               <motion.div
-                className="bg-muted/30 p-6 flex items-center justify-center"
+                className="bg-muted/30 p-6 flex items-center justify-center order-1 md:order-2"
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.4 }}
@@ -1448,7 +1479,7 @@ export default function Home() {
             </motion.p>
           </motion.div>
 
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, idx) => (
               <motion.div
                 key={testimonial.name}
@@ -1575,7 +1606,7 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto items-start">
             {[
               {
                 title: "Free",
@@ -1740,6 +1771,207 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 md:py-28 bg-gradient-to-br from-muted/30 to-background relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-primary/10 blur-3xl"></div>
+          <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-violet-500/10 blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl mx-auto text-center mb-16"
+          >
+            <motion.div
+              className="flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary w-fit mb-6 mx-auto"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <DollarSign className="h-4 w-4" />
+              <span className="text-sm font-semibold">Simple, Transparent Pricing</span>
+            </motion.div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Choose the perfect plan for your{" "}
+              <span className="text-gradient-primary">financial journey</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Start free and upgrade as your needs grow. All plans include our core features with no hidden fees.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <motion.div
+                key={plan.name}
+                className={`relative rounded-2xl border bg-background/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 ${
+                  plan.popular ? 'border-primary/50 scale-105' : 'border-border/50'
+                }`}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                whileHover={{ y: -5 }}
+              >
+                {plan.popular && (
+                  <motion.div
+                    className="absolute -top-4 left-1/2 transform -translate-x-1/2"
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
+                  >
+                    <div className="bg-gradient-to-r from-primary to-violet-500 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                      Most Popular
+                    </div>
+                  </motion.div>
+                )}
+
+                <div className="p-6 md:p-8">
+                  <div className="text-center mb-8">
+                    <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
+                    <motion.div
+                      className="flex items-baseline justify-center gap-1 mb-2"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 + 0.2, duration: 0.4 }}
+                    >
+                      <span className="text-4xl font-bold">{plan.price}</span>
+                      {plan.period && <span className="text-muted-foreground">/{plan.period}</span>}
+                    </motion.div>
+                    <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
+                    {plan.savings && (
+                      <motion.div
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-medium"
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 + 0.4, duration: 0.4 }}
+                      >
+                        <TrendingDown className="h-3 w-3" />
+                        {plan.savings}
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="flex items-start gap-3 text-sm"
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.1 + 0.3 + (idx * 0.05), duration: 0.3 }}
+                      >
+                        <motion.div
+                          className="mt-0.5 flex-shrink-0 w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center"
+                          whileHover={{ scale: 1.2, backgroundColor: "var(--primary)" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Check className="h-2.5 w-2.5 text-primary" />
+                        </motion.div>
+                        <span>{feature}</span>
+                      </motion.div>
+                    ))}
+                    
+                    {plan.limitations && plan.limitations.length > 0 && (
+                      <div className="pt-3 border-t border-border/50">
+                        {plan.limitations.map((limitation, idx) => (
+                          <motion.div
+                            key={idx}
+                            className="flex items-start gap-3 text-sm text-muted-foreground"
+                            initial={{ opacity: 0, x: -10 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 + 0.5 + (idx * 0.05), duration: 0.3 }}
+                          >
+                            <div className="mt-0.5 flex-shrink-0 w-4 h-4 rounded-full bg-muted/20 flex items-center justify-center">
+                              <Minus className="h-2.5 w-2.5 text-muted-foreground" />
+                            </div>
+                            <span>{limitation}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Button
+                      asChild
+                      className={`w-full relative overflow-hidden ${
+                        plan.popular ? 'bg-primary hover:bg-primary/90' : ''
+                      }`}
+                      variant={plan.popular ? "default" : "outline"}
+                    >
+                      <Link href="/auth/register">
+                        <motion.span
+                          className="absolute inset-0 bg-primary/10"
+                          initial={{ width: 0 }}
+                          whileHover={{ width: "100%" }}
+                          transition={{ duration: 0.3 }}
+                        />
+                        <span className="relative z-10">{plan.cta}</span>
+                      </Link>
+                    </Button>
+                  </motion.div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            className="max-w-3xl mx-auto mt-16 p-6 bg-muted/30 rounded-xl text-center border border-border/50"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Building className="h-5 w-5 text-primary" />
+              <span className="font-semibold">Enterprise Solutions</span>
+            </div>
+            <p className="text-muted-foreground text-sm mb-4">
+              Need custom features, dedicated support, or enterprise-grade security? We offer tailored solutions for organizations of all sizes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Mail className="h-4 w-4" />
+                  Contact Sales
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Phone className="h-4 w-4" />
+                  Schedule Demo
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA section */}
       <section className="py-16 md:py-24 bg-gradient-cta text-white relative overflow-hidden">
         <motion.div
@@ -1774,7 +2006,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to take control of your finances?</h2>
             <p className="mb-8 text-lg text-white/90">Sign up now and start budgeting like a pro with our AI-powered tools.</p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <div className="grid md:grid-cols-5 gap-8 items-center">
               <motion.div
                 className="md:col-span-3 text-center md:text-left"
                 initial={{ opacity: 0, y: 20 }}
@@ -2402,143 +2634,353 @@ export default function Home() {
 
 const features = [
   {
-    title: "Expense Tracking",
-    description: "Effortlessly record and categorize your daily expenses, income, and financial transactions in one secure place.",
+    title: "Smart Expense Tracking",
+    description: "Automatically categorize transactions with AI-powered recognition. Connect bank accounts, credit cards, and digital wallets for seamless expense monitoring across all your financial accounts.",
     icon: <Wallet className="h-6 w-6" />,
+    benefits: ["Auto-categorization", "Multi-account sync", "Receipt scanning", "Real-time updates"],
+    highlight: "Save 5+ hours weekly"
   },
   {
-    title: "Budget Management",
-    description: "Create personalized budgets for different categories and track your progress with visual indicators and alerts.",
+    title: "Intelligent Budget Management",
+    description: "Create dynamic budgets that adapt to your lifestyle. Get personalized recommendations, spending alerts, and smart suggestions to optimize your financial health.",
     icon: <PieChart className="h-6 w-6" />,
+    benefits: ["Dynamic budgets", "Smart alerts", "Spending insights", "Goal alignment"],
+    highlight: "Reduce overspending by 40%"
   },
   {
-    title: "Financial Insights",
-    description: "Gain valuable insights into your spending patterns with beautiful charts, trends analysis, and personalized reports.",
+    title: "Advanced Financial Analytics",
+    description: "Discover hidden spending patterns with machine learning insights. Beautiful visualizations, trend analysis, and predictive forecasting help you make informed decisions.",
     icon: <LineChart className="h-6 w-6" />,
+    benefits: ["Predictive analytics", "Custom reports", "Trend analysis", "Export capabilities"],
+    highlight: "Identify 15+ saving opportunities"
   },
   {
-    title: "Goal Setting",
-    description: "Set savings goals, track your progress, and celebrate achievements as you work toward financial freedom.",
+    title: "Goal Achievement System",
+    description: "Set and achieve financial milestones with our proven goal-setting framework. Track progress, celebrate wins, and stay motivated with gamified savings challenges.",
     icon: <TrendingUp className="h-6 w-6" />,
+    benefits: ["SMART goals", "Progress tracking", "Milestone rewards", "Achievement badges"],
+    highlight: "3x higher success rate"
   },
   {
-    title: "Recurring Expenses",
-    description: "Never miss a bill payment with reminders for recurring expenses and subscription tracking features.",
+    title: "Automated Bill Management",
+    description: "Never miss a payment again with intelligent bill tracking and reminders. Monitor subscriptions, detect price changes, and optimize recurring expenses automatically.",
     icon: <Calendar className="h-6 w-6" />,
+    benefits: ["Payment reminders", "Subscription tracking", "Price monitoring", "Cancellation alerts"],
+    highlight: "Prevent $200+ in late fees"
   },
   {
-    title: "Secure & Private",
-    description: "Rest easy knowing your financial data is protected with bank-level encryption and strict privacy controls.",
+    title: "Bank-Level Security",
+    description: "Your financial data is protected with 256-bit encryption, multi-factor authentication, and SOC 2 compliance. We never store banking credentials or sell your data.",
     icon: <ShieldCheck className="h-6 w-6" />,
+    benefits: ["256-bit encryption", "Multi-factor auth", "SOC 2 compliant", "Zero data selling"],
+    highlight: "Trusted by 50,000+ users"
   },
+];
+
+const pricingPlans = [
+  {
+    name: "Starter",
+    price: "Free",
+    period: "forever",
+    description: "Perfect for individuals starting their financial journey",
+    features: [
+      "Track up to 3 accounts",
+      "Basic expense categorization",
+      "Monthly budget creation",
+      "Simple reports and charts",
+      "Mobile app access",
+      "Email support"
+    ],
+    limitations: ["Limited to 100 transactions/month", "Basic categories only"],
+    cta: "Get Started Free",
+    popular: false,
+    color: "from-gray-400 to-gray-600"
+  },
+  {
+    name: "Pro",
+    price: "$9.99",
+    period: "per month",
+    description: "Advanced features for serious budgeters and savers",
+    features: [
+      "Unlimited accounts and transactions",
+      "AI-powered categorization",
+      "Advanced budget templates",
+      "Goal tracking and milestones",
+      "Bill reminders and alerts",
+      "Custom reports and exports",
+      "Investment tracking",
+      "Priority email support",
+      "Mobile and web access"
+    ],
+    limitations: [],
+    cta: "Start 14-Day Free Trial",
+    popular: true,
+    color: "from-blue-500 to-purple-600",
+    savings: "Save $24 annually vs monthly billing"
+  },
+  {
+    name: "Family",
+    price: "$19.99",
+    period: "per month",
+    description: "Comprehensive financial management for families",
+    features: [
+      "Everything in Pro",
+      "Up to 6 family member accounts",
+      "Shared budgets and goals",
+      "Kids' allowance tracking",
+      "Family spending insights",
+      "Multiple currency support",
+      "Advanced security controls",
+      "Dedicated account manager",
+      "Phone and chat support",
+      "Financial planning consultation"
+    ],
+    limitations: [],
+    cta: "Start Family Trial",
+    popular: false,
+    color: "from-emerald-500 to-teal-600",
+    savings: "Save $48 annually vs monthly billing"
+  }
+];
+
+const faqs = [
+  {
+    question: "How secure is my financial data?",
+    answer: "We use bank-level 256-bit SSL encryption and never store your banking credentials. Your data is protected with multi-factor authentication, and we're SOC 2 compliant. We never sell or share your personal information with third parties."
+  },
+  {
+    question: "Can I connect multiple bank accounts?",
+    answer: "Yes! You can connect unlimited bank accounts, credit cards, investment accounts, and digital wallets. We support over 12,000 financial institutions across the US, Canada, and UK through secure API connections."
+  },
+  {
+    question: "How does the AI categorization work?",
+    answer: "Our machine learning algorithms analyze transaction descriptions, merchant information, and spending patterns to automatically categorize your expenses. The system learns from your corrections and becomes more accurate over time."
+  },
+  {
+    question: "Can I cancel my subscription anytime?",
+    answer: "Absolutely! You can cancel your subscription at any time with no cancellation fees. Your data will remain accessible for 90 days after cancellation, giving you time to export your information if needed."
+  },
+  {
+    question: "Do you offer customer support?",
+    answer: "Yes! Free users get email support, Pro users get priority email support, and Family plan users get phone and chat support plus a dedicated account manager. Our average response time is under 2 hours during business days."
+  },
+  {
+    question: "Can I use Budget Buddy on mobile?",
+    answer: "Yes! We have native iOS and Android apps that sync seamlessly with the web version. You can track expenses, check budgets, and receive notifications on the go. The mobile app works offline and syncs when you're back online."
+  }
 ];
 
 const testimonials = [
   {
     name: "Alex Johnson",
     title: "Small Business Owner",
-    quote: "Budget Buddy completely transformed how I manage both my personal and business finances. The insights have helped me save over $5,000 in the past year alone.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
+    company: "Johnson's Coffee Roasters",
+    quote: "Budget Buddy completely transformed how I manage both my personal and business finances. The AI categorization caught subscription services I'd forgotten about, saving me $180/month. The business expense tracking helped me identify that I was overspending on supplies by 30%. In just one year, I've saved over $5,200 and increased my profit margins significantly.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+    rating: 5,
+    savings: "$5,200",
+    timeUsing: "14 months",
+    location: "Portland, OR"
   },
   {
     name: "Sarah Williams",
-    title: "Financial Planner",
-    quote: "I recommend Budget Buddy to all my clients. It's intuitive, comprehensive, and makes financial planning accessible to everyone.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+    title: "Certified Financial Planner",
+    company: "Williams Wealth Management",
+    quote: "I recommend Budget Buddy to all my clients because it bridges the gap between professional financial planning and daily money management. The goal tracking feature has a 73% higher success rate compared to traditional methods I've seen. My clients love the visual progress indicators and automated insights. It's become an essential tool in my practice.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+    rating: 5,
+    savings: "Helps clients save avg $3,400/year",
+    timeUsing: "2+ years",
+    location: "Austin, TX"
   },
   {
     name: "Michael Chen",
-    title: "Software Engineer",
-    quote: "As someone who was terrible at tracking expenses, this app has been a game-changer. The automated categorization saves me hours each month.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael"
+    title: "Senior Software Engineer",
+    company: "TechFlow Solutions",
+    quote: "As someone who was terrible at tracking expenses, this app has been a game-changer. The automated categorization is incredibly accurate - it correctly identifies 95% of my transactions. I used to spend 2-3 hours monthly on budgeting; now it takes me 15 minutes. The investment tracking feature helped me rebalance my portfolio and I'm up 12% this year.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael",
+    rating: 5,
+    savings: "5+ hours monthly",
+    timeUsing: "18 months",
+    location: "San Francisco, CA"
   },
   {
     name: "Priya Patel",
     title: "Graduate Student",
-    quote: "Living on a student budget was challenging until I found Budget Buddy. Now I can see exactly where my money goes and make informed decisions.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya"
+    company: "Stanford University",
+    quote: "Living on a $1,800/month stipend was challenging until I found Budget Buddy. The student discount made it affordable, and the app showed me I was spending $340/month on food delivery! Now I meal prep and cook more, saving $200/month. The goal feature helped me save $2,400 for a summer research trip to India. As a data science student, I love the detailed analytics.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya",
+    rating: 5,
+    savings: "$2,400 goal achieved",
+    timeUsing: "10 months",
+    location: "Palo Alto, CA"
   },
   {
     name: "David Kim",
-    title: "Healthcare Professional",
-    quote: "The goal setting feature helped me save for a down payment on my house. The visual progress trackers kept me motivated throughout the journey.",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David"
+    title: "Emergency Room Physician",
+    company: "Metro General Hospital",
+    quote: "Working irregular hours made budgeting nearly impossible. Budget Buddy's automated tracking handles everything while I focus on saving lives. The goal setting feature helped me save $45,000 for a house down payment in 18 months. The bill reminders ensure I never miss payments despite my chaotic schedule. The family plan helps my wife and I coordinate our finances seamlessly.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
+    rating: 5,
+    savings: "$45,000 house fund",
+    timeUsing: "2 years",
+    location: "Chicago, IL"
   },
   {
     name: "Emma Rodriguez",
-    title: "Marketing Manager",
-    quote: "I've tried many budget apps, but this one strikes the perfect balance between powerful features and ease of use. Highly recommend!",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma"
+    title: "Marketing Director",
+    company: "BrandForward Agency",
+    quote: "I've tried Mint, YNAB, PocketGuard, and others, but Budget Buddy strikes the perfect balance between powerful features and ease of use. The AI insights revealed I was spending $450/month on work lunches and coffee. Now I budget $200 and bring lunch twice a week. The custom reports help me track business expenses for tax season. Highly recommend to any professional!",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+    rating: 5,
+    savings: "$3,000 annually",
+    timeUsing: "16 months",
+    location: "Denver, CO"
+  },
+  {
+    name: "James Thompson",
+    title: "Retired Teacher",
+    company: "Lincoln Elementary (Retired)",
+    quote: "At 67, I thought I was too old to learn new technology, but Budget Buddy's interface is so intuitive! It helps me manage my pension, Social Security, and retirement savings all in one place. The bill tracking ensures I never miss my medication refills or insurance payments. I've optimized my fixed income and even found ways to save $150/month on utilities and subscriptions.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=James",
+    rating: 5,
+    savings: "$1,800 annually",
+    timeUsing: "8 months",
+    location: "Phoenix, AZ"
+  },
+  {
+    name: "Lisa Park",
+    title: "Working Mother of 3",
+    company: "Park Family Household",
+    quote: "Managing finances for a family of 5 was overwhelming until we started using Budget Buddy's Family plan. The kids' allowance tracking teaches financial responsibility, and shared budgets keep my husband and I aligned. We discovered we were spending $800/month on groceries and dining out. Now we budget $500 and meal plan together. We've saved enough for a Disney vacation!",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa",
+    rating: 5,
+    savings: "$4,200 vacation fund",
+    timeUsing: "13 months",
+    location: "Orlando, FL"
   }
 ];
+
+const companyInfo = {
+  founded: "2021",
+  headquarters: "San Francisco, CA",
+  employees: "25+",
+  funding: "Series A",
+  mission: "To democratize financial wellness by making budgeting simple, intelligent, and accessible to everyone.",
+  values: ["Privacy First", "User-Centric Design", "Financial Inclusion", "Continuous Innovation"],
+  certifications: ["SOC 2 Type II", "PCI DSS Compliant", "GDPR Compliant"],
+  investors: ["Sequoia Capital", "Andreessen Horowitz", "Y Combinator"]
+};
 
 const developers = [
   {
     name: "Alex Chen",
-    role: "Lead Developer",
-    bio: "Full-stack developer passionate about creating intuitive financial tools that empower users to achieve their goals.",
+    role: "Co-Founder & CEO",
+    bio: "Former Goldman Sachs quantitative analyst turned fintech entrepreneur. Alex has 8+ years of experience in financial modeling and machine learning. He holds an MS in Computer Science from Stanford and is passionate about making financial tools accessible to everyone.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+    experience: "8+ years",
+    education: "MS Computer Science, Stanford University",
+    previousCompanies: ["Goldman Sachs", "Stripe", "Robinhood"],
+    expertise: ["Machine Learning", "Financial Modeling", "Product Strategy"],
     socials: [
       {
         platform: "LinkedIn",
-        url: "https://linkedin.com",
+        url: "https://linkedin.com/in/alexchen",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
       },
       {
         platform: "GitHub",
-        url: "https://github.com",
+        url: "https://github.com/alexchen",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
       },
       {
         platform: "Twitter",
-        url: "https://twitter.com",
+        url: "https://twitter.com/alexchen_tech",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
       }
     ]
   },
   {
     name: "Sophia Rodriguez",
-    role: "UI/UX Designer",
-    bio: "Design enthusiast focused on creating beautiful, accessible interfaces that make managing finances a delightful experience.",
+    role: "Co-Founder & Head of Design",
+    bio: "Award-winning UX designer with 6+ years at Apple and Google. Sophia led design for Google Pay's budgeting features used by 100M+ users. She holds a BFA in Interaction Design from Art Center and is passionate about inclusive financial design.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia",
+    experience: "6+ years",
+    education: "BFA Interaction Design, Art Center College of Design",
+    previousCompanies: ["Apple", "Google", "IDEO"],
+    expertise: ["User Experience", "Design Systems", "Accessibility"],
+    awards: ["Webby Award 2020", "UX Design Awards 2019"],
     socials: [
       {
         platform: "LinkedIn",
-        url: "https://linkedin.com",
+        url: "https://linkedin.com/in/sophiarodriguez",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
       },
       {
         platform: "Dribbble",
-        url: "https://dribbble.com",
+        url: "https://dribbble.com/sophiarodriguez",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M19.13 5.09C15.22 9.14 10 10.44 2.25 10.94"/><path d="M21.75 12.84c-6.62-1.41-12.14 1-16.38 6.32"/><path d="M8.56 2.75c4.37 6 6 9.42 8 17.72"/></svg>
       },
       {
-        platform: "Instagram",
-        url: "https://instagram.com",
+        platform: "Behance",
+        url: "https://behance.net/sophiarodriguez",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
       }
     ]
   },
   {
     name: "Marcus Johnson",
-    role: "Backend Developer",
-    bio: "Security and database specialist ensuring your financial data is protected with the latest encryption technologies.",
+    role: "VP of Engineering",
+    bio: "Cybersecurity expert and former Netflix senior engineer. Marcus built scalable systems serving 200M+ users and specializes in financial data protection. He holds an MS in Cybersecurity from MIT and ensures Budget Buddy meets the highest security standards.",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
+    experience: "10+ years",
+    education: "MS Cybersecurity, MIT",
+    previousCompanies: ["Netflix", "Palantir", "Square"],
+    expertise: ["Cybersecurity", "Distributed Systems", "Data Protection"],
+    certifications: ["CISSP", "CISM", "AWS Solutions Architect"],
     socials: [
       {
         platform: "LinkedIn",
-        url: "https://linkedin.com",
+        url: "https://linkedin.com/in/marcusjohnson",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
       },
       {
         platform: "GitHub",
-        url: "https://github.com",
+        url: "https://github.com/marcusjohnson",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
       },
       {
         platform: "Stack Overflow",
-        url: "https://stackoverflow.com",
+        url: "https://stackoverflow.com/users/marcusjohnson",
         icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 16.5h-12v-2h12v2z"/><path d="m19 20h-14v-2h14z"/><path d="m14 12 0.8-3-3-0.7-0.8 3 3 0.7z"/><path d="m12 8.3 1.6-2.7-2.7-1.6-1.6 2.7 2.7 1.6z"/><path d="m8.8 3.8 2.3-2.1-2.1-2.3-2.3 2.1 2.1 2.3z"/></svg>
+      }
+    ]
+  },
+  {
+    name: "Dr. Priya Sharma",
+    role: "Head of Data Science",
+    bio: "PhD in Machine Learning from Carnegie Mellon with 7+ years in financial AI. Former lead data scientist at American Express, where she developed fraud detection algorithms. Priya leads our AI initiatives and predictive analytics features.",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya",
+    experience: "7+ years",
+    education: "PhD Machine Learning, Carnegie Mellon University",
+    previousCompanies: ["American Express", "JPMorgan Chase", "IBM Research"],
+    expertise: ["Machine Learning", "Financial AI", "Predictive Analytics"],
+    publications: "15+ peer-reviewed papers",
+    socials: [
+      {
+        platform: "LinkedIn",
+        url: "https://linkedin.com/in/priyasharma",
+        icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      },
+      {
+        platform: "Google Scholar",
+        url: "https://scholar.google.com/priyasharma",
+        icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443a55.381 55.381 0 015.25 2.882V15"></path></svg>
+      },
+      {
+        platform: "ResearchGate",
+        url: "https://researchgate.net/profile/priya-sharma",
+        icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
       }
     ]
   }
