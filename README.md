@@ -4,11 +4,11 @@
 
 ![Budget Buddy Banner](public/banner.png)
 
-**Take control of your finances with intelligent insights and beautiful design**
+**Take control of your finances with AI-powered insights and beautiful design**
 
 [![Version](https://img.shields.io/badge/version-10.75-blue.svg)](VERSION.md)
-[![Next.js](https://img.shields.io/badge/Next.js-14.2.0-black.svg)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4.0-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Latest-green.svg)](https://supabase.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -20,45 +20,63 @@
 
 ## 🌟 Welcome to Budget Buddy
 
-Budget Buddy is a modern, intelligent financial management application built with cutting-edge technologies. It combines beautiful UI/UX design with powerful AI-driven insights to help you make smarter financial decisions.
+Budget Buddy is a modern, intelligent financial management application built with cutting-edge technologies. It combines beautiful UI/UX design with powerful AI-driven insights to help you make smarter financial decisions and achieve your financial goals.
 
 <div align="center">
   
-  [![Product ScreenShot](public/dashboard.png)](https://budget-buddy.netlify.app)
+  [![Product Screenshot](public/dashboard.png)](https://budget-buddy.netlify.app)
   
 </div>
 
-### ✨ Why Budget Buddy?
+### ✨ Why Choose Budget Buddy?
 
-Budget Buddy isn't just another expense tracker. It's a comprehensive financial companion that helps you understand your spending patterns, predict future expenses, and achieve your financial goals with minimal effort.
+Budget Buddy isn't just another expense tracker. It's a comprehensive financial companion that leverages artificial intelligence to understand your spending patterns, predict future expenses, and provide personalized recommendations to optimize your financial health.
 
 ---
 
 ## 🚀 Key Features
 
 ### 💳 Smart Transaction Management
-- **AI-Powered Categorization** - Automatically categorizes your transactions
-- **Bulk Import** - Import from CSV, Excel, or bank statements
-- **Recurring Transactions** - Set up automatic recurring income/expenses
-- **Search & Filter** - Find transactions instantly with powerful search
+- **AI-Powered Categorization** - Automatically categorizes transactions using machine learning
+- **Bulk Import/Export** - Import from CSV, Excel, or export to PDF/Excel formats
+- **Recurring Transactions** - Set up automatic recurring income/expenses with flexible intervals
+- **Advanced Search & Filter** - Find transactions instantly with powerful search capabilities
+- **Batch Operations** - Edit multiple transactions simultaneously for efficiency
 
-### 📈 Advanced Budget Planning
-- **Flexible Budgets** - Create weekly, monthly, or yearly budgets
-- **Real-time Tracking** - Monitor spending against budgets in real-time
-- **Smart Alerts** - Get notified when approaching budget limits
-- **Category Insights** - Detailed breakdown by spending categories
+### 📊 Advanced Analytics Dashboard
+- **Interactive Charts** - Beautiful visualizations with drill-down capabilities using Recharts
+- **Real-time Data** - Live updates with smooth animations and transitions
+- **Custom Time Periods** - Analyze data across different date ranges
+- **Comparative Analysis** - Compare spending patterns across months and categories
+- **Export Reports** - Generate detailed financial reports in multiple formats
 
-### 🧠 AI-Powered Analytics
-- **Spending Patterns** - Discover your spending habits and trends
-- **Predictive Insights** - Forecast future expenses and income
-- **Personalized Tips** - Get tailored advice to improve your finances
+### 🧠 AI-Powered Financial Insights
+- **Multiple AI Providers** - Support for Google Gemini, Mistral, Claude, Groq, and more
+- **Personalized Recommendations** - Tailored advice based on your spending habits
+- **Predictive Forecasting** - Forecast future expenses with confidence intervals
+- **Anomaly Detection** - Identify unusual spending patterns automatically
 - **Natural Language Queries** - Ask questions about your finances in plain English
+- **Financial Assistant Chat** - Interactive AI chat for financial guidance
 
-### 🎨 Beautiful Design System
+### 🎯 Intelligent Budget Planning
+- **Dynamic Budgets** - Create flexible budgets that adapt to your lifestyle
+- **Smart Alerts** - Get notified when approaching budget limits
+- **Goal Tracking** - Visual progress meters toward financial objectives
+- **Category Insights** - Detailed breakdown by spending categories
+- **Monthly Reports** - Comprehensive financial summaries
+
+### 🎨 Modern Design System
 - **Responsive UI** - Optimized for all devices from mobile to desktop
-- **Dark/Light Mode** - Beautiful themes that adapt to your preference
-- **Smooth Animations** - Fluid transitions and micro-interactions
-- **Accessibility** - WCAG compliant design for all users
+- **Dark/Light Mode** - Beautiful themes with seamless switching
+- **Smooth Animations** - Fluid transitions powered by Framer Motion
+- **Accessibility First** - WCAG compliant design for all users
+- **Customizable Dashboard** - Drag-and-drop widgets and layouts
+
+### 🔒 Enterprise-Grade Security
+- **Bank-Level Encryption** - 256-bit encryption for all sensitive data
+- **Supabase Authentication** - Secure user management with row-level security
+- **Multi-Factor Authentication** - Enhanced security with biometric support
+- **Privacy First** - Your data is never sold or shared with third parties
 
 ---
 
@@ -66,44 +84,44 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
 
 <div align="center">
 
-| Category | Technology | Purpose |
-|----------|------------|---------|
-| **Frontend** | ![Next.js](public/tech/nextjs.svg) Next.js 14 | React Framework |
-| **Language** | ![TypeScript](public/tech/typescript.svg) TypeScript | Type Safety |
-| **Styling** | ![Tailwind](public/tech/tailwind.svg) Tailwind CSS | Utility-First CSS |
-| **UI Components** | Radix UI + Custom | Accessible Components |
-| **State Management** | Zustand | Lightweight State |
-| **Animations** | ![Framer Motion](public/tech/framer.svg) Framer Motion | Smooth Interactions |
-| **Charts** | Recharts | Data Visualization |
-| **Backend** | ![Supabase](public/tech/supabase.svg) Supabase | Backend-as-a-Service |
-| **Database** | ![PostgreSQL](public/tech/postgres.svg) PostgreSQL | Reliable Data Storage |
-| **Authentication** | ![Supabase Auth](public/tech/supabase.svg) Supabase Auth | Secure User Management |
-| **AI** | ![Google AI](public/tech/openai.svg) Google Generative AI | Financial Insights |
-| **Deployment** | ![Vercel](public/tech/vercel.svg) Vercel | Global CDN |
+| Category | Technology | Purpose | Version |
+|----------|------------|---------|---------|
+| **Frontend** | ![Next.js](public/tech/nextjs.svg) Next.js | React Framework | 15.5.0 |
+| **Language** | ![TypeScript](public/tech/typescript.svg) TypeScript | Type Safety | 5.9.2 |
+| **Styling** | ![Tailwind](public/tech/tailwind.svg) Tailwind CSS | Utility-First CSS | 4.1.12 |
+| **UI Components** | Radix UI | Accessible Components | Latest |
+| **State Management** | Zustand | Lightweight State | 5.0.8 |
+| **Animations** | ![Framer Motion](public/tech/framer.svg) Framer Motion | Smooth Interactions | 12.23.12 |
+| **Charts** | Recharts | Data Visualization | 3.1.2 |
+| **Backend** | ![Supabase](public/tech/supabase.svg) Supabase | Backend-as-a-Service | 2.55.0 |
+| **Database** | ![PostgreSQL](public/tech/postgres.svg) PostgreSQL | Reliable Data Storage | Latest |
+| **Authentication** | Supabase Auth | Secure User Management | Latest |
+| **AI Integration** | ![Google AI](public/tech/openai.svg) Multiple Providers | Financial Insights | Latest |
+| **Deployment** | ![Vercel](public/tech/vercel.svg) Netlify | Global CDN | Latest |
 
 </div>
 
 ---
 
-## 📱 Screenshots
+## 📱 Application Screenshots
 
 <div align="center">
 
 ### 🏠 Dashboard Overview
 ![Dashboard](docs/screenshots/dashboard.png)
-*Beautiful dashboard with all your financial information at a glance*
+*Comprehensive dashboard with real-time financial insights and interactive charts*
 
 ### 💳 Transaction Management
 ![Transactions](docs/screenshots/transactions.png)
-*Easily add, edit, and categorize your transactions*
+*Advanced transaction management with AI categorization and bulk operations*
 
 ### 📊 Financial Analytics
 ![Analytics](docs/screenshots/dashboard.png)
-*Deep insights into your spending patterns and trends*
+*Deep insights into spending patterns with predictive analytics*
 
-### 🤖 AI Insights
+### 🤖 AI Financial Assistant
 ![AI Insights](docs/screenshots/dashboard.png)
-*Personalized financial advice powered by AI*
+*Personalized financial advice powered by multiple AI providers*
 
 </div>
 
@@ -113,10 +131,10 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Google AI API key (optional, for AI features)
+- **Node.js** 18+ 
+- **npm** or **yarn**
+- **Supabase** account
+- **AI API keys** (optional, for AI features)
 
 ### Installation Steps
 
@@ -134,13 +152,19 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
    ```
 
 3. **Environment Setup**
-   Create a `.env.local` file in the root directory:
+   
+   Copy the environment template:
+   ```bash
+   cp .env.template .env.local
+   ```
+   
+   Configure your `.env.local` file:
    ```env
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    
-   # AI Configuration (Optional)
+   # AI Configuration (Optional - for AI features)
    NEXT_PUBLIC_GOOGLE_AI_API_KEY=your_google_ai_api_key
    
    # App Configuration
@@ -148,9 +172,10 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
    ```
 
 4. **Database Setup**
-   Run the database setup scripts in order:
-   ```bash
-   # In Supabase SQL Editor, run these files from the sql directory:
+   
+   Run the database setup scripts in your Supabase SQL Editor:
+   ```sql
+   -- Execute these files in order:
    sql/setup-1-base.sql
    sql/setup-2-security.sql
    sql/setup-3-functions.sql
@@ -164,7 +189,28 @@ Budget Buddy isn't just another expense tracker. It's a comprehensive financial 
    yarn dev
    ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see your application running! 🎉
+6. **Open Your Browser**
+   
+   Visit [http://localhost:3000](http://localhost:3000) to see your application! 🎉
+
+---
+
+## 🤖 AI Features Setup
+
+Budget Buddy supports multiple AI providers for enhanced financial insights:
+
+### Supported AI Providers
+- **Google Gemini** - Versatile model for general financial advice
+- **Mistral AI** - Fast and efficient financial analysis
+- **Claude (Anthropic)** - Advanced reasoning for complex financial planning
+- **Groq** - Ultra-fast processing for real-time insights
+- **DeepSeek** - Specialized financial calculations
+- **OpenRouter** - Access to multiple models through single API
+
+### Setup Instructions
+1. Follow the detailed [AI Setup Guide](AI-SETUP-GUIDE.md)
+2. Configure your preferred AI provider in Settings
+3. Start chatting with your AI financial assistant!
 
 ---
 
@@ -175,31 +221,56 @@ Visit [http://localhost:3000](http://localhost:3000) to see your application run
 - [🤖 AI Setup Guide](AI-SETUP-GUIDE.md)
 - [💰 Income Categories Setup](INCOME_CATEGORIES_SETUP.md)
 - [🔧 API Reference](docs/api-reference.md)
-- [🎨 Theming Guide](docs/theming.md)
+- [🎨 Features Overview](docs/features.md)
 - [📱 Mobile Guide](docs/mobile.md)
-- [🔒 Security Guide](docs/security.md)
+- [🔒 Security Guide](SECURITY.md)
 
 ---
 
-## 🤝 Community & Contributing
+## 🏗️ Project Structure
 
-We love contributions from the community! Here's how you can help:
+```
+Budget-Buddy/
+├── app/                    # Next.js App Router
+│   ├── dashboard/         # Dashboard pages
+│   ├── auth/             # Authentication pages
+│   ├── globals.css       # Global styles
+│   └── layout.tsx        # Root layout
+├── components/           # Reusable components
+│   ├── ui/              # UI components
+│   ├── landing/         # Landing page components
+│   └── auth/            # Authentication components
+├── lib/                 # Utility libraries
+│   ├── supabase.ts     # Supabase client
+│   ├── utils.ts        # Utility functions
+│   ├── store.ts        # Zustand store
+│   └── ai.ts           # AI integration
+├── sql/                # Database schemas
+├── public/             # Static assets
+└── docs/              # Documentation
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
 
 ### Development Workflow
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Make** your changes
+4. **Test** your changes: `npm run build`
+5. **Commit** changes: `git commit -m 'Add amazing feature'`
+6. **Push** to branch: `git push origin feature/amazing-feature`
+7. **Open** a Pull Request
 
 ### Code Standards
 
-- Follow TypeScript best practices
-- Use Prettier for code formatting
-- Follow the existing component patterns
+- Follow **TypeScript** best practices
+- Use **Prettier** for code formatting
+- Follow existing component patterns
 - Write meaningful commit messages
 - Add tests for new features
 
@@ -218,25 +289,25 @@ We love contributions from the community! Here's how you can help:
 
 ---
 
-## 🗺️ Future Roadmap
+## 🗺️ Roadmap
 
 ### 🎯 Version 11.0 (Planned)
 - [ ] **Multi-currency Support** - Handle multiple currencies seamlessly
-- [ ] **Bank Integration** - Connect directly to your bank accounts
+- [ ] **Bank Integration** - Connect directly to bank accounts via Plaid
 - [ ] **Investment Tracking** - Track stocks, crypto, and other investments
-- [ ] **Bill Reminders** - Never miss a payment again
+- [ ] **Bill Reminders** - Smart notifications for upcoming payments
 - [ ] **Family Sharing** - Share budgets with family members
 
 ### 🔮 Long-term Vision
 - [ ] **Receipt Scanning** - AI-powered receipt text extraction
-- [ ] **Voice Commands** - Add transactions using voice
+- [ ] **Voice Commands** - Add transactions using voice input
 - [ ] **Smart Notifications** - Intelligent spending alerts
-- [ ] **Financial Reports** - Generate detailed financial reports
 - [ ] **Tax Integration** - Export data for tax preparation
+- [ ] **Financial Reports** - Generate comprehensive financial reports
 
 ---
 
-## 🏆 Recognition
+## 🏆 Recognition & Awards
 
 - 🥇 **Best Personal Finance App** - Developer Awards 2024
 - ⭐ **Featured Project** - GitHub Trending
@@ -275,13 +346,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Supabase** for the amazing backend platform
-- **Vercel** for seamless deployment
+Special thanks to the amazing open-source community and these fantastic tools:
+
+- **Supabase** for the incredible backend platform
+- **Vercel/Netlify** for seamless deployment
 - **Radix UI** for accessible component primitives
 - **Tailwind CSS** for the utility-first CSS framework
 - **Recharts** for beautiful data visualizations
 - **Framer Motion** for smooth animations
-- **Google AI** for intelligent insights
+- **Google AI & Other AI Providers** for intelligent insights
+- **Next.js Team** for the amazing React framework
 
 ---
 
@@ -293,5 +367,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [![Twitter](https://img.shields.io/twitter/follow/itisaddy7?style=social)](https://twitter.com/itisaddy7)
 [![GitHub](https://img.shields.io/github/followers/Xenonesis?style=social)](https://github.com/Xenonesis)
+
+---
+
+### 🔥 Latest Updates
+
+**Version 10.75** - Landing page refactoring complete with improved performance and maintainability
+
+**Version 10.70** - Enhanced dashboard UI with virtualized lists and advanced transaction management
+
+**Version 10.65** - Comprehensive financial analytics with interactive charts and export capabilities
+
+**Version 10.60** - AI-powered insights with multiple provider support and predictive forecasting
+
+[View Full Changelog](CHANGELOG.md)
 
 </div>
