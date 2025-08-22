@@ -14,12 +14,14 @@ export interface AIMessage {
 }
 
 export interface FinancialInsight {
-  type: 'spending_pattern' | 'saving_suggestion' | 'budget_warning' | 'investment_tip';
+  type: 'spending_pattern' | 'saving_suggestion' | 'budget_warning' | 'investment_tip' | 'warning' | 'success' | 'trend' | 'decline';
   title: string;
   description: string;
   confidence: number; // 0-1
   relevantCategories?: string[];
   createdAt: string;
+  amount?: number;
+  category?: string;
 }
 
 export type AIProvider = 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter' | 'cerebras' | 'xAI' | 'unbound' | 'openai' | 'ollama' | 'lmstudio';
@@ -59,6 +61,11 @@ export interface ModelConfig {
   provider: AIProvider;
   model: AIModel;
   apiKey?: string;
+}
+
+export interface AIModelConfig {
+  provider: AIProvider;
+  model: AIModel;
 }
 
 export interface AISettings {
@@ -543,28 +550,34 @@ export async function generateGoogleAIInsights(
 function getExampleInsights(): FinancialInsight[] {
   return [
     {
-      type: "spending_pattern",
+      type: "trend",
       title: "Increased Spending on Food",
       description: "Your food expenses have increased by 15% compared to last month. Consider meal planning to reduce costs.",
       confidence: 0.92,
       relevantCategories: ["Food", "Groceries", "Restaurants"],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      amount: 245.50,
+      category: "Food"
     },
     {
-      type: "budget_warning",
+      type: "warning",
       title: "Entertainment Budget at Risk",
       description: "You've already spent 80% of your entertainment budget with 10 days left in the month.",
       confidence: 0.85,
       relevantCategories: ["Entertainment", "Subscriptions"],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      amount: 320.00,
+      category: "Entertainment"
     },
     {
-      type: "saving_suggestion",
+      type: "success",
       title: "Potential Savings on Subscriptions",
       description: "You're spending $45 monthly on subscription services. Consider reviewing which ones you actually use regularly.",
       confidence: 0.78,
       relevantCategories: ["Subscriptions", "Entertainment"],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      amount: 45.00,
+      category: "Subscriptions"
     },
     {
       type: "investment_tip",
@@ -572,7 +585,9 @@ function getExampleInsights(): FinancialInsight[] {
       description: "Based on your current savings, moving to a high-yield savings account could earn you an additional $120 per year.",
       confidence: 0.88,
       relevantCategories: ["Savings", "Investments"],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      amount: 120.00,
+      category: "Savings"
     }
   ];
 }
@@ -1309,6 +1324,88 @@ export async function getUserQuotaStatus(userId: string): Promise<{
   } catch (error) {
     console.error('Error getting user quota status:', error);
     return null;
+  }
+}
+
+// Get available AI providers for a user based on their API keys
+export async function getAvailableAIProviders(userId: string): Promise<string[]> {
+  try {
+    const settings = await getUserAISettings(userId);
+    if (!settings) return [];
+    
+    const providers: string[] = [];
+    
+    if (settings.mistral_api_key) providers.push('mistral');
+    if (settings.anthropic_api_key) providers.push('anthropic');
+    if (settings.groq_api_key) providers.push('groq');
+    if (settings.deepseek_api_key) providers.push('deepseek');
+    if (settings.llama_api_key) providers.push('llama');
+    if (settings.cohere_api_key) providers.push('cohere');
+    if (settings.gemini_api_key || settings.google_api_key) providers.push('gemini');
+    if (settings.qwen_api_key) providers.push('qwen');
+    if (settings.openrouter_api_key) providers.push('openrouter');
+    if (settings.cerebras_api_key) providers.push('cerebras');
+    if (settings.xai_api_key) providers.push('xAI');
+    if (settings.unbound_api_key) providers.push('unbound');
+    if (settings.openai_api_key) providers.push('openai');
+    if (settings.ollama_api_key) providers.push('ollama');
+    if (settings.lmstudio_api_key) providers.push('lmstudio');
+    
+    return providers;
+  } catch (error) {
+    console.error('Error getting available AI providers:', error);
+    return [];
+  }
+}
+
+// Get AI models for a specific provider (alias for existing function)
+export async function getAIModelsForProvider(provider: AIProvider): Promise<AIModel[]> {
+  try {
+    // For now, return static models since we don't have API keys in this context
+    // In a real implementation, you'd pass the API key here
+    const models = await getAvailableModelsForProvider(provider, '');
+    return models || getDefaultModelsForProvider(provider);
+  } catch (error) {
+    console.error(`Error getting models for ${provider}:`, error);
+    return getDefaultModelsForProvider(provider);
+  }
+}
+
+// Get default models for a provider when API call fails
+function getDefaultModelsForProvider(provider: string): AIModel[] {
+  switch (provider) {
+    case 'mistral':
+      return ['mistral-tiny', 'mistral-small', 'mistral-medium', 'mistral-large-latest', 'mistral-large', 'mistral-small-latest', 'mistral-nemo'];
+    case 'anthropic':
+      return ['claude-3-haiku', 'claude-3-sonnet', 'claude-3-opus', 'claude-3-5-sonnet', 'claude-3-5-haiku'];
+    case 'groq':
+      return ['llama3-8b', 'llama3-70b', 'mixtral-8x7b', 'llama-3.1-8b', 'llama-3.1-70b', 'llama-3.1-405b'];
+    case 'deepseek':
+      return ['deepseek-coder', 'deepseek-chat', 'deepseek-chat-v2', 'deepseek-coder-v2'];
+    case 'llama':
+      return ['llama-2-7b', 'llama-2-13b', 'llama-2-70b', 'llama-3-8b', 'llama-3-70b', 'llama-3.1-8b', 'llama-3.1-70b', 'llama-3.1-405b'];
+    case 'cohere':
+      return ['command', 'command-light', 'command-r', 'command-r-plus', 'command-nightly'];
+    case 'gemini':
+      return ['gemini-pro', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.5-pro-exp-0801', 'gemini-1.5-flash-exp-0801', 'gemini-2.0-flash-exp'];
+    case 'qwen':
+      return ['qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen-2.5-7b', 'qwen-2.5-14b', 'qwen-2.5-32b', 'qwen-2.5-72b'];
+    case 'openrouter':
+      return ['openrouter-default', 'anthropic/claude-3-opus', 'google/gemini-pro', 'meta-llama/llama-3-70b-instruct', 'openai/gpt-4', 'openai/gpt-4-turbo'];
+    case 'cerebras':
+      return ['cerebras-gemma-2b', 'cerebras-llama3-8b', 'cerebras-llama-3.1-8b', 'cerebras-llama-3.1-70b'];
+    case 'xAI':
+      return ['grok-1', 'grok-2', 'grok-3', 'grok-4'];
+    case 'unbound':
+      return ['unbound-llama-3-8b', 'unbound-llama-3-70b', 'unbound-llama-3.1-8b', 'unbound-llama-3.1-70b'];
+    case 'openai':
+      return ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini', 'o1-preview', 'o1-mini'];
+    case 'ollama':
+      return ['ollama-llama2', 'ollama-mistral', 'ollama-gemma', 'ollama-phi3', 'ollama-llama3', 'ollama-llama3.1', 'ollama-gemma2'];
+    case 'lmstudio':
+      return ['lmstudio-llama3', 'lmstudio-mistral', 'lmstudio-gemma', 'lmstudio-llama3.1', 'lmstudio-gemma2', 'lmstudio-mixtral'];
+    default:
+      return ['mistral-small'];
   }
 }
 

@@ -30,7 +30,7 @@ NEXT_PUBLIC_GOOGLE_AI_API_KEY=your-google-ai-key
 # App Configuration
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 NEXT_PUBLIC_APP_NAME="Budget Buddy"
-NEXT_PUBLIC_APP_VERSION="9.5.0"
+NEXT_PUBLIC_APP_VERSION="9.5.0"  # Optional: If not set, automatically reads from package.json
 
 # Analytics (Optional)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
