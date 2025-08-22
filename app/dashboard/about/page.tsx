@@ -60,7 +60,11 @@ const gridPatternStyle = {
 };
 
 // Animation helper component
-const AnimateInView = ({ children, className = "", delay = 0 }) => {
+const AnimateInView = ({ children, className = "", delay = 0 }: { 
+  children: React.ReactNode; 
+  className?: string; 
+  delay?: number; 
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = React.useRef(null);
 
