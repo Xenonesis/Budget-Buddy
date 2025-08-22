@@ -15,7 +15,8 @@ import {
   type FinancialInsight,
   type AIMessage,
   type AIModelConfig,
-  type AIModel
+  type AIModel,
+  type AIProvider
 } from "@/lib/ai";
 
 import {
