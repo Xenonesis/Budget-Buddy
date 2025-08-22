@@ -55,7 +55,7 @@ export default function AIInsightsPage() {
     provider: 'mistral',
     model: 'mistral-small'
   });
-  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
+  const [availableProviders, setAvailableProviders] = useState<AIProvider[]>([]);
   const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
   const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
 
@@ -116,8 +116,8 @@ export default function AIInsightsPage() {
       
       if (providers.length > 0) {
         setCurrentModelConfig({
-          provider: providers[0],
-          model: getDefaultModelForProvider(providers[0])
+          provider: providers[0] as AIProvider,
+          model: getDefaultModelForProvider(providers[0]) as AIModel
         });
       }
     } catch (error) {
