@@ -7,3 +7,6 @@ export { ConversationHistory } from './ConversationHistory';
 export { PageHeader } from './PageHeader';
 export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
+export { VoiceInterface } from './VoiceInterface';
+export { TypingIndicator } from './TypingIndicator';
+export { InsightMessage } from './InsightMessage';

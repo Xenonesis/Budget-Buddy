@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { SafeImage } from './safe-image';
 
 interface LogoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -166,25 +167,18 @@ export function Logo({
   // Base component with responsive container
   const LogoContent = () => (
     <div className={`relative flex items-center justify-center ${sizeMap[size].container} transition-all duration-300`}>
-      <Image 
+      <SafeImage 
         src="/logo.svg" 
         alt="Budget Buddy Logo" 
         width={getImageDimension(sizeMap[size].logo)} 
         height={getImageDimension(sizeMap[size].logo)} 
         className={`${sizeMap[size].logo} transition-all duration-300`}
         priority={size === 'lg' || size === 'xl' || size === '2xl'} 
-        onError={(e) => {
-          // Fallback to a colored div if image fails to load
-          const target = e.target as HTMLImageElement;
-          target.style.display = 'none';
-          const parent = target.parentElement;
-          if (parent) {
-            const fallback = document.createElement('div');
-            fallback.className = `${sizeMap[size].logo} bg-primary/80 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300`;
-            fallback.innerText = 'BB';
-            parent.appendChild(fallback);
-          }
-        }}
+        fallback={
+          <div className={`${sizeMap[size].logo} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 shadow-lg`}>
+            <span className="text-xs sm:text-sm md:text-base lg:text-lg">BB</span>
+          </div>
+        }
       />
     </div>
   );

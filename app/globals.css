@@ -1598,11 +1598,107 @@ html {
 /* Financial Data Flow Animation Styles */
 .financial-data {
   offset-anchor: 10px 0px;
-  animation: financial-animation-path;
-  animation-iteration-count: infinite;
-  animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  animation-duration: 4s;
-  animation-delay: 1s;
+}
+
+/* AI Insights Page Animation Styles */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.3); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes typing-dots {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
+.animate-typing-dots {
+  animation: typing-dots 1.4s infinite;
+}
+
+.animate-typing-dots:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.animate-typing-dots:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Voice Interface Animations */
+.voice-listening {
+  position: relative;
+}
+
+.voice-listening::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: conic-gradient(from 0deg, transparent, rgba(239, 68, 68, 0.4), transparent);
+  border-radius: inherit;
+  z-index: -1;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Insights Card Hover Effects */
+.insight-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.insight-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar Animation */
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: var(--progress-width); }
+}
+
+.animate-progress {
+  animation: progress-fill 1s ease-out forwards;
+}
+
+/* Chat Message Animations */
+.message-slide-in {
+  animation: slide-in-bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .financial-light-1 {
