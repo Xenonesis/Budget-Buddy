@@ -558,8 +558,8 @@ export default function AIInsightsPage() {
                   {/* Voice Interface */}
                   <div className="bg-gradient-to-br from-primary/5 via-blue-50/50 to-purple-50/30 dark:from-primary/10 dark:via-blue-950/20 dark:to-purple-950/10 rounded-2xl p-8 mb-8 border border-primary/10">
                     <VoiceInterface
-                      onTranscript={handleVoiceCommand}
-                      onSpeakText={handleSpeakTextSetup}
+                      onTranscriptAction={handleVoiceCommand}
+                      onSpeakTextAction={handleSpeakTextSetup}
                       disabled={chatLoading}
                       mode="center"
                       className="justify-center"

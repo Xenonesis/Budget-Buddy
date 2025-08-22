@@ -10,16 +10,20 @@ import { Mic, MicOff, Volume2, VolumeX, Loader2, Square, Play, Pause, Bot, Alert
 import { cn } from "@/lib/utils";
 
 interface VoiceInterfaceProps {
-  onTranscript: (text: string) => void;
-  onSpeakText?: (speakFunction: (text: string) => void) => void;
+  onTranscriptAction: (text: string) => void;
+  onSpeakTextAction?: (speakFunction: (text: string) => void) => void;
+  onListeningChangeAction?: (isListening: boolean, transcript?: string) => void;
+  onTranscriptUpdateAction?: (transcript: string) => void;
   disabled?: boolean;
   className?: string;
   mode?: 'compact' | 'expanded' | 'center';
 }
 
 export function VoiceInterface({ 
-  onTranscript, 
-  onSpeakText,
+  onTranscriptAction, 
+  onSpeakTextAction,
+  onListeningChangeAction,
+  onTranscriptUpdateAction,
   disabled = false,
   className = "",
   mode = 'compact'
@@ -134,6 +138,9 @@ export function VoiceInterface({
       setTranscript("");
       setFinalTranscript("");
       performanceRef.current.recognitionStartTime = Date.now();
+      
+            // Notify parent about listening state change
+      onListeningChangeAction?.(true);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -161,9 +168,14 @@ export function VoiceInterface({
       setTranscript(interimTranscript);
       setConfidence(maxConfidence);
       
+      // Notify parent about real-time transcript updates
+      if (interimTranscript) {
+        onTranscriptUpdateAction?.(interimTranscript);
+      }
+      
       if (finalTranscriptLocal) {
         setFinalTranscript(finalTranscriptLocal);
-        onTranscript(finalTranscriptLocal);
+        onTranscriptAction(finalTranscriptLocal);
         
         // Clear interim transcript after final result
         setTimeout(() => {
@@ -220,6 +232,9 @@ export function VoiceInterface({
       
       setIsListening(false);
       performanceRef.current.errorCount++;
+      
+      // Notify parent about listening state change
+      onListeningChangeAction?.(false);
     };
 
     recognition.onend = () => {
@@ -237,6 +252,8 @@ export function VoiceInterface({
       } else {
         setIsListening(false);
         setTranscript("");
+        // Notify parent about listening state change
+        onListeningChangeAction?.(false);
       }
     };
 
@@ -250,7 +267,7 @@ export function VoiceInterface({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isSupported, onTranscript, isListening, isPaused]);
+  }, [isSupported, onTranscriptAction, isListening, isPaused]);
 
   const startListening = async () => {
     if (!recognitionRef.current || disabled || isListening) return;
@@ -557,10 +574,10 @@ export function VoiceInterface({
 
   // Expose speak function to parent
   useEffect(() => {
-    if (onSpeakText) {
-      onSpeakText(speakText);
+    if (onSpeakTextAction) {
+      onSpeakTextAction(speakText);
     }
-  }, [onSpeakText]);
+  }, [onSpeakTextAction]);
 
   if (!isSupported) {
     return (

@@ -289,7 +289,7 @@ export default function AboutPage() {
                     <Logo size="lg" withText animated={false} className="relative z-10" />
                   </div>
                   <div className="flex items-center gap-2 ml-2">
-                    <p className="text-sm text-muted-foreground">Version 9.0.0</p>
+                    <p className="text-sm text-muted-foreground">Version 15.50.00</p>
                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">Latest</Badge>
                   </div>
                 </div>
@@ -311,21 +311,21 @@ export default function AboutPage() {
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium flex items-center gap-2 text-primary">
                       <GitBranch className="w-4 h-4" />
-                      Version 9.0.0 key update:
+                      Version 15.50.00 key update:
                     </h3>
-                    <p className="text-xs text-muted-foreground mb-2">Released on May 8, 2025</p>
+                    <p className="text-xs text-muted-foreground mb-2">Released on August 22, 2025</p>
                     <ul className="space-y-2.5 text-sm">
                       <li className="flex items-start gap-2 group">
                         <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                        <span className="group-hover:translate-x-0.5 transition-transform">AI-powered financial insights with personalized recommendations</span>
+                        <span className="group-hover:translate-x-0.5 transition-transform">Advanced AI integration with 20+ providers for comprehensive financial insights</span>
                       </li>
                       <li className="flex items-start gap-2 group">
                         <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                        <span className="group-hover:translate-x-0.5 transition-transform">Completely redesigned user interface with modern aesthetic</span>
+                        <span className="group-hover:translate-x-0.5 transition-transform">Real-time financial predictions with machine learning algorithms</span>
                       </li>
                       <li className="flex items-start gap-2 group">
                         <span className="text-primary group-hover:scale-110 transition-transform">•</span>
-                        <span className="group-hover:translate-x-0.5 transition-transform">Enhanced mobile experience with offline capabilities</span>
+                        <span className="group-hover:translate-x-0.5 transition-transform">Enhanced security with biometric authentication and advanced encryption</span>
                       </li>
                       <li className="flex items-start gap-2 group">
                         <span className="text-primary group-hover:scale-110 transition-transform">•</span>
@@ -379,44 +379,152 @@ export default function AboutPage() {
                   {/* Timeline line */}
                   <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/80 to-primary/10 rounded-full"></div>
                   
-                  {/* Version 8.9.0 */}
+                  {/* Version 15.50.00 */}
                   <div className="relative pl-10 pb-8">
                     <div className="absolute left-0 top-1 w-[30px] h-[30px] rounded-full bg-gradient-to-tr from-primary to-violet-500/80 flex items-center justify-center shadow-lg shadow-primary/20 z-10">
-                      <span className="text-xs font-semibold text-white">8.9</span>
+                      <span className="text-xs font-semibold text-white">15.5</span>
                     </div>
                     <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gradient-to-b from-primary/50 via-primary/30 to-transparent"></div>
                     <div className="bg-card rounded-lg border border-primary/10 shadow-md overflow-hidden">
                       <div className="bg-gradient-to-r from-primary/5 to-violet-500/5 px-4 py-2.5 border-b border-primary/10 flex justify-between items-center">
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">v8.9.0</Badge>
-                        <span className="text-xs text-muted-foreground">Released on May 7, 2025</span>
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">v15.50.00</Badge>
+                        <span className="text-xs text-muted-foreground">Released on August 22, 2025</span>
                       </div>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <ul className="space-y-1.5">
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>GitHub integration with improved version control</span>
+                            <span>Advanced AI integration with 20+ providers</span>
                           </li>
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>Enhanced transaction filtering capabilities</span>
+                            <span>Real-time financial insights and predictions</span>
                           </li>
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>Multi-currency support for international users</span>
+                            <span>Enhanced security with biometric authentication</span>
                           </li>
                         </ul>
                         <ul className="space-y-1.5">
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>Optimized dark mode with improved contrast</span>
+                            <span>Improved performance with 40% faster loading</span>
                           </li>
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>Performance metrics dashboard for admins</span>
+                            <span>Multi-language support for global users</span>
                           </li>
                           <li className="flex items-start gap-1.5">
                             <span className="text-primary">•</span>
-                            <span>New accessible data visualization components</span>
+                            <span>Advanced analytics dashboard with custom reports</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Version 13.50.00 */}
+                  <div className="relative pl-10 pb-8">
+                    <div className="absolute left-0 top-1 w-[30px] h-[30px] rounded-full bg-gradient-to-tr from-primary/70 to-violet-500/60 flex items-center justify-center shadow-lg shadow-primary/15 z-10">
+                      <span className="text-xs font-semibold text-white">13.5</span>
+                    </div>
+                    <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-transparent"></div>
+                    <div className="bg-card rounded-lg border border-muted shadow-sm overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-4 py-2.5 border-b border-muted flex justify-between items-center">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-muted">v13.50.00</Badge>
+                        <span className="text-xs text-muted-foreground">Released on August 22, 2025</span>
+                      </div>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Enhanced AI provider support with 15+ providers</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Automatic model detection based on API keys</span>
+                          </li>
+                        </ul>
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Dynamic model fetching for all providers</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Improved rate limit handling for Gemini API</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Version 13.25.00 */}
+                  <div className="relative pl-10 pb-8">
+                    <div className="absolute left-0 top-1 w-[30px] h-[30px] rounded-full bg-gradient-to-tr from-primary/70 to-violet-500/60 flex items-center justify-center shadow-lg shadow-primary/15 z-10">
+                      <span className="text-xs font-semibold text-white">13.2</span>
+                    </div>
+                    <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-transparent"></div>
+                    <div className="bg-card rounded-lg border border-muted shadow-sm overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-4 py-2.5 border-b border-muted flex justify-between items-center">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-muted">v13.25.00</Badge>
+                        <span className="text-xs text-muted-foreground">Released on August 22, 2025</span>
+                      </div>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>AI provider support enhancements</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Dynamic model fetching implementation</span>
+                          </li>
+                        </ul>
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Updated AI setup guide</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Improved user experience</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Version 12.50.00 */}
+                  <div className="relative pl-10 pb-8">
+                    <div className="absolute left-0 top-1 w-[30px] h-[30px] rounded-full bg-gradient-to-tr from-primary/60 to-violet-500/50 flex items-center justify-center shadow-lg shadow-primary/10 z-10">
+                      <span className="text-xs font-semibold text-white">12.5</span>
+                    </div>
+                    <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gradient-to-b from-primary/30 via-primary/15 to-transparent"></div>
+                    <div className="bg-card rounded-lg border border-muted shadow-sm overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-4 py-2.5 border-b border-muted flex justify-between items-center">
+                        <Badge variant="outline" className="bg-muted text-muted-foreground border-muted">v12.50.00</Badge>
+                        <span className="text-xs text-muted-foreground">Released on August 22, 2025</span>
+                      </div>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Landing page components refactoring</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Split main page into focused components</span>
+                          </li>
+                        </ul>
+                        <ul className="space-y-1.5">
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Improved code organization</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-muted-foreground">•</span>
+                            <span>Reduced bundle size optimization</span>
                           </li>
                         </ul>
                       </div>

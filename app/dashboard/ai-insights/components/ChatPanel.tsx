@@ -42,6 +42,8 @@ export function ChatPanel({
   const [inputMessage, setInputMessage] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [currentTranscript, setCurrentTranscript] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const speakFunctionRef = useRef<((text: string) => void) | null>(null);
@@ -64,8 +66,14 @@ export function ChatPanel({
     }
   }, [messages, autoSpeak, loading]);
 
-  // Handle voice transcript
+  // Handle real-time transcript updates
+  const handleTranscriptUpdate = (transcript: string) => {
+    setCurrentTranscript(transcript);
+  };
+
+  // Handle voice transcript with real-time updates
   const handleVoiceTranscript = (text: string) => {
+    setCurrentTranscript("");
     const newMessage = inputMessage + (inputMessage ? ' ' : '') + text;
     setInputMessage(newMessage);
     
@@ -75,8 +83,17 @@ export function ChatPanel({
         if (!loading) {
           onSendMessageAction(newMessage.trim());
           setInputMessage("");
+          setCurrentTranscript("");
         }
       }, 1000); // Wait 1 second for user to add more
+    }
+  };
+
+  // Handle voice state changes
+  const handleVoiceStateChange = (listening: boolean, transcript: string = "") => {
+    setIsListening(listening);
+    if (!listening) {
+      setCurrentTranscript("");
     }
   };
 
@@ -163,8 +180,10 @@ export function ChatPanel({
             </p>
           </div>
           <VoiceInterface
-            onTranscript={handleVoiceTranscript}
-            onSpeakText={handleSpeakTextSetup}
+            onTranscriptAction={handleVoiceTranscript}
+            onSpeakTextAction={handleSpeakTextSetup}
+            onListeningChangeAction={handleVoiceStateChange}
+            onTranscriptUpdateAction={handleTranscriptUpdate}
             disabled={loading}
             className="justify-center"
           />
@@ -301,16 +320,39 @@ export function ChatPanel({
         
         {/* Input Area */}
         <div className="border-t p-4">
+          {/* Voice Listening Feedback */}
+          {isListening && (
+            <div className="mb-3 flex items-center gap-2 text-sm bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-blue-700 dark:text-blue-300 font-medium">🎤 Listening...</span>
+              {currentTranscript && (
+                <span className="text-blue-600 dark:text-blue-400 italic ml-2">"{currentTranscript}"</span>
+              )}
+            </div>
+          )}
+          
           <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask about your finances..."
-              disabled={loading}
-              className="flex-1"
-            />
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={isListening ? "Speak clearly..." : "Ask about your finances..."}
+                disabled={loading}
+                className={`transition-all duration-200 ${
+                  isListening 
+                    ? "border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/10 focus:border-blue-500" 
+                    : ""
+                }`}
+              />
+              {/* Voice indicator in input */}
+              {isListening && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                </div>
+              )}
+            </div>
             <Button 
               onClick={handleSend} 
               disabled={loading || !inputMessage.trim()}
