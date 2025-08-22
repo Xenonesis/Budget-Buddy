@@ -5,8 +5,19 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useUserPreferences } from "@/lib/store";
-import { FileText } from "lucide-react";
+import { FileText, User, Palette, Bell, Bot, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input, Textarea } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import type { AIProvider, AIModel } from "@/lib/ai";
 
 interface Profile {
@@ -72,6 +83,8 @@ export default function SettingsPage() {
     username, setCurrency, setUsername, theme, setTheme, 
     syncWithDatabase, setUserId 
   } = useUserPreferences();
+  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "notifications" | "ai">("profile");
+  
   const [formData, setFormData] = useState<{
     name: string;
     email: string;
@@ -96,13 +109,13 @@ export default function SettingsPage() {
     address: "",
     preferred_language: "en",
     profile_photo: "",
-    gender: "",
+    gender: "prefer-not-to-say",
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     notification_preferences: {
       email: true,
       push: false,
       sms: false
-    },
+    } as Profile['notification_preferences'],
     ai_settings: {
       google_api_key: "",
       mistral_api_key: "",
@@ -120,7 +133,7 @@ export default function SettingsPage() {
         provider: 'mistral' as AIProvider,
         model: 'mistral-small' as AIModel
       }
-    }
+    } as NonNullable<Profile['ai_settings']>
   });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
     null
@@ -232,13 +245,13 @@ export default function SettingsPage() {
               address: newProfile.address || '',
               preferred_language: newProfile.preferred_language || 'en',
               profile_photo: newProfile.profile_photo || '',
-              gender: newProfile.gender || '',
+              gender: newProfile.gender || 'prefer-not-to-say',
               timezone: newProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
               notification_preferences: newProfile.notification_preferences || {
                 email: true,
                 push: false,
                 sms: false
-              },
+              } as Profile['notification_preferences'],
               ai_settings: {
                 google_api_key: "",
                 mistral_api_key: "",
@@ -256,7 +269,7 @@ export default function SettingsPage() {
                   provider: 'mistral' as AIProvider,
                   model: 'mistral-small' as AIModel
                 }
-              }
+              } as NonNullable<Profile['ai_settings']>
             });
           }
         }
@@ -270,13 +283,13 @@ export default function SettingsPage() {
           address: data.address || '',
           preferred_language: data.preferred_language || 'en',
           profile_photo: data.profile_photo || '',
-          gender: data.gender || '',
+          gender: data.gender || 'prefer-not-to-say',
           timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           notification_preferences: data.notification_preferences || {
             email: true,
             push: false,
             sms: false
-          },
+          } as Profile['notification_preferences'],
           ai_settings: data.ai_settings || {
             google_api_key: "",
             mistral_api_key: "",
@@ -294,7 +307,7 @@ export default function SettingsPage() {
               provider: 'mistral' as AIProvider,
               model: 'mistral-small' as AIModel
             }
-          }
+          } as NonNullable<Profile['ai_settings']>
         });
       }
     } catch (error) {
@@ -350,13 +363,13 @@ export default function SettingsPage() {
           address: updatedProfile.address || '',
           preferred_language: updatedProfile.preferred_language || 'en',
           profile_photo: updatedProfile.profile_photo || '',
-          gender: updatedProfile.gender || '',
+          gender: updatedProfile.gender || 'prefer-not-to-say',
           timezone: updatedProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           notification_preferences: updatedProfile.notification_preferences || {
             email: true,
             push: false,
             sms: false
-          },
+          } as Profile['notification_preferences'],
           ai_settings: updatedProfile.ai_settings || {
             google_api_key: "",
             mistral_api_key: "",
@@ -374,7 +387,7 @@ export default function SettingsPage() {
               provider: 'mistral' as AIProvider,
               model: 'mistral-small' as AIModel
             }
-          }
+          } as Profile['ai_settings']
         });
         setMessage({ type: "success", text: "Profile updated successfully" });
       }
@@ -391,6 +404,39 @@ export default function SettingsPage() {
     setFormData({
       ...formData,
       [name]: value,
+    });
+  };
+
+  const handleNotificationChange = (field: keyof Profile['notification_preferences'], checked: boolean) => {
+    setFormData({
+      ...formData,
+      notification_preferences: {
+        ...formData.notification_preferences,
+        [field]: checked
+      } as Profile['notification_preferences']
+    });
+  };
+
+  const handleAiSettingsChange = (field: keyof NonNullable<Profile['ai_settings']>, value: any) => {
+    setFormData({
+      ...formData,
+      ai_settings: {
+        ...formData.ai_settings,
+        [field]: value
+      } as NonNullable<Profile['ai_settings']>
+    });
+  };
+
+  const handleAiModelChange = (provider: string, model: string) => {
+    setFormData({
+      ...formData,
+      ai_settings: {
+        ...formData.ai_settings,
+        defaultModel: {
+          provider: provider as AIProvider,
+          model: model
+        }
+      }
     });
   };
 
@@ -548,81 +594,81 @@ export default function SettingsPage() {
       case 'mistral':
         return (
           <>
-            <option value="mistral-tiny">Mistral Tiny (Fastest)</option>
-            <option value="mistral-small">Mistral Small (Balanced)</option>
-            <option value="mistral-medium">Mistral Medium (Advanced)</option>
-            <option value="mistral-large-latest">Mistral Large (Most Powerful)</option>
+            <SelectItem value="mistral-tiny">Mistral Tiny (Fastest)</SelectItem>
+            <SelectItem value="mistral-small">Mistral Small (Balanced)</SelectItem>
+            <SelectItem value="mistral-medium">Mistral Medium (Advanced)</SelectItem>
+            <SelectItem value="mistral-large-latest">Mistral Large (Most Powerful)</SelectItem>
           </>
         );
       case 'anthropic':
         return (
           <>
-            <option value="claude-3-haiku">Claude 3 Haiku (Fast)</option>
-            <option value="claude-3-sonnet">Claude 3 Sonnet (Balanced)</option>
-            <option value="claude-3-opus">Claude 3 Opus (Most Powerful)</option>
+            <SelectItem value="claude-3-haiku">Claude 3 Haiku (Fast)</SelectItem>
+            <SelectItem value="claude-3-sonnet">Claude 3 Sonnet (Balanced)</SelectItem>
+            <SelectItem value="claude-3-opus">Claude 3 Opus (Most Powerful)</SelectItem>
           </>
         );
       case 'groq':
         return (
           <>
-            <option value="llama3-8b">Llama 3 8B (Fast)</option>
-            <option value="llama3-70b">Llama 3 70B (Powerful)</option>
-            <option value="mixtral-8x7b">Mixtral 8x7B (Balanced)</option>
+            <SelectItem value="llama3-8b">Llama 3 8B (Fast)</SelectItem>
+            <SelectItem value="llama3-70b">Llama 3 70B (Powerful)</SelectItem>
+            <SelectItem value="mixtral-8x7b">Mixtral 8x7B (Balanced)</SelectItem>
           </>
         );
       case 'deepseek':
         return (
           <>
-            <option value="deepseek-chat">DeepSeek Chat</option>
-            <option value="deepseek-coder">DeepSeek Coder</option>
+            <SelectItem value="deepseek-chat">DeepSeek Chat</SelectItem>
+            <SelectItem value="deepseek-coder">DeepSeek Coder</SelectItem>
           </>
         );
       case 'llama':
         return (
           <>
-            <option value="llama-2-7b">Llama 2 7B</option>
-            <option value="llama-2-13b">Llama 2 13B</option>
-            <option value="llama-2-70b">Llama 2 70B</option>
-            <option value="llama-3-8b">Llama 3 8B</option>
-            <option value="llama-3-70b">Llama 3 70B</option>
+            <SelectItem value="llama-2-7b">Llama 2 7B</SelectItem>
+            <SelectItem value="llama-2-13b">Llama 2 13B</SelectItem>
+            <SelectItem value="llama-2-70b">Llama 2 70B</SelectItem>
+            <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
+            <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
           </>
         );
       case 'cohere':
         return (
           <>
-            <option value="command">Command</option>
-            <option value="command-light">Command Light (Faster)</option>
-            <option value="command-r">Command R</option>
-            <option value="command-r-plus">Command R+ (Most Powerful)</option>
+            <SelectItem value="command">Command</SelectItem>
+            <SelectItem value="command-light">Command Light (Faster)</SelectItem>
+            <SelectItem value="command-r">Command R</SelectItem>
+            <SelectItem value="command-r-plus">Command R+ (Most Powerful)</SelectItem>
           </>
         );
       case 'gemini':
         return (
           <>
-            <option value="gemini-pro">Gemini Pro</option>
-            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+            <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+            <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
           </>
         );
       case 'qwen':
         return (
           <>
-            <option value="qwen-turbo">Qwen Turbo</option>
-            <option value="qwen-plus">Qwen Plus</option>
-            <option value="qwen-max">Qwen Max</option>
+            <SelectItem value="qwen-turbo">Qwen Turbo</SelectItem>
+            <SelectItem value="qwen-plus">Qwen Plus</SelectItem>
+            <SelectItem value="qwen-max">Qwen Max</SelectItem>
           </>
         );
       case 'openrouter':
         return (
           <>
-            <option value="openrouter-default">OpenRouter Default</option>
-            <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-            <option value="google/gemini-pro">Gemini Pro</option>
-            <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
+            <SelectItem value="openrouter-default">OpenRouter Default</SelectItem>
+            <SelectItem value="anthropic/claude-3-opus">Claude 3 Opus</SelectItem>
+            <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
+            <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
           </>
         );
       default:
-        return <option value="mistral-small">Mistral Small</option>;
+        return <SelectItem value="mistral-small">Mistral Small</SelectItem>;
     }
   };
 
@@ -657,190 +703,252 @@ export default function SettingsPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </div>
       ) : (
-        <div className="rounded-lg border bg-card shadow-sm">
-          <div className="p-6">
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <h2 className="mb-4 text-xl font-semibold">Personal Information</h2>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                        Name
-                      </label>
-                      <input
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="border-b">
+            <nav className="flex space-x-6 overflow-x-auto">
+              <button
+                type="button"
+                className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "profile"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                }`}
+                onClick={() => setActiveTab("profile")}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </button>
+              <button
+                type="button"
+                className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "preferences"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                }`}
+                onClick={() => setActiveTab("preferences")}
+              >
+                <Palette className="mr-2 h-4 w-4" />
+                Preferences
+              </button>
+              <button
+                type="button"
+                className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "notifications"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                }`}
+                onClick={() => setActiveTab("notifications")}
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                Notifications
+              </button>
+              <button
+                type="button"
+                className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "ai"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                }`}
+                onClick={() => setActiveTab("ai")}
+              >
+                <Bot className="mr-2 h-4 w-4" />
+                AI Assistant
+              </button>
+            </nav>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Profile Tab */}
+            {activeTab === "profile" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>
+                    Update your personal details here
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
                         id="name"
                         name="name"
-                        type="text"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="Your name"
                       />
                     </div>
                     
-                    <div>
-                      <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                        Email
-                      </label>
-                      <input
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         disabled
-                        className="w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground ring-offset-background"
                       />
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Email cannot be changed
                       </p>
                     </div>
                     
-                    <div>
-                      <label htmlFor="phone" className="mb-2 block text-sm font-medium">
-                        Phone Number (optional)
-                      </label>
-                      <input
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number (optional)</Label>
+                      <Input
                         id="phone"
                         name="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="Your phone number"
                       />
                     </div>
                     
-                    <div>
-                      <label htmlFor="address" className="mb-2 block text-sm font-medium">
-                        Address (optional)
-                      </label>
-                      <textarea
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        rows={3}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="Your address"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="gender">Gender (optional)</Label>
+                      <Select
+                        value={formData.gender}
+                        onValueChange={(value) => setFormData({...formData, gender: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="non-binary">Non-binary</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                </div>
-                
-                <div>
-                  <h2 className="mb-4 text-xl font-semibold">Preferences</h2>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="currency" className="mb-2 block text-sm font-medium">
-                        Currency
-                      </label>
-                      <select
-                        id="currency"
-                        name="currency"
-                        value={formData.currency}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                        title="Select currency"
-                      >
-                        <option value="USD">US Dollar (USD)</option>
-                        <option value="EUR">Euro (EUR)</option>
-                        <option value="GBP">British Pound (GBP)</option>
-                        <option value="JPY">Japanese Yen (JPY)</option>
-                        <option value="CNY">Chinese Yuan (CNY)</option>
-                        <option value="INR">Indian Rupee (INR)</option>
-                        <option value="CAD">Canadian Dollar (CAD)</option>
-                        <option value="AUD">Australian Dollar (AUD)</option>
-                        <option value="SGD">Singapore Dollar (SGD)</option>
-                        <option value="CHF">Swiss Franc (CHF)</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="preferred_language" className="mb-2 block text-sm font-medium">
-                        Language
-                      </label>
-                      <select
-                        id="preferred_language"
-                        name="preferred_language"
-                        value={formData.preferred_language}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                        title="Select language"
-                      >
-                        <option value="en">English</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="zh">Chinese</option>
-                        <option value="ja">Japanese</option>
-                        <option value="ko">Korean</option>
-                        <option value="ar">Arabic</option>
-                        <option value="ru">Russian</option>
-                        <option value="pt">Portuguese</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="gender" className="mb-2 block text-sm font-medium">
-                        Gender (optional)
-                      </label>
-                      <select
-                        id="gender"
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                        title="Select gender"
-                      >
-                        <option value="">Prefer not to say</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="non-binary">Non-binary</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="timezone" className="mb-2 block text-sm font-medium">
-                        Timezone
-                      </label>
-                      <select
-                        id="timezone"
-                        name="timezone"
-                        value={formData.timezone}
-                        onChange={handleInputChange}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                        title="Select timezone"
-                      >
-                        <option value="UTC">UTC (Coordinated Universal Time)</option>
-                        <option value="America/New_York">Eastern Time (ET)</option>
-                        <option value="America/Chicago">Central Time (CT)</option>
-                        <option value="America/Denver">Mountain Time (MT)</option>
-                        <option value="America/Los_Angeles">Pacific Time (PT)</option>
-                        <option value="America/Anchorage">Alaska Time</option>
-                        <option value="Pacific/Honolulu">Hawaii Time</option>
-                        <option value="Europe/London">London (GMT/BST)</option>
-                        <option value="Europe/Paris">Central European (CET/CEST)</option>
-                        <option value="Europe/Helsinki">Eastern European (EET/EEST)</option>
-                        <option value="Asia/Tokyo">Japan (JST)</option>
-                        <option value="Asia/Shanghai">China (CST)</option>
-                        <option value="Asia/Kolkata">India (IST)</option>
-                        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="mb-2 block text-sm font-medium">Theme</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Button
-                          type="button"
-                          variant={themeChoice === "light" ? "default" : "outline"}
-                          onClick={() => handleThemeChange("light")}
-                          className="justify-start"
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address (optional)</Label>
+                    <Textarea
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      rows={3}
+                      placeholder="Your address"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Preferences Tab */}
+            {activeTab === "preferences" && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Preferences</CardTitle>
+                    <CardDescription>
+                      Customize your app experience
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="currency">Currency</Label>
+                        <Select
+                          value={formData.currency}
+                          onValueChange={(value) => setFormData({...formData, currency: value})}
                         >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                            <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                            <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+                            <SelectItem value="JPY">Japanese Yen (JPY)</SelectItem>
+                            <SelectItem value="CNY">Chinese Yuan (CNY)</SelectItem>
+                            <SelectItem value="INR">Indian Rupee (INR)</SelectItem>
+                            <SelectItem value="CAD">Canadian Dollar (CAD)</SelectItem>
+                            <SelectItem value="AUD">Australian Dollar (AUD)</SelectItem>
+                            <SelectItem value="SGD">Singapore Dollar (SGD)</SelectItem>
+                            <SelectItem value="CHF">Swiss Franc (CHF)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="preferred_language">Language</Label>
+                        <Select
+                          value={formData.preferred_language}
+                          onValueChange={(value) => setFormData({...formData, preferred_language: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
+                            <SelectItem value="zh">Chinese</SelectItem>
+                            <SelectItem value="ja">Japanese</SelectItem>
+                            <SelectItem value="ko">Korean</SelectItem>
+                            <SelectItem value="ar">Arabic</SelectItem>
+                            <SelectItem value="ru">Russian</SelectItem>
+                            <SelectItem value="pt">Portuguese</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="timezone">Timezone</Label>
+                        <Select
+                          value={formData.timezone}
+                          onValueChange={(value) => setFormData({...formData, timezone: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select timezone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="UTC">UTC (Coordinated Universal Time)</SelectItem>
+                            <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                            <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                            <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                            <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                            <SelectItem value="America/Anchorage">Alaska Time</SelectItem>
+                            <SelectItem value="Pacific/Honolulu">Hawaii Time</SelectItem>
+                            <SelectItem value="Europe/London">London (GMT/BST)</SelectItem>
+                            <SelectItem value="Europe/Paris">Central European (CET/CEST)</SelectItem>
+                            <SelectItem value="Europe/Helsinki">Eastern European (EET/EEST)</SelectItem>
+                            <SelectItem value="Asia/Tokyo">Japan (JST)</SelectItem>
+                            <SelectItem value="Asia/Shanghai">China (CST)</SelectItem>
+                            <SelectItem value="Asia/Kolkata">India (IST)</SelectItem>
+                            <SelectItem value="Australia/Sydney">Sydney (AEST/AEDT)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Theme</CardTitle>
+                    <CardDescription>
+                      Choose how the app looks to you
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Button
+                        type="button"
+                        variant={themeChoice === "light" ? "default" : "outline"}
+                        onClick={() => handleThemeChange("light")}
+                        className="h-auto py-4 flex flex-col items-center justify-center gap-2"
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 text-white">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="1em"
@@ -848,7 +956,7 @@ export default function SettingsPage() {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            className="mr-2 h-4 w-4"
+                            className="h-5 w-5"
                           >
                             <circle cx="12" cy="12" r="4" strokeWidth="2" />
                             <path
@@ -857,14 +965,16 @@ export default function SettingsPage() {
                               d="M12 2v2m0 16v2M4 12H2m20 0h-2m-14 6l-2 2m2-16L4 4m16 16l2 2m-2-16l2-2"
                             />
                           </svg>
-                          Light
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={themeChoice === "dark" ? "default" : "outline"}
-                          onClick={() => handleThemeChange("dark")}
-                          className="justify-start"
-                        >
+                        </div>
+                        <span>Light</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={themeChoice === "dark" ? "default" : "outline"}
+                        onClick={() => handleThemeChange("dark")}
+                        className="h-auto py-4 flex flex-col items-center justify-center gap-2"
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="1em"
@@ -872,7 +982,7 @@ export default function SettingsPage() {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            className="mr-2 h-4 w-4"
+                            className="h-5 w-5"
                           >
                             <path
                               strokeLinecap="round"
@@ -880,14 +990,16 @@ export default function SettingsPage() {
                               d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
                             />
                           </svg>
-                          Dark
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={themeChoice === "system" ? "default" : "outline"}
-                          onClick={() => handleThemeChange("system")}
-                          className="justify-start"
-                        >
+                        </div>
+                        <span>Dark</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={themeChoice === "system" ? "default" : "outline"}
+                        onClick={() => handleThemeChange("system")}
+                        className="h-auto py-4 flex flex-col items-center justify-center gap-2"
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-sky-500 text-white">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="1em"
@@ -895,316 +1007,231 @@ export default function SettingsPage() {
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
-                            className="mr-2 h-4 w-4"
+                            className="h-5 w-5"
                           >
                             <rect width="18" height="14" x="3" y="3" rx="2" strokeWidth="2" />
                             <path strokeLinecap="round" strokeWidth="2" d="M4 17h16M12 21v-4" />
                           </svg>
-                          System
-                        </Button>
-                      </div>
+                        </div>
+                        <span>System</span>
+                      </Button>
                     </div>
-                    
-                    <div>
-                      <label className="mb-2 block text-sm font-medium">Notification Preferences</label>
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="email_notifications"
-                            checked={formData.notification_preferences?.email ?? true}
-                            onChange={(e) => setFormData({
-                              ...formData,
-                              notification_preferences: {
-                                ...formData.notification_preferences,
-                                email: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                          />
-                          <label htmlFor="email_notifications" className="ml-2 text-sm">
-                            Email Notifications
-                          </label>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="push_notifications"
-                            checked={formData.notification_preferences?.push ?? false}
-                            onChange={(e) => setFormData({
-                              ...formData,
-                              notification_preferences: {
-                                ...formData.notification_preferences,
-                                push: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                          />
-                          <label htmlFor="push_notifications" className="ml-2 text-sm">
-                            Push Notifications
-                          </label>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="sms_notifications"
-                            checked={formData.notification_preferences?.sms ?? false}
-                            onChange={(e) => setFormData({
-                              ...formData,
-                              notification_preferences: {
-                                ...formData.notification_preferences,
-                                sms: e.target.checked
-                              }
-                            })}
-                            className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                          />
-                          <label htmlFor="sms_notifications" className="ml-2 text-sm">
-                            SMS Notifications
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="mb-2 block text-sm font-medium">AI Assistant Settings</label>
-                      <div className="space-y-4 border rounded-md p-4">
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id="ai_enabled"
-                            checked={formData.ai_settings?.enabled ?? false}
-                            onChange={(e) => {
-                              setFormData({
-                                ...formData,
-                                ai_settings: {
-                                  ...formData.ai_settings,
-                                  enabled: e.target.checked,
-                                  defaultModel: formData.ai_settings?.defaultModel || {
-                                    provider: 'mistral' as AIProvider,
-                                    model: 'mistral-small' as AIModel
-                                  }
-                                }
-                              });
-                            }}
-                            className="h-4 w-4 rounded border-gray-300 focus:ring-primary"
-                          />
-                          <label htmlFor="ai_enabled" className="ml-2 text-sm">
-                            Enable AI Assistant
-                          </label>
-                        </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-                        <div>
-                          <label className="mb-2 block text-sm font-medium">
-                            Default AI Provider & Model
-                          </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <select
-                              value={formData.ai_settings?.defaultModel?.provider || "mistral"}
-                              onChange={(e) => setFormData({
-                                ...formData,
-                                ai_settings: {
-                                  ...formData.ai_settings,
-                                  defaultModel: {
-                                    provider: (e.target.value || 'mistral') as AIProvider,
-                                    model: getDefaultModelForProvider(e.target.value)
-                                  },
-                                  enabled: formData.ai_settings?.enabled ?? false
-                                }
-                              })}
-                              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                              aria-label="Select AI provider"
-                              title="Select AI provider"
-                            >
-                              <option value="mistral">Mistral AI</option>
-                              <option value="anthropic">Claude (Anthropic)</option>
-                              <option value="groq">Groq</option>
-                              <option value="deepseek">DeepSeek</option>
-                              <option value="llama">Llama</option>
-                              <option value="cohere">Cohere</option>
-                              <option value="gemini">Gemini (Google)</option>
-                              <option value="qwen">Qwen</option>
-                              <option value="openrouter">OpenRouter</option>
-                            </select>
-                            <select
-                              value={formData.ai_settings?.defaultModel?.model || "mistral-small"}
-                              onChange={(e) => setFormData({
-                                ...formData,
-                                ai_settings: {
-                                  ...formData.ai_settings,
-                                  defaultModel: {
-                                    provider: (formData.ai_settings?.defaultModel?.provider || 'mistral') as AIProvider,
-                                    model: e.target.value
-                                  },
-                                  enabled: formData.ai_settings?.enabled ?? false
-                                }
-                              })}
-                              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                              aria-label="Select AI model"
-                              title="Select AI model"
-                            >
-                              {renderModelOptions(formData.ai_settings?.defaultModel?.provider || "mistral")}
-                            </select>
-                          </div>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Select your preferred AI provider and model for financial insights and chat
-                          </p>
-                        </div>
+            {/* Notifications Tab */}
+            {activeTab === "notifications" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardDescription>
+                    Choose how you want to be notified
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="email_notifications">Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive important updates via email
+                      </p>
+                    </div>
+                    <Switch
+                      id="email_notifications"
+                      checked={formData.notification_preferences?.email ?? true}
+                      onCheckedChange={(checked) => handleNotificationChange("email", checked)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="push_notifications">Push Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive notifications on your device
+                      </p>
+                    </div>
+                    <Switch
+                      id="push_notifications"
+                      checked={formData.notification_preferences?.push ?? false}
+                      onCheckedChange={(checked) => handleNotificationChange("push", checked)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="sms_notifications">SMS Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive text messages for important alerts
+                      </p>
+                    </div>
+                    <Switch
+                      id="sms_notifications"
+                      checked={formData.notification_preferences?.sms ?? false}
+                      onCheckedChange={(checked) => handleNotificationChange("sms", checked)}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* AI Assistant Tab */}
+            {activeTab === "ai" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Assistant Settings</CardTitle>
+                  <CardDescription>
+                    Configure your AI-powered financial assistant
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="ai_enabled">Enable AI Assistant</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Use AI for financial insights and chat
+                      </p>
+                    </div>
+                    <Switch
+                      id="ai_enabled"
+                      checked={formData.ai_settings?.enabled ?? false}
+                      onCheckedChange={(checked) => handleAiSettingsChange("enabled", checked)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Default AI Provider & Model</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Select
+                          value={formData.ai_settings?.defaultModel?.provider || "mistral"}
+                          onValueChange={(value) => handleAiModelChange(value, getDefaultModelForProvider(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select AI provider" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mistral">Mistral AI</SelectItem>
+                            <SelectItem value="anthropic">Claude (Anthropic)</SelectItem>
+                            <SelectItem value="groq">Groq</SelectItem>
+                            <SelectItem value="deepseek">DeepSeek</SelectItem>
+                            <SelectItem value="llama">Llama</SelectItem>
+                            <SelectItem value="cohere">Cohere</SelectItem>
+                            <SelectItem value="gemini">Gemini (Google)</SelectItem>
+                            <SelectItem value="qwen">Qwen</SelectItem>
+                            <SelectItem value="openrouter">OpenRouter</SelectItem>
+                          </SelectContent>
+                        </Select>
                         
-                        <div className="pt-2 border-t">
-                          <h4 className="text-sm font-medium mb-2">API Keys</h4>
-                          <div className="space-y-3">
-                            <div>
-                              <label htmlFor="google_api_key" className="mb-1 block text-sm font-medium">
-                                Google AI API Key
-                              </label>
-                              <input
-                                id="google_api_key"
-                                type="password"
-                                value={formData.ai_settings?.google_api_key ?? ""}
-                                onChange={(e) => {
-                                  setFormData({
-                                    ...formData,
-                                    ai_settings: {
-                                      ...formData.ai_settings,
-                                      google_api_key: e.target.value,
-                                      enabled: formData.ai_settings?.enabled ?? false,
-                                      defaultModel: formData.ai_settings?.defaultModel || {
-                                        provider: 'mistral' as AIProvider,
-                                        model: 'mistral-small' as AIModel
-                                      }
-                                    }
-                                  });
-                                }}
-                                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Enter your Google AI API key"
-                              />
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                Used for financial insights and analytics
-                              </p>
-                            </div>
-                            
-                            <div>
-                              <label htmlFor="mistral_api_key" className="mb-1 block text-sm font-medium">
-                                Mistral AI API Key
-                              </label>
-                              <input
-                                id="mistral_api_key"
-                                type="password"
-                                value={formData.ai_settings?.mistral_api_key ?? ""}
-                                onChange={(e) => {
-                                  setFormData({
-                                    ...formData,
-                                    ai_settings: {
-                                      ...formData.ai_settings,
-                                      mistral_api_key: e.target.value,
-                                      enabled: formData.ai_settings?.enabled ?? false,
-                                      defaultModel: formData.ai_settings?.defaultModel || {
-                                        provider: 'mistral' as AIProvider,
-                                        model: 'mistral-small' as AIModel
-                                      }
-                                    }
-                                  });
-                                }}
-                                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Enter your Mistral AI API key"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label htmlFor="anthropic_api_key" className="mb-1 block text-sm font-medium">
-                                Claude (Anthropic) API Key
-                              </label>
-                              <input
-                                id="anthropic_api_key"
-                                type="password"
-                                value={formData.ai_settings?.anthropic_api_key ?? ""}
-                                onChange={(e) => {
-                                  setFormData({
-                                    ...formData,
-                                    ai_settings: {
-                                      ...formData.ai_settings,
-                                      anthropic_api_key: e.target.value,
-                                      enabled: formData.ai_settings?.enabled ?? false,
-                                      defaultModel: formData.ai_settings?.defaultModel || {
-                                        provider: 'mistral' as AIProvider,
-                                        model: 'mistral-small' as AIModel
-                                      }
-                                    }
-                                  });
-                                }}
-                                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Enter your Claude API key"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label htmlFor="groq_api_key" className="mb-1 block text-sm font-medium">
-                                Groq API Key
-                              </label>
-                              <input
-                                id="groq_api_key"
-                                type="password"
-                                value={formData.ai_settings?.groq_api_key ?? ""}
-                                onChange={(e) => {
-                                  setFormData({
-                                    ...formData,
-                                    ai_settings: {
-                                      ...formData.ai_settings,
-                                      groq_api_key: e.target.value,
-                                      enabled: formData.ai_settings?.enabled ?? false,
-                                      defaultModel: formData.ai_settings?.defaultModel || {
-                                        provider: 'mistral' as AIProvider,
-                                        model: 'mistral-small' as AIModel
-                                      }
-                                    }
-                                  });
-                                }}
-                                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Enter your Groq API key"
-                              />
-                            </div>
-                          </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            Your API keys are stored securely and only used for AI feature processing
-                          </p>
-                        </div>
+                        <Select
+                          value={formData.ai_settings?.defaultModel?.model || "mistral-small"}
+                          onValueChange={(value) => handleAiModelChange(formData.ai_settings?.defaultModel?.provider || "mistral", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select AI model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {renderModelOptions(formData.ai_settings?.defaultModel?.provider || "mistral")}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Select your preferred AI provider and model for financial insights and chat
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4 pt-4 border-t">
+                    <h3 className="text-lg font-medium">API Keys</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your API keys are stored securely and only used for AI feature processing
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="google_api_key">Google AI API Key</Label>
+                        <Input
+                          id="google_api_key"
+                          type="password"
+                          value={formData.ai_settings?.google_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("google_api_key", e.target.value)}
+                          placeholder="Enter your Google AI API key"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Used for financial insights and analytics
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="mistral_api_key">Mistral AI API Key</Label>
+                        <Input
+                          id="mistral_api_key"
+                          type="password"
+                          value={formData.ai_settings?.mistral_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("mistral_api_key", e.target.value)}
+                          placeholder="Enter your Mistral AI API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="anthropic_api_key">Claude (Anthropic) API Key</Label>
+                        <Input
+                          id="anthropic_api_key"
+                          type="password"
+                          value={formData.ai_settings?.anthropic_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("anthropic_api_key", e.target.value)}
+                          placeholder="Enter your Claude API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="groq_api_key">Groq API Key</Label>
+                        <Input
+                          id="groq_api_key"
+                          type="password"
+                          value={formData.ai_settings?.groq_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("groq_api_key", e.target.value)}
+                          placeholder="Enter your Groq API key"
+                        />
                       </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Message Display */}
+            {message && (
+              <div
+                className={`rounded-md p-4 ${
+                  message.type === "success"
+                    ? "bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-50"
+                    : "bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-50"
+                }`}
+              >
+                {message.text}
               </div>
-              
-              {message && (
-                <div
-                  className={`mt-6 rounded-md p-4 ${
-                    message.type === "success"
-                      ? "bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-50"
-                      : "bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-50"
-                  }`}
-                >
-                  {message.text}
-                </div>
-              )}
-              
-              <div className="mt-6 flex justify-between">
-                <Button type="button" variant="outline" onClick={handleSignOut}>
-                  Sign Out
-                </Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white mr-2"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-between">
+              <Button type="button" variant="outline" onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
       )}
     </div>
