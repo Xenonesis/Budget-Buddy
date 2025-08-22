@@ -129,6 +129,7 @@ export interface Database {
           name: string | null
           currency: string | null
           timezone: string | null
+          ai_settings: Json | null
           created_at: string
           updated_at: string
         }
@@ -138,6 +139,7 @@ export interface Database {
           name?: string | null
           currency?: string | null
           timezone?: string | null
+          ai_settings?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -147,8 +149,32 @@ export interface Database {
           name?: string | null
           currency?: string | null
           timezone?: string | null
+          ai_settings?: Json | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      ai_conversations: {
+        Row: {
+          id: string
+          user_id: string
+          messages: Json
+          created_at: string
+          last_updated: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          messages?: Json
+          created_at?: string
+          last_updated?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          messages?: Json
+          created_at?: string
+          last_updated?: string
         }
       }
     }

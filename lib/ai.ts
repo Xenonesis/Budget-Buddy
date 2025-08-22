@@ -1,4 +1,11 @@
 import { supabase } from './supabase';
+import { 
+  canMakeRequest, 
+  incrementQuotaUsage, 
+  setQuotaExceeded, 
+  getQuotaStatus,
+  formatTimeUntilReset 
+} from './quota-manager';
 
 // Types for AI interactions
 export interface AIMessage {
@@ -15,26 +22,38 @@ export interface FinancialInsight {
   createdAt: string;
 }
 
-export type AIProvider = 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter';
+export type AIProvider = 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter' | 'cerebras' | 'xAI' | 'unbound' | 'openai' | 'ollama' | 'lmstudio';
 export type AIModel = 
   // Mistral models
-  | 'mistral-tiny' | 'mistral-small' | 'mistral-medium' | 'mistral-large-latest' 
+  | 'mistral-tiny' | 'mistral-small' | 'mistral-medium' | 'mistral-large-latest' | 'mistral-large' | 'mistral-small-latest' | 'mistral-nemo'
   // Claude models
-  | 'claude-3-haiku' | 'claude-3-sonnet' | 'claude-3-opus'
+  | 'claude-3-haiku' | 'claude-3-sonnet' | 'claude-3-opus' | 'claude-3-5-sonnet' | 'claude-3-5-haiku'
   // Groq models
-  | 'llama3-8b' | 'llama3-70b' | 'mixtral-8x7b'
+  | 'llama3-8b' | 'llama3-70b' | 'mixtral-8x7b' | 'llama-3.1-8b' | 'llama-3.1-70b' | 'llama-3.1-405b' | 'llama3-groq-8b' | 'llama3-groq-70b'
   // DeepSeek models
-  | 'deepseek-coder' | 'deepseek-chat'
+  | 'deepseek-coder' | 'deepseek-chat' | 'deepseek-chat-v2' | 'deepseek-coder-v2'
   // Llama models
-  | 'llama-2-7b' | 'llama-2-13b' | 'llama-2-70b' | 'llama-3-8b' | 'llama-3-70b'
+  | 'llama-2-7b' | 'llama-2-13b' | 'llama-2-70b' | 'llama-3-8b' | 'llama-3-70b' | 'llama-3.1-8b' | 'llama-3.1-70b' | 'llama-3.1-405b' | 'llama-3.2-1b' | 'llama-3.2-3b'
   // Cohere models
-  | 'command' | 'command-light' | 'command-r' | 'command-r-plus'
+  | 'command' | 'command-light' | 'command-r' | 'command-r-plus' | 'command-nightly' | 'c4ai-aya-expanse-8b' | 'c4ai-aya-expanse-32b'
   // Gemini models - use only currently supported models
-  | 'gemini-pro' | 'gemini-1.5-pro' | 'gemini-1.5-flash'
+  | 'gemini-pro' | 'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-1.5-pro-exp-0801' | 'gemini-1.5-flash-exp-0801' | 'gemini-2.0-flash-exp'
   // Qwen models
-  | 'qwen-turbo' | 'qwen-plus' | 'qwen-max'
+  | 'qwen-turbo' | 'qwen-plus' | 'qwen-max' | 'qwen-1.5-7b' | 'qwen-1.5-14b' | 'qwen-1.5-32b' | 'qwen-1.5-72b' | 'qwen-2-0.5b' | 'qwen-2-1.5b' | 'qwen-2-7b' | 'qwen-2-72b' | 'qwen-2.5-0.5b' | 'qwen-2.5-1.5b' | 'qwen-2.5-3b' | 'qwen-2.5-7b' | 'qwen-2.5-14b' | 'qwen-2.5-32b' | 'qwen-2.5-72b'
   // OpenRouter models (can be many models from different providers)
-  | 'openrouter-default' | 'anthropic/claude-3-opus' | 'google/gemini-pro' | 'meta-llama/llama-3-70b-instruct';
+  | 'openrouter-default' | 'anthropic/claude-3-opus' | 'google/gemini-pro' | 'meta-llama/llama-3-70b-instruct' | 'meta-llama/llama-3.1-405b' | 'meta-llama/llama-3.1-70b' | 'meta-llama/llama-3.1-8b' | 'mistralai/mistral-7b-instruct' | 'mistralai/mistral-large' | 'mistralai/mixtral-8x22b' | 'mistralai/mixtral-8x7b' | 'openai/gpt-3.5-turbo' | 'openai/gpt-4' | 'openai/gpt-4-turbo' | 'openai/gpt-4o'
+  // Cerebras models
+  | 'cerebras-gemma-2b' | 'cerebras-llama3-8b' | 'cerebras-llama-3.1-8b' | 'cerebras-llama-3.1-70b'
+  // xAI models
+  | 'grok-1' | 'grok-2' | 'grok-3' | 'grok-4'
+  // Unbound models
+  | 'unbound-llama-3-8b' | 'unbound-llama-3-70b' | 'unbound-llama-3.1-8b' | 'unbound-llama-3.1-70b'
+  // OpenAI models
+  | 'gpt-3.5-turbo' | 'gpt-4' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1-mini' | 'gpt-4o-2024-08-06'
+  // Ollama models
+  | 'ollama-llama2' | 'ollama-mistral' | 'ollama-gemma' | 'ollama-phi3' | 'ollama-llama3' | 'ollama-llama3.1' | 'ollama-gemma2' | 'ollama-mixtral' | 'ollama-qwen' | 'ollama-command-r' | 'ollama-command-r-plus'
+  // LM Studio models
+  | 'lmstudio-llama3' | 'lmstudio-mistral' | 'lmstudio-gemma' | 'lmstudio-llama3.1' | 'lmstudio-gemma2' | 'lmstudio-mixtral';
 
 export interface ModelConfig {
   provider: AIProvider;
@@ -54,6 +73,12 @@ export interface AISettings {
   gemini_api_key?: string;
   qwen_api_key?: string;
   openrouter_api_key?: string;
+  cerebras_api_key?: string;
+  xai_api_key?: string;
+  unbound_api_key?: string;
+  openai_api_key?: string;
+  ollama_api_key?: string;
+  lmstudio_api_key?: string;
   mistral_model?: string;
   defaultModel: ModelConfig;
 }
@@ -130,6 +155,12 @@ function getDefaultAISettings(): AISettings {
     gemini_api_key: '',
     qwen_api_key: '',
     openrouter_api_key: '',
+    cerebras_api_key: '',
+    xai_api_key: '',
+    unbound_api_key: '',
+    openai_api_key: '',
+    ollama_api_key: '',
+    lmstudio_api_key: '',
     mistral_model: 'mistral-small', // Legacy support
     enabled: false,
     defaultModel: {
@@ -156,8 +187,155 @@ export async function isAIEnabled(userId: string): Promise<boolean> {
     settings.cohere_api_key ||
     settings.gemini_api_key ||
     settings.qwen_api_key ||
-    settings.openrouter_api_key
+    settings.openrouter_api_key ||
+    settings.cerebras_api_key ||
+    settings.xai_api_key ||
+    settings.unbound_api_key ||
+    settings.openai_api_key ||
+    settings.ollama_api_key ||
+    settings.lmstudio_api_key
   );
+}
+
+// Function to test API key validity and fetch available models
+export async function getAvailableModelsForProvider(provider: AIProvider, apiKey: string): Promise<AIModel[] | null> {
+  try {
+    switch (provider) {
+      case 'mistral':
+        if (!apiKey) return null;
+        // Fetch models from Mistral API
+        const mistralResponse = await fetch('https://api.mistral.ai/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!mistralResponse.ok) return null;
+        const mistralData = await mistralResponse.json();
+        return mistralData.data.map((model: any) => model.id as AIModel);
+        
+      case 'anthropic':
+        if (!apiKey) return null;
+        // Anthropic doesn't have a models endpoint, so we return the known models
+        return ['claude-3-haiku', 'claude-3-sonnet', 'claude-3-opus', 'claude-3-5-sonnet', 'claude-3-5-haiku'];
+        
+      case 'groq':
+        if (!apiKey) return null;
+        // Fetch models from Groq API
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!groqResponse.ok) return null;
+        const groqData = await groqResponse.json();
+        return groqData.data.map((model: any) => model.id as AIModel);
+        
+      case 'deepseek':
+        if (!apiKey) return null;
+        // DeepSeek doesn't have a models endpoint, so we return the known models
+        return ['deepseek-chat', 'deepseek-coder', 'deepseek-chat-v2', 'deepseek-coder-v2'];
+        
+      case 'llama':
+        if (!apiKey) return null;
+        // Llama API doesn't have a standard models endpoint, so we return the known models
+        return [
+          'llama-2-7b', 'llama-2-13b', 'llama-2-70b', 
+          'llama-3-8b', 'llama-3-70b',
+          'llama-3.1-8b', 'llama-3.1-70b', 'llama-3.1-405b',
+          'llama-3.2-1b', 'llama-3.2-3b'
+        ];
+        
+      case 'cohere':
+        if (!apiKey) return null;
+        // Fetch models from Cohere API
+        const cohereResponse = await fetch('https://api.cohere.ai/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!cohereResponse.ok) return null;
+        const cohereData = await cohereResponse.json();
+        return cohereData.models.map((model: any) => model.name as AIModel);
+        
+      case 'gemini':
+        if (!apiKey) return null;
+        // Google doesn't have a models endpoint, so we return the known models
+        return [
+          'gemini-pro', 'gemini-1.5-pro', 'gemini-1.5-flash',
+          'gemini-1.5-pro-exp-0801', 'gemini-1.5-flash-exp-0801', 'gemini-2.0-flash-exp'
+        ];
+        
+      case 'qwen':
+        if (!apiKey) return null;
+        // Qwen doesn't have a models endpoint, so we return the known models
+        return [
+          'qwen-turbo', 'qwen-plus', 'qwen-max',
+          'qwen-1.5-7b', 'qwen-1.5-14b', 'qwen-1.5-32b', 'qwen-1.5-72b',
+          'qwen-2-0.5b', 'qwen-2-1.5b', 'qwen-2-7b', 'qwen-2-72b',
+          'qwen-2.5-0.5b', 'qwen-2.5-1.5b', 'qwen-2.5-3b', 'qwen-2.5-7b', 
+          'qwen-2.5-14b', 'qwen-2.5-32b', 'qwen-2.5-72b'
+        ];
+        
+      case 'openrouter':
+        if (!apiKey) return null;
+        // Fetch models from OpenRouter API
+        const openrouterResponse = await fetch('https://openrouter.ai/api/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!openrouterResponse.ok) return null;
+        const openrouterData = await openrouterResponse.json();
+        return openrouterData.data.map((model: any) => model.id as AIModel);
+        
+      case 'cerebras':
+        if (!apiKey) return null;
+        // Cerebras doesn't have a models endpoint, so we return the known models
+        return ['cerebras-gemma-2b', 'cerebras-llama3-8b', 'cerebras-llama-3.1-8b', 'cerebras-llama-3.1-70b'];
+        
+      case 'xAI':
+        if (!apiKey) return null;
+        // xAI doesn't have a models endpoint, so we return the known models
+        return ['grok-1', 'grok-2', 'grok-3', 'grok-4'];
+        
+      case 'unbound':
+        if (!apiKey) return null;
+        // Unbound doesn't have a models endpoint, so we return the known models
+        return ['unbound-llama-3-8b', 'unbound-llama-3-70b', 'unbound-llama-3.1-8b', 'unbound-llama-3.1-70b'];
+        
+      case 'openai':
+        if (!apiKey) return null;
+        // Fetch models from OpenAI API
+        const openaiResponse = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!openaiResponse.ok) return null;
+        const openaiData = await openaiResponse.json();
+        return openaiData.data.map((model: any) => model.id as AIModel);
+        
+      case 'ollama':
+        if (!apiKey) return null;
+        // Fetch models from Ollama API
+        const baseUrl = apiKey ? `https://${apiKey}.api.ollama.ai` : 'http://localhost:11434';
+        const ollamaResponse = await fetch(`${baseUrl}/api/tags`);
+        if (!ollamaResponse.ok) return null;
+        const ollamaData = await ollamaResponse.json();
+        return ollamaData.models.map((model: any) => `ollama-${model.name}` as AIModel);
+        
+      case 'lmstudio':
+        if (!apiKey) return null;
+        // LM Studio doesn't have a models endpoint, so we return the known models
+        return ['lmstudio-llama3', 'lmstudio-mistral', 'lmstudio-gemma', 'lmstudio-llama3.1', 'lmstudio-gemma2', 'lmstudio-mixtral'];
+        
+      default:
+        return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching models for ${provider}:`, error);
+    return null;
+  }
 }
 
 // Generate financial insights using Google AI API
@@ -165,7 +343,7 @@ export async function generateGoogleAIInsights(
   userId: string,
   transactionData: any[],
   budgetData: any[]
-): Promise<FinancialInsight[] | null> {
+): Promise<FinancialInsight[] | string> {
   try {
     const settings = await getUserAISettings(userId);
     if (!settings?.google_api_key || !settings.enabled) return getExampleInsights();
@@ -174,6 +352,12 @@ export async function generateGoogleAIInsights(
       // Use gemini-1.5-flash instead of the deprecated model
       const apiKey = settings.gemini_api_key || settings.google_api_key;
       const modelName = "gemini-1.5-flash"; // Updated to supported model
+      
+      // Check quota before making request
+      if (!canMakeRequest('gemini', modelName, userId)) {
+        const quotaStatus = getQuotaStatus('gemini', modelName, userId);
+        return `You've reached your daily quota for Gemini AI (${quotaStatus.usage} requests). Your quota will reset in ${quotaStatus.timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
+      }
       
       // Sanitize transaction and budget data to prevent JSON issues
       const sanitizedTransactions = transactionData.map(t => ({
@@ -191,6 +375,9 @@ export async function generateGoogleAIInsights(
         amount: b.amount,
         period: b.period
       }));
+      
+      // Increment quota usage before making request
+      incrementQuotaUsage('gemini', modelName, userId);
       
       // Basic request to Google AI API
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`, {
@@ -253,7 +440,48 @@ export async function generateGoogleAIInsights(
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Gemini API HTTP error: ${response.status}`, errorText);
-        return getExampleInsights();
+        
+        // Check for rate limit error specifically
+        if (response.status === 429) {
+          // Mark quota as exceeded
+          setQuotaExceeded('gemini', modelName, userId, true);
+          
+          // Parse the error response to get more specific information
+          try {
+            const errorData = JSON.parse(errorText);
+            const quotaInfo = errorData.error?.details?.find((detail: any) => detail['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure');
+            const retryInfo = errorData.error?.details?.find((detail: any) => detail['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
+            
+            let rateLimitMessage = "You've reached the rate limit for Gemini AI. ";
+            
+            if (quotaInfo?.violations?.[0]) {
+              const violation = quotaInfo.violations[0];
+              if (violation.quotaId?.includes('FreeTier')) {
+                rateLimitMessage += "You've exceeded your free tier quota. ";
+              }
+              if (violation.quotaValue) {
+                rateLimitMessage += `Daily limit: ${violation.quotaValue} requests. `;
+              }
+            }
+            
+            // Use our quota manager for reset time
+            const timeUntilReset = formatTimeUntilReset('gemini', modelName, userId);
+            if (retryInfo?.retryDelay) {
+              rateLimitMessage += `Try again in ${retryInfo.retryDelay}. `;
+            } else if (timeUntilReset) {
+              rateLimitMessage += `Quota resets in ${timeUntilReset}. `;
+            }
+            
+            rateLimitMessage += "Consider upgrading your plan or trying a different AI provider.";
+            return rateLimitMessage;
+          } catch (parseError) {
+            console.error('Error parsing rate limit error:', parseError);
+            const timeUntilReset = formatTimeUntilReset('gemini', modelName, userId);
+            return `You've reached the rate limit for Gemini AI. Quota resets in ${timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
+          }
+        }
+        
+        return "There was an error connecting to Gemini AI. Please try again later.";
       }
       
       const result = await response.json();
@@ -349,7 +577,6 @@ function getExampleInsights(): FinancialInsight[] {
   ];
 }
 
-// Chat with AI based on provider
 export async function chatWithAI(
   userId: string,
   messages: AIMessage[],
@@ -387,15 +614,33 @@ export async function chatWithAI(
         return chatWithCohereAI(apiKey, messages, config.model as string);
       case 'gemini':
         apiKey = settings.gemini_api_key || settings.google_api_key || '';
-        return chatWithGeminiAI(apiKey, messages, config.model as string);
+        return chatWithGeminiAI(apiKey, messages, config.model as string, userId);
       case 'qwen':
         apiKey = settings.qwen_api_key || '';
         return chatWithQwenAI(apiKey, messages, config.model as string);
       case 'openrouter':
         apiKey = settings.openrouter_api_key || '';
         return chatWithOpenRouterAI(apiKey, messages, config.model as string);
+      case 'cerebras':
+        apiKey = settings.cerebras_api_key || '';
+        return chatWithCerebrasAI(apiKey, messages, config.model as string);
+      case 'xAI':
+        apiKey = settings.xai_api_key || '';
+        return chatWithXaiAI(apiKey, messages, config.model as string);
+      case 'unbound':
+        apiKey = settings.unbound_api_key || '';
+        return chatWithUnboundAI(apiKey, messages, config.model as string);
+      case 'openai':
+        apiKey = settings.openai_api_key || '';
+        return chatWithOpenAIAI(apiKey, messages, config.model as string);
+      case 'ollama':
+        apiKey = settings.ollama_api_key || '';
+        return chatWithOllamaAI(apiKey, messages, config.model as string);
+      case 'lmstudio':
+        apiKey = settings.lmstudio_api_key || '';
+        return chatWithLmStudioAI(apiKey, messages, config.model as string);
       default:
-        return "Unknown AI provider selected.";
+        return `Unknown AI provider selected: ${config.provider}.`;
     }
   } catch (error) {
     console.error('Error in chatWithAI:', error);
@@ -666,11 +911,18 @@ async function chatWithCohereAI(
 async function chatWithGeminiAI(
   apiKey: string,
   messages: AIMessage[],
-  model: string = 'gemini-pro'
+  model: string = 'gemini-pro',
+  userId?: string
 ): Promise<string | null> {
   try {
     if (!apiKey) {
       return "Gemini API key is not configured. Please add your API key in settings.";
+    }
+    
+    // Check quota if userId is provided
+    if (userId && !canMakeRequest('gemini', model, userId)) {
+      const quotaStatus = getQuotaStatus('gemini', model, userId);
+      return `You've reached your daily quota for Gemini AI (${quotaStatus.usage} requests). Your quota will reset in ${quotaStatus.timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
     }
     
     // Validate model - prevent using deprecated models
@@ -729,6 +981,11 @@ async function chatWithGeminiAI(
     
     console.log('Using Gemini model:', model);
     
+    // Increment quota usage if userId is provided
+    if (userId) {
+      incrementQuotaUsage('gemini', model, userId);
+    }
+    
     // Implement Gemini API request
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -777,7 +1034,48 @@ async function chatWithGeminiAI(
       } else if (response.status === 404) {
         return `The requested Gemini model "${model}" was not found. Try a different model.`;
       } else if (response.status === 429) {
-        return "You've reached the rate limit for Gemini AI. Please try again later.";
+        // Mark quota as exceeded if userId is provided
+        if (userId) {
+          setQuotaExceeded('gemini', model, userId, true);
+        }
+        
+        // Parse the error response to get more specific information
+        try {
+          const errorData = await response.json();
+          const quotaInfo = errorData.error?.details?.find((detail: any) => detail['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure');
+          const retryInfo = errorData.error?.details?.find((detail: any) => detail['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
+          
+          let rateLimitMessage = "You've reached the rate limit for Gemini AI. ";
+          
+          if (quotaInfo?.violations?.[0]) {
+            const violation = quotaInfo.violations[0];
+            if (violation.quotaId?.includes('FreeTier')) {
+              rateLimitMessage += "You've exceeded your free tier quota. ";
+            }
+            if (violation.quotaValue) {
+              rateLimitMessage += `Daily limit: ${violation.quotaValue} requests. `;
+            }
+          }
+          
+          // Use our quota manager for reset time if userId is available
+          if (userId) {
+            const timeUntilReset = formatTimeUntilReset('gemini', model, userId);
+            rateLimitMessage += `Quota resets in ${timeUntilReset}. `;
+          } else if (retryInfo?.retryDelay) {
+            rateLimitMessage += `Try again in ${retryInfo.retryDelay}. `;
+          }
+          
+          rateLimitMessage += "Consider upgrading your plan or trying a different AI provider.";
+          return rateLimitMessage;
+        } catch (parseError) {
+          console.error('Error parsing rate limit error:', parseError);
+          if (userId) {
+            const timeUntilReset = formatTimeUntilReset('gemini', model, userId);
+            return `You've reached the rate limit for Gemini AI. Quota resets in ${timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
+          } else {
+            return "You've reached the rate limit for Gemini AI. Please try again later. Consider upgrading your plan or trying a different AI provider.";
+          }
+        }
       }
       
       return "There was an error connecting to Gemini AI. Please try again later.";
@@ -990,17 +1288,285 @@ export async function getAIConversations(userId: string): Promise<any[]> {
   }
 }
 
+// Get quota status for a user's AI provider
+export async function getUserQuotaStatus(userId: string): Promise<{
+  provider: string;
+  model: string;
+  status: any;
+} | null> {
+  try {
+    const settings = await getUserAISettings(userId);
+    if (!settings?.enabled || !settings.defaultModel) return null;
+    
+    const { provider, model } = settings.defaultModel;
+    const status = getQuotaStatus(provider, model, userId);
+    
+    return {
+      provider,
+      model,
+      status
+    };
+  } catch (error) {
+    console.error('Error getting user quota status:', error);
+    return null;
+  }
+}
+
 const getDefaultModelForProvider = (provider: string): string => {
   switch (provider) {
     case 'mistral': return 'mistral-small';
-    case 'anthropic': return 'claude-3-haiku';
-    case 'groq': return 'llama3-8b';
+    case 'anthropic': return 'claude-3-5-sonnet';
+    case 'groq': return 'llama-3.1-8b';
     case 'deepseek': return 'deepseek-chat';
-    case 'llama': return 'llama-3-8b';
-    case 'cohere': return 'command';
-    case 'gemini': return 'gemini-1.5-flash'; // Updated to use a currently supported model
-    case 'qwen': return 'qwen-turbo';
+    case 'llama': return 'llama-3.1-8b';
+    case 'cohere': return 'command-r';
+    case 'gemini': return 'gemini-1.5-flash';
+    case 'qwen': return 'qwen-2.5-7b';
     case 'openrouter': return 'openrouter-default';
+    case 'cerebras': return 'cerebras-llama-3.1-8b';
+    case 'xAI': return 'grok-2';
+    case 'unbound': return 'unbound-llama-3.1-8b';
+    case 'openai': return 'gpt-4o';
+    case 'ollama': return 'ollama-llama3.1';
+    case 'lmstudio': return 'lmstudio-llama3.1';
     default: return 'mistral-small';
   }
 }; 
+
+// Chat with Cerebras AI
+async function chatWithCerebrasAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'cerebras-gemma-2b'
+): Promise<string | null> {
+  try {
+    if (!apiKey) {
+      return "Cerebras API key is not configured. Please add your API key in settings.";
+    }
+    
+    // Implement Cerebras API request
+    const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Cerebras API error:', data.error);
+      return "There was an error connecting to Cerebras AI. Please check your API key in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from Cerebras AI.";
+  } catch (error) {
+    console.error('Error chatting with Cerebras AI:', error);
+    return "There was an error communicating with Cerebras AI. Please try again later.";
+  }
+}
+
+// Chat with xAI (Grok)
+async function chatWithXaiAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'grok-1'
+): Promise<string | null> {
+  try {
+    if (!apiKey) {
+      return "xAI API key is not configured. Please add your API key in settings.";
+    }
+    
+    // Implement xAI API request
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('xAI API error:', data.error);
+      return "There was an error connecting to xAI. Please check your API key in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from xAI.";
+  } catch (error) {
+    console.error('Error chatting with xAI:', error);
+    return "There was an error communicating with xAI. Please try again later.";
+  }
+}
+
+// Chat with Unbound AI
+async function chatWithUnboundAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'unbound-llama-3-8b'
+): Promise<string | null> {
+  try {
+    if (!apiKey) {
+      return "Unbound API key is not configured. Please add your API key in settings.";
+    }
+    
+    // Implement Unbound API request
+    const response = await fetch('https://api.unbound.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Unbound API error:', data.error);
+      return "There was an error connecting to Unbound AI. Please check your API key in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from Unbound AI.";
+  } catch (error) {
+    console.error('Error chatting with Unbound AI:', error);
+    return "There was an error communicating with Unbound AI. Please try again later.";
+  }
+}
+
+// Chat with OpenAI
+async function chatWithOpenAIAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'gpt-3.5-turbo'
+): Promise<string | null> {
+  try {
+    if (!apiKey) {
+      return "OpenAI API key is not configured. Please add your API key in settings.";
+    }
+    
+    // Implement OpenAI API request
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('OpenAI API error:', data.error);
+      return "There was an error connecting to OpenAI. Please check your API key in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from OpenAI.";
+  } catch (error) {
+    console.error('Error chatting with OpenAI:', error);
+    return "There was an error communicating with OpenAI. Please try again later.";
+  }
+}
+
+// Chat with Ollama
+async function chatWithOllamaAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'ollama-llama2'
+): Promise<string | null> {
+  try {
+    // Ollama typically runs locally, but we'll support API key for hosted versions
+    const baseUrl = apiKey ? `https://${apiKey}.api.ollama.ai/v1` : 'http://localhost:11434/v1';
+    
+    // Implement Ollama API request
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Ollama API error:', data.error);
+      return "There was an error connecting to Ollama. Please check your setup in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from Ollama.";
+  } catch (error) {
+    console.error('Error chatting with Ollama:', error);
+    return "There was an error communicating with Ollama. Please ensure it's running locally or check your API key.";
+  }
+}
+
+// Chat with LM Studio
+async function chatWithLmStudioAI(
+  apiKey: string,
+  messages: AIMessage[],
+  model: string = 'lmstudio-llama3'
+): Promise<string | null> {
+  try {
+    // LM Studio typically runs locally
+    const baseUrl = apiKey ? `https://${apiKey}.api.lmstudio.ai/v1` : 'http://localhost:1234/v1';
+    
+    // Implement LM Studio API request
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('LM Studio API error:', data.error);
+      return "There was an error connecting to LM Studio. Please check your setup in settings.";
+    }
+    
+    return data.choices?.[0]?.message?.content || "No response from LM Studio.";
+  } catch (error) {
+    console.error('Error chatting with LM Studio:', error);
+    return "There was an error communicating with LM Studio. Please ensure it's running locally or check your API key.";
+  }
+} 

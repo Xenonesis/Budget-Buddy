@@ -15,7 +15,7 @@ Before using the AI features, you need to set up the required database tables in
 ```sql
 -- Add ai_settings column to profiles table if it doesn't exist
 ALTER TABLE profiles 
-ADD COLUMN IF NOT EXISTS ai_settings JSONB DEFAULT '{"google_api_key":"", "mistral_api_key":"", "anthropic_api_key":"", "groq_api_key":"", "deepseek_api_key":"", "llama_api_key":"", "cohere_api_key":"", "gemini_api_key":"", "qwen_api_key":"", "openrouter_api_key":"", "enabled":false, "defaultModel":{"provider":"mistral", "model":"mistral-small"}}'::jsonb;
+ADD COLUMN IF NOT EXISTS ai_settings JSONB DEFAULT '{"google_api_key":"","mistral_api_key":"","anthropic_api_key":"","groq_api_key":"","deepseek_api_key":"","llama_api_key":"","cohere_api_key":"","gemini_api_key":"","qwen_api_key":"","openrouter_api_key":"","cerebras_api_key":"","xai_api_key":"","unbound_api_key":"","openai_api_key":"","ollama_api_key":"","lmstudio_api_key":"","enabled":false,"defaultModel":{"provider":"mistral","model":"mistral-small"}}'::jsonb;
 
 -- Create ai_conversations table
 CREATE TABLE IF NOT EXISTS ai_conversations (
@@ -156,46 +156,106 @@ Different AI providers have different strengths and capabilities:
 ### Mistral AI Models
 - **Mistral Tiny**: Best for simple questions, fastest response time, lowest token usage
 - **Mistral Small**: Good for general financial questions and advice
+- **Mistral Small Latest**: Latest version of Mistral Small with improvements
 - **Mistral Medium**: Better for complex financial analysis and detailed explanations
-- **Mistral Large**: Best for sophisticated financial planning and in-depth analysis
+- **Mistral Large**: Powerful model for sophisticated financial planning
+- **Mistral Large Latest**: Latest version of Mistral Large with improvements
+- **Mistral Nemo**: New efficient model with good balance of performance and speed
 
 ### Claude (Anthropic) Models
 - **Claude 3 Haiku**: Fast responses, good for simple financial questions
 - **Claude 3 Sonnet**: Balanced performance for most financial tasks
 - **Claude 3 Opus**: Most powerful Claude model, best for complex analysis
+- **Claude 3.5 Sonnet**: Improved version with better reasoning and capabilities
+- **Claude 3.5 Haiku**: Faster version of Claude 3.5 with good performance
 
 ### Groq Models
 - **Llama 3 8B**: Extremely fast processing, good for general questions
 - **Llama 3 70B**: More powerful with deeper reasoning capabilities
 - **Mixtral 8x7B**: Balanced performance with good reasoning
+- **Llama 3.1 8B**: Updated version with improvements
+- **Llama 3.1 70B**: More powerful updated version
+- **Llama 3.1 405B**: Most powerful Groq model with exceptional reasoning
+- **Llama 3 Groq 8B**: Optimized for Groq's infrastructure
+- **Llama 3 Groq 70B**: More powerful optimized version
 
 ### DeepSeek Models
 - **DeepSeek Chat**: General purpose chat model for financial advice
+- **DeepSeek Chat v2**: Improved version with better reasoning
 - **DeepSeek Coder**: Specialized for budget calculations and financial formulas
+- **DeepSeek Coder v2**: Improved coding specialized model
 
 ### Llama Models
 - **Llama 2** (various sizes): Older generation models with good performance
 - **Llama 3** (various sizes): Newer generation with improved reasoning
+- **Llama 3.1** (various sizes): Latest generation with significant improvements
+- **Llama 3.2** (1B, 3B): Lightweight models for faster responses
 
 ### Cohere Models
 - **Command**: Balanced performance for most tasks
 - **Command Light**: Faster, more efficient version
-- **Command R/R+**: More advanced reasoning capabilities
+- **Command R**: Advanced model for complex reasoning
+- **Command R+**: Most powerful Cohere model for complex analysis
+- **Command Nightly**: Experimental version with latest features
+- **Aya Expanse 8B**: Multilingual model for global financial advice
+- **Aya Expanse 32B**: Most powerful multilingual model
 
 ### Gemini Models
 - **Gemini Pro**: Google's versatile model for general financial advice
 - **Gemini 1.5 Pro**: More advanced with better understanding of complex questions
 - **Gemini 1.5 Flash**: Faster model with good balance of speed and quality
+- **Gemini 1.5 Pro Exp 0801**: Experimental version with latest features
+- **Gemini 1.5 Flash Exp 0801**: Experimental faster version
+- **Gemini 2.0 Flash Exp**: Next generation experimental model
 
 ### Qwen Models
 - **Qwen Turbo**: Fast, efficient model good for everyday financial questions
 - **Qwen Plus**: Enhanced capabilities for more detailed financial analysis
 - **Qwen Max**: Most powerful Qwen model for complex financial planning
+- **Qwen 1.5/2/2.5** (various sizes): Different generations with various capabilities
+- **Qwen 2.5** (0.5B to 72B): Latest generation with models of various sizes for different needs
 
 ### OpenRouter
 - OpenRouter provides access to models from various providers through a single API
 - You can select from models like Claude, Gemini, Llama, and more
 - Useful for comparing different models or accessing premium models more easily
+- Supports models from Anthropic, Google, Meta, Mistral, and OpenAI
+
+### Cerebras Models
+- **Cerebras Gemma 2B**: Lightweight model optimized for Cerebras hardware
+- **Cerebras Llama 3 8B**: Optimized version of Llama 3 for Cerebras hardware
+- **Cerebras Llama 3.1 8B/70B**: Latest generation models optimized for Cerebras hardware
+
+### xAI (Grok) Models
+- **Grok 1**: Initial version of xAI's model
+- **Grok 2**: Improved version with better reasoning
+- **Grok 3**: More powerful version with enhanced capabilities
+- **Grok 4**: Most powerful xAI model with exceptional reasoning
+
+### Unbound Models
+- **Unbound Llama 3 8B/70B**: Cloud-based Llama models with good performance
+- **Unbound Llama 3.1 8B/70B**: Latest generation cloud-based models
+
+### OpenAI Models
+- **GPT-3.5 Turbo**: Balanced performance for most tasks
+- **GPT-4**: More powerful model with better reasoning
+- **GPT-4 Turbo**: Faster version with good performance
+- **GPT-4o**: Most powerful OpenAI model with multimodal capabilities
+- **GPT-4o Mini**: Lightweight version optimized for speed
+- **O1 Preview/Mini**: Reasoning models with advanced capabilities
+
+### Ollama Models
+- **Llama 2/3/3.1**: Various generations of Llama models for local use
+- **Mistral/Mixtral**: Efficient models for local use
+- **Gemma/Gemma 2**: Google's lightweight models for local use
+- **Phi 3**: Microsoft's efficient model for local use
+- **Qwen**: Alibaba's model for local use
+- **Command R/R+**: Cohere's models for local use
+
+### LM Studio Models
+- **Llama 3/3.1**: Latest generation models for local use
+- **Mistral/Mixtral**: Efficient models for local use
+- **Gemma/Gemma 2**: Google's lightweight models for local use
 
 ## How to Choose a Model
 

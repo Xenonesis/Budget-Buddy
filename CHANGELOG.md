@@ -2,6 +2,29 @@
 
 All notable changes to the Budget Buddy application will be documented in this file.
 
+## [13.25.00] - 2025-08-22
+
+### Added
+- Updated to version v13.25.00
+- Enhanced AI provider support with automatic model detection
+- Added support for 15+ AI providers including Cerebras, xAI, Unbound, OpenAI, Ollama, and LM Studio
+- Implemented dynamic model fetching based on API keys
+- Improved rate limit handling for Gemini API with detailed error messages
+- Updated AI models to include latest offerings from all providers
+
+### Changed
+- Updated package.json with new version number
+- Updated README.md with new version badge and latest updates section
+- Enhanced AI setup guide with information about new providers
+- Improved user experience with automatic model detection
+
+## [13.00.00] - 2025-08-22
+
+### Added
+- Version update to v13.00.00
+- Updated package.json with new version number
+- Updated README.md with new version badge and latest updates section
+
 ## [12.50.00] - 2025-08-22
 
 ### Refactored

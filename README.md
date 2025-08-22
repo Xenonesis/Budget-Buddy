@@ -29,7 +29,7 @@
 
 <p align="center">
   <a href="https://github.com/Xenonesis/Budget-Buddy/releases">
-    <img src="https://img.shields.io/badge/version-12.50.00-blue.svg?style=flat-square" alt="Version">
+    <img src="https://img.shields.io/badge/version-13.25.00-blue.svg?style=flat-square" alt="Version">
   </a>
   <a href="https://nextjs.org/">
     <img src="https://img.shields.io/badge/Next.js-15.5.0-black.svg?style=flat-square&logo=next.js" alt="Next.js">
@@ -381,8 +381,21 @@ Budget Buddy supports multiple AI providers for enhanced financial insights, giv
 
 | Provider | Model | Strengths | Use Cases |
 |----------|-------|-----------|-----------|
-| **Google Gemini** | gemini-pro, gemini-ultra | Versatile, contextual understanding | General financial advice, budget recommendations |
-| **Anthropic Claude** | claude-3-opus, claude-3-sonnet | Advanced reasoning, long-context | Complex financial planning, investment analysis |
+| **Google Gemini** | gemini-pro, gemini-1.5-pro, gemini-1.5-flash | Versatile, contextual understanding | General financial advice, budget recommendations |
+| **Anthropic Claude** | claude-3-opus, claude-3-sonnet, claude-3.5-sonnet | Advanced reasoning, long-context | Complex financial planning, investment analysis |
+| **Mistral AI** | mistral-large, mistral-small, mistral-tiny | Efficient, cost-effective | General financial tasks, quick insights |
+| **Groq** | llama-3.1-405b, llama-3.1-70b, llama-3.1-8b | Extremely fast processing | Real-time financial analysis, quick responses |
+| **DeepSeek** | deepseek-chat, deepseek-coder | Specialized capabilities | Financial calculations, coding assistance |
+| **Llama** | llama-3.1-405b, llama-3.1-70b, llama-3.1-8b | Open-source flexibility | Custom financial analysis, local processing |
+| **Cohere** | command-r-plus, command-r, command | Advanced reasoning | Financial document analysis, complex queries |
+| **Qwen** | qwen-2.5-72b, qwen-2.5-7b, qwen-2.5-0.5b | Multilingual support | Global financial advice, multi-language users |
+| **OpenRouter** | Various models | Unified access | Model comparison, flexible selection |
+| **Cerebras** | llama-3.1-70b, llama-3.1-8b | Hardware-optimized | High-performance financial computing |
+| **xAI (Grok)** | grok-4, grok-2, grok-1 | Unique training data | Creative financial insights, unconventional analysis |
+| **Unbound** | llama-3.1-70b, llama-3.1-8b | Cloud-based | Scalable financial analysis, API access |
+| **OpenAI** | gpt-4o, gpt-4, gpt-3.5-turbo | Industry-leading | Comprehensive financial assistance |
+| **Ollama** | llama-3.1, mistral, gemma | Local processing | Privacy-focused analysis, offline use |
+| **LM Studio** | llama-3.1, mistral, gemma | Local customization | Personalized models, custom fine-tuning |
 | **Mistral AI** | mistral-large, mistral-medium | Fast processing, cost-effective | Quick financial calculations, expense categorization |
 | **Groq** | llama2-70b, mixtral-8x7b | Ultra-fast inference | Real-time insights, chat responses |
 | **DeepSeek** | deepseek-chat, deepseek-coder | Specialized financial models | Financial calculations, risk assessment |
@@ -393,6 +406,19 @@ Budget Buddy supports multiple AI providers for enhanced financial insights, giv
 #### 1. **Get API Keys**
 - **Google Gemini**: [Get API Key](https://ai.google.dev/)
 - **Anthropic Claude**: [Get API Key](https://www.anthropic.com/)
+- **Mistral AI**: [Get API Key](https://console.mistral.ai/)
+- **Groq**: [Get API Key](https://console.groq.com/)
+- **DeepSeek**: [Get API Key](https://platform.deepseek.ai/)
+- **Llama**: [Get API Key](https://llama-api.com/)
+- **Cohere**: [Get API Key](https://dashboard.cohere.com/)
+- **Qwen**: [Get API Key](https://dashscope.aliyun.com/)
+- **OpenRouter**: [Get API Key](https://openrouter.ai/)
+- **Cerebras**: [Get API Key](https://www.cerebras.net/)
+- **xAI (Grok)**: [Get API Key](https://x.ai/)
+- **Unbound**: [Get API Key](https://unbound.ai/)
+- **OpenAI**: [Get API Key](https://platform.openai.com/)
+- **Ollama**: [Get API Key](https://ollama.ai/)
+- **LM Studio**: [Get API Key](https://lmstudio.ai/)
 - **Mistral AI**: [Get API Key](https://mistral.ai/)
 - **Groq**: [Get API Key](https://groq.com/)
 - **DeepSeek**: [Get API Key](https://www.deepseek.com/)
@@ -1526,7 +1552,7 @@ Budget Buddy tracks these KPIs to ensure optimal performance and user satisfacti
 
 ### 🔥 Latest Updates
 
-**Version 12.50.00** - Current version with all the latest features and improvements
+**Version 13.25.00** - Current version with all the latest features and improvements
 
 **Version 10.75** - Landing page refactoring complete with improved performance and maintainability
 

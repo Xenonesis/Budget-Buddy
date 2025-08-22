@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import type { AIProvider, AIModel } from "@/lib/ai";
+import { getAvailableModelsForProvider } from "@/lib/ai";
 
 interface Profile {
   id: string;
@@ -38,24 +39,30 @@ interface Profile {
   profile_photo?: string;
   gender?: string;
   timezone?: string;
-  ai_settings?: {
-    google_api_key?: string;
-    mistral_api_key?: string;
-    anthropic_api_key?: string;
-    groq_api_key?: string;
-    deepseek_api_key?: string;
-    llama_api_key?: string;
-    cohere_api_key?: string;
-    gemini_api_key?: string;
-    qwen_api_key?: string;
-    openrouter_api_key?: string;
-    enabled: boolean;
-    mistral_model?: string;
-    defaultModel: {
-      provider: 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter';
-      model: string;
+  ai_settings: {
+      google_api_key: string;
+      mistral_api_key: string;
+      anthropic_api_key: string;
+      groq_api_key: string;
+      deepseek_api_key: string;
+      llama_api_key: string;
+      cohere_api_key: string;
+      gemini_api_key: string;
+      qwen_api_key: string;
+      openrouter_api_key: string;
+      cerebras_api_key: string;
+      xai_api_key: string;
+      unbound_api_key: string;
+      openai_api_key: string;
+      ollama_api_key: string;
+      lmstudio_api_key: string;
+      enabled: boolean;
+      mistral_model: string;
+      defaultModel: {
+        provider: 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter' | 'cerebras' | 'xAI' | 'unbound' | 'openai' | 'ollama' | 'lmstudio';
+        model: string;
+      };
     };
-  };
 }
 
 interface AuthUser {
@@ -127,6 +134,12 @@ export default function SettingsPage() {
       gemini_api_key: "",
       qwen_api_key: "",
       openrouter_api_key: "",
+      cerebras_api_key: "",
+      xai_api_key: "",
+      unbound_api_key: "",
+      openai_api_key: "",
+      ollama_api_key: "",
+      lmstudio_api_key: "",
       mistral_model: "mistral-small",
       enabled: false,
       defaultModel: {
@@ -139,6 +152,8 @@ export default function SettingsPage() {
     null
   );
   const [themeChoice, setThemeChoice] = useState<"light" | "dark" | "system">(theme || "system");
+  const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
+  const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchProfile();
@@ -445,6 +460,87 @@ export default function SettingsPage() {
     setTheme(value);
   };
 
+  const fetchAvailableModels = async (provider: string) => {
+    // Don't fetch if we already have the models or if we're already fetching
+    if (availableModels[provider] || loadingModels[provider]) return;
+    
+    setLoadingModels(prev => ({ ...prev, [provider]: true }));
+    
+    try {
+      // Get the API key for this provider
+      let apiKey = '';
+      switch (provider) {
+        case 'mistral':
+          apiKey = formData.ai_settings?.mistral_api_key || '';
+          break;
+        case 'anthropic':
+          apiKey = formData.ai_settings?.anthropic_api_key || '';
+          break;
+        case 'groq':
+          apiKey = formData.ai_settings?.groq_api_key || '';
+          break;
+        case 'deepseek':
+          apiKey = formData.ai_settings?.deepseek_api_key || '';
+          break;
+        case 'llama':
+          apiKey = formData.ai_settings?.llama_api_key || '';
+          break;
+        case 'cohere':
+          apiKey = formData.ai_settings?.cohere_api_key || '';
+          break;
+        case 'gemini':
+          apiKey = formData.ai_settings?.gemini_api_key || formData.ai_settings?.google_api_key || '';
+          break;
+        case 'qwen':
+          apiKey = formData.ai_settings?.qwen_api_key || '';
+          break;
+        case 'openrouter':
+          apiKey = formData.ai_settings?.openrouter_api_key || '';
+          break;
+        case 'cerebras':
+          apiKey = formData.ai_settings?.cerebras_api_key || '';
+          break;
+        case 'xAI':
+          apiKey = formData.ai_settings?.xai_api_key || '';
+          break;
+        case 'unbound':
+          apiKey = formData.ai_settings?.unbound_api_key || '';
+          break;
+        case 'openai':
+          apiKey = formData.ai_settings?.openai_api_key || '';
+          break;
+        case 'ollama':
+          apiKey = formData.ai_settings?.ollama_api_key || '';
+          break;
+        case 'lmstudio':
+          apiKey = formData.ai_settings?.lmstudio_api_key || '';
+          break;
+      }
+      
+      // If no API key, use default models
+      if (!apiKey) {
+        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+        setLoadingModels(prev => ({ ...prev, [provider]: false }));
+        return;
+      }
+      
+      // Fetch available models
+      const models = await getAvailableModelsForProvider(provider as AIProvider, apiKey);
+      
+      if (models) {
+        setAvailableModels(prev => ({ ...prev, [provider]: models }));
+      } else {
+        // If fetching failed, use default models
+        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+      }
+    } catch (error) {
+      console.error(`Error fetching models for ${provider}:`, error);
+      setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+    } finally {
+      setLoadingModels(prev => ({ ...prev, [provider]: false }));
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/auth/login");
@@ -612,27 +708,67 @@ export default function SettingsPage() {
   const getDefaultModelForProvider = (provider: string): string => {
     switch (provider) {
       case 'mistral': return 'mistral-small';
-      case 'anthropic': return 'claude-3-haiku';
-      case 'groq': return 'llama3-8b';
+      case 'anthropic': return 'claude-3-5-sonnet';
+      case 'groq': return 'llama-3.1-8b';
       case 'deepseek': return 'deepseek-chat';
-      case 'llama': return 'llama-3-8b';
-      case 'cohere': return 'command';
+      case 'llama': return 'llama-3.1-8b';
+      case 'cohere': return 'command-r';
       case 'gemini': return 'gemini-1.5-flash';
-      case 'qwen': return 'qwen-turbo';
+      case 'qwen': return 'qwen-2.5-7b';
       case 'openrouter': return 'openrouter-default';
+      case 'cerebras': return 'cerebras-llama-3.1-8b';
+      case 'xAI': return 'grok-2';
+      case 'unbound': return 'unbound-llama-3.1-8b';
+      case 'openai': return 'gpt-4o';
+      case 'ollama': return 'ollama-llama3.1';
+      case 'lmstudio': return 'lmstudio-llama3.1';
       default: return 'mistral-small';
     }
   };
   
   const renderModelOptions = (provider: string) => {
+    // Fetch models when the provider is selected
+    useEffect(() => {
+      if (formData.ai_settings?.defaultModel?.provider === provider) {
+        fetchAvailableModels(provider);
+      }
+    }, [formData.ai_settings?.defaultModel?.provider]);
+    
+    // Get available models for this provider, or use defaults if not fetched
+    const models = availableModels[provider] || [];
+    const hasFetchedModels = models.length > 0;
+    const isLoading = loadingModels[provider];
+    
+    // If we have fetched models, use them
+    if (hasFetchedModels) {
+      return (
+        <>
+          {models.map((model) => (
+            <SelectItem key={model} value={model}>
+              {model}
+            </SelectItem>
+          ))}
+        </>
+      );
+    }
+    
+    // If we're loading, show a loading indicator
+    if (isLoading) {
+      return <SelectItem value="loading">Loading models...</SelectItem>;
+    }
+    
+    // Otherwise, use the default models based on provider
     switch (provider) {
       case 'mistral':
         return (
           <>
             <SelectItem value="mistral-tiny">Mistral Tiny (Fastest)</SelectItem>
             <SelectItem value="mistral-small">Mistral Small (Balanced)</SelectItem>
+            <SelectItem value="mistral-small-latest">Mistral Small Latest</SelectItem>
             <SelectItem value="mistral-medium">Mistral Medium (Advanced)</SelectItem>
-            <SelectItem value="mistral-large-latest">Mistral Large (Most Powerful)</SelectItem>
+            <SelectItem value="mistral-large">Mistral Large</SelectItem>
+            <SelectItem value="mistral-large-latest">Mistral Large Latest (Most Powerful)</SelectItem>
+            <SelectItem value="mistral-nemo">Mistral Nemo</SelectItem>
           </>
         );
       case 'anthropic':
@@ -640,7 +776,9 @@ export default function SettingsPage() {
           <>
             <SelectItem value="claude-3-haiku">Claude 3 Haiku (Fast)</SelectItem>
             <SelectItem value="claude-3-sonnet">Claude 3 Sonnet (Balanced)</SelectItem>
-            <SelectItem value="claude-3-opus">Claude 3 Opus (Most Powerful)</SelectItem>
+            <SelectItem value="claude-3-opus">Claude 3 Opus (Powerful)</SelectItem>
+            <SelectItem value="claude-3-5-sonnet">Claude 3.5 Sonnet (Most Powerful)</SelectItem>
+            <SelectItem value="claude-3-5-haiku">Claude 3.5 Haiku</SelectItem>
           </>
         );
       case 'groq':
@@ -649,13 +787,20 @@ export default function SettingsPage() {
             <SelectItem value="llama3-8b">Llama 3 8B (Fast)</SelectItem>
             <SelectItem value="llama3-70b">Llama 3 70B (Powerful)</SelectItem>
             <SelectItem value="mixtral-8x7b">Mixtral 8x7B (Balanced)</SelectItem>
+            <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
+            <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
+            <SelectItem value="llama-3.1-405b">Llama 3.1 405B (Most Powerful)</SelectItem>
+            <SelectItem value="llama3-groq-8b">Llama 3 Groq 8B</SelectItem>
+            <SelectItem value="llama3-groq-70b">Llama 3 Groq 70B</SelectItem>
           </>
         );
       case 'deepseek':
         return (
           <>
             <SelectItem value="deepseek-chat">DeepSeek Chat</SelectItem>
+            <SelectItem value="deepseek-chat-v2">DeepSeek Chat v2</SelectItem>
             <SelectItem value="deepseek-coder">DeepSeek Coder</SelectItem>
+            <SelectItem value="deepseek-coder-v2">DeepSeek Coder v2</SelectItem>
           </>
         );
       case 'llama':
@@ -666,6 +811,11 @@ export default function SettingsPage() {
             <SelectItem value="llama-2-70b">Llama 2 70B</SelectItem>
             <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
             <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
+            <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
+            <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
+            <SelectItem value="llama-3.1-405b">Llama 3.1 405B (Most Powerful)</SelectItem>
+            <SelectItem value="llama-3.2-1b">Llama 3.2 1B (Fastest)</SelectItem>
+            <SelectItem value="llama-3.2-3b">Llama 3.2 3B</SelectItem>
           </>
         );
       case 'cohere':
@@ -674,7 +824,10 @@ export default function SettingsPage() {
             <SelectItem value="command">Command</SelectItem>
             <SelectItem value="command-light">Command Light (Faster)</SelectItem>
             <SelectItem value="command-r">Command R</SelectItem>
-            <SelectItem value="command-r-plus">Command R+ (Most Powerful)</SelectItem>
+            <SelectItem value="command-r-plus">Command R+ (Powerful)</SelectItem>
+            <SelectItem value="command-nightly">Command Nightly</SelectItem>
+            <SelectItem value="c4ai-aya-expanse-8b">Aya Expanse 8B</SelectItem>
+            <SelectItem value="c4ai-aya-expanse-32b">Aya Expanse 32B (Most Powerful)</SelectItem>
           </>
         );
       case 'gemini':
@@ -682,7 +835,10 @@ export default function SettingsPage() {
           <>
             <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
             <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-            <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+            <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash (Balanced)</SelectItem>
+            <SelectItem value="gemini-1.5-pro-exp-0801">Gemini 1.5 Pro Exp 0801</SelectItem>
+            <SelectItem value="gemini-1.5-flash-exp-0801">Gemini 1.5 Flash Exp 0801</SelectItem>
+            <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
           </>
         );
       case 'qwen':
@@ -690,7 +846,22 @@ export default function SettingsPage() {
           <>
             <SelectItem value="qwen-turbo">Qwen Turbo</SelectItem>
             <SelectItem value="qwen-plus">Qwen Plus</SelectItem>
-            <SelectItem value="qwen-max">Qwen Max</SelectItem>
+            <SelectItem value="qwen-max">Qwen Max (Most Powerful)</SelectItem>
+            <SelectItem value="qwen-1.5-7b">Qwen 1.5 7B</SelectItem>
+            <SelectItem value="qwen-1.5-14b">Qwen 1.5 14B</SelectItem>
+            <SelectItem value="qwen-1.5-32b">Qwen 1.5 32B</SelectItem>
+            <SelectItem value="qwen-1.5-72b">Qwen 1.5 72B</SelectItem>
+            <SelectItem value="qwen-2-0.5b">Qwen 2 0.5B (Fastest)</SelectItem>
+            <SelectItem value="qwen-2-1.5b">Qwen 2 1.5B</SelectItem>
+            <SelectItem value="qwen-2-7b">Qwen 2 7B</SelectItem>
+            <SelectItem value="qwen-2-72b">Qwen 2 72B</SelectItem>
+            <SelectItem value="qwen-2.5-0.5b">Qwen 2.5 0.5B (Fastest)</SelectItem>
+            <SelectItem value="qwen-2.5-1.5b">Qwen 2.5 1.5B</SelectItem>
+            <SelectItem value="qwen-2.5-3b">Qwen 2.5 3B</SelectItem>
+            <SelectItem value="qwen-2.5-7b">Qwen 2.5 7B</SelectItem>
+            <SelectItem value="qwen-2.5-14b">Qwen 2.5 14B</SelectItem>
+            <SelectItem value="qwen-2.5-32b">Qwen 2.5 32B</SelectItem>
+            <SelectItem value="qwen-2.5-72b">Qwen 2.5 72B (Most Powerful)</SelectItem>
           </>
         );
       case 'openrouter':
@@ -698,8 +869,89 @@ export default function SettingsPage() {
           <>
             <SelectItem value="openrouter-default">OpenRouter Default</SelectItem>
             <SelectItem value="anthropic/claude-3-opus">Claude 3 Opus</SelectItem>
+            <SelectItem value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Most Powerful)</SelectItem>
             <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
+            <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+            <SelectItem value="google/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
             <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
+            <SelectItem value="meta-llama/llama-3.1-405b">Llama 3.1 405B (Most Powerful)</SelectItem>
+            <SelectItem value="meta-llama/llama-3.1-70b">Llama 3.1 70B</SelectItem>
+            <SelectItem value="meta-llama/llama-3.1-8b">Llama 3.1 8B</SelectItem>
+            <SelectItem value="mistralai/mistral-7b-instruct">Mistral 7B</SelectItem>
+            <SelectItem value="mistralai/mistral-large">Mistral Large</SelectItem>
+            <SelectItem value="mistralai/mixtral-8x22b">Mixtral 8x22B</SelectItem>
+            <SelectItem value="mistralai/mixtral-8x7b">Mixtral 8x7B</SelectItem>
+            <SelectItem value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+            <SelectItem value="openai/gpt-4">GPT-4</SelectItem>
+            <SelectItem value="openai/gpt-4-turbo">GPT-4 Turbo</SelectItem>
+            <SelectItem value="openai/gpt-4o">GPT-4o (Most Powerful)</SelectItem>
+          </>
+        );
+      case 'cerebras':
+        return (
+          <>
+            <SelectItem value="cerebras-gemma-2b">Cerebras Gemma 2B</SelectItem>
+            <SelectItem value="cerebras-llama3-8b">Cerebras Llama 3 8B</SelectItem>
+            <SelectItem value="cerebras-llama-3.1-8b">Cerebras Llama 3.1 8B</SelectItem>
+            <SelectItem value="cerebras-llama-3.1-70b">Cerebras Llama 3.1 70B (Most Powerful)</SelectItem>
+          </>
+        );
+      case 'xAI':
+        return (
+          <>
+            <SelectItem value="grok-1">Grok 1</SelectItem>
+            <SelectItem value="grok-2">Grok 2</SelectItem>
+            <SelectItem value="grok-3">Grok 3</SelectItem>
+            <SelectItem value="grok-4">Grok 4 (Most Powerful)</SelectItem>
+          </>
+        );
+      case 'unbound':
+        return (
+          <>
+            <SelectItem value="unbound-llama-3-8b">Unbound Llama 3 8B</SelectItem>
+            <SelectItem value="unbound-llama-3-70b">Unbound Llama 3 70B</SelectItem>
+            <SelectItem value="unbound-llama-3.1-8b">Unbound Llama 3.1 8B</SelectItem>
+            <SelectItem value="unbound-llama-3.1-70b">Unbound Llama 3.1 70B (Most Powerful)</SelectItem>
+          </>
+        );
+      case 'openai':
+        return (
+          <>
+            <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+            <SelectItem value="gpt-4">GPT-4</SelectItem>
+            <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+            <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+            <SelectItem value="gpt-4o-mini">GPT-4o Mini (Fastest)</SelectItem>
+            <SelectItem value="o1-preview">O1 Preview</SelectItem>
+            <SelectItem value="o1-mini">O1 Mini</SelectItem>
+            <SelectItem value="gpt-4o-2024-08-06">GPT-4o 2024-08-06</SelectItem>
+          </>
+        );
+      case 'ollama':
+        return (
+          <>
+            <SelectItem value="ollama-llama2">Llama 2</SelectItem>
+            <SelectItem value="ollama-mistral">Mistral</SelectItem>
+            <SelectItem value="ollama-gemma">Gemma</SelectItem>
+            <SelectItem value="ollama-phi3">Phi 3</SelectItem>
+            <SelectItem value="ollama-llama3">Llama 3</SelectItem>
+            <SelectItem value="ollama-llama3.1">Llama 3.1 (Recommended)</SelectItem>
+            <SelectItem value="ollama-gemma2">Gemma 2</SelectItem>
+            <SelectItem value="ollama-mixtral">Mixtral</SelectItem>
+            <SelectItem value="ollama-qwen">Qwen</SelectItem>
+            <SelectItem value="ollama-command-r">Command R</SelectItem>
+            <SelectItem value="ollama-command-r-plus">Command R+</SelectItem>
+          </>
+        );
+      case 'lmstudio':
+        return (
+          <>
+            <SelectItem value="lmstudio-llama3">Llama 3</SelectItem>
+            <SelectItem value="lmstudio-mistral">Mistral</SelectItem>
+            <SelectItem value="lmstudio-gemma">Gemma</SelectItem>
+            <SelectItem value="lmstudio-llama3.1">Llama 3.1 (Recommended)</SelectItem>
+            <SelectItem value="lmstudio-gemma2">Gemma 2</SelectItem>
+            <SelectItem value="lmstudio-mixtral">Mixtral</SelectItem>
           </>
         );
       default:
@@ -1141,7 +1393,10 @@ export default function SettingsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select
                           value={formData.ai_settings?.defaultModel?.provider || "mistral"}
-                          onValueChange={(value) => handleAiModelChange(value, getDefaultModelForProvider(value))}
+                          onValueChange={(value) => {
+                            handleAiModelChange(value, getDefaultModelForProvider(value));
+                            fetchAvailableModels(value);
+                          }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select AI provider" />
@@ -1156,6 +1411,12 @@ export default function SettingsPage() {
                             <SelectItem value="gemini">Gemini (Google)</SelectItem>
                             <SelectItem value="qwen">Qwen</SelectItem>
                             <SelectItem value="openrouter">OpenRouter</SelectItem>
+                            <SelectItem value="cerebras">Cerebras</SelectItem>
+                            <SelectItem value="xAI">xAI (Grok)</SelectItem>
+                            <SelectItem value="unbound">Unbound</SelectItem>
+                            <SelectItem value="openai">OpenAI</SelectItem>
+                            <SelectItem value="ollama">Ollama</SelectItem>
+                            <SelectItem value="lmstudio">LM Studio</SelectItem>
                           </SelectContent>
                         </Select>
                         
@@ -1300,6 +1561,136 @@ export default function SettingsPage() {
                         />
                         <p className="text-xs text-muted-foreground">
                           Access to multiple AI models through a single API
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="cerebras_api_key">Cerebras API Key</Label>
+                        <Input
+                          id="cerebras_api_key"
+                          type="password"
+                          value={formData.ai_settings?.cerebras_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("cerebras_api_key", e.target.value)}
+                          placeholder="Enter your Cerebras API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="xai_api_key">xAI (Grok) API Key</Label>
+                        <Input
+                          id="xai_api_key"
+                          type="password"
+                          value={formData.ai_settings?.xai_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("xai_api_key", e.target.value)}
+                          placeholder="Enter your xAI API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="unbound_api_key">Unbound API Key</Label>
+                        <Input
+                          id="unbound_api_key"
+                          type="password"
+                          value={formData.ai_settings?.unbound_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("unbound_api_key", e.target.value)}
+                          placeholder="Enter your Unbound API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="openai_api_key">OpenAI API Key</Label>
+                        <Input
+                          id="openai_api_key"
+                          type="password"
+                          value={formData.ai_settings?.openai_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("openai_api_key", e.target.value)}
+                          placeholder="Enter your OpenAI API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="ollama_api_key">Ollama API Key/Endpoint</Label>
+                        <Input
+                          id="ollama_api_key"
+                          type="password"
+                          value={formData.ai_settings?.ollama_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("ollama_api_key", e.target.value)}
+                          placeholder="Enter your Ollama API key or leave blank for local"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          For hosted Ollama services. Leave blank for local Ollama.
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="cerebras_api_key">Cerebras API Key</Label>
+                        <Input
+                          id="cerebras_api_key"
+                          type="password"
+                          value={formData.ai_settings?.cerebras_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("cerebras_api_key", e.target.value)}
+                          placeholder="Enter your Cerebras API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="xai_api_key">xAI (Grok) API Key</Label>
+                        <Input
+                          id="xai_api_key"
+                          type="password"
+                          value={formData.ai_settings?.xai_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("xai_api_key", e.target.value)}
+                          placeholder="Enter your xAI API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="unbound_api_key">Unbound API Key</Label>
+                        <Input
+                          id="unbound_api_key"
+                          type="password"
+                          value={formData.ai_settings?.unbound_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("unbound_api_key", e.target.value)}
+                          placeholder="Enter your Unbound API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="openai_api_key">OpenAI API Key</Label>
+                        <Input
+                          id="openai_api_key"
+                          type="password"
+                          value={formData.ai_settings?.openai_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("openai_api_key", e.target.value)}
+                          placeholder="Enter your OpenAI API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="ollama_api_key">Ollama API Key/Endpoint</Label>
+                        <Input
+                          id="ollama_api_key"
+                          type="password"
+                          value={formData.ai_settings?.ollama_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("ollama_api_key", e.target.value)}
+                          placeholder="Enter your Ollama API key or leave blank for local"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          For hosted Ollama services. Leave blank for local Ollama.
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="lmstudio_api_key">LM Studio API Key/Endpoint</Label>
+                        <Input
+                          id="lmstudio_api_key"
+                          type="password"
+                          value={formData.ai_settings?.lmstudio_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("lmstudio_api_key", e.target.value)}
+                          placeholder="Enter your LM Studio API key or leave blank for local"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          For hosted LM Studio services. Leave blank for local LM Studio.
                         </p>
                       </div>
                     </div>

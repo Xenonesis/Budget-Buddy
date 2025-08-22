@@ -7,7 +7,8 @@ import { useUserPreferences } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { 
   isAIEnabled, 
-  generateGoogleAIInsights, 
+  generateGoogleAIInsights,
+  getUserQuotaStatus, 
   chatWithAI,
   AIMessage, 
   FinancialInsight, 
@@ -16,7 +17,8 @@ import {
   getUserAISettings,
   AIProvider,
   AIModel,
-  ModelConfig
+  ModelConfig,
+  getAvailableModelsForProvider
 } from "@/lib/ai";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,14 +73,30 @@ export default function AIInsightsPage() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isTitleEditing, setIsTitleEditing] = useState<boolean>(false);
   const [layoutMode, setLayoutMode] = useState<'default' | 'chat-focus' | 'insights-focus'>('default');
+  const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
+  const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
+  const [quotaError, setQuotaError] = useState<string | null>(null);
+  const [quotaStatus, setQuotaStatus] = useState<any>(null);
 
   useEffect(() => {
     if (userId) {
       checkAIEnabled();
       fetchInsightsAndChats();
       fetchAISettings();
+      fetchQuotaStatus();
     }
   }, [userId]);
+
+  const fetchQuotaStatus = async () => {
+    if (!userId) return;
+    
+    try {
+      const status = await getUserQuotaStatus(userId);
+      setQuotaStatus(status);
+    } catch (error) {
+      console.error("Error fetching quota status:", error);
+    }
+  };
 
   const fetchAISettings = async () => {
     if (!userId) return;
@@ -166,8 +184,13 @@ export default function AIInsightsPage() {
             budgets
           );
           
-          if (generatedInsights) {
+          if (typeof generatedInsights === 'string') {
+            // This is a quota error message
+            setQuotaError(generatedInsights);
+            setInsights([]);
+          } else if (generatedInsights) {
             setInsights(generatedInsights);
+            setQuotaError(null);
           }
         } catch (error) {
           console.error("Error generating insights:", error);
@@ -318,17 +341,106 @@ export default function AIInsightsPage() {
     }
   };
 
+  const fetchAvailableModels = async (provider: string) => {
+    // Don't fetch if we already have the models or if we're already fetching
+    if (availableModels[provider] || loadingModels[provider]) return;
+    
+    setLoadingModels(prev => ({ ...prev, [provider]: true }));
+    
+    try {
+      // Get the API key for this provider from aiSettings
+      if (!aiSettings) return;
+      
+      let apiKey = '';
+      switch (provider) {
+        case 'mistral':
+          apiKey = aiSettings.mistral_api_key || '';
+          break;
+        case 'anthropic':
+          apiKey = aiSettings.anthropic_api_key || '';
+          break;
+        case 'groq':
+          apiKey = aiSettings.groq_api_key || '';
+          break;
+        case 'deepseek':
+          apiKey = aiSettings.deepseek_api_key || '';
+          break;
+        case 'llama':
+          apiKey = aiSettings.llama_api_key || '';
+          break;
+        case 'cohere':
+          apiKey = aiSettings.cohere_api_key || '';
+          break;
+        case 'gemini':
+          apiKey = aiSettings.gemini_api_key || aiSettings.google_api_key || '';
+          break;
+        case 'qwen':
+          apiKey = aiSettings.qwen_api_key || '';
+          break;
+        case 'openrouter':
+          apiKey = aiSettings.openrouter_api_key || '';
+          break;
+        case 'cerebras':
+          apiKey = aiSettings.cerebras_api_key || '';
+          break;
+        case 'xAI':
+          apiKey = aiSettings.xai_api_key || '';
+          break;
+        case 'unbound':
+          apiKey = aiSettings.unbound_api_key || '';
+          break;
+        case 'openai':
+          apiKey = aiSettings.openai_api_key || '';
+          break;
+        case 'ollama':
+          apiKey = aiSettings.ollama_api_key || '';
+          break;
+        case 'lmstudio':
+          apiKey = aiSettings.lmstudio_api_key || '';
+          break;
+      }
+      
+      // If no API key, use default models
+      if (!apiKey) {
+        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+        setLoadingModels(prev => ({ ...prev, [provider]: false }));
+        return;
+      }
+      
+      // Fetch available models
+      const models = await getAvailableModelsForProvider(provider as AIProvider, apiKey);
+      
+      if (models) {
+        setAvailableModels(prev => ({ ...prev, [provider]: models }));
+      } else {
+        // If fetching failed, use default models
+        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+      }
+    } catch (error) {
+      console.error(`Error fetching models for ${provider}:`, error);
+      setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+    } finally {
+      setLoadingModels(prev => ({ ...prev, [provider]: false }));
+    }
+  };
+
   const getDefaultModelForProvider = (provider: string): AIModel => {
     switch (provider) {
       case 'mistral': return 'mistral-small';
-      case 'anthropic': return 'claude-3-haiku';
-      case 'groq': return 'llama3-8b';
+      case 'anthropic': return 'claude-3-5-sonnet';
+      case 'groq': return 'llama-3.1-8b';
       case 'deepseek': return 'deepseek-chat';
-      case 'llama': return 'llama-3-8b';
-      case 'cohere': return 'command';
+      case 'llama': return 'llama-3.1-8b';
+      case 'cohere': return 'command-r';
       case 'gemini': return 'gemini-1.5-flash';
-      case 'qwen': return 'qwen-turbo';
+      case 'qwen': return 'qwen-2.5-7b';
       case 'openrouter': return 'openrouter-default';
+      case 'cerebras': return 'cerebras-llama-3.1-8b';
+      case 'xAI': return 'grok-2';
+      case 'unbound': return 'unbound-llama-3.1-8b';
+      case 'openai': return 'gpt-4o';
+      case 'ollama': return 'ollama-llama3.1';
+      case 'lmstudio': return 'lmstudio-llama3.1';
       default: return 'mistral-small';
     }
   };
@@ -461,8 +573,14 @@ export default function AIInsightsPage() {
           budgets
         );
         
-        if (generatedInsights) {
+        if (typeof generatedInsights === 'string') {
+          // This is a quota error message
+          setQuotaError(generatedInsights);
+          setInsights([]);
+          toast.error("Quota limit reached");
+        } else if (generatedInsights) {
           setInsights(generatedInsights);
+          setQuotaError(null);
           toast.success("Insights refreshed successfully");
         } else {
           toast.error("Unable to generate new insights");
@@ -473,6 +591,199 @@ export default function AIInsightsPage() {
       toast.error("Failed to refresh insights");
     } finally {
       setInsightLoading(false);
+    }
+  };
+
+  // Add this helper function to render model options per provider
+  const renderModelOptions = (provider: string) => {
+    // Get available models for this provider, or use defaults if not fetched
+    const models = availableModels[provider] || [];
+    const hasFetchedModels = models.length > 0;
+    const isLoading = loadingModels[provider];
+  
+    // If we have fetched models, use them
+    if (hasFetchedModels) {
+      return (
+        <>
+          {models.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+        </>
+      );
+    }
+    
+    // If we're loading, show loading indicator
+    if (isLoading) {
+      return <option value="">Loading models...</option>;
+    }
+    
+    // Otherwise, show default models for each provider
+    switch (provider) {
+      case 'mistral':
+        return (
+          <>
+            <option value="mistral-tiny">Mistral Tiny</option>
+            <option value="mistral-small">Mistral Small</option>
+            <option value="mistral-medium">Mistral Medium</option>
+            <option value="mistral-large-latest">Mistral Large Latest</option>
+            <option value="mistral-large">Mistral Large</option>
+            <option value="mistral-small-latest">Mistral Small Latest</option>
+            <option value="mistral-nemo">Mistral Nemo</option>
+          </>
+        );
+      case 'anthropic':
+        return (
+          <>
+            <option value="claude-3-haiku">Claude 3 Haiku</option>
+            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+            <option value="claude-3-opus">Claude 3 Opus</option>
+            <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+            <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
+          </>
+        );
+      case 'groq':
+        return (
+          <>
+            <option value="llama3-8b">Llama 3 8B</option>
+            <option value="llama3-70b">Llama 3 70B</option>
+            <option value="mixtral-8x7b">Mixtral 8x7B</option>
+            <option value="llama-3.1-8b">Llama 3.1 8B</option>
+            <option value="llama-3.1-70b">Llama 3.1 70B</option>
+            <option value="llama-3.1-405b">Llama 3.1 405B</option>
+          </>
+        );
+      case 'deepseek':
+        return (
+          <>
+            <option value="deepseek-coder">DeepSeek Coder</option>
+            <option value="deepseek-chat">DeepSeek Chat</option>
+            <option value="deepseek-chat-v2">DeepSeek Chat V2</option>
+            <option value="deepseek-coder-v2">DeepSeek Coder V2</option>
+          </>
+        );
+      case 'llama':
+        return (
+          <>
+            <option value="llama-2-7b">Llama 2 7B</option>
+            <option value="llama-2-13b">Llama 2 13B</option>
+            <option value="llama-2-70b">Llama 2 70B</option>
+            <option value="llama-3-8b">Llama 3 8B</option>
+            <option value="llama-3-70b">Llama 3 70B</option>
+            <option value="llama-3.1-8b">Llama 3.1 8B</option>
+            <option value="llama-3.1-70b">Llama 3.1 70B</option>
+            <option value="llama-3.1-405b">Llama 3.1 405B</option>
+          </>
+        );
+      case 'cohere':
+        return (
+          <>
+            <option value="command">Command</option>
+            <option value="command-light">Command Light</option>
+            <option value="command-r">Command R</option>
+            <option value="command-r-plus">Command R Plus</option>
+            <option value="command-nightly">Command Nightly</option>
+          </>
+        );
+      case 'gemini':
+        return (
+          <>
+            <option value="gemini-pro">Gemini Pro</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro-exp-0801">Gemini 1.5 Pro Exp</option>
+            <option value="gemini-1.5-flash-exp-0801">Gemini 1.5 Flash Exp</option>
+            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+          </>
+        );
+      case 'qwen':
+        return (
+          <>
+            <option value="qwen-turbo">Qwen Turbo</option>
+            <option value="qwen-plus">Qwen Plus</option>
+            <option value="qwen-max">Qwen Max</option>
+            <option value="qwen-2.5-7b">Qwen 2.5 7B</option>
+            <option value="qwen-2.5-14b">Qwen 2.5 14B</option>
+            <option value="qwen-2.5-32b">Qwen 2.5 32B</option>
+            <option value="qwen-2.5-72b">Qwen 2.5 72B</option>
+          </>
+        );
+      case 'openrouter':
+        return (
+          <>
+            <option value="openrouter-default">OpenRouter Default</option>
+            <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+            <option value="google/gemini-pro">Gemini Pro</option>
+            <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
+            <option value="openai/gpt-4">GPT-4</option>
+            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+          </>
+        );
+      case 'cerebras':
+        return (
+          <>
+            <option value="cerebras-gemma-2b">Gemma 2B</option>
+            <option value="cerebras-llama3-8b">Llama 3 8B</option>
+            <option value="cerebras-llama-3.1-8b">Llama 3.1 8B</option>
+            <option value="cerebras-llama-3.1-70b">Llama 3.1 70B</option>
+          </>
+        );
+      case 'xAI':
+        return (
+          <>
+            <option value="grok-1">Grok 1</option>
+            <option value="grok-2">Grok 2</option>
+            <option value="grok-3">Grok 3</option>
+            <option value="grok-4">Grok 4</option>
+          </>
+        );
+      case 'unbound':
+        return (
+          <>
+            <option value="unbound-llama-3-8b">Llama 3 8B</option>
+            <option value="unbound-llama-3-70b">Llama 3 70B</option>
+            <option value="unbound-llama-3.1-8b">Llama 3.1 8B</option>
+            <option value="unbound-llama-3.1-70b">Llama 3.1 70B</option>
+          </>
+        );
+      case 'openai':
+        return (
+          <>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="gpt-4">GPT-4</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="o1-preview">O1 Preview</option>
+            <option value="o1-mini">O1 Mini</option>
+          </>
+        );
+      case 'ollama':
+        return (
+          <>
+            <option value="ollama-llama2">Llama 2</option>
+            <option value="ollama-mistral">Mistral</option>
+            <option value="ollama-gemma">Gemma</option>
+            <option value="ollama-phi3">Phi 3</option>
+            <option value="ollama-llama3">Llama 3</option>
+            <option value="ollama-llama3.1">Llama 3.1</option>
+            <option value="ollama-gemma2">Gemma 2</option>
+          </>
+        );
+      case 'lmstudio':
+        return (
+          <>
+            <option value="lmstudio-llama3">Llama 3</option>
+            <option value="lmstudio-mistral">Mistral</option>
+            <option value="lmstudio-gemma">Gemma</option>
+            <option value="lmstudio-llama3.1">Llama 3.1</option>
+            <option value="lmstudio-gemma2">Gemma 2</option>
+            <option value="lmstudio-mixtral">Mixtral</option>
+          </>
+        );
+      default:
+        return <option value="mistral-small">Mistral Small</option>;
     }
   };
 
@@ -601,6 +912,37 @@ export default function AIInsightsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Quota Status Display */}
+      {quotaError && (
+        <Card className="mb-4 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-orange-800 dark:text-orange-200 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              API Quota Limit Reached
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-orange-700 dark:text-orange-300 mb-3">{quotaError}</p>
+            {quotaStatus && (
+              <div className="text-sm text-orange-600 dark:text-orange-400">
+                <p>Current usage: {quotaStatus.status?.usage}</p>
+                <p>Quota resets in: {quotaStatus.status?.timeUntilReset}</p>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="pt-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={fetchQuotaStatus}
+              className="border-orange-300 text-orange-700 hover:bg-orange-100 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900"
+            >
+              Refresh Status
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       <div className={`grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6 ${
         layoutMode === 'default' ? 'xl:grid-cols-12' : 
@@ -759,7 +1101,10 @@ export default function AIInsightsPage() {
                         {/* Provider selector */}
                         <select
                           value={currentModelConfig.provider}
-                          onChange={(e) => handleChangeModelConfig(e.target.value)}
+                          onChange={(e) => {
+                            handleChangeModelConfig(e.target.value);
+                            fetchAvailableModels(e.target.value);
+                          }}
                           className="rounded-md border border-input bg-transparent px-1.5 py-0.5 md:px-2 md:py-1 text-[10px] md:text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary"
                           disabled={chatLoading}
                           aria-label="Select AI provider"
@@ -925,88 +1270,4 @@ export default function AIInsightsPage() {
       )}
     </div>
   );
-}
-
-// Add this helper function to render model options per provider
-const renderModelOptions = (provider: string) => {
-  switch (provider) {
-    case 'mistral':
-      return (
-        <>
-          <option value="mistral-tiny">Mistral Tiny</option>
-          <option value="mistral-small">Mistral Small</option>
-          <option value="mistral-medium">Mistral Medium</option>
-          <option value="mistral-large-latest">Mistral Large</option>
-        </>
-      );
-    case 'anthropic':
-      return (
-        <>
-          <option value="claude-3-haiku">Claude 3 Haiku</option>
-          <option value="claude-3-sonnet">Claude 3 Sonnet</option>
-          <option value="claude-3-opus">Claude 3 Opus</option>
-        </>
-      );
-    case 'groq':
-      return (
-        <>
-          <option value="llama3-8b">Llama 3 8B</option>
-          <option value="llama3-70b">Llama 3 70B</option>
-          <option value="mixtral-8x7b">Mixtral 8x7B</option>
-        </>
-      );
-    case 'deepseek':
-      return (
-        <>
-          <option value="deepseek-chat">DeepSeek Chat</option>
-          <option value="deepseek-coder">DeepSeek Coder</option>
-        </>
-      );
-    case 'llama':
-      return (
-        <>
-          <option value="llama-2-7b">Llama 2 7B</option>
-          <option value="llama-2-13b">Llama 2 13B</option>
-          <option value="llama-2-70b">Llama 2 70B</option>
-          <option value="llama-3-8b">Llama 3 8B</option>
-          <option value="llama-3-70b">Llama 3 70B</option>
-        </>
-      );
-    case 'cohere':
-      return (
-        <>
-          <option value="command">Command</option>
-          <option value="command-light">Command Light</option>
-          <option value="command-r">Command R</option>
-          <option value="command-r-plus">Command R+</option>
-        </>
-      );
-    case 'gemini':
-      return (
-        <>
-          <option value="gemini-pro">Gemini Pro</option>
-          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-        </>
-      );
-    case 'qwen':
-      return (
-        <>
-          <option value="qwen-turbo">Qwen Turbo</option>
-          <option value="qwen-plus">Qwen Plus</option>
-          <option value="qwen-max">Qwen Max</option>
-        </>
-      );
-    case 'openrouter':
-      return (
-        <>
-          <option value="openrouter-default">OpenRouter Default</option>
-          <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-          <option value="google/gemini-pro">Gemini Pro</option>
-          <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
-        </>
-      );
-    default:
-      return <option value="mistral-small">Mistral Small</option>;
-  }
-}; 
+} 
