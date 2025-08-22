@@ -1,8 +1,8 @@
-# Budget Buddy Version 10.0.0
+# Budget Buddy Version 12.50.00
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 
-**Released: August 21, 2025**
+**Released: August 22, 2025**
 
 ## 🚀 Overview
 

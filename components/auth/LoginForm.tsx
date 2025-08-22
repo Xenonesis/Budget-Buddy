@@ -13,9 +13,10 @@ import { SocialLoginButtons } from "./SocialLoginButtons";
 interface LoginFormProps {
   onSuccess: () => void;
   onError: (error: string) => void;
+  onStart?: () => void;
 }
 
-export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
+export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -28,6 +29,7 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
     setLoading(true);
     setIsSubmitting(true);
     onError(""); // Clear previous errors
+    onStart?.(); // Notify parent component that login has started
 
     try {
       // Reset preferences to ensure a clean state

@@ -20,24 +20,57 @@ export const AuthCard = ({
   showBackLink = true
 }: AuthCardProps) => {
   return (
-    <div className="bg-background/80 backdrop-blur-lg rounded-2xl border shadow-lg p-8 relative overflow-hidden">
-      {/* Subtle background animation */}
-      <div className="absolute inset-0 -z-10">
+    <div className="relative group">
+      {/* Enhanced glow effect */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-violet-500/30 to-primary/30 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      
+      <div className="relative bg-background/85 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl p-8 overflow-hidden">
+        {/* Enhanced background animation with multiple layers */}
+        <div className="absolute inset-0 -z-10">
+          <motion.div 
+            className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/8 via-violet-500/6 to-transparent rounded-2xl"
+            animate={{ 
+              backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+            }}
+            transition={{ 
+              duration: 20, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              backgroundSize: '300% 300%'
+            }}
+          />
+          
+          {/* Additional animated layer */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-tl from-transparent via-primary/4 to-violet-500/4 rounded-2xl"
+            animate={{ 
+              opacity: [0.3, 0.7, 0.3],
+              scale: [1, 1.02, 1]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+        </div>
+        
+        {/* Subtle border animation */}
         <motion.div 
-          className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent rounded-2xl"
-          animate={{ 
-            backgroundPosition: ['0% 0%', '100% 100%'],
+          className="absolute inset-0 rounded-2xl border border-primary/20"
+          animate={{
+            borderColor: ['rgba(124, 58, 237, 0.2)', 'rgba(139, 92, 246, 0.4)', 'rgba(124, 58, 237, 0.2)']
           }}
-          transition={{ 
-            duration: 15, 
+          transition={{
+            duration: 4,
             repeat: Infinity,
-            repeatType: "mirror" 
-          }}
-          style={{
-            backgroundSize: '200% 200%'
+            repeatType: "reverse",
+            ease: "easeInOut"
           }}
         />
-      </div>
 
       <motion.div 
         className="space-y-3 text-center"
@@ -58,12 +91,30 @@ export const AuthCard = ({
         >
           {children}
         </motion.div>
-        <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent drop-shadow-sm">
+        <motion.h1 
+          className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-violet-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-sm"
+          animate={{
+            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{
+            backgroundSize: '200% 200%'
+          }}
+        >
           {title}
-        </h1>
-        <p className="text-muted-foreground text-sm">
+        </motion.h1>
+        <motion.p 
+          className="text-muted-foreground text-sm leading-relaxed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
           {subtitle}
-        </p>
+        </motion.p>
       </motion.div>
 
       {error && (
@@ -80,6 +131,7 @@ export const AuthCard = ({
           <span>{error}</span>
         </motion.div>
       )}
+      </div>
     </div>
   );
 };

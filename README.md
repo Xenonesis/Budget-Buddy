@@ -29,7 +29,7 @@
 
 <p align="center">
   <a href="https://github.com/Xenonesis/Budget-Buddy/releases">
-    <img src="https://img.shields.io/badge/version-10.75-blue.svg?style=flat-square" alt="Version">
+    <img src="https://img.shields.io/badge/version-12.50.00-blue.svg?style=flat-square" alt="Version">
   </a>
   <a href="https://nextjs.org/">
     <img src="https://img.shields.io/badge/Next.js-15.5.0-black.svg?style=flat-square&logo=next.js" alt="Next.js">
@@ -1526,13 +1526,13 @@ Budget Buddy tracks these KPIs to ensure optimal performance and user satisfacti
 
 ### 🔥 Latest Updates
 
+**Version 12.50.00** - Current version with all the latest features and improvements
+
 **Version 10.75** - Landing page refactoring complete with improved performance and maintainability
 
 **Version 10.70** - Enhanced dashboard UI with virtualized lists and advanced transaction management
 
 **Version 10.65** - Comprehensive financial analytics with interactive charts and export capabilities
-
-**Version 10.60** - AI-powered insights with multiple provider support and predictive forecasting
 
 [View Full Changelog](CHANGELOG.md)
 

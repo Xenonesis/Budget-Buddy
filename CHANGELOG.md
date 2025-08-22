@@ -2,7 +2,7 @@
 
 All notable changes to the Budget Buddy application will be documented in this file.
 
-## [10.75.0] - 2025-08-22
+## [12.50.00] - 2025-08-22
 
 ### Refactored
 - Landing page components
