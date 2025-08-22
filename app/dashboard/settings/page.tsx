@@ -456,7 +456,15 @@ export default function SettingsPage() {
       setSaving(true);
       
       // Dynamic import to reduce bundle size
-      const jsPDF = (await import('jspdf')).default;
+      let jsPDF;
+      try {
+        const jsPDFModule = await import('jspdf');
+        jsPDF = jsPDFModule.default;
+      } catch (importError) {
+        console.error("Failed to load jspdf:", importError);
+        toast.error("PDF export functionality is not available. Please try again later.");
+        return;
+      }
       
       // Create document
       const doc = new jsPDF();
@@ -515,7 +523,7 @@ export default function SettingsPage() {
       doc.text(`Theme: ${themeChoice}`, leftMargin, yPosition);
 
       yPosition += lineHeight;
-      doc.text(`Gender: ${formData.gender || 'Not specified'}`, leftMargin, yPosition);
+      doc.text(`Gender: ${formData.gender === 'prefer-not-to-say' ? 'Not specified' : formData.gender || 'Not specified'}`, leftMargin, yPosition);
       
       yPosition += lineHeight;
       doc.text(`Timezone: ${formData.timezone || 'UTC'}`, leftMargin, yPosition);
@@ -568,7 +576,7 @@ export default function SettingsPage() {
       toast.success("Profile exported to PDF successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("Failed to export profile");
+      toast.error("Failed to export profile. Please try again later.");
     } finally {
       setSaving(false);
     }
