@@ -555,10 +555,37 @@ export default function SettingsPage() {
       doc.text(`AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
       
       yPosition += lineHeight;
+      doc.text(`AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
       doc.text(`Google AI API Key: ${formData.ai_settings?.google_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
       
       yPosition += lineHeight;
       doc.text(`Mistral AI API Key: ${formData.ai_settings?.mistral_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Claude (Anthropic) API Key: ${formData.ai_settings?.anthropic_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Groq API Key: ${formData.ai_settings?.groq_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`DeepSeek API Key: ${formData.ai_settings?.deepseek_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Llama API Key: ${formData.ai_settings?.llama_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Cohere API Key: ${formData.ai_settings?.cohere_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Gemini API Key: ${formData.ai_settings?.gemini_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`Qwen API Key: ${formData.ai_settings?.qwen_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
+      
+      yPosition += lineHeight;
+      doc.text(`OpenRouter API Key: ${formData.ai_settings?.openrouter_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
       
       // Add footer with generation date
       doc.setFontSize(10);
@@ -1202,6 +1229,78 @@ export default function SettingsPage() {
                           onChange={(e) => handleAiSettingsChange("groq_api_key", e.target.value)}
                           placeholder="Enter your Groq API key"
                         />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="deepseek_api_key">DeepSeek API Key</Label>
+                        <Input
+                          id="deepseek_api_key"
+                          type="password"
+                          value={formData.ai_settings?.deepseek_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("deepseek_api_key", e.target.value)}
+                          placeholder="Enter your DeepSeek API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="llama_api_key">Llama API Key</Label>
+                        <Input
+                          id="llama_api_key"
+                          type="password"
+                          value={formData.ai_settings?.llama_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("llama_api_key", e.target.value)}
+                          placeholder="Enter your Llama API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="cohere_api_key">Cohere API Key</Label>
+                        <Input
+                          id="cohere_api_key"
+                          type="password"
+                          value={formData.ai_settings?.cohere_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("cohere_api_key", e.target.value)}
+                          placeholder="Enter your Cohere API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="gemini_api_key">Gemini (Google) API Key</Label>
+                        <Input
+                          id="gemini_api_key"
+                          type="password"
+                          value={formData.ai_settings?.gemini_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("gemini_api_key", e.target.value)}
+                          placeholder="Enter your Gemini API key"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Alternative to Google AI for financial insights
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="qwen_api_key">Qwen API Key</Label>
+                        <Input
+                          id="qwen_api_key"
+                          type="password"
+                          value={formData.ai_settings?.qwen_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("qwen_api_key", e.target.value)}
+                          placeholder="Enter your Qwen API key"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="openrouter_api_key">OpenRouter API Key</Label>
+                        <Input
+                          id="openrouter_api_key"
+                          type="password"
+                          value={formData.ai_settings?.openrouter_api_key ?? ""}
+                          onChange={(e) => handleAiSettingsChange("openrouter_api_key", e.target.value)}
+                          placeholder="Enter your OpenRouter API key"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Access to multiple AI models through a single API
+                        </p>
                       </div>
                     </div>
                   </div>
