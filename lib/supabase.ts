@@ -4,20 +4,34 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase environment variables:', {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseKey
+// Create a function to get the Supabase client
+function createSupabaseClient() {
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase environment variables:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey
+    })
+    throw new Error("Missing Supabase environment variables")
+  }
+
+  console.log('Initializing Supabase client with URL:', supabaseUrl)
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    }
   })
-  throw new Error("Missing Supabase environment variables")
 }
 
-// Create Supabase client
-console.log('Initializing Supabase client with URL:', supabaseUrl)
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+// Lazy-loaded Supabase client
+let _supabase: ReturnType<typeof createSupabaseClient> | null = null
+
+export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
+  get(target, prop) {
+    if (!_supabase) {
+      _supabase = createSupabaseClient()
+    }
+    return (_supabase as any)[prop]
   }
 })
 
