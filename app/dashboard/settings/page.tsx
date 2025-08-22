@@ -106,7 +106,7 @@ export default function SettingsPage() {
       email: boolean;
       push: boolean;
       sms: boolean;
-    };
+    } | undefined;
     ai_settings: Profile['ai_settings'];
   }>({
     name: "",
@@ -122,7 +122,7 @@ export default function SettingsPage() {
       email: true,
       push: false,
       sms: false
-    } as Profile['notification_preferences'],
+    },
     ai_settings: {
       google_api_key: "",
       mistral_api_key: "",
@@ -158,6 +158,14 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  // Fetch models when the default provider changes
+  useEffect(() => {
+    const currentProvider = formData.ai_settings?.defaultModel?.provider;
+    if (currentProvider) {
+      fetchAvailableModels(currentProvider);
+    }
+  }, [formData.ai_settings?.defaultModel?.provider]);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -422,7 +430,7 @@ export default function SettingsPage() {
     });
   };
 
-  const handleNotificationChange = (field: keyof Profile['notification_preferences'], checked: boolean) => {
+  const handleNotificationChange = (field: keyof NonNullable<Profile['notification_preferences']>, checked: boolean) => {
     setFormData({
       ...formData,
       notification_preferences: {
@@ -727,13 +735,6 @@ export default function SettingsPage() {
   };
   
   const renderModelOptions = (provider: string) => {
-    // Fetch models when the provider is selected
-    useEffect(() => {
-      if (formData.ai_settings?.defaultModel?.provider === provider) {
-        fetchAvailableModels(provider);
-      }
-    }, [formData.ai_settings?.defaultModel?.provider]);
-    
     // Get available models for this provider, or use defaults if not fetched
     const models = availableModels[provider] || [];
     const hasFetchedModels = models.length > 0;
@@ -1561,64 +1562,6 @@ export default function SettingsPage() {
                         />
                         <p className="text-xs text-muted-foreground">
                           Access to multiple AI models through a single API
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="cerebras_api_key">Cerebras API Key</Label>
-                        <Input
-                          id="cerebras_api_key"
-                          type="password"
-                          value={formData.ai_settings?.cerebras_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("cerebras_api_key", e.target.value)}
-                          placeholder="Enter your Cerebras API key"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="xai_api_key">xAI (Grok) API Key</Label>
-                        <Input
-                          id="xai_api_key"
-                          type="password"
-                          value={formData.ai_settings?.xai_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("xai_api_key", e.target.value)}
-                          placeholder="Enter your xAI API key"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="unbound_api_key">Unbound API Key</Label>
-                        <Input
-                          id="unbound_api_key"
-                          type="password"
-                          value={formData.ai_settings?.unbound_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("unbound_api_key", e.target.value)}
-                          placeholder="Enter your Unbound API key"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="openai_api_key">OpenAI API Key</Label>
-                        <Input
-                          id="openai_api_key"
-                          type="password"
-                          value={formData.ai_settings?.openai_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("openai_api_key", e.target.value)}
-                          placeholder="Enter your OpenAI API key"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="ollama_api_key">Ollama API Key/Endpoint</Label>
-                        <Input
-                          id="ollama_api_key"
-                          type="password"
-                          value={formData.ai_settings?.ollama_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("ollama_api_key", e.target.value)}
-                          placeholder="Enter your Ollama API key or leave blank for local"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          For hosted Ollama services. Leave blank for local Ollama.
                         </p>
                       </div>
                       

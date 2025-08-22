@@ -64,10 +64,14 @@ export function Footer() {
           </div>
 
           {/* Navigation columns */}
-          {[["Product", ["Features", "Integrations", "Pricing", "Changelog"]], 
-            ["Company", ["About Us", "Careers", "Blog", "Press"]], 
-            ["Resources", ["Help Center", "Contact Us", "Community", "Status"]], 
-            ["Legal", ["Terms of Service", "Privacy Policy", "Cookie Policy", "Compliance"]]].map(([section, items], i) => (
+          {(
+            [
+              ["Product", ["Features", "Integrations", "Pricing", "Changelog"]], 
+              ["Company", ["About Us", "Careers", "Blog", "Press"]], 
+              ["Resources", ["Help Center", "Contact Us", "Community", "Status"]], 
+              ["Legal", ["Terms of Service", "Privacy Policy", "Cookie Policy", "Compliance"]]
+            ] as [string, string[]][]
+          ).map(([section, items], i) => (
             <div key={section} className="space-y-4">
               <h3 className="font-semibold text-base">{section}</h3>
               <ul className="space-y-3">

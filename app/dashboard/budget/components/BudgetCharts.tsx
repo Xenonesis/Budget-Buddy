@@ -592,7 +592,7 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
                               fill: '#fff',
                               fontWeight: 'bold',
                               fontSize: isMobile ? 10 : 12,
-                              formatter: (value: number) => `${Math.round(value)}%`,
+                              formatter: (value: any) => `${Math.round(Number(value) || 0)}%`,
                             }}
                             animationBegin={200}
                             animationDuration={1000}

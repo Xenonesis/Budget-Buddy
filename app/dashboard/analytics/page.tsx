@@ -787,8 +787,7 @@ export default function AnalyticsPage() {
                               tick={{ 
                                 fill: '#ffffff', 
                                 fontSize: 14, 
-                                fontWeight: 700,
-                                background: 'rgba(0,0,0,0.5)'
+                                fontWeight: 700
                               }}
                               tickLine={{ stroke: '#ffffff', strokeWidth: 1.5 }}
                               height={50}
@@ -945,8 +944,7 @@ export default function AnalyticsPage() {
                               tick={{ 
                                 fill: '#ffffff', 
                                 fontSize: 14, 
-                                fontWeight: 700,
-                                background: 'rgba(0,0,0,0.5)' 
+                                fontWeight: 700
                               }}
                               tickLine={{ stroke: '#ffffff', strokeWidth: 1.5 }}
                               height={50}

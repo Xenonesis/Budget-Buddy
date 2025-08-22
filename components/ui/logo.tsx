@@ -95,8 +95,7 @@ export function Logo({
     hover: {
       scale: 1.03,
       transition: {
-        duration: 0.2,
-        ease: 'easeInOut'
+        duration: 0.2
       }
     }
   };

@@ -135,7 +135,7 @@ export default function AIInsightsPage() {
         .from("ai_conversations")
         .select("*")
         .eq("user_id", userId)
-        .order("updated_at", { ascending: false });
+        .order("last_updated", { ascending: false });
       
       if (conversationsData) {
         setConversations(conversationsData);
@@ -251,8 +251,8 @@ export default function AIInsightsPage() {
   };
 
   const handleModelConfigChange = async (provider: string | undefined, model: string) => {
-    const newProvider = provider || currentModelConfig.provider;
-    setCurrentModelConfig({ provider: newProvider, model });
+    const newProvider = (provider || currentModelConfig.provider) as AIProvider;
+    setCurrentModelConfig({ provider: newProvider, model: model as AIModel });
     
     // Fetch models for the new provider if not already loaded
     if (!availableModels[newProvider] && !loadingModels[newProvider]) {

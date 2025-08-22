@@ -20,7 +20,7 @@ interface Conversation {
   id: string;
   title: string;
   created_at: string;
-  updated_at: string;
+  last_updated: string;
   message_count?: number;
 }
 
@@ -174,7 +174,7 @@ export function ConversationHistory({
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {formatDate(conversation.updated_at)}
+                        {formatDate(conversation.last_updated)}
                       </div>
                       {conversation.message_count && (
                         <Badge variant="secondary" className="text-xs px-1.5 py-0.5">

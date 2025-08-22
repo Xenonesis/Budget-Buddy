@@ -83,7 +83,6 @@ function OptimizedBubble({
             repeat: Infinity,
             repeatType: "loop" as const,
             times: [0, 0.25, 0.5, 0.75, 1],
-            ease: "easeInOut",
             delay: index * 0.3,
           }
         };
@@ -98,7 +97,6 @@ function OptimizedBubble({
             repeat: Infinity,
             repeatType: "loop" as const,
             times: [0, 0.25, 0.5, 0.75, 1],
-            ease: "easeInOut",
             delay: index * 0.4,
           }
         };
@@ -113,7 +111,6 @@ function OptimizedBubble({
             repeat: Infinity,
             repeatType: "loop" as const,
             times: [0, 0.25, 0.5, 0.75, 1],
-            ease: "easeInOut",
             delay: index * 0.5,
           }
         };
@@ -128,7 +125,6 @@ function OptimizedBubble({
             repeat: Infinity,
             repeatType: "loop" as const,
             times: [0, 0.25, 0.5, 0.75, 1],
-            ease: "easeInOut",
             delay: index * 0.3,
           }
         };
