@@ -1328,12 +1328,12 @@ export async function getUserQuotaStatus(userId: string): Promise<{
 }
 
 // Get available AI providers for a user based on their API keys
-export async function getAvailableAIProviders(userId: string): Promise<string[]> {
+export async function getAvailableAIProviders(userId: string): Promise<AIProvider[]> {
   try {
     const settings = await getUserAISettings(userId);
     if (!settings) return [];
     
-    const providers: string[] = [];
+    const providers: AIProvider[] = [];
     
     if (settings.mistral_api_key) providers.push('mistral');
     if (settings.anthropic_api_key) providers.push('anthropic');
