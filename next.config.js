@@ -3,8 +3,18 @@ const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
   images: {
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self'; worker-src 'self' blob:;",
     formats: ['image/webp', 'image/avif'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdnjs.cloudflare.com',
+      }
+    ],
+    domains: ['localhost', '127.0.0.1', '192.168.180.1'],
   },
   reactStrictMode: true,
   webpack: (config, { isServer }) => {

@@ -5,6 +5,11 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/_next/image')) {
     const url = request.nextUrl.searchParams.get('url');
     
+    // Allow local images
+    if (url && (url.startsWith('/') || url.includes('localhost') || url.includes('127.0.0.1') || url.includes('192.168.180.1'))) {
+      return NextResponse.next();
+    }
+    
     // Block problematic external image URLs
     if (url) {
       try {

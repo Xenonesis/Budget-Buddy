@@ -670,28 +670,127 @@ async function chatWithMistralAI(
   model: string = 'mistral-small'
 ): Promise<string | null> {
   try {
-    if (!apiKey) {
+    if (!apiKey || apiKey.trim() === '') {
       return "Mistral AI API key is not configured. Please add your API key in settings.";
     }
+    
+    // Basic API key format validation - Mistral API keys can have various formats
+    const trimmedKey = apiKey.trim();
+    // Remove overly restrictive validation - let the API itself validate the key
+    // Modern Mistral API keys may start with different prefixes
+    
+    if (trimmedKey.length < 10) {
+      return "Mistral AI API key appears to be too short. Please check your API key in settings and ensure it's complete.";
+    }
+    
+    // Validate model name
+    const validMistralModels = [
+      'mistral-tiny', 'mistral-small', 'mistral-medium', 'mistral-large-latest', 
+      'mistral-large', 'mistral-small-latest', 'mistral-nemo'
+    ];
+    
+    if (!validMistralModels.includes(model)) {
+      console.warn(`Invalid Mistral model: ${model}, using mistral-small as fallback`);
+      model = 'mistral-small';
+    }
+    
+    // Filter and format messages for Mistral API
+    // Mistral API only supports 'user' and 'assistant' roles
+    const formattedMessages = messages
+      .filter(msg => msg.content && msg.content.trim() !== '')
+      .map(msg => {
+        if (msg.role === 'system') {
+          // Convert system message to user message with context
+          return {
+            role: 'user' as const,
+            content: `Context: ${msg.content.trim()}`
+          };
+        }
+        return {
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content.trim()
+        };
+      })
+      .filter(msg => msg.content.length > 0);
+    
+    // Ensure we have at least one user message
+    if (formattedMessages.length === 0) {
+      return "No valid messages to process.";
+    }
+    
+    // If the first message is not from user, add a default user message
+    if (formattedMessages[0].role !== 'user') {
+      formattedMessages.unshift({
+        role: 'user',
+        content: 'Hello, I need help with financial advice.'
+      });
+    }
+    
+    console.log(`Making Mistral API request with model: ${model}`);
+    console.log('Formatted messages:', JSON.stringify(formattedMessages, null, 2));
+    console.log('API key configured:', trimmedKey ? `Yes (${trimmedKey.length} chars, starts with: ${trimmedKey.substring(0, 12)}...)` : 'No');
     
     // Implement Mistral AI API request
     const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify({
         model: model,
-        messages: messages
+        messages: formattedMessages,
+        max_tokens: 1000,
+        temperature: 0.7
       })
     });
+    
+    // Check if response is ok
+    if (!response.ok) {
+      let errorText = '';
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = 'Unable to read error response';
+      }
+      
+      console.error(`Mistral API HTTP error: ${response.status} ${response.statusText}`, errorText);
+      
+      if (response.status === 401) {
+        return "Invalid Mistral AI API key. Please check your API key in settings.";
+      } else if (response.status === 429) {
+        return "Mistral AI rate limit exceeded. Please try again in a few minutes.";
+      } else if (response.status === 400) {
+        // Try to parse the error for more specific feedback
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.message) {
+            return `Mistral AI request error: ${errorData.message}`;
+          }
+        } catch (e) {
+          // Ignore JSON parse error
+        }
+        return "Invalid request to Mistral AI. Please try a different message.";
+      } else if (response.status === 403) {
+        return "Access denied to Mistral AI. Please check your API key permissions.";
+      } else if (response.status >= 500) {
+        return "Mistral AI service is temporarily unavailable. Please try again later.";
+      } else {
+        return `Mistral AI error (${response.status}): ${response.statusText}. ${errorText ? 'Details: ' + errorText : ''}`;
+      }
+    }
     
     const data = await response.json();
     
     if (data.error) {
       console.error('Mistral API error:', data.error);
-      return "There was an error connecting to Mistral AI. Please check your API key in settings.";
+      if (data.error.type === 'invalid_api_key') {
+        return "Invalid Mistral AI API key. Please check your API key in settings.";
+      } else if (data.error.type === 'insufficient_quota') {
+        return "Mistral AI quota exceeded. Please check your account or try again later.";
+      } else {
+        return `Mistral AI error: ${data.error.message || 'Unknown error'}`;
+      }
     }
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
@@ -699,10 +798,23 @@ async function chatWithMistralAI(
       return "Received an unexpected response from Mistral AI. Please try again later.";
     }
     
-    return data.choices[0].message.content;
+    const content = data.choices[0].message.content;
+    if (!content || content.trim() === '') {
+      return "Mistral AI returned an empty response. Please try rephrasing your question.";
+    }
+    
+    return content.trim();
   } catch (error) {
     console.error('Error chatting with Mistral AI:', error);
-    return "There was an error communicating with Mistral AI. Please try again later.";
+    
+    // More specific error handling
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return "Network error connecting to Mistral AI. Please check your internet connection.";
+    } else if (error instanceof SyntaxError) {
+      return "Invalid response from Mistral AI. Please try again later.";
+    } else {
+      return "There was an error communicating with Mistral AI. Please try again later.";
+    }
   }
 }
 
@@ -1666,4 +1778,40 @@ async function chatWithLmStudioAI(
     console.error('Error chatting with LM Studio:', error);
     return "There was an error communicating with LM Studio. Please ensure it's running locally or check your API key.";
   }
-} 
+}
+
+// Test Mistral API connection
+export async function testMistralConnection(apiKey: string): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!apiKey || apiKey.trim() === '') {
+      return { success: false, message: "API key is required" };
+    }
+    
+    const trimmedKey = apiKey.trim();
+    // Remove overly restrictive format validation - let the API validate the key format
+    // Modern Mistral API keys may have different prefixes than expected
+    
+    // Test with a simple request
+    const response = await fetch('https://api.mistral.ai/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${trimmedKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      return { success: true, message: "✅ Mistral API connection successful!" };
+    } else if (response.status === 401) {
+      return { success: false, message: "❌ Invalid API key. Please check your Mistral API key." };
+    } else if (response.status === 429) {
+      return { success: false, message: "⚠️ Rate limit exceeded. API key is valid but you've hit the rate limit." };
+    } else {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      return { success: false, message: `❌ API error (${response.status}): ${errorText}` };
+    }
+  } catch (error) {
+    console.error('Mistral connection test error:', error);
+    return { success: false, message: `❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}` };
+  }
+}

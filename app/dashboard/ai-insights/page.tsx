@@ -12,6 +12,7 @@ import {
   chatWithAI,
   getAvailableAIProviders,
   getAIModelsForProvider,
+  getUserAISettings,
   type FinancialInsight,
   type AIMessage,
   type AIModelConfig,
@@ -136,7 +137,17 @@ export default function AIInsightsPage() {
       const providers = await getAvailableAIProviders(userId);
       setAvailableProviders(providers);
       
-      if (providers.length > 0) {
+      // Get the user's actual default model from their settings
+      const userSettings = await getUserAISettings(userId);
+      
+      if (userSettings && userSettings.defaultModel) {
+        // Use the user's saved default model
+        setCurrentModelConfig({
+          provider: userSettings.defaultModel.provider as AIProvider,
+          model: userSettings.defaultModel.model as AIModel
+        });
+      } else if (providers.length > 0) {
+        // Fallback to first available provider if no default is set
         setCurrentModelConfig({
           provider: providers[0] as AIProvider,
           model: getDefaultModelForProvider(providers[0]) as AIModel
