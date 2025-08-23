@@ -88,7 +88,13 @@ export class AdvancedOCRProcessor {
   async initialize() {
     if (!this.isInitialized) {
       try {
-        this.tesseractWorker = await createWorker('eng');
+        // Create worker with explicit options to handle CSP
+        this.tesseractWorker = await createWorker('eng', 1, {
+          workerPath: 'https://unpkg.com/tesseract.js@5.0.4/dist/worker.min.js',
+          langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+          corePath: 'https://unpkg.com/tesseract.js-core@5.0.0/tesseract-core-simd.wasm.js',
+        });
+        
         await this.tesseractWorker.setParameters({
           tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/-:₹ ',
           tessedit_pageseg_mode: '6', // Uniform block of text
@@ -707,10 +713,27 @@ export class AdvancedOCRProcessor {
   }
 
   private async generateFileHash(file: File): Promise<string> {
-    const buffer = await file.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    try {
+      // Try using crypto.subtle if available (HTTPS context)
+      if (typeof crypto !== 'undefined' && crypto.subtle) {
+        const buffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+    } catch (error) {
+      console.warn('crypto.subtle not available, using fallback hash');
+    }
+    
+    // Fallback: simple hash based on file properties
+    const fileInfo = `${file.name}-${file.size}-${file.lastModified}-${file.type}`;
+    let hash = 0;
+    for (let i = 0; i < fileInfo.length; i++) {
+      const char = fileInfo.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(16);
   }
 
   private async fileToDataURL(file: File): Promise<string> {
@@ -728,7 +751,7 @@ export class AdvancedOCRProcessor {
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
       
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
@@ -757,7 +780,7 @@ export class AdvancedOCRProcessor {
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
       
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const page = await pdf.getPage(1); // Get first page

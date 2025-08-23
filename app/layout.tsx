@@ -89,7 +89,7 @@ export default function RootLayout({
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
 
         {/* Performance optimization meta tags */}
-        <meta httpEquiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';" />
+        <meta httpEquiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://tessdata.projectnaptha.com https://cdnjs.cloudflare.com; worker-src 'self' blob: https://unpkg.com https://cdnjs.cloudflare.com; connect-src 'self' data: https://unpkg.com https://tessdata.projectnaptha.com https://*.supabase.co https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;" />
         <meta name="referrer" content="no-referrer-when-downgrade" />
         <meta httpEquiv="Cache-Control" content="max-age=31536000, immutable" />
         <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />

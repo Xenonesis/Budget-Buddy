@@ -3,7 +3,7 @@ const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
   images: {
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self';",
+    contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self'; worker-src 'self' blob:;",
     formats: ['image/webp', 'image/avif'],
   },
   reactStrictMode: true,
