@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { TechLogo } from "@/components/ui/tech-logo";
+import TeamSection from "@/components/ui/team";
 import { 
   BarChart4, 
   BookOpen, 
@@ -167,7 +168,7 @@ export default function AboutPage() {
               {[
                 { id: "mission", label: "Mission", icon: <Info className="w-3.5 h-3.5" /> },
                 { id: "app-details", label: "App Details", icon: <Sparkles className="w-3.5 h-3.5" /> },
-                { id: "developer", label: "Developer", icon: <UserCircle className="w-3.5 h-3.5" /> },
+                { id: "team", label: "Team", icon: <Users className="w-3.5 h-3.5" /> },
                 { id: "faq", label: "FAQ", icon: <FileQuestion className="w-3.5 h-3.5" /> },
                 { id: "stack", label: "Tech Stack", icon: <Layers className="w-3.5 h-3.5" /> },
                 { id: "compare", label: "Comparison", icon: <BarChart className="w-3.5 h-3.5" /> },
@@ -202,29 +203,32 @@ export default function AboutPage() {
                   Our Mission
                 </CardTitle>
                 <CardDescription className="text-base">
-                  Empowering individuals and businesses to take control of their finances
+                  AI-powered financial management with voice interface and real-time insights
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-6">
                 <p className="leading-relaxed">
-                  Budget Buddy is designed to help you manage your finances effectively and achieve your financial goals.
-                  Our application provides intuitive tools for tracking expenses, creating budgets, and analyzing your 
-                  spending patterns with advanced visualizations and AI insights.
+                  Budget Buddy revolutionizes personal finance management by combining cutting-edge AI technology with 
+                  intuitive design. Our platform integrates 20+ AI providers including Google Gemini to deliver 
+                  personalized financial insights, voice-powered transaction input, and intelligent spending analysis 
+                  that adapts to your unique financial patterns.
                 </p>
                 <p className="leading-relaxed">
-                  We believe that financial management should be accessible to everyone, regardless of their financial 
-                  background or expertise. Our goal is to simplify personal finance and provide you with the insights 
-                  you need to make informed financial decisions while maintaining complete privacy and security.
+                  Built on modern web technologies including Next.js 15, React 19, and Supabase, Budget Buddy offers 
+                  real-time data synchronization, drag-and-drop budget management, and comprehensive analytics with 
+                  interactive visualizations. Our voice interface and AI-powered insights make financial management 
+                  as simple as having a conversation with your personal finance assistant.
                 </p>
                 <p className="leading-relaxed">
-                  Developed with modern web technologies, Budget Buddy offers a seamless and
-                  responsive experience across all your devices, with a focus on security,
-                  performance, and exceptional user experience.
+                  We believe financial empowerment should be accessible to everyone. That's why we've created a 
+                  platform that not only tracks your finances but actively helps you make smarter decisions through 
+                  predictive analytics, automated categorization, and export capabilities for Excel and PDF reports.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-6 items-center">
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Security Focused</Badge>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Privacy First</Badge>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">User Centered</Badge>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">AI-Powered</Badge>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Voice Enabled</Badge>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Real-time Sync</Badge>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Export Ready</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -241,20 +245,22 @@ export default function AboutPage() {
               <CardContent className="p-6">
                 <ul className="space-y-2 grid sm:grid-cols-1 gap-2">
                   {[
-                    "Expense tracking and categorization",
-                    "Custom budget creation and visualization",
-                    "Financial analytics with multiple chart types",
-                    "Multi-currency support",
-                    "AI-powered financial insights",
+                    "Transaction tracking with drag & drop sorting",
+                    "Dynamic budget creation and management",
+                    "Interactive charts with Recharts visualization",
+                    "AI-powered financial insights (20+ providers)",
+                    "Voice interface for transaction input",
                     "Dark & light theme support",
-                    "Responsive mobile design",
-                    "Personalized spending recommendations",
-                    "Automated saving goals tracking",
-                    "Predictive spending patterns",
-                    "Bill payment reminders",
-                    "Real-time sync across devices",
-                    "Export financial reports",
-                    "Secure data encryption"
+                    "Responsive mobile-first design",
+                    "Excel and PDF export functionality",
+                    "Real-time data sync with Supabase",
+                    "Advanced filtering and search",
+                    "Recurring transaction automation",
+                    "Annual budget summaries",
+                    "Secure authentication system",
+                    "Copy-to-clipboard functionality",
+                    "Animated UI with Framer Motion",
+                    "Comprehensive analytics dashboard"
                   ].map((feature, index) => (
                     <li 
                       key={index}
@@ -634,7 +640,7 @@ export default function AboutPage() {
           </Card>
         </AnimateInView>
         
-        <AnimateInView>
+        {/* <AnimateInView>
           <Card id="developer" className="mb-10 sm:mb-12 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden scroll-mt-20">
             <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -842,6 +848,13 @@ export default function AboutPage() {
               </div>
             </CardContent>
           </Card>
+        </AnimateInView> */}
+        
+        {/* New Team Section */}
+        <AnimateInView>
+          <div id="team" className="scroll-mt-20">
+            <TeamSection />
+          </div>
         </AnimateInView>
         
         <AnimateInView>
@@ -962,11 +975,13 @@ export default function AboutPage() {
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
                       {[
-                        { name: "Next.js", logo: "/tech/nextjs.svg", desc: "React framework for production" },
-                        { name: "React", logo: "/tech/react.svg", desc: "UI component library" },
-                        { name: "TypeScript", logo: "/tech/typescript.svg", desc: "Type-safe JavaScript" },
-                        { name: "Tailwind CSS", logo: "/tech/tailwind.svg", desc: "Utility-first CSS framework" },
-                        { name: "Shadcn UI", logo: "/tech/shadcn.png", desc: "UI component system" }
+                        { name: "Next.js", logo: "/tech/nextjs.svg", desc: "React framework v15.5.0" },
+                        { name: "React", logo: "/tech/react.svg", desc: "UI library v19.1.1" },
+                        { name: "TypeScript", logo: "/tech/typescript.svg", desc: "Type-safe JavaScript v5.9.2" },
+                        { name: "Tailwind CSS", logo: "/tech/tailwind.svg", desc: "Utility-first CSS v4.1.12" },
+                        { name: "Framer Motion", logo: "/tech/framer.svg", desc: "Animation library v12.23.12" },
+                        { name: "Radix UI", logo: "/tech/shadcn.png", desc: "Headless UI components" },
+                        { name: "Lucide React", logo: "/tech/react.svg", desc: "Icon library v0.540.0" }
                       ].map((tech, i) => (
                         <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
                           <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
@@ -990,15 +1005,15 @@ export default function AboutPage() {
                   <div>
                     <h3 className="text-sm font-medium flex items-center gap-2 text-primary mb-4">
                       <Database className="w-4 h-4" />
-                      Backend Technologies
+                      Backend & Database
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
                       {[
-                        { name: "Supabase", logo: "/tech/supabase.svg", desc: "Open source Firebase alternative" },
+                        { name: "Supabase", logo: "/tech/supabase.svg", desc: "Backend-as-a-Service v2.55.0" },
                         { name: "PostgreSQL", logo: "/tech/postgres.svg", desc: "Relational database" },
                         { name: "Node.js", logo: "/tech/nodejs.svg", desc: "JavaScript runtime" },
-                        { name: "Auth.js", logo: "/tech/authjs.svg", desc: "Authentication for Next.js" },
-                        { name: "REST API", logo: "/tech/api.svg", desc: "API architecture" }
+                        { name: "Google AI", logo: "/tech/openai.svg", desc: "Generative AI v0.24.1" },
+                        { name: "Zustand", logo: "/tech/react.svg", desc: "State management v5.0.8" }
                       ].map((tech, i) => (
                         <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
                           <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
@@ -1022,15 +1037,17 @@ export default function AboutPage() {
                   <div>
                     <h3 className="text-sm font-medium flex items-center gap-2 text-primary mb-4">
                       <ArrowUpRight className="w-4 h-4" />
-                      Deployment & Tools
+                      Tools & Libraries
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
                       {[
                         { name: "Vercel", logo: "/tech/vercel.svg", desc: "Deployment platform" },
                         { name: "GitHub", logo: "/tech/github.svg", desc: "Version control" },
-                        { name: "Chart.js", logo: "/tech/chartjs.svg", desc: "Data visualization" },
-                        { name: "Framer Motion", logo: "/tech/framer.svg", desc: "Animation library" },
-                        { name: "OpenAI", logo: "/tech/openai.svg", desc: "AI insights integration" }
+                        { name: "Recharts", logo: "/tech/chartjs.svg", desc: "Data visualization v3.1.2" },
+                        { name: "DnD Kit", logo: "/tech/react.svg", desc: "Drag & drop v6.3.1" },
+                        { name: "Date-fns", logo: "/tech/nodejs.svg", desc: "Date utilities v4.1.0" },
+                        { name: "ExcelJS", logo: "/tech/api.svg", desc: "Excel export v4.4.0" },
+                        { name: "jsPDF", logo: "/tech/api.svg", desc: "PDF generation v3.0.1" }
                       ].map((tech, i) => (
                         <div key={i} className="flex flex-col items-center p-3 rounded-lg border border-muted hover:border-primary/20 transition-all bg-white/50 dark:bg-gray-900/50 hover:shadow-md group">
                           <div className="w-12 h-12 mb-3 relative flex items-center justify-center">
@@ -1073,39 +1090,75 @@ export default function AboutPage() {
         
         <div id="compare" className="scroll-mt-20">
           <AnimateInView>
-            <Card className="mb-10 sm:mb-12 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Table className="w-5 h-5" />
-                  Comparison
+            <Card className="mb-10 sm:mb-12 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border-0 bg-gradient-to-br from-white via-white to-primary/5 dark:from-gray-950 dark:via-gray-950 dark:to-primary/5">
+              <CardHeader className="bg-gradient-to-r from-primary/15 via-violet-400/10 to-primary/15 border-b border-primary/20 p-8 relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-5 -left-5 w-20 h-20 bg-violet-500/10 rounded-full blur-2xl"></div>
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold relative z-10">
+                  <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
+                    <Table className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">
+                    Feature Comparison
+                  </span>
                 </CardTitle>
-                <CardDescription className="text-base">
-                  How Budget Buddy compares to traditional budget managers
+                <CardDescription className="text-lg text-muted-foreground relative z-10 mt-2">
+                  See how Budget Buddy's cutting-edge features stack up against traditional budget managers
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-primary/5 to-violet-500/5 p-4 rounded-lg border border-primary/10 mb-6">
-                    <p className="text-sm leading-relaxed">
-                      Budget Buddy sets itself apart from traditional budget managers with its intuitive design, powerful AI-driven insights, and comprehensive feature set - all while maintaining bank-level security and privacy.
-                    </p>
+              <CardContent className="p-8">
+                <div className="space-y-8">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-violet-500/5 to-primary/10 rounded-2xl blur-sm"></div>
+                    <div className="relative bg-gradient-to-r from-primary/8 to-violet-500/8 p-6 rounded-2xl border border-primary/20 backdrop-blur-sm">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
+                          <Sparkles className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2 text-primary">Revolutionary Financial Management</h3>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            Budget Buddy revolutionizes financial management with <span className="font-semibold text-primary">20+ AI providers</span>, 
+                            <span className="font-semibold text-primary"> voice-powered interactions</span>, 
+                            <span className="font-semibold text-primary"> drag-and-drop functionality</span>, and 
+                            <span className="font-semibold text-primary"> real-time data sync</span>. Built on Next.js 15 and React 19, 
+                            it offers capabilities that traditional budget apps simply can't match.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto rounded-2xl border border-primary/20 bg-gradient-to-br from-white to-primary/5 dark:from-gray-900 dark:to-primary/10">
                     <UITable>
                       <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="w-[250px]">Feature</TableHead>
-                          <TableHead className="text-center">
-                            <div className="flex flex-col items-center">
-                              <span className="font-bold text-primary">Budget Buddy</span>
-                              <span className="text-xs text-muted-foreground font-normal">Modern Finance App</span>
+                        <TableRow className="hover:bg-transparent border-b border-primary/20 bg-gradient-to-r from-primary/5 to-violet-500/5 dark:from-primary/10 dark:to-violet-500/10">
+                          <TableHead className="w-[300px] p-6 font-bold text-foreground">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-primary"></div>
+                              Feature Comparison
                             </div>
                           </TableHead>
-                          <TableHead className="text-center">
-                            <div className="flex flex-col items-center">
-                              <span className="font-medium">Traditional Apps</span>
-                              <span className="text-xs text-muted-foreground font-normal">Legacy Budget Managers</span>
+                          <TableHead className="text-center p-6">
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                                <div className="w-3 h-3 rounded-full bg-primary animate-pulse"></div>
+                                <span className="font-bold text-primary text-lg">Budget Buddy</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground font-medium bg-primary/5 px-3 py-1 rounded-full">
+                                Next-Gen Finance Platform
+                              </span>
+                            </div>
+                          </TableHead>
+                          <TableHead className="text-center p-6">
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-muted">
+                                <div className="w-3 h-3 rounded-full bg-muted-foreground/50"></div>
+                                <span className="font-medium text-muted-foreground text-lg">Traditional Apps</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground font-medium bg-muted/30 px-3 py-1 rounded-full">
+                                Legacy Budget Managers
+                              </span>
                             </div>
                           </TableHead>
                         </TableRow>
@@ -1113,99 +1166,119 @@ export default function AboutPage() {
                       <TableBody>
                         {[
                           { 
-                            feature: "AI-Powered Insights", 
+                            feature: "Voice Interface", 
                             budgetBuddy: true, 
                             traditional: false,
-                            description: "Smart recommendations and spending pattern analysis"
+                            description: "Voice-powered transaction input and commands"
                           },
                           { 
-                            feature: "Modern UI/UX", 
+                            feature: "20+ AI Providers", 
                             budgetBuddy: true, 
                             traditional: false,
-                            description: "Intuitive design with responsive animations"
+                            description: "Google Gemini, OpenAI, and 18+ other AI models"
                           },
                           { 
-                            feature: "Transaction Categorization", 
-                            budgetBuddy: true, 
-                            traditional: true,
-                            description: "Auto-categorize transactions for easier tracking"
-                          },
-                          { 
-                            feature: "Budget Planning", 
-                            budgetBuddy: true, 
-                            traditional: true,
-                            description: "Create and manage budgets across categories"
-                          },
-                          { 
-                            feature: "Predictive Analysis", 
+                            feature: "Drag & Drop Management", 
                             budgetBuddy: true, 
                             traditional: false,
-                            description: "Forecast future spending based on patterns"
+                            description: "Intuitive drag-and-drop budget and transaction sorting"
                           },
                           { 
-                            feature: "Data Visualization", 
+                            feature: "Real-time Data Sync", 
                             budgetBuddy: true, 
                             traditional: { partial: true },
-                            description: "Interactive charts and visual analytics"
+                            description: "Instant synchronization with Supabase backend"
                           },
                           { 
-                            feature: "Cross-Device Sync", 
+                            feature: "Excel & PDF Export", 
                             budgetBuddy: true, 
                             traditional: { partial: true },
-                            description: "Seamless experience across all devices"
+                            description: "Advanced export with ExcelJS and jsPDF integration"
                           },
                           { 
-                            feature: "Bank Connection", 
+                            feature: "Interactive Charts", 
                             budgetBuddy: true, 
                             traditional: { partial: true },
-                            description: "Secure linking with financial institutions"
+                            description: "Recharts-powered dynamic visualizations"
                           },
                           { 
-                            feature: "Learning Algorithms", 
+                            feature: "Modern Tech Stack", 
                             budgetBuddy: true, 
                             traditional: false,
-                            description: "Gets smarter with more usage"
+                            description: "Next.js 15, React 19, TypeScript 5.9"
+                          },
+                          { 
+                            feature: "Animated UI", 
+                            budgetBuddy: true, 
+                            traditional: false,
+                            description: "Framer Motion animations and smooth transitions"
+                          },
+                          { 
+                            feature: "Copy-to-Clipboard", 
+                            budgetBuddy: true, 
+                            traditional: false,
+                            description: "One-click data copying and sharing"
+                          },
+                          { 
+                            feature: "Advanced Filtering", 
+                            budgetBuddy: true, 
+                            traditional: { partial: true },
+                            description: "Powerful search and filter capabilities"
                           },
                         ].map((row, i) => (
-                          <TableRow key={i} className="hover:bg-muted/30">
-                            <TableCell className="font-medium">
-                              <div className="flex flex-col">
-                                <span>{row.feature}</span>
-                                <span className="text-xs text-muted-foreground">{row.description}</span>
+                          <TableRow key={i} className="hover:bg-gradient-to-r hover:from-primary/5 hover:to-violet-500/5 dark:hover:from-primary/10 dark:hover:to-violet-500/10 transition-all duration-300 border-b border-primary/10 group">
+                            <TableCell className="font-medium p-6">
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                  <span className="text-xs font-bold text-primary">{i + 1}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{row.feature}</span>
+                                  <span className="text-sm text-muted-foreground mt-1 leading-relaxed">{row.description}</span>
+                                </div>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center">
+                            <TableCell className="text-center p-6">
                               {row.budgetBuddy === true ? (
                                 <div className="flex justify-center">
-                                  <span className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
-                                    <Check className="w-3.5 h-3.5" />
-                                  </span>
+                                  <div className="relative">
+                                    <div className="absolute inset-0 bg-green-500/20 rounded-full blur-sm"></div>
+                                    <span className="relative w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                                      <Check className="w-5 h-5" />
+                                    </span>
+                                  </div>
                                 </div>
                               ) : (
                                 <div className="flex justify-center">
-                                  <span className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
-                                    <X className="w-3.5 h-3.5" />
+                                  <span className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 border border-red-500/30">
+                                    <X className="w-5 h-5" />
                                   </span>
                                 </div>
                               )}
                             </TableCell>
-                            <TableCell className="text-center">
+                            <TableCell className="text-center p-6">
                               {row.traditional === true ? (
                                 <div className="flex justify-center">
-                                  <span className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-600">
-                                    <Check className="w-3.5 h-3.5" />
-                                  </span>
+                                  <div className="relative">
+                                    <div className="absolute inset-0 bg-green-500/20 rounded-full blur-sm"></div>
+                                    <span className="relative w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                                      <Check className="w-5 h-5" />
+                                    </span>
+                                  </div>
                                 </div>
                               ) : row.traditional && row.traditional.partial ? (
                                 <div className="flex justify-center">
-                                  <span className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600">
-                                    <Check className="w-3.5 h-3.5 opacity-70" />
-                                  </span>
+                                  <div className="relative">
+                                    <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-sm"></div>
+                                    <span className="relative w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                                      <Check className="w-5 h-5 opacity-80" />
+                                    </span>
+                                  </div>
                                 </div>
                               ) : (
                                 <div className="flex justify-center">
-                                  <span className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
-                                    <X className="w-3.5 h-3.5" />
+                                  <span className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 border border-red-500/30 group-hover:scale-110 transition-transform">
+                                    <X className="w-5 h-5" />
                                   </span>
                                 </div>
                               )}
@@ -1216,36 +1289,63 @@ export default function AboutPage() {
                     </UITable>
                   </div>
                   
-                  <div className="p-5 bg-gradient-to-r from-primary/5 to-violet-500/5 rounded-lg border border-primary/10 space-y-4">
-                    <h3 className="text-sm font-medium">Why Choose Budget Buddy?</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex items-start gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <BarChart className="w-4 h-4 text-primary" />
+                  <div className="relative mt-8">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-violet-500/5 to-primary/10 rounded-3xl blur-sm"></div>
+                    <div className="relative bg-gradient-to-br from-primary/8 via-violet-500/5 to-primary/8 p-8 rounded-3xl border border-primary/20 backdrop-blur-sm">
+                      <div className="text-center mb-8">
+                        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/20 mb-4">
+                          <Trophy className="w-5 h-5 text-primary" />
+                          <h3 className="text-lg font-bold text-primary">Why Choose Budget Buddy?</h3>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-medium mb-1">Advanced Analytics</h4>
-                          <p className="text-xs text-muted-foreground">Powerful visualization tools and insights not available in traditional apps</p>
-                        </div>
+                        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+                          Experience the future of financial management with cutting-edge technology and innovative features
+                        </p>
                       </div>
                       
-                      <div className="flex items-start gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <Cpu className="w-4 h-4 text-primary" />
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="group relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-2xl blur-sm group-hover:blur-md transition-all"></div>
+                          <div className="relative bg-white/80 dark:bg-gray-900/80 p-6 rounded-2xl border border-primary/20 backdrop-blur-sm group-hover:border-primary/30 transition-all">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 border border-primary/30 shrink-0 group-hover:scale-110 transition-transform">
+                                <Network className="w-6 h-6 text-primary" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Voice-Powered Interface</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Revolutionary voice commands for transaction input and financial queries</p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-medium mb-1">AI-Powered Insights</h4>
-                          <p className="text-xs text-muted-foreground">Smart recommendations learn from your habits to provide personalized advice</p>
+                        
+                        <div className="group relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-2xl blur-sm group-hover:blur-md transition-all"></div>
+                          <div className="relative bg-white/80 dark:bg-gray-900/80 p-6 rounded-2xl border border-primary/20 backdrop-blur-sm group-hover:border-primary/30 transition-all">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 border border-primary/30 shrink-0 group-hover:scale-110 transition-transform">
+                                <Cpu className="w-6 h-6 text-primary" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">20+ AI Providers</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Unmatched AI integration with Google Gemini, OpenAI, and 18+ other models</p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                          <DollarSign className="w-4 h-4 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-medium mb-1">Financial Growth</h4>
-                          <p className="text-xs text-muted-foreground">Tools designed not just for tracking but for growing your wealth long-term</p>
+                        
+                        <div className="group relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-violet-500/10 rounded-2xl blur-sm group-hover:blur-md transition-all"></div>
+                          <div className="relative bg-white/80 dark:bg-gray-900/80 p-6 rounded-2xl border border-primary/20 backdrop-blur-sm group-hover:border-primary/30 transition-all">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-violet-500/20 border border-primary/30 shrink-0 group-hover:scale-110 transition-transform">
+                                <LayoutGrid className="w-6 h-6 text-primary" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">Modern Architecture</h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Built on Next.js 15, React 19, and cutting-edge web technologies</p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
