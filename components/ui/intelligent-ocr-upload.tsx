@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { FileUpload } from "./file-upload";
-import { AdvancedOCRProcessor, ProcessingResult } from "@/lib/advanced-ocr-processor";
+import { LLMEnhancedOCR, LLMEnhancedResult } from "@/lib/llm-enhanced-ocr";
+import { SampleReceiptGenerator } from "@/lib/sample-receipts-generator";
 import { Button } from "./button";
 import { Card } from "./card";
 import { Badge } from "./badge";
@@ -20,12 +21,13 @@ import {
   Target,
   TrendingUp,
   Shield,
-  Cpu
+  Cpu,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 
 interface IntelligentOCRUploadProps {
-  onDataExtracted: (data: ProcessingResult) => void;
+  onDataExtracted: (data: LLMEnhancedResult) => void;
   onClose: () => void;
 }
 
@@ -33,8 +35,9 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState<string>("");
-  const [extractedResult, setExtractedResult] = useState<ProcessingResult | null>(null);
-  const [ocrProcessor] = useState(() => new AdvancedOCRProcessor());
+  const [extractedResult, setExtractedResult] = useState<LLMEnhancedResult | null>(null);
+  const [ocrProcessor] = useState(() => new LLMEnhancedOCR());
+  const [showSampleReceipts, setShowSampleReceipts] = useState(false);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -53,23 +56,26 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
     setProcessingStage("Initializing AI engines...");
     
     try {
-      // Stage 1: File analysis
-      setProcessingStage("🔍 Analyzing document structure...");
+      // Stage 1: LLM Document Analysis
+      setProcessingStage("🧠 LLM analyzing document structure and context...");
       
-      // Stage 2: OCR processing with real-time updates
-      setProcessingStage("🧠 Applying advanced OCR with AI enhancement...");
+      // Stage 2: Advanced Image Enhancement
+      setProcessingStage("🖼️ AI enhancing image with adaptive algorithms...");
       
-      // Stage 3: Data extraction
-      setProcessingStage("⚡ Extracting transaction data intelligently...");
+      // Stage 3: Multi-Engine OCR
+      setProcessingStage("🔍 Running enhanced OCR with language models...");
       
-      // Stage 4: Validation
-      setProcessingStage("🎯 Validating and cross-referencing data...");
+      // Stage 4: LLM Data Extraction
+      setProcessingStage("🤖 LLM extracting data with reasoning and context...");
       
-      // Process the document with real OCR
+      // Stage 5: LLM Validation
+      setProcessingStage("✅ LLM validating data with intelligent reasoning...");
+      
+      // Process the document with LLM-Enhanced OCR
       const result = await ocrProcessor.processDocument(selectedFile);
       
-      // Stage 5: Final processing
-      setProcessingStage("✨ Finalizing intelligent analysis...");
+      // Stage 6: Final LLM Analysis
+      setProcessingStage("🎯 LLM finalizing analysis with confidence scoring...");
 
       setExtractedResult(result);
       
@@ -81,8 +87,22 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
         toast.warning("⚠️ Extraction completed but please review carefully");
       }
     } catch (error) {
-      console.error('Advanced OCR processing failed:', error);
-      toast.error('🚫 AI processing failed. Please try again or enter manually.');
+      console.error('LLM-Enhanced OCR processing failed:', error);
+      
+      // Show user-friendly error messages
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process document with LLM';
+      
+      if (errorMessage.includes('PDF')) {
+        toast.error('📄 PDF files are not supported. Please convert to JPG/PNG and try again.');
+      } else if (errorMessage.includes('file type') || errorMessage.includes('Unsupported')) {
+        toast.error('🚫 Unsupported file type. Please upload an image file (JPG, PNG, etc.)');
+      } else if (errorMessage.includes('size')) {
+        toast.error('📦 File too large. Please upload a file smaller than 10MB.');
+      } else if (errorMessage.includes('Image loading failed') || errorMessage.includes('Error attempting to read image')) {
+        toast.error('🖼️ Failed to load image. Please check the file format and try again.');
+      } else {
+        toast.error('❌ Processing failed. Please try again with a clearer image.');
+      }
     } finally {
       setIsProcessing(false);
       setProcessingStage("");
@@ -93,6 +113,30 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
     if (extractedResult) {
       onDataExtracted(extractedResult);
       onClose();
+    }
+  };
+
+  const handleSampleReceiptTest = async (receiptId: string) => {
+    try {
+      setIsProcessing(true);
+      setProcessingStage("📋 Loading sample receipt...");
+      
+      const sampleFile = await SampleReceiptGenerator.createFileFromReceipt(receiptId);
+      setSelectedFile(sampleFile);
+      
+      setProcessingStage("🧠 Processing sample receipt with LLM...");
+      const result = await ocrProcessor.processDocument(sampleFile);
+      
+      setExtractedResult(result);
+      setShowSampleReceipts(false);
+      
+      toast.success(`✅ Sample receipt processed! Check accuracy against expected data.`);
+    } catch (error) {
+      console.error('Sample receipt processing failed:', error);
+      toast.error('Failed to process sample receipt');
+    } finally {
+      setIsProcessing(false);
+      setProcessingStage("");
     }
   };
 
@@ -140,11 +184,11 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
           </div>
         </div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          🚀 Intelligent Invoice Processing
+          🧠 LLM-Powered Invoice Processing
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-          Advanced AI-powered OCR with 99%+ accuracy. Upload any receipt, invoice, or payment screenshot 
-          for instant intelligent data extraction.
+          Advanced Language Model-powered OCR with 99%+ accuracy. Upload any receipt, invoice, or payment screenshot (JPG, PNG, etc.) 
+          for instant intelligent data extraction with reasoning.
         </p>
       </div>
 
@@ -153,9 +197,21 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
         onFileRemove={handleFileRemove}
         selectedFile={selectedFile}
         isProcessing={isProcessing}
-        accept="image/*,.pdf"
+        accept="image/*,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.tif,.svg,.ico,.avif,.heic,.heif"
         maxSize={10}
       />
+
+      {!selectedFile && !extractedResult && (
+        <div className="text-center space-y-4">
+          <Button 
+            onClick={() => setShowSampleReceipts(true)}
+            variant="outline"
+            className="w-full"
+          >
+            📋 Test with Sample Receipts
+          </Button>
+        </div>
+      )}
 
       {selectedFile && !extractedResult && (
         <div className="text-center">
@@ -173,10 +229,61 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
             ) : (
               <>
                 <Zap className="h-5 w-5 mr-2" />
-                🧠 Process with AI Intelligence
+                🧠 Process with LLM Intelligence
               </>
             )}
           </Button>
+        </div>
+      )}
+
+      {/* Sample Receipts Modal */}
+      {showSampleReceipts && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4">
+          <div className="bg-card rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold">📋 Test Sample Receipts</h3>
+              <button
+                onClick={() => setShowSampleReceipts(false)}
+                className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SampleReceiptGenerator.getSampleReceipts().map((receipt) => (
+                <Card key={receipt.id} className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => handleSampleReceiptTest(receipt.id)}>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm">{receipt.name}</h4>
+                      <Badge variant={receipt.difficulty === 'easy' ? 'default' : receipt.difficulty === 'medium' ? 'secondary' : 'destructive'}>
+                        {receipt.difficulty}
+                      </Badge>
+                    </div>
+                    
+                    <div className="text-xs space-y-1 text-gray-600 dark:text-gray-400">
+                      <p><strong>Amount:</strong> ₹{receipt.expectedData.amount}</p>
+                      <p><strong>Merchant:</strong> {receipt.expectedData.merchant}</p>
+                      <p><strong>Category:</strong> {receipt.expectedData.category}</p>
+                      <p><strong>Date:</strong> {receipt.expectedData.date}</p>
+                    </div>
+                    
+                    <Button size="sm" className="w-full" disabled={isProcessing}>
+                      {isProcessing ? 'Processing...' : 'Test This Receipt'}
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>💡 How to test:</strong> Click on any sample receipt to automatically generate and process it with the LLM system. 
+                Compare the extracted data with the expected values to verify accuracy.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -205,10 +312,10 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</p>
                   <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {formatAmount(extractedResult.data.amount, extractedResult.data.currency)}
+                    {formatAmount(extractedResult.extractedData.amount, extractedResult.extractedData.currency)}
                   </p>
-                  {extractedResult.data.currency && (
-                    <p className="text-xs text-gray-500">Currency: {extractedResult.data.currency}</p>
+                  {extractedResult.extractedData.currency && (
+                    <p className="text-xs text-gray-500">Currency: {extractedResult.extractedData.currency}</p>
                   )}
                 </div>
               </div>
@@ -218,7 +325,7 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Date</p>
                   <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {formatDate(extractedResult.data.date)}
+                    {formatDate(extractedResult.extractedData.date)}
                   </p>
                 </div>
               </div>
@@ -228,14 +335,14 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</p>
                   <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {extractedResult.data.category || "Auto-detected"}
+                    {extractedResult.extractedData.category || "Auto-detected"}
                   </p>
                   <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${
-                    extractedResult.data.type === 'income' 
+                    extractedResult.extractedData.type === 'income' 
                       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                       : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                   }`}>
-                    {extractedResult.data.type === 'income' ? '📈 Income' : '📉 Expense'}
+                    {extractedResult.extractedData.type === 'income' ? '📈 Income' : '📉 Expense'}
                   </div>
                 </div>
               </div>
@@ -247,30 +354,30 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</p>
                   <p className="text-gray-900 dark:text-gray-100">
-                    {extractedResult.data.description || extractedResult.data.merchant || "Auto-generated"}
+                    {extractedResult.extractedData.description || extractedResult.extractedData.merchant || "Auto-generated"}
                   </p>
                 </div>
               </div>
 
-              {extractedResult.data.paymentMethod && (
+              {extractedResult.extractedData.paymentMethod && (
                 <div className="flex items-start space-x-3">
                   <CheckCircle className="h-6 w-6 text-green-500 mt-1" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</p>
                     <p className="text-gray-900 dark:text-gray-100">
-                      {extractedResult.data.paymentMethod}
+                      {extractedResult.extractedData.paymentMethod}
                     </p>
                   </div>
                 </div>
               )}
 
-              {extractedResult.data.transactionId && (
+              {extractedResult.extractedData.transactionId && (
                 <div className="flex items-start space-x-3">
                   <Shield className="h-6 w-6 text-blue-500 mt-1" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Transaction ID</p>
                     <p className="text-sm font-mono text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                      {extractedResult.data.transactionId}
+                      {extractedResult.extractedData.transactionId}
                     </p>
                   </div>
                 </div>

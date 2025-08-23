@@ -60,9 +60,29 @@ export const INDIAN_PAYMENT_PATTERNS = {
   // General Indian receipt patterns
   general: {
     amount: [
-      /(?:total|amount|bill|grand total)\s*:?\s*(?:rs\.?|₹)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/gi,
-      /(?:rs\.?|₹)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*(?:only|\/-|total)/gi,
-      /(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*(?:rs\.?|₹|inr)/gi
+      // Standard currency patterns
+      /(?:total|amount|bill|grand total|net amount|final amount)\s*:?\s*(?:rs\.?|₹|inr)?\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/gi,
+      /(?:rs\.?|₹)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*(?:only|\/-|total)?/gi,
+      /(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*(?:rs\.?|₹|inr)/gi,
+      
+      // Amount without currency symbol but with context
+      /(?:total|amount|bill|grand total|net amount|final amount|paid|due)\s*:?\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/gi,
+      
+      // Standalone amounts (common patterns)
+      /(?:^|\s)(\d{1,3}(?:,\d{2,3})*(?:\.\d{2})?)(?:\s*only|\s*\/-|\s*$)/gm,
+      
+      // Amount with decimal variations
+      /(?:rs\.?|₹)\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/gi,
+      /(\d+(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:rs\.?|₹)/gi,
+      
+      // Amount in parentheses or brackets
+      /[\(\[](?:rs\.?|₹)?\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*(?:rs\.?|₹)?[\)\]]/gi,
+      
+      // Amount with words
+      /(?:rupees?|rs\.?|₹)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/gi,
+      
+      // Simple number patterns (last resort)
+      /(?:^|\s)(\d{2,6}(?:\.\d{2})?)(?=\s|$)/gm
     ],
     date: [
       /(?:date|bill date|invoice date)\s*:?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/gi,

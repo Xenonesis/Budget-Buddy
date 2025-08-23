@@ -6,7 +6,7 @@ import { formatCurrency, formatDate, getUserTimezone } from "@/lib/utils";
 import { useUserPreferences } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { IntelligentOCRUpload } from "@/components/ui/intelligent-ocr-upload";
-import { ProcessingResult } from "@/lib/advanced-ocr-processor";
+import { LLMEnhancedResult } from "@/lib/llm-enhanced-ocr";
 import {
   Calendar,
   X,
@@ -826,9 +826,9 @@ export default function AddTransactionForm({
     );
   };
 
-  // Handle intelligent OCR data extraction
-  const handleOCRDataExtracted = (result: ProcessingResult) => {
-    const extractedData = result.data;
+  // Handle LLM-enhanced OCR data extraction
+  const handleOCRDataExtracted = (result: LLMEnhancedResult) => {
+    const extractedData = result.extractedData;
     
     // Update form data with extracted information
     const updates: Partial<FormData> = {

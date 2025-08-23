@@ -255,11 +255,15 @@ export class AdvancedOCRProcessor {
   }
 
   private preprocessText(text: string): string {
-    return text
-      .replace(/[^\w\s₹.,/-:]/g, ' ') // Remove special characters except important ones
+    console.log('Raw OCR text:', text);
+    
+    const processed = text
+      .replace(/[^\w\s₹.,/-:()[\]]/g, ' ') // Keep more characters that might be important
       .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim()
-      .toLowerCase();
+      .trim();
+    
+    console.log('Processed OCR text:', processed);
+    return processed;
   }
 
   private async extractDataIntelligently(text: string): Promise<ExtractedTransactionData> {
@@ -296,13 +300,23 @@ export class AdvancedOCRProcessor {
   }
 
   private extractAmountWithPatterns(text: string, patterns: RegExp[]): number | undefined {
-    const amounts: number[] = [];
+    const amounts: { value: number; confidence: number; context: string }[] = [];
+    
+    // Clean text for better pattern matching
+    const cleanText = text
+      .replace(/[^\w\s₹.,/-:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    console.log('OCR Text for amount extraction:', cleanText);
     
     for (const pattern of patterns) {
-      const matches = text.matchAll(pattern);
+      const matches = cleanText.matchAll(pattern);
       for (const match of matches) {
-        const amountStr = match[1].replace(/,/g, '');
+        const amountStr = match[1].replace(/,/g, '').replace(/\s/g, '');
         const amount = parseFloat(amountStr);
+        
+        console.log(`Pattern matched: ${pattern.source}, Amount: ${amountStr} -> ${amount}`);
         
         // Use real validation rules
         if (!isNaN(amount) && 
@@ -315,41 +329,62 @@ export class AdvancedOCRProcessor {
           );
           
           if (!isSuspicious) {
-            amounts.push(amount);
+            // Calculate confidence based on context
+            let confidence = 0.5;
+            const context = match[0].toLowerCase();
+            
+            // Higher confidence for explicit amount keywords
+            if (context.includes('total') || context.includes('amount') || context.includes('bill')) {
+              confidence += 0.3;
+            }
+            
+            // Higher confidence for currency symbols
+            if (context.includes('₹') || context.includes('rs')) {
+              confidence += 0.2;
+            }
+            
+            // Higher confidence for reasonable amounts
+            if (amount >= 10 && amount <= 10000) {
+              confidence += 0.1;
+            }
+            
+            amounts.push({ value: amount, confidence, context });
           }
         }
       }
     }
     
-    if (amounts.length === 0) return undefined;
-    if (amounts.length === 1) return amounts[0];
+    console.log('All extracted amounts:', amounts);
     
-    // Remove duplicates and select best amount
-    const uniqueAmounts = [...new Set(amounts)];
-    
-    // Prefer amounts that match common denominations
-    const commonAmount = uniqueAmounts.find(amount => 
-      AMOUNT_VALIDATION_RULES.commonAmounts.includes(amount)
-    );
-    
-    if (commonAmount) return commonAmount;
-    
-    // Return most frequent amount
-    const amountCounts = new Map<number, number>();
-    amounts.forEach(amount => {
-      amountCounts.set(amount, (amountCounts.get(amount) || 0) + 1);
-    });
-    
-    let maxCount = 0;
-    let bestAmount = uniqueAmounts[0];
-    for (const [amount, count] of amountCounts) {
-      if (count > maxCount) {
-        maxCount = count;
-        bestAmount = amount;
+    if (amounts.length === 0) {
+      // Fallback: try to find any number that looks like an amount
+      const fallbackPattern = /(\d{1,6}(?:\.\d{2})?)/g;
+      const fallbackMatches = cleanText.matchAll(fallbackPattern);
+      
+      for (const match of fallbackMatches) {
+        const amount = parseFloat(match[1]);
+        if (amount >= 10 && amount <= 100000) {
+          amounts.push({ value: amount, confidence: 0.3, context: 'fallback' });
+        }
       }
+      
+      console.log('Fallback amounts:', amounts);
     }
     
-    return bestAmount;
+    if (amounts.length === 0) return undefined;
+    if (amounts.length === 1) return amounts[0].value;
+    
+    // Sort by confidence and return the highest confidence amount
+    amounts.sort((a, b) => b.confidence - a.confidence);
+    
+    // If top amounts have similar confidence, prefer larger amounts (likely to be totals)
+    const topAmounts = amounts.filter(a => a.confidence >= amounts[0].confidence - 0.1);
+    if (topAmounts.length > 1) {
+      topAmounts.sort((a, b) => b.value - a.value);
+    }
+    
+    console.log('Selected amount:', topAmounts[0]);
+    return topAmounts[0].value;
   }
 
   private extractDateWithPatterns(text: string, patterns: RegExp[]): string | undefined {
