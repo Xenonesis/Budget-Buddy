@@ -79,7 +79,14 @@ export default function TeamSection() {
                                                 onError={(e) => {
                                                     // Fallback to a placeholder if image fails to load
                                                     const target = e.currentTarget;
-                                                    if (!target.src.includes('ui-avatars.com')) {
+                                                    let isUiAvatarHost = false;
+                                                    try {
+                                                        const host = new URL(target.src).hostname;
+                                                        isUiAvatarHost = (host === 'ui-avatars.com');
+                                                    } catch (err) {
+                                                        // If parsing fails, treat host as not ui-avatars.com
+                                                    }
+                                                    if (!isUiAvatarHost) {
                                                         target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=6366f1&color=fff&size=200&bold=true`;
                                                     }
                                                 }}
