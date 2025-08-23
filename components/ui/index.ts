@@ -20,6 +20,8 @@ export * from './tabs'
 export * from './tech-logo'
 export * from './theme-toggle'
 export * from './tooltip'
+export * from './file-upload';
+export * from './ocr-upload';
 export * from './validated-input'
 export * from './hero-section-dark'
 export * from './financial-data-flow'

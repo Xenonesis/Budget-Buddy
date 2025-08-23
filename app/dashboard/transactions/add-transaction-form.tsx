@@ -5,12 +5,16 @@ import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, getUserTimezone } from "@/lib/utils";
 import { useUserPreferences } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { IntelligentOCRUpload } from "@/components/ui/intelligent-ocr-upload";
+import { ProcessingResult } from "@/lib/advanced-ocr-processor";
 import {
   Calendar,
   X,
   RefreshCw,
   Trash,
-  ChevronDown
+  ChevronDown,
+  Upload,
+  Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -48,6 +52,10 @@ interface FormData {
   category_id: string;
   amount: string;
   description: string;
+  // OCR-related fields
+  ocr_extracted?: boolean;
+  ocr_confidence?: number;
+  original_file_name?: string;
   date: string;
   is_recurring: boolean;
   recurring_frequency: "daily" | "weekly" | "biweekly" | "monthly" | "quarterly" | "annually";
@@ -97,6 +105,9 @@ export default function AddTransactionForm({
   const [showDeleteCategoryConfirm, setShowDeleteCategoryConfirm] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
+  
+  // OCR-related state
+  const [showOCRUpload, setShowOCRUpload] = useState(false);
   
   // Load transaction data if editing
   useEffect(() => {
@@ -471,7 +482,11 @@ export default function AddTransactionForm({
         description: formData.description ? formData.description.trim() : '', // Ensure empty string instead of null
         date: formattedDate, // Use the properly formatted date
         created_at: new Date().toISOString(), // Add timestamp
-        updated_at: new Date().toISOString()  // Add timestamp
+        updated_at: new Date().toISOString(),  // Add timestamp
+        // OCR-related fields
+        ocr_extracted: formData.ocr_extracted || false,
+        ocr_confidence: formData.ocr_confidence || null,
+        original_file_name: formData.original_file_name || null
       };
 
       console.log("Submitting transaction data:", transactionData);
@@ -811,6 +826,82 @@ export default function AddTransactionForm({
     );
   };
 
+  // Handle intelligent OCR data extraction
+  const handleOCRDataExtracted = (result: ProcessingResult) => {
+    const extractedData = result.data;
+    
+    // Update form data with extracted information
+    const updates: Partial<FormData> = {
+      ocr_extracted: true,
+      ocr_confidence: result.confidence * 100, // Convert to percentage
+      original_file_name: extractedData.rawText ? 'ocr_processed_file' : undefined,
+    };
+
+    if (extractedData.amount) {
+      updates.amount = extractedData.amount.toString();
+    }
+
+    // Use merchant name or description
+    if (extractedData.description || extractedData.merchant) {
+      updates.description = extractedData.description || extractedData.merchant || '';
+    }
+
+    if (extractedData.date) {
+      try {
+        const dateObj = new Date(extractedData.date);
+        if (!isNaN(dateObj.getTime())) {
+          updates.date = dateObj.toISOString().split('T')[0];
+        }
+      } catch (e) {
+        console.error('Error parsing extracted date:', e);
+      }
+    }
+
+    if (extractedData.type) {
+      updates.type = extractedData.type;
+    }
+
+    // Enhanced category matching with AI suggestions
+    if (extractedData.category) {
+      const matchingCategory = categories.find(cat => 
+        cat.name.toLowerCase() === extractedData.category!.toLowerCase() ||
+        cat.name.toLowerCase().includes(extractedData.category!.toLowerCase()) ||
+        extractedData.category!.toLowerCase().includes(cat.name.toLowerCase())
+      );
+      
+      if (matchingCategory) {
+        updates.category_id = matchingCategory.id;
+      } else {
+        // Create suggestion for new category if confidence is high
+        if (result.confidence > 0.8) {
+          toast.info(`💡 Suggestion: Create "${extractedData.category}" category for better tracking`);
+        }
+      }
+    }
+
+    setFormData(prev => ({ ...prev, ...updates }));
+    setShowOCRUpload(false);
+    
+    // Enhanced success message based on confidence
+    if (result.confidence >= 0.9) {
+      toast.success(`🎉 Excellent! AI extracted data with ${Math.round(result.confidence * 100)}% confidence. Ready to save!`);
+    } else if (result.confidence >= 0.8) {
+      toast.success(`✅ Great extraction! ${Math.round(result.confidence * 100)}% confidence. Please review and save.`);
+    } else if (result.confidence >= 0.7) {
+      toast.success(`👍 Good extraction with ${Math.round(result.confidence * 100)}% confidence. Please verify details.`);
+    } else {
+      toast.warning(`⚠️ Extraction completed with ${Math.round(result.confidence * 100)}% confidence. Please review carefully.`);
+    }
+
+    // Show validation insights if available
+    if (result.validationResults.length > 0) {
+      const highConfidenceFields = result.validationResults.filter(v => v.confidence > 0.8).length;
+      if (highConfidenceFields > 0) {
+        toast.info(`🔍 AI validated ${highConfidenceFields} fields with high confidence`);
+      }
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -821,18 +912,59 @@ export default function AddTransactionForm({
           <h2 className="text-xl font-bold">
             {isEditing ? "Edit Transaction" : "Add Transaction"}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-2 text-muted-foreground hover:bg-muted active:scale-95 transition-transform"
-            aria-label="Close form"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center space-x-2">
+            {!isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowOCRUpload(true)}
+                className="flex items-center space-x-1"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">Smart Upload</span>
+              </Button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full p-2 text-muted-foreground hover:bg-muted active:scale-95 transition-transform"
+              aria-label="Close form"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
         
         {/* Form content with automatic scrolling */}
         <div className="overflow-y-auto flex-grow py-4 px-4 pb-24">
+          {/* OCR Upload Section */}
+          {!isEditing && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Smart Invoice Processing</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Upload receipts to auto-fill transaction details</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowOCRUpload(true)}
+                  className="flex items-center space-x-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload</span>
+                </Button>
+              </div>
+            </div>
+          )}
+
           <form id="transactionForm" className="space-y-4" onSubmit={handleSubmit}>
             {/* Type and Amount */}
             <div className="grid grid-cols-2 gap-4">
@@ -1088,6 +1220,29 @@ export default function AddTransactionForm({
                   )}
                 </Button>
               </div>
+            </div>
+          </div>
+        )}
+        
+        {/* OCR Upload Modal */}
+        {showOCRUpload && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+            <div className="bg-card rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Upload Invoice or Receipt</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowOCRUpload(false)}
+                  className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <IntelligentOCRUpload
+                onDataExtracted={handleOCRDataExtracted}
+                onClose={() => setShowOCRUpload(false)}
+              />
             </div>
           </div>
         )}
