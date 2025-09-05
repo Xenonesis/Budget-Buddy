@@ -1,8 +1,8 @@
-# Budget Buddy Version 15.50.00
+# Budget Buddy Version 18.50.00
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 
-**Released: August 22, 2025**
+**Released: September 6, 2025**
 
 ## 🚀 Overview
 

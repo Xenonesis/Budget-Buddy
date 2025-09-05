@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MonthlyBudgetOverview } from "@/components/ui/monthly-budget-overview";
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, AreaChart as ChartIcon, PieChart as PieChartIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -768,6 +769,11 @@ export default function DashboardPage() {
         </div>
       </div>
       
+      {/* Monthly Budget Overview */}
+      <div className="mb-8 md:mb-10">
+        <MonthlyBudgetOverview />
+      </div>
+
       {/* Charts - More responsive and visually appealing */}
       <div className="mb-8 md:mb-10 grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2" role="region" aria-label="Financial Charts">
         <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">

@@ -10,6 +10,7 @@ import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import { useUserPreferences } from "@/lib/store";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/ui/logo";
+import { NotificationCenter } from "@/components/ui/notification-center";
 import {
   LayoutGrid,
   BarChart3,
@@ -23,7 +24,8 @@ import {
   LifeBuoy,
   Ban,
   Menu,
-  X
+  X,
+  Bell
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn, getAppVersion } from '@/lib/utils'
@@ -463,6 +465,13 @@ export default function DashboardLayout({
           label: "AI Insights",
           shortcutKey: 'Alt+5'
         },
+        {
+          title: "Notifications",
+          href: "/dashboard/notifications",
+          icon: <Bell className="h-5 w-5" />,
+          label: "Notifications",
+          shortcutKey: 'Alt+6'
+        },
       ],
     },
     {
@@ -500,6 +509,7 @@ export default function DashboardLayout({
           </div>
         </Link>
         <div className="flex items-center gap-3">
+          <NotificationCenter />
           <ThemeToggle iconOnly />
           <button
             className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
@@ -769,6 +779,7 @@ export default function DashboardLayout({
           )}>
             {collapsed ? (
               <div className="flex flex-col items-center gap-3">
+                <NotificationCenter />
                 <ThemeToggle iconOnly size="sm" />
                 <div className="text-xs text-muted-foreground bg-primary/5 py-2 rounded-md">v{appVersion}</div>
               </div>
@@ -779,6 +790,7 @@ export default function DashboardLayout({
                 </div>
               
                 <div className="flex items-center justify-between mt-4 px-2">
+                  <NotificationCenter />
                   <ThemeToggle iconOnly size="sm" />
                   <button
                     className="rounded-full p-2 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
