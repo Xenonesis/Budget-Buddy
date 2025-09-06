@@ -1,16 +1,3 @@
--- Add address column to profiles table if it doesn't exist
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT FROM information_schema.columns 
-    WHERE table_schema = 'public' 
-    AND table_name = 'profiles' 
-    AND column_name = 'address'
-  ) THEN
-    ALTER TABLE profiles ADD COLUMN address TEXT;
-    RAISE NOTICE 'Added address column to profiles table';
-  ELSE
-    RAISE NOTICE 'Address column already exists in profiles table';
-  END IF;
-END
-$$; 
+version https://git-lfs.github.com/spec/v1
+oid sha256:c9093bac81d60b4203580cea3583593b2eab86ef595d87209f526f8535730d7f
+size 460
