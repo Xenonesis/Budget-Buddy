@@ -1118,7 +1118,7 @@ Focus on accuracy and provide reasoning for each extraction.
     const invalidPatterns = [
       /^(date|time|amount|total|bill|receipt|invoice|address|phone|email|gst)$/i,
       /^(the|and|or|of|in|at|to|for|with|by)$/i,
-      /^\d+[\s.-]*\d*$/,
+      /^\d+[\s.-]{0,10}\d*$/,
       /^[a-z]$/i
     ];
     
