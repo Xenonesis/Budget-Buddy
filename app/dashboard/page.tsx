@@ -28,8 +28,35 @@ import { WidgetSystem } from "@/components/ui/widget-system";
 import { WidgetLayout } from "@/lib/store";
 import { useUserPreferences } from "@/lib/store";
 import { AVAILABLE_WIDGETS, getDefaultLayout } from "@/lib/widget-config";
+import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from "@/lib/simple-widget-config";
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, AreaChart as ChartIcon, PieChart as PieChartIcon, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Validation function to clean up duplicate widgets
+function validateAndCleanLayout(layout: WidgetLayout): WidgetLayout {
+  const allowedTypes = ['enhanced-stats', 'enhanced-budget'];
+  const seenTypes = new Set<string>();
+  
+  const cleanedWidgets = layout.widgets.filter(widget => {
+    // Only allow widgets that are in our simple config
+    if (!allowedTypes.includes(widget.type)) {
+      return false;
+    }
+    
+    // Remove duplicates
+    if (seenTypes.has(widget.type)) {
+      return false;
+    }
+    
+    seenTypes.add(widget.type);
+    return true;
+  });
+  
+  return {
+    widgets: cleanedWidgets,
+    columns: Math.min(layout.columns || 2, 2) // Ensure max 2 columns
+  };
+}
 
 interface Transaction {
   id: string;
@@ -491,7 +518,7 @@ export default function DashboardPage() {
   const [isOffline, setIsOffline] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [currentLayout, setCurrentLayout] = useState<WidgetLayout>(
-    dashboardLayout || getDefaultLayout()
+    dashboardLayout || getSimpleDefaultLayout()
   );
 
   // Monitor online/offline status
@@ -637,18 +664,40 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // Initialize layout if not set
+  // Initialize layout if not set or invalid
   useEffect(() => {
     if (!dashboardLayout) {
-      const defaultLayout = getDefaultLayout();
+      const defaultLayout = getSimpleDefaultLayout();
       setCurrentLayout(defaultLayout);
       setDashboardLayout(defaultLayout);
+    } else {
+      // Validate existing layout and remove duplicates
+      const cleanLayout = validateAndCleanLayout(dashboardLayout);
+      if (JSON.stringify(cleanLayout) !== JSON.stringify(dashboardLayout)) {
+        console.log('Cleaned up duplicate widgets from saved layout');
+        setCurrentLayout(cleanLayout);
+        setDashboardLayout(cleanLayout);
+      } else {
+        setCurrentLayout(dashboardLayout);
+      }
     }
   }, [dashboardLayout, setDashboardLayout]);
 
   const handleLayoutChange = (newLayout: WidgetLayout) => {
     setCurrentLayout(newLayout);
     setDashboardLayout(newLayout);
+  };
+
+  // Prepare widget data
+  const widgetData = {
+    totalIncome: stats.totalIncome,
+    totalExpense: stats.totalExpense,
+    recentTransactions: stats.recentTransactions,
+    budgetUsed: stats.totalExpense,
+    budgetTotal: 5000, // This should come from user's budget settings
+    monthlyIncome: stats.totalIncome,
+    monthlyExpense: stats.totalExpense,
+    topCategories: stats.topCategories
   };
 
   // Add passive event listeners for scroll and touch events
@@ -806,7 +855,8 @@ export default function DashboardPage() {
           onLayoutChange={handleLayoutChange}
           isEditMode={false}
           onEditModeChange={() => {}}
-          availableWidgets={AVAILABLE_WIDGETS}
+          availableWidgets={SIMPLE_WIDGET_CONFIG}
+          widgetData={widgetData}
         />
       </div>
 

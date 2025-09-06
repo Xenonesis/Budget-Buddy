@@ -1,11 +1,24 @@
-import { Widget, WidgetLayout } from '@/lib/store';
+import { Widget } from '@/lib/store';
 import {
   QuickStatsWidget,
   BudgetProgressWidget,
   RecentTransactionsWidget,
   MonthlySummaryWidget,
-  CategoryBreakdownWidget
+  CategoryBreakdownWidget,
+  SimpleStatsWidget,
+  SimpleBudgetWidget,
+  EnhancedStatsWidget,
+  EnhancedBudgetWidget
 } from '@/components/ui/dashboard-widgets';
+
+// Debug: Check if components are properly imported
+console.log('Widget components:', {
+  QuickStatsWidget,
+  BudgetProgressWidget,
+  RecentTransactionsWidget,
+  MonthlySummaryWidget,
+  CategoryBreakdownWidget
+});
 import React from 'react';
 import { 
   DollarSign, 
@@ -134,6 +147,54 @@ export const AVAILABLE_WIDGETS: Widget[] = [
     description: 'Top spending categories',
     icon: React.createElement(PieChart, { className: 'h-4 w-4' }),
     component: CategoryBreakdownWidget,
+    isVisible: true,
+    position: 0,
+    size: 'medium',
+    settings: {}
+  },
+  {
+    id: 'simple-stats',
+    type: 'simple-stats',
+    title: 'Simple Stats',
+    description: 'Basic financial overview',
+    icon: React.createElement(DollarSign, { className: 'h-4 w-4' }),
+    component: SimpleStatsWidget,
+    isVisible: true,
+    position: 0,
+    size: 'medium',
+    settings: {}
+  },
+  {
+    id: 'simple-budget',
+    type: 'simple-budget',
+    title: 'Simple Budget',
+    description: 'Basic budget tracking',
+    icon: React.createElement(Target, { className: 'h-4 w-4' }),
+    component: SimpleBudgetWidget,
+    isVisible: true,
+    position: 0,
+    size: 'medium',
+    settings: {}
+  },
+  {
+    id: 'enhanced-stats',
+    type: 'enhanced-stats',
+    title: 'Enhanced Stats',
+    description: 'Enhanced financial overview with beautiful design',
+    icon: React.createElement(DollarSign, { className: 'h-4 w-4' }),
+    component: EnhancedStatsWidget,
+    isVisible: true,
+    position: 0,
+    size: 'medium',
+    settings: {}
+  },
+  {
+    id: 'enhanced-budget',
+    type: 'enhanced-budget',
+    title: 'Enhanced Budget',
+    description: 'Enhanced budget tracking with status indicators',
+    icon: React.createElement(Target, { className: 'h-4 w-4' }),
+    component: EnhancedBudgetWidget,
     isVisible: true,
     position: 0,
     size: 'medium',

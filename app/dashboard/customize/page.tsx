@@ -5,6 +5,7 @@ import { WidgetSystem } from '@/components/ui/widget-system';
 import { WidgetLayout } from '@/lib/store';
 import { useUserPreferences } from '@/lib/store';
 import { AVAILABLE_WIDGETS, getDefaultLayout } from '@/lib/widget-config';
+import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from '@/lib/simple-widget-config';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import { toast } from 'sonner';
 export default function CustomizeDashboardPage() {
   const { dashboardLayout, setDashboardLayout, userId } = useUserPreferences();
   const [currentLayout, setCurrentLayout] = useState<WidgetLayout>(
-    dashboardLayout || getDefaultLayout()
+    dashboardLayout || getSimpleDefaultLayout()
   );
   const [isEditMode, setIsEditMode] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,7 +24,7 @@ export default function CustomizeDashboardPage() {
   // Initialize layout if not set
   useEffect(() => {
     if (!dashboardLayout) {
-      const defaultLayout = getDefaultLayout();
+      const defaultLayout = getSimpleDefaultLayout();
       setCurrentLayout(defaultLayout);
       setDashboardLayout(defaultLayout);
     }
@@ -67,7 +68,7 @@ export default function CustomizeDashboardPage() {
   };
 
   const handleReset = () => {
-    const defaultLayout = getDefaultLayout();
+    const defaultLayout = getSimpleDefaultLayout();
     setCurrentLayout(defaultLayout);
     setDashboardLayout(defaultLayout);
     toast.success('Dashboard reset to default layout');
@@ -156,7 +157,8 @@ export default function CustomizeDashboardPage() {
         onLayoutChange={handleLayoutChange}
         isEditMode={isEditMode}
         onEditModeChange={setIsEditMode}
-        availableWidgets={AVAILABLE_WIDGETS}
+        availableWidgets={SIMPLE_WIDGET_CONFIG}
+        widgetData={{}}
       />
     </div>
   );

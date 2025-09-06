@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,19 +12,38 @@ import {
   EyeOff, 
   Plus,
   X,
-  BarChart3,
-  PieChart,
-  TrendingUp,
-  DollarSign,
-  Calendar,
-  Target,
-  CreditCard,
-  Activity
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Import interfaces from store to avoid circular dependency
 import { Widget, WidgetLayout } from '@/lib/store';
+
+// Import all widget components
+import {
+  QuickStatsWidget,
+  BudgetProgressWidget,
+  RecentTransactionsWidget,
+  MonthlySummaryWidget,
+  CategoryBreakdownWidget,
+  SimpleStatsWidget,
+  SimpleBudgetWidget,
+  EnhancedStatsWidget,
+  EnhancedBudgetWidget
+} from '@/components/ui/dashboard-widgets';
+
+// Widget type to component mapping
+const WIDGET_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
+  'quick-stats': QuickStatsWidget,
+  'budget-progress': BudgetProgressWidget,
+  'recent-transactions': RecentTransactionsWidget,
+  'monthly-summary': MonthlySummaryWidget,
+  'category-breakdown': CategoryBreakdownWidget,
+  'simple-stats': SimpleStatsWidget,
+  'simple-budget': SimpleBudgetWidget,
+  'enhanced-stats': EnhancedStatsWidget,
+  'enhanced-budget': EnhancedBudgetWidget,
+};
 
 interface WidgetSystemProps {
   layout: WidgetLayout;
@@ -32,6 +51,7 @@ interface WidgetSystemProps {
   isEditMode: boolean;
   onEditModeChange: (editMode: boolean) => void;
   availableWidgets: Widget[];
+  widgetData?: any;
 }
 
 export function WidgetSystem({
@@ -39,7 +59,8 @@ export function WidgetSystem({
   onLayoutChange,
   isEditMode,
   onEditModeChange,
-  availableWidgets
+  availableWidgets,
+  widgetData = {}
 }: WidgetSystemProps) {
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
 
@@ -189,7 +210,7 @@ export function WidgetSystem({
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                        {widget.icon}
+                        {React.isValidElement(widget.icon) ? widget.icon : null}
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium">{widget.title}</h4>
@@ -216,7 +237,7 @@ export function WidgetSystem({
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-muted text-muted-foreground">
-                            {widget.icon}
+                            {React.isValidElement(widget.icon) ? widget.icon : null}
                           </div>
                           <div className="flex-1">
                             <h4 className="font-medium">{widget.title}</h4>
@@ -337,7 +358,18 @@ export function WidgetSystem({
                         )}
 
                         {/* Widget Content */}
-                        <widget.component {...widget.settings} />
+                        {(() => {
+                          const WidgetComponent = widget.component || WIDGET_COMPONENT_MAP[widget.type];
+                          if (WidgetComponent) {
+                            return React.createElement(WidgetComponent, { data: widgetData });
+                          } else {
+                            return (
+                              <div className="p-4 text-center text-muted-foreground">
+                                Widget component not found: {widget.type}
+                              </div>
+                            );
+                          }
+                        })()}
                       </Card>
                     </div>
                   )}
