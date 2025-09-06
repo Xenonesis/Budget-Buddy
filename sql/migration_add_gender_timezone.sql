@@ -1,3 +1,8 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:307a569c390b08a8d466ee8f1c634d4a4c18035ad360dbde12dbe3e5a23efab9
-size 291
+-- Add gender and timezone columns to profiles table
+ALTER TABLE profiles 
+ADD COLUMN gender TEXT,
+ADD COLUMN timezone TEXT;
+
+-- Comment on columns
+COMMENT ON COLUMN profiles.gender IS 'User''s gender preference';
+COMMENT ON COLUMN profiles.timezone IS 'User''s timezone preference'; 

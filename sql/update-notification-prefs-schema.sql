@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7470a0839b0c3588f0fbb7f2f683259b942a819a40914f1f8310cb1fc6a312da
-size 601
+-- Add notification_preferences column to profiles table if it doesn't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+    AND table_name = 'profiles' 
+    AND column_name = 'notification_preferences'
+  ) THEN
+    ALTER TABLE profiles ADD COLUMN notification_preferences JSONB DEFAULT '{"email": true, "push": false, "sms": false}';
+    RAISE NOTICE 'Added notification_preferences column to profiles table';
+  ELSE
+    RAISE NOTICE 'notification_preferences column already exists in profiles table';
+  END IF;
+END
+$$; 
