@@ -51,6 +51,27 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Color scheme variations
+        blue: {
+          primary: "hsl(221.2 83.2% 53.3%)",
+          "primary-dark": "hsl(217.2 91.2% 59.8%)",
+        },
+        green: {
+          primary: "hsl(142.1 76.2% 36.3%)",
+          "primary-dark": "hsl(142.1 70.6% 45.3%)",
+        },
+        purple: {
+          primary: "hsl(265 84% 53%)",
+          "primary-dark": "hsl(263.4 70% 71%)",
+        },
+        orange: {
+          primary: "hsl(25.7 95% 53.1%)",
+          "primary-dark": "hsl(24.6 95% 53.1%)",
+        },
+        rose: {
+          primary: "hsl(346.8 77.2% 49.8%)",
+          "primary-dark": "hsl(346.8 77.2% 49.8%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

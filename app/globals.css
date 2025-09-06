@@ -57,6 +57,9 @@
     /* Mobile menu width */
     --mobile-menu-width: 100%;
     --mobile-menu-max-width: 320px;
+
+    /* Theme transition duration */
+    --theme-transition-duration: 300ms;
   }
   
   @media (min-width: 480px) {
@@ -114,6 +117,106 @@
     
     --income-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
     --expense-gradient: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  }
+
+  /* Color Scheme Variations */
+  .color-blue {
+    --primary: 221.2 83.2% 53.3%;
+    --primary-rgb: 59, 130, 246;
+    --ring: 221.2 83.2% 53.3%;
+  }
+
+  .color-blue.dark {
+    --primary: 217.2 91.2% 59.8%;
+    --primary-rgb: 96, 165, 250;
+    --ring: 217.2 91.2% 59.8%;
+  }
+
+  .color-green {
+    --primary: 142.1 76.2% 36.3%;
+    --primary-rgb: 34, 197, 94;
+    --ring: 142.1 76.2% 36.3%;
+  }
+
+  .color-green.dark {
+    --primary: 142.1 70.6% 45.3%;
+    --primary-rgb: 74, 222, 128;
+    --ring: 142.1 70.6% 45.3%;
+  }
+
+  .color-purple {
+    --primary: 265 84% 53%;
+    --primary-rgb: 124, 58, 237;
+    --ring: 265 84% 53%;
+  }
+
+  .color-purple.dark {
+    --primary: 263.4 70% 71%;
+    --primary-rgb: 167, 139, 250;
+    --ring: 263.4 70% 71%;
+  }
+
+  .color-orange {
+    --primary: 25.7 95% 53.1%;
+    --primary-rgb: 249, 115, 22;
+    --ring: 25.7 95% 53.1%;
+  }
+
+  .color-orange.dark {
+    --primary: 24.6 95% 53.1%;
+    --primary-rgb: 251, 146, 60;
+    --ring: 24.6 95% 53.1%;
+  }
+
+  .color-rose {
+    --primary: 346.8 77.2% 49.8%;
+    --primary-rgb: 244, 63, 94;
+    --ring: 346.8 77.2% 49.8%;
+  }
+
+  .color-rose.dark {
+    --primary: 346.8 77.2% 49.8%;
+    --primary-rgb: 251, 113, 133;
+    --ring: 346.8 77.2% 49.8%;
+  }
+
+  /* High Contrast Mode */
+  .contrast-high {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 20%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+  }
+
+  .contrast-high.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
   }
 }
  
@@ -453,6 +556,30 @@
   .dark .btn-hover-lift:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   }
+
+  /* Theme transition styles */
+  .theme-transitioning * {
+    transition: background-color var(--theme-transition-duration) ease,
+                color var(--theme-transition-duration) ease,
+                border-color var(--theme-transition-duration) ease,
+                box-shadow var(--theme-transition-duration) ease !important;
+  }
+
+  .theme-transitioning {
+    transition: background-color var(--theme-transition-duration) ease,
+                color var(--theme-transition-duration) ease !important;
+  }
+
+  /* Smooth theme preview animations */
+  .theme-preview {
+    transition: all 0.2s ease;
+  }
+
+  .theme-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
   .stagger-5 { animation-delay: 0.5s; }
   
   /* Add the animate-grid keyframes for the RetroGrid component */
