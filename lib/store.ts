@@ -14,7 +14,25 @@ export interface Widget {
   isVisible: boolean;
   position: number;
   size: 'small' | 'medium' | 'large';
-  settings?: Record<string, any>;
+  settings?: WidgetSettings;
+}
+
+export interface WidgetSettings {
+  timeRange?: TimeRange;
+  customDateRange?: DateRange;
+  alertThresholds?: WidgetAlertThreshold[];
+  refreshInterval?: number; // in minutes
+  showTrend?: boolean;
+  compactView?: boolean;
+}
+
+export interface WidgetAlertThreshold {
+  id: string;
+  type: 'budget' | 'spending' | 'balance' | 'category';
+  category?: string;
+  threshold: number;
+  condition: 'above' | 'below' | 'equals';
+  enabled: boolean;
 }
 
 export interface WidgetLayout {
@@ -22,23 +40,59 @@ export interface WidgetLayout {
   columns: number;
 }
 
+// Import types for personalization
+export type TimeRange = 'today' | 'yesterday' | 'this-week' | 'last-week' | 'this-month' | 'last-month' | 'this-year' | 'last-year' | 'custom';
+export type ThemeType = 'light' | 'dark' | 'system';
+
+export interface DateRange {
+  from: Date;
+  to: Date;
+}
+
+export interface AlertThreshold {
+  id: string;
+  type: 'budget' | 'spending' | 'balance' | 'category';
+  category?: string;
+  threshold: number;
+  condition: 'above' | 'below' | 'equals';
+  enabled: boolean;
+  frequency: 'immediate' | 'daily' | 'weekly';
+}
+
+export interface DashboardSection {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  visible: boolean;
+}
+
 export interface UserPreferences {
   userId: string | null;
   username: string;
   currency: string; 
-  theme: 'light' | 'dark' | 'system';
+  theme: ThemeType;
   initialized: boolean;
   timezone: string;
   dashboardLayout: WidgetLayout | null;
+  // New personalization settings
+  timeRange: TimeRange;
+  customDateRange?: DateRange;
+  alertThresholds: AlertThreshold[];
+  sectionVisibility: DashboardSection[];
   setUserId: (userId: string | null) => void;
   setUsername: (username: string) => void;
   setCurrency: (currency: string) => void;
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setTheme: (theme: ThemeType) => void;
   syncWithDatabase: () => Promise<void>;
   setInitialized: (initialized: boolean) => void;
   resetPreferences: () => void;
   setTimezone: (timezone: string) => void;
   setDashboardLayout: (layout: WidgetLayout) => void;
+  // New personalization setters
+  setTimeRange: (range: TimeRange, customRange?: DateRange) => void;
+  setAlertThresholds: (thresholds: AlertThreshold[]) => void;
+  setSectionVisibility: (sections: DashboardSection[]) => void;
 }
 
 // Safe way to access localStorage that works in both client and server contexts
@@ -66,6 +120,54 @@ export const useUserPreferences = create<UserPreferences>()(
       initialized: false,
       timezone: 'UTC',
       dashboardLayout: null,
+      // New personalization settings
+      timeRange: 'this-month' as TimeRange,
+      customDateRange: undefined,
+      alertThresholds: [],
+      sectionVisibility: [
+        {
+          id: 'stats-cards',
+          title: 'Financial Summary Cards',
+          description: 'Total income, expenses, and balance overview',
+          icon: null,
+          visible: true,
+        },
+        {
+          id: 'charts',
+          title: 'Charts & Analytics',
+          description: 'Income vs expenses and category breakdown charts',
+          icon: null,
+          visible: true,
+        },
+        {
+          id: 'budget-overview',
+          title: 'Monthly Budget Overview',
+          description: 'Budget progress and spending vs budget analysis',
+          icon: null,
+          visible: true,
+        },
+        {
+          id: 'recent-transactions',
+          title: 'Recent Transactions',
+          description: 'Latest financial activity and transaction history',
+          icon: null,
+          visible: true,
+        },
+        {
+          id: 'category-insights',
+          title: 'Category Insights',
+          description: 'Top spending categories and spending patterns',
+          icon: null,
+          visible: true,
+        },
+        {
+          id: 'widgets',
+          title: 'Custom Widgets',
+          description: 'Personalized dashboard widgets and components',
+          icon: null,
+          visible: true,
+        },
+      ],
       setUserId: (userId: string | null) => set({ userId }),
       setUsername: (username: string) => set({ username }),
       setCurrency: (currency: string) => {
@@ -78,6 +180,13 @@ export const useUserPreferences = create<UserPreferences>()(
       setInitialized: (initialized: boolean) => set({ initialized }),
       setTimezone: (timezone: string) => set({ timezone }),
       setDashboardLayout: (layout: WidgetLayout) => set({ dashboardLayout: layout }),
+      // New personalization setters
+      setTimeRange: (range: TimeRange, customRange?: DateRange) => set({
+        timeRange: range,
+        customDateRange: customRange
+      }),
+      setAlertThresholds: (thresholds: AlertThreshold[]) => set({ alertThresholds: thresholds }),
+      setSectionVisibility: (sections: DashboardSection[]) => set({ sectionVisibility: sections }),
       resetPreferences: () => set({
         userId: null,
         username: '',
@@ -85,7 +194,54 @@ export const useUserPreferences = create<UserPreferences>()(
         theme: 'system',
         initialized: false,
         timezone: 'UTC',
-        dashboardLayout: null
+        dashboardLayout: null,
+        timeRange: 'this-month' as TimeRange,
+        customDateRange: undefined,
+        alertThresholds: [],
+        sectionVisibility: [
+          {
+            id: 'stats-cards',
+            title: 'Financial Summary Cards',
+            description: 'Total income, expenses, and balance overview',
+            icon: null,
+            visible: true,
+          },
+          {
+            id: 'charts',
+            title: 'Charts & Analytics',
+            description: 'Income vs expenses and category breakdown charts',
+            icon: null,
+            visible: true,
+          },
+          {
+            id: 'budget-overview',
+            title: 'Monthly Budget Overview',
+            description: 'Budget progress and spending vs budget analysis',
+            icon: null,
+            visible: true,
+          },
+          {
+            id: 'recent-transactions',
+            title: 'Recent Transactions',
+            description: 'Latest financial activity and transaction history',
+            icon: null,
+            visible: true,
+          },
+          {
+            id: 'category-insights',
+            title: 'Category Insights',
+            description: 'Top spending categories and spending patterns',
+            icon: null,
+            visible: true,
+          },
+          {
+            id: 'widgets',
+            title: 'Custom Widgets',
+            description: 'Personalized dashboard widgets and components',
+            icon: null,
+            visible: true,
+          },
+        ]
       }),
       syncWithDatabase: async () => {
         const { userId } = get();
@@ -186,7 +342,11 @@ export const useUserPreferences = create<UserPreferences>()(
         theme: state.theme,
         initialized: state.initialized,
         timezone: state.timezone,
-        dashboardLayout: state.dashboardLayout
+        dashboardLayout: state.dashboardLayout,
+        timeRange: state.timeRange,
+        customDateRange: state.customDateRange,
+        alertThresholds: state.alertThresholds,
+        sectionVisibility: state.sectionVisibility
       }),
     }
   )

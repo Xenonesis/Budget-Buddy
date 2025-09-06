@@ -17,7 +17,10 @@ import {
 import { cn } from '@/lib/utils';
 
 // Import interfaces from store to avoid circular dependency
-import { Widget, WidgetLayout } from '@/lib/store';
+import { Widget, WidgetLayout, WidgetSettings } from '@/lib/store';
+
+// Import the widget settings panel
+import { WidgetSettingsPanel } from '@/components/ui/widget-settings-panel';
 
 // Import all widget components
 import {
@@ -63,6 +66,7 @@ export function WidgetSystem({
   widgetData = {}
 }: WidgetSystemProps) {
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
+  const [settingsWidget, setSettingsWidget] = useState<Widget | null>(null);
 
   const handleDragEnd = useCallback((result: DropResult) => {
     setDraggedWidget(null);
@@ -142,6 +146,27 @@ export function WidgetSystem({
       widgets: updatedWidgets
     });
   }, [layout, onLayoutChange]);
+
+  const updateWidgetSettings = useCallback((widgetId: string, settings: WidgetSettings) => {
+    const updatedWidgets = layout.widgets.map(widget =>
+      widget.id === widgetId
+        ? { ...widget, settings: { ...widget.settings, ...settings } }
+        : widget
+    );
+
+    onLayoutChange({
+      ...layout,
+      widgets: updatedWidgets
+    });
+  }, [layout, onLayoutChange]);
+
+  const openWidgetSettings = useCallback((widget: Widget) => {
+    setSettingsWidget(widget);
+  }, []);
+
+  const closeWidgetSettings = useCallback(() => {
+    setSettingsWidget(null);
+  }, []);
 
   const getWidgetGridClass = (size: 'small' | 'medium' | 'large') => {
     switch (size) {
@@ -302,6 +327,14 @@ export function WidgetSystem({
                               size="sm"
                               variant="ghost"
                               className="h-8 w-8 p-0"
+                              onClick={() => openWidgetSettings(widget)}
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
                               onClick={() => toggleWidgetVisibility(widget.id)}
                             >
                               {widget.isVisible ? (
@@ -398,6 +431,17 @@ export function WidgetSystem({
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Widget Settings Panel */}
+      {settingsWidget && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <WidgetSettingsPanel
+            widget={settingsWidget}
+            onSettingsChange={updateWidgetSettings}
+            onClose={closeWidgetSettings}
+          />
+        </div>
       )}
     </div>
   );

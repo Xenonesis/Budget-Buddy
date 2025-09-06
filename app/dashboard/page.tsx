@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MonthlyBudgetOverview } from "@/components/ui/monthly-budget-overview";
 import { WidgetSystem } from "@/components/ui/widget-system";
 import { WidgetLayout } from "@/lib/store";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences, TimeRange, DateRange } from "@/lib/store";
 import { AVAILABLE_WIDGETS, getDefaultLayout } from "@/lib/widget-config";
 import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from "@/lib/simple-widget-config";
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, Settings } from "lucide-react";
@@ -18,6 +18,8 @@ import { ExpenseCategoryChart } from "@/components/dashboard/charts/expense-cate
 import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
+import { TimeRangeSelector } from '@/components/ui/time-range-selector';
+import { AlertNotificationSystem } from '@/components/ui/alert-notification-system';
 
 // Validation function to clean up duplicate widgets
 function validateAndCleanLayout(layout: WidgetLayout): WidgetLayout {
@@ -228,7 +230,14 @@ const StatCard = memo(({ title, value, icon, className = "" }: {
 StatCard.displayName = 'StatCard';
 
 export default function DashboardPage() {
-  const { dashboardLayout, setDashboardLayout } = useUserPreferences();
+  const { 
+    dashboardLayout, 
+    setDashboardLayout,
+    timeRange,
+    customDateRange,
+    sectionVisibility,
+    setTimeRange
+  } = useUserPreferences();
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
     totalExpense: 0,
@@ -320,7 +329,59 @@ export default function DashboardPage() {
         return;
       }
 
-      // Fetch transactions with a single query
+      // Calculate date range based on selected time range
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date = new Date(now);
+
+      switch (timeRange) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'yesterday':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
+          break;
+        case 'this-week':
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          startDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
+          break;
+        case 'last-week':
+          const lastWeekStart = new Date(now);
+          lastWeekStart.setDate(now.getDate() - now.getDay() - 7);
+          const lastWeekEnd = new Date(now);
+          lastWeekEnd.setDate(now.getDate() - now.getDay() - 1);
+          startDate = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+          endDate = new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate(), 23, 59, 59);
+          break;
+        case 'this-month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'last-month':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+          break;
+        case 'this-year':
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        case 'last-year':
+          startDate = new Date(now.getFullYear() - 1, 0, 1);
+          endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+          break;
+        case 'custom':
+          if (customDateRange) {
+            startDate = customDateRange.from;
+            endDate = customDateRange.to;
+          } else {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          }
+          break;
+        default:
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+
+      // Fetch transactions with date filtering
       const { data: transactions } = await supabase
         .from("transactions")
         .select(`
@@ -331,6 +392,8 @@ export default function DashboardPage() {
           )
         `)
         .eq("user_id", userData.user.id)
+        .gte("date", startDate.toISOString().split('T')[0])
+        .lte("date", endDate.toISOString().split('T')[0])
         .order("date", { ascending: false });
 
       if (!transactions) {
@@ -383,10 +446,10 @@ export default function DashboardPage() {
     }
   };
 
-  // Load data on component mount
+  // Load data on component mount and when time range changes
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [timeRange, customDateRange]);
 
   // Initialize layout if not set or invalid
   useEffect(() => {
@@ -480,6 +543,16 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-2">
           <p className="text-sm md:text-base text-muted-foreground" tabIndex={0}>Welcome back! Here's an overview of your finances.</p>
           
+          {/* Time Range Selector */}
+          <div className="mt-3 sm:mt-0 sm:mr-4">
+            <TimeRangeSelector
+              value={timeRange}
+              customRange={customDateRange}
+              onChange={setTimeRange}
+              className="text-sm"
+            />
+          </div>
+          
           {/* Improved offline status indicator */}
           <div className="mt-3 sm:mt-0">
             {isOffline ? (
@@ -511,7 +584,8 @@ export default function DashboardPage() {
       </header>
       
       {/* Stats Cards - Enhanced with gradients and better spacing */}
-      <div className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Financial Summary">
+      {sectionVisibility.find(s => s.id === 'stats-cards')?.visible && (
+        <div className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Financial Summary">
         <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300" tabIndex={0} aria-label="Total Income Summary">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 text-white">
@@ -571,46 +645,57 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      )}
       
       {/* Customizable Widgets Section */}
-      <div className="mb-8 md:mb-10">
-        <WidgetSystem
-          layout={currentLayout}
-          onLayoutChange={handleLayoutChange}
-          isEditMode={false}
-          onEditModeChange={() => {}}
-          availableWidgets={SIMPLE_WIDGET_CONFIG}
-          widgetData={widgetData}
-        />
-      </div>
+      {sectionVisibility.find(s => s.id === 'widgets')?.visible && (
+        <div className="mb-8 md:mb-10">
+          <WidgetSystem
+            layout={currentLayout}
+            onLayoutChange={handleLayoutChange}
+            isEditMode={false}
+            onEditModeChange={() => {}}
+            availableWidgets={SIMPLE_WIDGET_CONFIG}
+            widgetData={widgetData}
+          />
+        </div>
+      )}
 
       {/* Monthly Budget Overview */}
-      <div className="mb-8 md:mb-10">
-        <MonthlyBudgetOverview />
-      </div>
+      {sectionVisibility.find(s => s.id === 'budget-overview')?.visible && (
+        <div className="mb-8 md:mb-10">
+          <MonthlyBudgetOverview />
+        </div>
+      )}
 
       {/* Charts - More responsive and visually appealing */}
-      <div className="mb-8 md:mb-10 grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2" role="region" aria-label="Financial Charts">
-        <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-          <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="income-expense-chart-title" tabIndex={0}>Income vs. Expenses</h2>
-          <div aria-labelledby="income-expense-chart-title" className="h-72 md:h-80">
-            <IncomeExpenseChart monthlyData={stats.monthlyData} />
+      {sectionVisibility.find(s => s.id === 'charts')?.visible && (
+        <div className="mb-8 md:mb-10 grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2" role="region" aria-label="Financial Charts">
+          <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="income-expense-chart-title" tabIndex={0}>Income vs. Expenses</h2>
+            <div aria-labelledby="income-expense-chart-title" className="h-72 md:h-80">
+              <IncomeExpenseChart monthlyData={stats.monthlyData} />
+            </div>
+          </div>
+          
+          <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="expense-categories-chart-title" tabIndex={0}>Expense Categories</h2>
+            <div aria-labelledby="expense-categories-chart-title" className="h-72 md:h-80">
+              <ExpenseCategoryChart categoryData={stats.categoryData} />
+            </div>
           </div>
         </div>
-        
-        <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-          <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="expense-categories-chart-title" tabIndex={0}>Expense Categories</h2>
-          <div aria-labelledby="expense-categories-chart-title" className="h-72 md:h-80">
-            <ExpenseCategoryChart categoryData={stats.categoryData} />
-          </div>
-        </div>
-      </div>
+      )}
       
       {/* Recent Transactions with Enhanced UI */}
-      <RecentTransactions transactions={stats.recentTransactions} />
+      {sectionVisibility.find(s => s.id === 'recent-transactions')?.visible && (
+        <RecentTransactions transactions={stats.recentTransactions} />
+      )}
 
       {/* Category Insights Section - More responsive */}
-      <CategoryInsights topCategories={stats.topCategories} totalExpense={stats.totalExpense} />
+      {sectionVisibility.find(s => s.id === 'category-insights')?.visible && (
+        <CategoryInsights topCategories={stats.topCategories} totalExpense={stats.totalExpense} />
+      )}
 
       {/* Offline warning banner - Make it more visible on mobile */}
       {isOffline && (
@@ -621,6 +706,9 @@ export default function DashboardPage() {
           </p>
         </div>
       )}
+
+      {/* Alert Notification System */}
+      <AlertNotificationSystem />
     </div>
   );
 } 

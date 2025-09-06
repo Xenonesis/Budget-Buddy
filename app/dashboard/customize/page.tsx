@@ -9,12 +9,27 @@ import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from '@/lib/simple-widge
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save, RotateCcw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Save, RotateCcw, Settings, Clock, Bell, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { TimeRangeSelector } from '@/components/ui/time-range-selector';
+import { AlertThresholds } from '@/components/ui/alert-thresholds';
+import { SectionVisibility } from '@/components/ui/section-visibility';
 
 export default function CustomizeDashboardPage() {
-  const { dashboardLayout, setDashboardLayout, userId } = useUserPreferences();
+  const {
+    dashboardLayout,
+    setDashboardLayout,
+    userId,
+    timeRange,
+    customDateRange,
+    alertThresholds,
+    sectionVisibility,
+    setTimeRange,
+    setAlertThresholds,
+    setSectionVisibility
+  } = useUserPreferences();
   const [currentLayout, setCurrentLayout] = useState<WidgetLayout>(
     dashboardLayout || getSimpleDefaultLayout()
   );
@@ -88,7 +103,7 @@ export default function CustomizeDashboardPage() {
           <div>
             <h1 className="text-2xl font-bold md:text-3xl">Customize Dashboard</h1>
             <p className="text-muted-foreground">
-              Personalize your dashboard by adding, removing, and rearranging widgets
+              Personalize your dashboard with advanced settings
             </p>
           </div>
         </div>
@@ -122,44 +137,92 @@ export default function CustomizeDashboardPage() {
         </div>
       </div>
 
-      {/* Instructions Card */}
-      <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
-        <CardHeader>
-          <CardTitle className="text-lg text-blue-900 dark:text-blue-100">
-            How to Customize Your Dashboard
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800 dark:text-blue-200">
-            <div className="space-y-2">
-              <h4 className="font-medium">Adding Widgets:</h4>
-              <ul className="space-y-1 text-xs">
-                <li>• Click on any widget in the "Add Widgets" section</li>
-                <li>• Hidden widgets can be made visible by clicking them</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-medium">Organizing Widgets:</h4>
-              <ul className="space-y-1 text-xs">
-                <li>• Drag widgets using the grip handle to reorder</li>
-                <li>• Use S/M/L buttons to change widget sizes</li>
-                <li>• Click the eye icon to hide widgets</li>
-                <li>• Click the X to remove widgets completely</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Personalization Tabs */}
+      <Tabs defaultValue="widgets" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="widgets" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Widgets
+          </TabsTrigger>
+          <TabsTrigger value="sections" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Sections
+          </TabsTrigger>
+          <TabsTrigger value="time" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Time Range
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Alerts
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Widget System */}
-      <WidgetSystem
-        layout={currentLayout}
-        onLayoutChange={handleLayoutChange}
-        isEditMode={isEditMode}
-        onEditModeChange={setIsEditMode}
-        availableWidgets={SIMPLE_WIDGET_CONFIG}
-        widgetData={{}}
-      />
+        {/* Widgets Tab */}
+        <TabsContent value="widgets" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Widget Layout</CardTitle>
+              <CardDescription>
+                Customize your dashboard by adding, removing, and rearranging widgets
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WidgetSystem
+                layout={currentLayout}
+                onLayoutChange={handleLayoutChange}
+                isEditMode={isEditMode}
+                onEditModeChange={setIsEditMode}
+                availableWidgets={SIMPLE_WIDGET_CONFIG}
+                widgetData={{}}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Sections Tab */}
+        <TabsContent value="sections">
+          <SectionVisibility
+            sections={sectionVisibility}
+            onChange={setSectionVisibility}
+          />
+        </TabsContent>
+
+        {/* Time Range Tab */}
+        <TabsContent value="time">
+          <Card>
+            <CardHeader>
+              <CardTitle>Default Time Range</CardTitle>
+              <CardDescription>
+                Set your preferred time range for dashboard data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="max-w-md">
+                <TimeRangeSelector
+                  value={timeRange}
+                  customRange={customDateRange}
+                  onChange={setTimeRange}
+                />
+              </div>
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Note:</strong> This sets the default time range for your dashboard.
+                  Individual charts and widgets may have their own time range controls.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Alerts Tab */}
+        <TabsContent value="alerts">
+          <AlertThresholds
+            thresholds={alertThresholds}
+            onChange={setAlertThresholds}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
