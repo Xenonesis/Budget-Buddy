@@ -24,7 +24,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthlyBudgetOverview } from "@/components/ui/monthly-budget-overview";
-import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, AreaChart as ChartIcon, PieChart as PieChartIcon } from "lucide-react";
+import { WidgetSystem } from "@/components/ui/widget-system";
+import { WidgetLayout } from "@/lib/store";
+import { useUserPreferences } from "@/lib/store";
+import { AVAILABLE_WIDGETS, getDefaultLayout } from "@/lib/widget-config";
+import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, AreaChart as ChartIcon, PieChart as PieChartIcon, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Transaction {
@@ -473,6 +477,7 @@ const StatCard = memo(({ title, value, icon, className = "" }: {
 StatCard.displayName = 'StatCard';
 
 export default function DashboardPage() {
+  const { dashboardLayout, setDashboardLayout } = useUserPreferences();
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
     totalExpense: 0,
@@ -485,6 +490,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
+  const [currentLayout, setCurrentLayout] = useState<WidgetLayout>(
+    dashboardLayout || getDefaultLayout()
+  );
 
   // Monitor online/offline status
   useEffect(() => {
@@ -629,6 +637,20 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
+  // Initialize layout if not set
+  useEffect(() => {
+    if (!dashboardLayout) {
+      const defaultLayout = getDefaultLayout();
+      setCurrentLayout(defaultLayout);
+      setDashboardLayout(defaultLayout);
+    }
+  }, [dashboardLayout, setDashboardLayout]);
+
+  const handleLayoutChange = (newLayout: WidgetLayout) => {
+    setCurrentLayout(newLayout);
+    setDashboardLayout(newLayout);
+  };
+
   // Add passive event listeners for scroll and touch events
   useEffect(() => {
     const handleTouchStart = () => {
@@ -673,7 +695,15 @@ export default function DashboardPage() {
     <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl" role="main" aria-label="Dashboard">
       {/* Mobile-optimized header with responsive spacing and gradient text */}
       <header className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold md:text-4xl bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent" tabIndex={0}>Dashboard</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold md:text-4xl bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent" tabIndex={0}>Dashboard</h1>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/customize" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Customize
+            </Link>
+          </Button>
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-2">
           <p className="text-sm md:text-base text-muted-foreground" tabIndex={0}>Welcome back! Here's an overview of your finances.</p>
           
@@ -769,6 +799,17 @@ export default function DashboardPage() {
         </div>
       </div>
       
+      {/* Customizable Widgets Section */}
+      <div className="mb-8 md:mb-10">
+        <WidgetSystem
+          layout={currentLayout}
+          onLayoutChange={handleLayoutChange}
+          isEditMode={false}
+          onEditModeChange={() => {}}
+          availableWidgets={AVAILABLE_WIDGETS}
+        />
+      </div>
+
       {/* Monthly Budget Overview */}
       <div className="mb-8 md:mb-10">
         <MonthlyBudgetOverview />

@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useUserPreferences } from "@/lib/store";
-import { FileText, User, Palette, Bell, Bot, LogOut } from "lucide-react";
+import { FileText, User, Palette, Bell, Bot, LogOut, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -90,7 +90,7 @@ export default function SettingsPage() {
     username, setCurrency, setUsername, theme, setTheme, 
     syncWithDatabase, setUserId 
   } = useUserPreferences();
-  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "notifications" | "ai">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "notifications" | "ai" | "dashboard">("profile");
   
   const [formData, setFormData] = useState<{
     name: string;
@@ -1043,6 +1043,18 @@ export default function SettingsPage() {
                 <Bot className="mr-2 h-4 w-4" />
                 AI Assistant
               </button>
+              <button
+                type="button"
+                className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "dashboard"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                }`}
+                onClick={() => setActiveTab("dashboard")}
+              >
+                <LayoutGrid className="mr-2 h-4 w-4" />
+                Dashboard
+              </button>
             </nav>
           </div>
 
@@ -1635,6 +1647,78 @@ export default function SettingsPage() {
                         <p className="text-xs text-muted-foreground">
                           For hosted LM Studio services. Leave blank for local LM Studio.
                         </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Dashboard Tab */}
+            {activeTab === "dashboard" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dashboard Customization</CardTitle>
+                  <CardDescription>
+                    Personalize your dashboard layout and widgets
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="text-center py-8">
+                    <LayoutGrid className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold mb-2">Customize Your Dashboard</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Add, remove, and rearrange widgets to create your perfect dashboard experience.
+                    </p>
+                    <Button asChild>
+                      <a href="/dashboard/customize" className="flex items-center gap-2">
+                        <LayoutGrid className="h-4 w-4" />
+                        Open Dashboard Customizer
+                      </a>
+                    </Button>
+                  </div>
+                  
+                  <div className="border-t pt-6">
+                    <h4 className="font-medium mb-4">Available Widgets</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                          <LayoutGrid className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Quick Stats</p>
+                          <p className="text-sm text-muted-foreground">Income, expenses, and balance overview</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                          <LayoutGrid className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Budget Progress</p>
+                          <p className="text-sm text-muted-foreground">Track monthly budget usage</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                          <LayoutGrid className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Recent Transactions</p>
+                          <p className="text-sm text-muted-foreground">Latest financial activity</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                          <LayoutGrid className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Category Breakdown</p>
+                          <p className="text-sm text-muted-foreground">Top spending categories</p>
+                        </div>
                       </div>
                     </div>
                   </div>

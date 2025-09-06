@@ -3,6 +3,25 @@ import { persist } from 'zustand/middleware';
 import { createJSONStorage } from 'zustand/middleware';
 import { supabase } from './supabase';
 
+// Define WidgetLayout interface here to avoid circular imports
+export interface Widget {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  component: React.ComponentType<any>;
+  isVisible: boolean;
+  position: number;
+  size: 'small' | 'medium' | 'large';
+  settings?: Record<string, any>;
+}
+
+export interface WidgetLayout {
+  widgets: Widget[];
+  columns: number;
+}
+
 export interface UserPreferences {
   userId: string | null;
   username: string;
@@ -10,6 +29,7 @@ export interface UserPreferences {
   theme: 'light' | 'dark' | 'system';
   initialized: boolean;
   timezone: string;
+  dashboardLayout: WidgetLayout | null;
   setUserId: (userId: string | null) => void;
   setUsername: (username: string) => void;
   setCurrency: (currency: string) => void;
@@ -18,6 +38,7 @@ export interface UserPreferences {
   setInitialized: (initialized: boolean) => void;
   resetPreferences: () => void;
   setTimezone: (timezone: string) => void;
+  setDashboardLayout: (layout: WidgetLayout) => void;
 }
 
 // Safe way to access localStorage that works in both client and server contexts
@@ -44,6 +65,7 @@ export const useUserPreferences = create<UserPreferences>()(
       theme: getDefaultTheme(),
       initialized: false,
       timezone: 'UTC',
+      dashboardLayout: null,
       setUserId: (userId: string | null) => set({ userId }),
       setUsername: (username: string) => set({ username }),
       setCurrency: (currency: string) => {
@@ -55,13 +77,15 @@ export const useUserPreferences = create<UserPreferences>()(
       setTheme: (theme: 'light' | 'dark' | 'system') => set({ theme }),
       setInitialized: (initialized: boolean) => set({ initialized }),
       setTimezone: (timezone: string) => set({ timezone }),
+      setDashboardLayout: (layout: WidgetLayout) => set({ dashboardLayout: layout }),
       resetPreferences: () => set({
         userId: null,
         username: '',
         currency: 'USD',
         theme: 'system',
         initialized: false,
-        timezone: 'UTC'
+        timezone: 'UTC',
+        dashboardLayout: null
       }),
       syncWithDatabase: async () => {
         const { userId } = get();
@@ -161,7 +185,8 @@ export const useUserPreferences = create<UserPreferences>()(
         currency: state.currency,
         theme: state.theme,
         initialized: state.initialized,
-        timezone: state.timezone
+        timezone: state.timezone,
+        dashboardLayout: state.dashboardLayout
       }),
     }
   )
