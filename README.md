@@ -6,7 +6,7 @@
 
 **The Ultimate AI-Powered Personal Finance Management Platform**
 
-[![Version](https://img.shields.io/badge/version-15.50.00-blue.svg)](https://github.com/Xenonesis/Budget-Tracker-)
+[![Version](https://img.shields.io/badge/version-20.00-blue.svg)](https://github.com/Xenonesis/Budget-Tracker-)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black.svg)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
