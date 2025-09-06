@@ -10,8 +10,8 @@ export const SIMPLE_WIDGET_CONFIG: Widget[] = [
   {
     id: 'enhanced-stats',
     type: 'enhanced-stats',
-    title: 'Quick Stats',
-    description: 'Enhanced financial overview with beautiful design',
+    title: 'Financial Insights',
+    description: 'Savings rate, expense ratio, and financial health metrics',
     icon: React.createElement(DollarSign, { className: 'h-4 w-4' }),
     component: EnhancedStatsWidget,
     isVisible: true,

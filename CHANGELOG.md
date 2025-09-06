@@ -2,6 +2,20 @@
 
 All notable changes to the Budget Buddy application will be documented in this file.
 
+## [20.00] - 2025-09-06
+
+### Added
+- Updated to version v20.00
+- Enhanced "See More" functionality for AI insights with interactive toggle
+- Removed all mock data sources for pure real-time data display
+- Improved Financial Insights widget with expandable AI insights view
+
+### Enhanced
+- Financial Insights widget now shows 3 insights initially with "See More" button
+- Interactive toggle between expanded and collapsed AI insights view
+- Cleaned up all mock data and fallback sources throughout the application
+- Improved user experience with dynamic insight display controls
+
 ## [18.50.00] - 2025-09-06
 
 ### Added

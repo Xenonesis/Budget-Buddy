@@ -1686,8 +1686,8 @@ export default function SettingsPage() {
                           <LayoutGrid className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium">Quick Stats</p>
-                          <p className="text-sm text-muted-foreground">Income, expenses, and balance overview</p>
+                          <p className="font-medium">Financial Insights</p>
+                          <p className="text-sm text-muted-foreground">Savings rate, expense ratio, and financial health</p>
                         </div>
                       </div>
                       

@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { FileUpload } from "./file-upload";
 import { LLMEnhancedOCR, LLMEnhancedResult } from "@/lib/llm-enhanced-ocr";
-import { SampleReceiptGenerator } from "@/lib/sample-receipts-generator";
 import { Button } from "./button";
 import { Card } from "./card";
 import { Badge } from "./badge";
@@ -31,13 +30,12 @@ interface IntelligentOCRUploadProps {
   onClose: () => void;
 }
 
-export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOCRUploadProps) {
+export function IntelligentOCRUpload({ onDataExtracted, onClose }: Readonly<IntelligentOCRUploadProps>) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState<string>("");
   const [extractedResult, setExtractedResult] = useState<LLMEnhancedResult | null>(null);
   const [ocrProcessor] = useState(() => new LLMEnhancedOCR());
-  const [showSampleReceipts, setShowSampleReceipts] = useState(false);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -116,30 +114,6 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
     }
   };
 
-  const handleSampleReceiptTest = async (receiptId: string) => {
-    try {
-      setIsProcessing(true);
-      setProcessingStage("📋 Loading sample receipt...");
-      
-      const sampleFile = await SampleReceiptGenerator.createFileFromReceipt(receiptId);
-      setSelectedFile(sampleFile);
-      
-      setProcessingStage("🧠 Processing sample receipt with LLM...");
-      const result = await ocrProcessor.processDocument(sampleFile);
-      
-      setExtractedResult(result);
-      setShowSampleReceipts(false);
-      
-      toast.success(`✅ Sample receipt processed! Check accuracy against expected data.`);
-    } catch (error) {
-      console.error('Sample receipt processing failed:', error);
-      toast.error('Failed to process sample receipt');
-    } finally {
-      setIsProcessing(false);
-      setProcessingStage("");
-    }
-  };
-
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.9) return "emerald";
     if (confidence >= 0.8) return "green";
@@ -157,8 +131,23 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
 
   const formatAmount = (amount?: number, currency?: string) => {
     if (!amount) return "Not detected";
-    const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₹';
+    let symbol = '₹';
+    if (currency === 'USD') {
+      symbol = '$';
+    } else if (currency === 'EUR') {
+      symbol = '€';
+    }
     return `${symbol}${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+  };
+
+  const getValidationClass = (confidence: number) => {
+    if (confidence > 0.8) {
+      return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+    }
+    if (confidence > 0.6) {
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300';
+    }
+    return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300';
   };
 
   const formatDate = (date?: string) => {
@@ -203,13 +192,6 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
 
       {!selectedFile && !extractedResult && (
         <div className="text-center space-y-4">
-          <Button 
-            onClick={() => setShowSampleReceipts(true)}
-            variant="outline"
-            className="w-full"
-          >
-            📋 Test with Sample Receipts
-          </Button>
         </div>
       )}
 
@@ -236,56 +218,7 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
         </div>
       )}
 
-      {/* Sample Receipts Modal */}
-      {showSampleReceipts && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[80] p-4">
-          <div className="bg-card rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold">📋 Test Sample Receipts</h3>
-              <button
-                onClick={() => setShowSampleReceipts(false)}
-                className="rounded-full p-2 text-muted-foreground hover:bg-muted"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SampleReceiptGenerator.getSampleReceipts().map((receipt) => (
-                <Card key={receipt.id} className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => handleSampleReceiptTest(receipt.id)}>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-sm">{receipt.name}</h4>
-                      <Badge variant={receipt.difficulty === 'easy' ? 'default' : receipt.difficulty === 'medium' ? 'secondary' : 'destructive'}>
-                        {receipt.difficulty}
-                      </Badge>
-                    </div>
-                    
-                    <div className="text-xs space-y-1 text-gray-600 dark:text-gray-400">
-                      <p><strong>Amount:</strong> ₹{receipt.expectedData.amount}</p>
-                      <p><strong>Merchant:</strong> {receipt.expectedData.merchant}</p>
-                      <p><strong>Category:</strong> {receipt.expectedData.category}</p>
-                      <p><strong>Date:</strong> {receipt.expectedData.date}</p>
-                    </div>
-                    
-                    <Button size="sm" className="w-full" disabled={isProcessing}>
-                      {isProcessing ? 'Processing...' : 'Test This Receipt'}
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                <strong>💡 How to test:</strong> Click on any sample receipt to automatically generate and process it with the LLM system. 
-                Compare the extracted data with the expected values to verify accuracy.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {extractedResult && (
         <Card className="p-6 space-y-6 border-2 border-blue-200 dark:border-blue-800">
@@ -402,14 +335,8 @@ export function IntelligentOCRUpload({ onDataExtracted, onClose }: IntelligentOC
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {extractedResult.validationResults.map((validation, index) => (
                   <div 
-                    key={index}
-                    className={`p-2 rounded-lg text-xs ${
-                      validation.confidence > 0.8 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-                        : validation.confidence > 0.6
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                    }`}
+                    key={`${validation.field}-${index}`}
+                    className={`p-2 rounded-lg text-xs ${getValidationClass(validation.confidence)}`}
                   >
                     <span className="font-medium capitalize">{validation.field}:</span> {Math.round(validation.confidence * 100)}%
                   </div>

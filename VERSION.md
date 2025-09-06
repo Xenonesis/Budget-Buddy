@@ -1,4 +1,4 @@
-# Budget Buddy v19.75
+# Budget Buddy v20.00
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 
@@ -6,7 +6,7 @@
 
 ## 🚀 Overview
 
-Version 19.75 brings revolutionary advancements to the Budget Buddy application with cutting-edge AI integration, real-time financial predictions, enhanced security features, and unprecedented performance improvements. This release represents a quantum leap in intelligent financial management technology.
+Version 20.00 brings revolutionary advancements to the Budget Buddy application with cutting-edge AI integration, real-time financial predictions, enhanced security features, and unprecedented performance improvements. This release represents a quantum leap in intelligent financial management technology.
 
 ## ✨ New Features
 

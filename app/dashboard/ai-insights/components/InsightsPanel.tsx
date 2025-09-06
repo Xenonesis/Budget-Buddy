@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Info, Volume2, Eye, Zap, Target, DollarSign, Calendar, Loader2 } from "lucide-react";
+import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Info, Volume2, Eye, Zap, Target, DollarSign, Loader2 } from "lucide-react";
 import { FinancialInsight } from "@/lib/ai";
 
 interface InsightsPanelProps {
@@ -22,7 +21,7 @@ export function InsightsPanel({
   onRefresh, 
   className = "",
   onSpeakInsight 
-}: InsightsPanelProps) {
+}: Readonly<InsightsPanelProps>) {
   const [selectedInsight, setSelectedInsight] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'compact'>('cards');
 
@@ -89,6 +88,16 @@ export function InsightsPanel({
     }
   };
 
+  const getAmountColor = (type: string) => {
+    if (type === 'success' || type === 'saving_suggestion') {
+      return 'text-green-600';
+    }
+    if (type === 'warning' || type === 'budget_warning' || type === 'decline') {
+      return 'text-red-600';
+    }
+    return 'text-blue-600';
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -98,20 +107,10 @@ export function InsightsPanel({
     }).format(Math.abs(amount));
   };
 
-  const getInsightProgress = (insight: FinancialInsight): number => {
-    // Calculate a mock progress based on insight type and amount
-    if ((insight.type === 'investment_tip' || insight.type === 'saving_suggestion') && insight.amount) {
-      return Math.min((Math.abs(insight.amount) / 1000) * 100, 100);
-    }
-    if (insight.type === 'budget_warning' && insight.amount) {
-      return Math.min((Math.abs(insight.amount) / 2000) * 100, 100);
-    }
-    return 0;
-  };
-
   const speakInsight = (insight: FinancialInsight) => {
     if (onSpeakInsight) {
-      const text = `${insight.title}. ${insight.description}${insight.amount ? ` The amount is ${formatCurrency(insight.amount)}.` : ''}`;
+      const amountText = insight.amount ? ` The amount is ${formatCurrency(insight.amount)}.` : '';
+      const text = `${insight.title}. ${insight.description}${amountText}`;
       onSpeakInsight(text);
     }
   };
@@ -212,7 +211,7 @@ export function InsightsPanel({
         <div className={viewMode === 'cards' ? 'grid gap-6' : 'space-y-3'}>
           {insights.map((insight, index) => (
             <Card 
-              key={index} 
+              key={`${insight.type}-${index}`} 
               className={`transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
                 selectedInsight === index ? 'ring-2 ring-primary/50 shadow-lg' : ''
               } ${viewMode === 'compact' ? 'p-2' : ''}`}
@@ -269,28 +268,10 @@ export function InsightsPanel({
                     <div className="mb-4 p-4 bg-muted/30 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">Amount:</span>
-                        <span className={`text-lg font-bold ${
-                          insight.type === 'success' || insight.type === 'saving_suggestion' ? 'text-green-600' : 
-                          insight.type === 'warning' || insight.type === 'budget_warning' || insight.type === 'decline' ? 'text-red-600' : 
-                          'text-blue-600'
-                        }`}>
+                        <span className={`text-lg font-bold ${getAmountColor(insight.type)}`}>
                           {formatCurrency(insight.amount)}
                         </span>
                       </div>
-                      
-                      {/* Progress bar for investment tips and budget warnings */}
-                      {(insight.type === 'investment_tip' || insight.type === 'budget_warning') && (
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Progress</span>
-                            <span>{getInsightProgress(insight).toFixed(0)}%</span>
-                          </div>
-                          <Progress 
-                            value={getInsightProgress(insight)} 
-                            className="h-2"
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
                   
@@ -313,11 +294,7 @@ export function InsightsPanel({
               {/* Compact mode amount display */}
               {viewMode === 'compact' && insight.amount && (
                 <div className="px-3 pb-2">
-                  <div className={`text-right text-sm font-semibold ${
-                    insight.type === 'success' || insight.type === 'saving_suggestion' ? 'text-green-600' : 
-                    insight.type === 'warning' || insight.type === 'budget_warning' || insight.type === 'decline' ? 'text-red-600' : 
-                    'text-blue-600'
-                  }`}>
+                  <div className={`text-right text-sm font-semibold ${getAmountColor(insight.type)}`}>
                     {formatCurrency(insight.amount)}
                   </div>
                 </div>
