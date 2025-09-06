@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect, memo } from "react";
 import { supabase } from "@/lib/supabase";
-import { formatCurrency, formatDate, formatDateWithTimezone, ensureUserProfile, calculateNextRecurringDate, getUserTimezone } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateWithTimezone, calculateNextRecurringDate, getUserTimezone } from "@/lib/utils";
 import { Currency } from "@/components/ui/currency";
 import { useUserPreferences } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -11,34 +11,16 @@ import {
   Calendar, 
   Edit2, 
   Trash, 
-  Search, 
-  ChevronLeft, 
-  ChevronRight,
   Download,
-  Filter,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  List,
-  LayoutGrid,
-  ChevronDown,
+  RefreshCw,
   FileSpreadsheet,
   FileText,
-  RefreshCw,
-  X,
-  PieChart, 
-  Wallet, 
-  FileDown, 
-  FileUp, 
-  Plus, 
-  Clock, 
-  AlertTriangle,
-  ListFilter,
-  FileSearch,
-  ArrowUpDown
+  ArrowUpCircle,
+  ArrowDownCircle,
+  ChevronDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { AddTransactionButton } from "@/components/ui/bottom-navigation";
-import { FixedSizeList as VirtualizedList } from 'react-window';
 import dynamic from 'next/dynamic';
 
 // Comment out the regular import and use dynamic import instead
@@ -59,11 +41,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import styles from './transactions.module.css';
 import { 
   validateAmount, 
@@ -73,8 +50,29 @@ import {
   validateTransactionType, 
   validateForm 
 } from "@/lib/validation";
-import { ValidatedInput, ValidatedTextarea } from "@/components/ui/validated-input";
 import AddTransactionForm from "./add-transaction-form";  // Import the new component
+
+// Import extracted components
+import { TransactionSummaryCards } from "@/components/transactions/summary-cards";
+import { TransactionFilters } from "@/components/transactions/transaction-filters";
+import { TransactionTable } from "@/components/transactions/transaction-table";
+import { TransactionCardView } from "@/components/transactions/transaction-card-view";
+import { TransactionPagination } from "@/components/transactions/transaction-pagination";
+import { RecurringTransactions } from "@/components/transactions/recurring-transactions";
+import { CustomCategoryForm } from "@/components/transactions/custom-category-form";
+
+import { 
+  calculateTransactionSummary
+} from "@/lib/transaction-utils";
+import type { TransactionSummary as TransactionSummaryType } from "@/lib/transaction-utils";
+
+import { 
+  exportToCSV,
+  exportToExcel,
+  exportToPDF,
+  scheduleExport,
+  calculateNextExportDate
+} from "@/lib/export-utils";
 
 interface Transaction {
   id: string;
@@ -119,12 +117,6 @@ interface Category {
   icon?: string;
   user_id?: string;
   type: 'income' | 'expense' | 'both';
-}
-
-interface TransactionSummary {
-  totalIncome: number;
-  totalExpense: number;
-  balance: number;
 }
 
 interface FormData {
@@ -276,23 +268,13 @@ export default function TransactionsPage() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [summary, setSummary] = useState<TransactionSummary>({
+  const [summary, setSummary] = useState<TransactionSummaryType>({
     totalIncome: 0,
     totalExpense: 0,
     balance: 0
   });
   const [sortField, setSortField] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [showCustomCategoryForm, setShowCustomCategoryForm] = useState(false);
-  const [newCategory, setNewCategory] = useState<{
-    name: string;
-    type: "income" | "expense" | "both";
-  }>({
-    name: "",
-    type: "expense"
-  });
-  const [isSavingCategory, setIsSavingCategory] = useState(false);
-  const [customCategoryError, setCustomCategoryError] = useState(false);
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -321,8 +303,6 @@ export default function TransactionsPage() {
   const [scheduleExportDay, setScheduleExportDay] = useState<number>(1);
   const [scheduleExportFormat, setScheduleExportFormat] = useState<"csv" | "excel" | "pdf">("csv");
   const [showDeleteCategoryConfirm, setShowDeleteCategoryConfirm] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
 
   // Add this useEffect to handle unwanted dropdowns globally
   useEffect(() => {
@@ -413,263 +393,27 @@ export default function TransactionsPage() {
     };
   }, []);
 
-  const exportToCSV = () => {
-    // Get selected columns
-    const selectedColumns = Object.entries(exportColumns)
-      .filter(([_, selected]) => selected)
-      .map(([column]) => column);
-    
-    if (selectedColumns.length === 0) {
-      toast.error("Please select at least one column to export");
-      return;
-    }
-    
-    // Create headers based on selected columns
-    const headers = selectedColumns.map(col => {
-      switch(col) {
-        case 'date': return 'Date';
-        case 'type': return 'Type';
-        case 'category': return 'Category';
-        case 'description': return 'Description';
-        case 'amount': return 'Amount';
-        default: return '';
-      }
-    });
-    
-    // Create CSV content with selected columns
-    const csvContent = [
-      headers.join(','),
-      ...transactions.map(t => {
-        const row: string[] = [];
-        
-        if (exportColumns.date) row.push(formatDate(t.date));
-        if (exportColumns.type) row.push(t.type);
-        if (exportColumns.category) row.push(t.category_name || 'Uncategorized');
-        if (exportColumns.description) row.push(`"${t.description.replace(/"/g, '""')}"`); // Escape quotes
-        if (exportColumns.amount) row.push(t.amount.toString());
-        
-        return row.join(',');
-      })
-    ].join('\n');
-    
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `transactions_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportToCSV = () => {
+    exportToCSV(transactions, exportColumns);
   };
 
-  const exportToExcel = async () => {
-    try {
-      // Dynamic import to reduce bundle size
-      const ExcelJS = await import('exceljs').then(mod => mod.default);
-      
-      // Get selected columns
-      const selectedColumns = Object.entries(exportColumns)
-        .filter(([_, selected]) => selected)
-        .map(([column]) => column);
-      
-      if (selectedColumns.length === 0) {
-        toast.error("Please select at least one column to export");
-        return;
-      }
-      
-      // Create workbook and worksheet
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Transactions");
-      
-      // Define columns
-      const columns = [];
-      if (exportColumns.date) columns.push({ header: 'Date', key: 'date', width: 15 });
-      if (exportColumns.type) columns.push({ header: 'Type', key: 'type', width: 10 });
-      if (exportColumns.category) columns.push({ header: 'Category', key: 'category', width: 20 });
-      if (exportColumns.description) columns.push({ header: 'Description', key: 'description', width: 30 });
-      if (exportColumns.amount) columns.push({ header: 'Amount', key: 'amount', width: 15 });
-      
-      worksheet.columns = columns;
-      
-      // Add rows
-      transactions.forEach(t => {
-        const rowData: any = {};
-        if (exportColumns.date) rowData.date = formatDate(t.date);
-        if (exportColumns.type) rowData.type = t.type;
-        if (exportColumns.category) rowData.category = t.category_name || 'Uncategorized';
-        if (exportColumns.description) rowData.description = t.description;
-        if (exportColumns.amount) rowData.amount = t.amount;
-        
-        worksheet.addRow(rowData);
-      });
-      
-      // Style the header row
-      worksheet.getRow(1).font = { bold: true };
-      
-      // Generate file and trigger download
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `transactions_${new Date().toISOString().slice(0,10)}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast.success("Excel file exported successfully");
-    } catch (error) {
-      console.error("Error exporting to Excel:", error);
-      toast.error("Failed to export to Excel");
-    }
+  const handleExportToExcel = () => {
+    exportToExcel(transactions, exportColumns);
   };
 
-  // Uncomment and implement PDF export functionality
-  const exportToPDF = async () => {
-    try {
-      // Dynamic import to reduce bundle size
-      const jsPDF = (await import('jspdf')).default;
-      const autoTable = (await import('jspdf-autotable')).default;
-      
-      // Create document
-      const doc = new jsPDF();
-      
-      // Add title
-      doc.setFontSize(16);
-      doc.text("Transactions Report", 14, 15);
-      
-      // Add date range if selected
-      if (dateRange.start && dateRange.end) {
-        doc.setFontSize(10);
-        doc.text(`Date range: ${formatDate(dateRange.start)} - ${formatDate(dateRange.end)}`, 14, 22);
-      }
-      
-      // Add summary section
-      doc.setFontSize(10);
-      const summaryY = dateRange.start && dateRange.end ? 28 : 22;
-      doc.text(`Total Income: ${formatCurrency(summary.totalIncome)}`, 14, summaryY);
-      doc.text(`Total Expenses: ${formatCurrency(summary.totalExpense)}`, 14, summaryY + 5);
-      doc.text(`Net Balance: ${formatCurrency(summary.balance)}`, 14, summaryY + 10);
-      
-      // Get selected columns for export
-      const selectedColumns = Object.entries(exportColumns)
-        .filter(([_, selected]) => selected)
-        .map(([column]) => column);
-      
-      if (selectedColumns.length === 0) {
-        toast.error("Please select at least one column to export");
-        return;
-      }
-      
-      // Define table columns based on selections
-      const columns = [];
-      if (exportColumns.date) columns.push('Date');
-      if (exportColumns.type) columns.push('Type');
-      if (exportColumns.category) columns.push('Category');
-      if (exportColumns.description) columns.push('Description');
-      if (exportColumns.amount) columns.push('Amount');
-      
-      // Prepare rows based on selected columns
-      const rows = transactions.map(t => {
-        const row = [];
-        if (exportColumns.date) row.push(formatDate(t.date));
-        if (exportColumns.type) row.push(t.type.charAt(0).toUpperCase() + t.type.slice(1));
-        if (exportColumns.category) row.push(t.category_name || 'Uncategorized');
-        if (exportColumns.description) row.push(t.description);
-        if (exportColumns.amount) row.push(formatCurrency(t.amount));
-        return row;
-      });
-      
-      // Add table
-      autoTable(doc, {
-        head: [columns],
-        body: rows,
-        startY: summaryY + 15,
-        theme: 'grid',
-        headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
-        styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: {
-          0: { cellWidth: 25 }, // Date
-          1: { cellWidth: 20 }, // Type
-          2: { cellWidth: 30 }, // Category
-          3: { cellWidth: 'auto' }, // Description (flexible)
-          4: { cellWidth: 25, halign: 'right' } // Amount (right-aligned)
-        }
-      });
-      
-      // Add footer with generation date
-      const pageCount = doc.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.text(
-          `Generated on ${new Date().toLocaleString()} | Page ${i} of ${pageCount}`,
-          doc.internal.pageSize.getWidth() / 2,
-          doc.internal.pageSize.getHeight() - 10,
-          { align: 'center' }
-        );
-      }
-      
-      // Save PDF
-      doc.save(`transactions_${new Date().toISOString().slice(0,10)}.pdf`);
-      
-      toast.success("PDF generated successfully");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF");
-    }
+  const handleExportToPDF = () => {
+    exportToPDF(transactions, exportColumns, summary, dateRange);
   };
 
-  const scheduleExport = () => {
-    if (scheduleExportFrequency === 'none') {
-      toast.error("Please select a frequency for scheduled exports");
-      return;
+  const handleScheduleExport = () => {
+    if (scheduleExportFrequency !== 'none') {
+      scheduleExport(scheduleExportFrequency, scheduleExportDay, scheduleExportFormat, exportColumns);
     }
-    
-    // Get day of the week/month for scheduling
-    const dayLabel = scheduleExportFrequency === 'weekly' 
-      ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][scheduleExportDay]
-      : `Day ${scheduleExportDay}`;
-    
-    // Save schedule settings to localStorage
-    const scheduleConfig = {
-      frequency: scheduleExportFrequency,
-      day: scheduleExportDay,
-      format: scheduleExportFormat,
-      columns: exportColumns,
-      nextRun: calculateNextExportDate(scheduleExportFrequency, scheduleExportDay).toISOString()
-    };
-    
-    localStorage.setItem('exportSchedule', JSON.stringify(scheduleConfig));
-    
-    toast.success(`Export scheduled for ${scheduleExportFrequency}, ${dayLabel}`);
     setShowExportOptions(false);
   };
 
   const calculateNextExportDate = (frequency: 'weekly' | 'monthly', day: number): Date => {
-    const now = new Date();
-    const result = new Date(now);
-    
-    if (frequency === 'weekly') {
-      // day is 0-6 (Sunday-Saturday)
-      const currentDay = now.getDay(); // 0-6
-      const daysToAdd = (day - currentDay + 7) % 7;
-      result.setDate(now.getDate() + (daysToAdd === 0 ? 7 : daysToAdd));
-    } else if (frequency === 'monthly') {
-      // day is 1-31
-      const currentMonth = now.getMonth();
-      const targetDay = Math.min(day, new Date(now.getFullYear(), currentMonth + 1, 0).getDate());
-      
-      if (now.getDate() >= targetDay) {
-        // Move to next month
-        result.setMonth(currentMonth + 1);
-      }
-      
-      result.setDate(targetDay);
-    }
-    
-    return result;
+    return calculateNextExportDate(frequency, day);
   };
 
   const toggleExportOptions = () => {
@@ -760,41 +504,8 @@ export default function TransactionsPage() {
   }
 
   const calculateSummary = (transactionsData: Transaction[]) => {
-    // Handle case when no transactions are provided
-    if (!transactionsData || transactionsData.length === 0) {
-      setSummary({
-        totalIncome: 0,
-        totalExpense: 0,
-        balance: 0
-      });
-      return;
-    }
-    
-    const summary = transactionsData.reduce((acc, transaction) => {
-      // Ensure amount is a valid number
-      const amount = Number(transaction.amount) || 0;
-      
-      if (transaction.type === "income") {
-        acc.totalIncome += amount;
-      } else {
-        acc.totalExpense += amount;
-      }
-      return acc;
-    }, {
-      totalIncome: 0,
-      totalExpense: 0,
-      balance: 0
-    });
-    
-    // Calculate balance after all transactions are processed
-    summary.balance = summary.totalIncome - summary.totalExpense;
-    
-    // Ensure we don't have any negative zeros in the UI
-    if (summary.balance === 0) summary.balance = 0;
-    if (summary.totalIncome === 0) summary.totalIncome = 0;
-    if (summary.totalExpense === 0) summary.totalExpense = 0;
-    
-    setSummary(summary);
+    const newSummary = calculateTransactionSummary(transactionsData);
+    setSummary(newSummary);
   };
 
   const fetchCategories = async () => {
@@ -952,12 +663,6 @@ export default function TransactionsPage() {
     });
     setIsEditing(false);
     setEditId(null);
-    setCustomCategoryError(false);
-    setShowCustomCategoryForm(false);
-    setNewCategory({
-      name: "",
-      type: "expense"
-    });
   };
 
   // Generate suggestions based on previous transactions
@@ -989,14 +694,6 @@ export default function TransactionsPage() {
     // Special handling for category selection
     if (name === "category_id" && value === "custom") {
       console.log("Custom category selected, showing custom category form");
-      setShowCustomCategoryForm(true);
-      // Set newCategory type to match current transaction type
-      const categoryType = formData.type === "income" ? "income" : "expense";
-      setNewCategory(prev => ({
-        ...prev,
-        name: "",
-        type: categoryType
-      }));
       
       // Schedule a cleanup after the form renders
       requestAnimationFrame(() => {
@@ -1013,17 +710,10 @@ export default function TransactionsPage() {
       });
     } else if (name === "category_id" && value !== "custom") {
       // Clear custom category form if not selecting custom
-      setShowCustomCategoryForm(false);
     }
 
     // Special handling for transaction type changes
     if (name === "type") {
-      // When transaction type changes, update newCategory type to match
-      setNewCategory(prev => ({
-        ...prev,
-        type: value as "income" | "expense" | "both"
-      }));
-      
       console.log(`Transaction type changed to: ${value}, updating newCategory type`);
       
       // Reset category selection when transaction type changes to ensure compatibility
@@ -1043,11 +733,6 @@ export default function TransactionsPage() {
       return;
     }
 
-    // Clear any custom category error when user changes selection
-    if (name === "category_id" && customCategoryError) {
-      setCustomCategoryError(false);
-    }
-    
     // Generate suggestions for description field
     if (name === "description") {
       generateSuggestions(value);
@@ -1097,22 +782,10 @@ export default function TransactionsPage() {
       });
       setIsEditing(true);
       setEditId(transaction.id);
-      
-      // Ensure newCategory type is synced with transaction type
-      setNewCategory(prev => ({
-        ...prev,
-        type: transaction.type
-      }));
     } else {
       resetForm();
       setIsEditing(false);
       setEditId(null);
-      
-      // Ensure newCategory type is set to default (expense)
-      setNewCategory({
-        name: "",
-        type: "expense"
-      });
     }
     
     setShowForm(true);
@@ -1165,7 +838,6 @@ export default function TransactionsPage() {
       // If it's still "custom", that means they didn't click the "Add Category" button
       if (formData.category_id === "custom") {
         toast.error("Please create the custom category before saving the transaction.");
-        setCustomCategoryError(true);
         setFormLoading(false);
         return;
       }
@@ -1174,7 +846,6 @@ export default function TransactionsPage() {
       if (formData.category_id && !formData.category_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
         console.error("Invalid category_id format:", formData.category_id);
         toast.error("Invalid category selection. Please choose or create a valid category.");
-        setCustomCategoryError(true);
         setFormLoading(false);
         return;
       }
@@ -1508,76 +1179,6 @@ export default function TransactionsPage() {
 
   const paginate = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-  };
-
-  const handleCreateCategory = async () => {
-    if (!newCategory.name.trim()) {
-      alert("Please enter a category name");
-      return;
-    }
-    
-    setIsSavingCategory(true);
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        alert("User session expired. Please login again.");
-        return;
-      }
-      
-      // Check if category already exists
-      const { data: existingCategories } = await supabase
-        .from("categories")
-        .select("*")
-        .ilike("name", newCategory.name.trim())
-        .or(`user_id.is.null,user_id.eq.${userData.user.id}`);
-        
-      if (existingCategories && existingCategories.length > 0) {
-        // Category exists, use it instead
-        const existingCategory = existingCategories[0];
-        setFormData(prev => ({
-          ...prev,
-          category_id: existingCategory.id
-        }));
-        setShowCustomCategoryForm(false);
-        toast.info(`Using existing category "${existingCategory.name}"`);
-        return;
-      }
-      
-      // Create new category
-      const { data: newCategoryData, error } = await supabase
-        .from("categories")
-        .insert([{
-          name: newCategory.name.trim(),
-          type: newCategory.type,
-          is_active: true,
-          user_id: userData.user.id
-        }])
-        .select()
-        .single();
-        
-      if (error) {
-        console.error("Error creating category:", error);
-        alert(`Failed to create category: ${error.message}`);
-        return;
-      }
-      
-      // Update categories list
-      await fetchCategories();
-      
-      // Update form with new category
-      setFormData(prev => ({
-        ...prev,
-        category_id: newCategoryData.id
-      }));
-      
-      toast.success(`Category "${newCategoryData.name}" created successfully`);
-      setShowCustomCategoryForm(false);
-    } catch (error) {
-      console.error("Error creating custom category:", error);
-      alert("Failed to create custom category");
-    } finally {
-      setIsSavingCategory(false);
-    }
   };
 
   useEffect(() => {
@@ -2089,230 +1690,6 @@ export default function TransactionsPage() {
     }
   };
 
-  // Add the handleAddCustomCategory function to handle adding custom categories
-  const handleAddCustomCategory = async () => {
-    try {
-      if (!newCategory.name.trim()) {
-        toast.error("Please enter a category name");
-        return;
-      }
-
-      // Debug logs to trace what's happening
-      console.log("Adding custom category with data:", {
-        categoryName: newCategory.name,
-        categoryType: newCategory.type,
-        formDataType: formData.type
-      });
-
-      setIsSavingCategory(true);
-
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        toast.error("You must be logged in to create categories");
-        return;
-      }
-      
-      console.log("User authenticated:", userData.user.id);
-      
-      // Check if the category already exists for this user
-      const { data: existingCategories, error: checkError } = await supabase
-        .from("categories")
-        .select("id, name, type")
-        .eq("name", newCategory.name.trim())
-        .eq("user_id", userData.user.id);
-        
-      if (checkError) {
-        console.error("Error checking existing categories:", checkError);
-      }
-      
-      console.log("Existing categories check:", existingCategories);
-      
-      if (existingCategories && existingCategories.length > 0) {
-        console.log("Category already exists, will use existing instead of creating new");
-        // Use the existing category instead of creating a new one
-        const existingCategory = existingCategories[0];
-        
-        // Check if the existing category type matches the current transaction type
-        const currentCategoryType = formData.type === 'income' ? 'income' : 'expense';
-        
-        // If the category exists but with a different type, update it to "both"
-        if (existingCategory.type !== currentCategoryType && existingCategory.type !== 'both') {
-          console.log("Updating category type to 'both'");
-          const { error: updateError } = await supabase
-            .from("categories")
-            .update({ type: 'both' })
-            .eq("id", existingCategory.id);
-            
-          if (updateError) {
-            console.error("Error updating category type:", updateError);
-          } else {
-            console.log("Category type updated successfully to 'both'");
-          }
-          
-          existingCategory.type = 'both';
-        }
-        
-        setFormData(prevForm => ({ ...prevForm, category_id: existingCategory.id }));
-        setCustomCategoryError(false);
-        setShowCustomCategoryForm(false);
-        toast.success(`Using existing category: ${existingCategory.name}`);
-        setIsSavingCategory(false);
-        return;
-      }
-      
-      // Force category type to match transaction type to ensure consistency
-      const categoryType = formData.type === 'income' ? 'income' : 'expense';
-      
-      console.log("Creating new category with type:", {
-        name: newCategory.name.trim(),
-        type: categoryType,
-        user_id: userData.user.id
-      });
-      
-      // Create the new category with correct typing
-      const { data, error } = await supabase
-        .from("categories")
-        .insert({
-          name: newCategory.name.trim(),
-          type: categoryType, // Use type based on transaction type
-          user_id: userData.user.id,
-          is_active: true
-        })
-        .select();
-        
-      if (error) {
-        console.error("Error creating category:", error);
-        toast.error(`Failed to create custom category: ${error.message}`);
-        return;
-      }
-      
-      // Make sure we have the data and the first item
-      if (!data || data.length === 0) {
-        console.error("No data returned after category creation");
-        toast.error("Failed to retrieve the created category");
-        return;
-      }
-      
-      const newCategoryData = data[0];
-      console.log("Category created successfully:", newCategoryData);
-      toast.success(`Category "${newCategoryData.name}" created successfully`);
-      
-      // Add the new category to the categories array so it appears in the dropdown immediately
-      setCategories(prevCategories => {
-        const updatedCategories = [...prevCategories, newCategoryData];
-        console.log("Updated categories list:", updatedCategories);
-        return updatedCategories;
-      });
-      
-      // Select the newly created category
-      setFormData(prevForm => {
-        const updatedForm = { ...prevForm, category_id: newCategoryData.id };
-        console.log("Updated form with new category:", updatedForm);
-        return updatedForm;
-      });
-      
-      setCustomCategoryError(false);
-      
-      // Reset new category form but keep the type aligned with current transaction type
-      setNewCategory({
-        name: "",
-        type: formData.type === "income" ? "income" : "expense"
-      });
-      
-      // Reset the custom category view
-      setShowCustomCategoryForm(false);
-      
-      // Refresh categories
-      await fetchCategories();
-    } catch (error) {
-      console.error("Error adding custom category:", error);
-      toast.error("An error occurred while creating the category");
-    } finally {
-      setIsSavingCategory(false);
-    }
-  };
-
-  const handleDeleteCategory = async (category: Category) => {
-    try {
-      setCategoryToDelete(category);
-      setShowDeleteCategoryConfirm(true);
-    } catch (error) {
-      console.error("Error preparing to delete category:", error);
-      toast.error("Failed to prepare category deletion");
-    }
-  };
-
-  const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return;
-    
-    try {
-      setIsDeletingCategory(true);
-      
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        toast.error("You must be logged in to delete categories");
-        return;
-      }
-      
-      // First check if category is in use
-      const { data: transactionsUsingCategory, error: checkError } = await supabase
-        .from("transactions")
-        .select("id")
-        .eq("category_id", categoryToDelete.id)
-        .eq("user_id", userData.user.id)
-        .limit(1);
-        
-      if (checkError) {
-        console.error("Error checking if category is in use:", checkError);
-      }
-      
-      if (transactionsUsingCategory && transactionsUsingCategory.length > 0) {
-        toast.error("Cannot delete category that is in use by transactions");
-        setShowDeleteCategoryConfirm(false);
-        setCategoryToDelete(null);
-        return;
-      }
-      
-      // Instead of actually deleting, mark as inactive
-      const { error } = await supabase
-        .from("categories")
-        .update({ is_active: false })
-        .eq("id", categoryToDelete.id)
-        .eq("user_id", userData.user.id);
-        
-      if (error) {
-        console.error("Error deleting category:", error);
-        toast.error(`Failed to delete category: ${error.message}`);
-        return;
-      }
-      
-      toast.success(`Category "${categoryToDelete.name}" deleted successfully`);
-      
-      // Update the categories list
-      setCategories(prevCategories => 
-        prevCategories.filter(c => c.id !== categoryToDelete.id)
-      );
-      
-      // If the deleted category was selected in the form, reset it
-      if (formData.category_id === categoryToDelete.id) {
-        setFormData(prevForm => ({
-          ...prevForm,
-          category_id: ""
-        }));
-      }
-      
-      // Refresh categories
-      await fetchCategories();
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      toast.error("An error occurred while deleting the category");
-    } finally {
-      setIsDeletingCategory(false);
-      setShowDeleteCategoryConfirm(false);
-      setCategoryToDelete(null);
-    }
-  };
-
   const CardRenderer = useCallback(({ index, style }: { index: number, style: React.CSSProperties }) => {
     const transaction = paginatedTransactions[index];
     if (!transaction) return null;
@@ -2393,192 +1770,6 @@ export default function TransactionsPage() {
       </div>
     );
   }, [paginatedTransactions, handleEdit, handleDelete]);
-
-  const CustomCategoryForm = () => {
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const [inputValue, setInputValue] = useState(""); // Local state for input value
-    
-    // Sync with newCategory when component mounts or when category type changes
-    useEffect(() => {
-      setInputValue(newCategory.name);
-    }, [formData.type, newCategory.name]);
-    
-    // Filter categories to only show user's custom categories of the current type
-    const userCustomCategories = useMemo(() => 
-      categories.filter(c => 
-        c.user_id && // Only user's custom categories
-        (c.type === formData.type || c.type === 'both')
-      ).sort((a, b) => a.name.localeCompare(b.name)),
-    [categories, formData.type]);
-    
-    // Update parent state less frequently to avoid re-renders during typing
-    const updateParentState = useCallback((value: string) => {
-      const categoryType = formData.type === "income" ? "income" : "expense";
-      setNewCategory(prev => ({
-        ...prev,
-        name: value,
-        type: categoryType
-      }));
-    }, [formData.type, setNewCategory]);
-
-    // Handle input change locally first
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInputValue(value);
-      
-      // Debounce the update to parent state
-      if ((e.nativeEvent as InputEvent).inputType === 'insertText' || 
-          (e.nativeEvent as InputEvent).inputType === 'deleteContentBackward' || 
-          (e.nativeEvent as InputEvent).inputType === 'deleteContentForward') {
-        updateParentState(value);
-      }
-    };
-    
-    // Use useLayoutEffect to ensure DOM manipulation happens before render
-    useLayoutEffect(() => {
-      // Define a cleanup function that removes unwanted dropdowns
-      const removeUnwantedDropdowns = () => {
-        if (dropdownRef.current) {
-          // Target both class patterns to ensure we remove all unwanted elements
-          const unwantedDropdowns = dropdownRef.current.querySelectorAll(
-            'select.flex-1.high-contrast-dropdown, select.categoryTypeDropdown, select[name="categoryType"]'
-          );
-          
-          unwantedDropdowns.forEach(dropdown => {
-            console.log("Removing unwanted dropdown:", dropdown);
-            dropdown.remove();
-          });
-        }
-      };
-      
-      // Run immediately and also after a short delay to catch any late additions
-      removeUnwantedDropdowns();
-      
-      // Set a cleanup timer to catch any dropdowns that might appear after initial render
-      const timer = setTimeout(removeUnwantedDropdowns, 100);
-      
-      return () => clearTimeout(timer);
-    }, []);
-  
-    // Determine if we're creating an income or expense category
-    const isIncome = formData.type === "income";
-    const categoryType = isIncome ? "income" : "expense";
-    
-    return (
-      <div ref={dropdownRef} className="space-y-4">
-        <div className={`space-y-2 ${styles.customCategoryForm}`}>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onBlur={() => updateParentState(inputValue)}
-            placeholder={`New ${categoryType} category name`}
-            className={`w-full rounded-md border-2 ${customCategoryError ? 'border-red-500' : 'border-input'} bg-transparent px-3 py-2 text-sm font-medium`}
-          />
-          
-          {/* This hidden input ensures we maintain the correct category type */}
-          <input 
-            type="hidden" 
-            name="categoryType"
-            value={categoryType} 
-          />
-          
-          {/* Button for adding the category with appropriate styling */}
-          <Button 
-            type="button" 
-            onClick={() => {
-              // Explicitly ensure the category type is correct
-              const updatedType = formData.type === "income" ? "income" : "expense";
-              
-              // Sync the local state with parent state
-              updateParentState(inputValue);
-              
-              // Then add the category
-              setTimeout(() => handleAddCustomCategory(), 50);
-            }}
-            disabled={isSavingCategory || !inputValue.trim()}
-            className={`w-full ${isIncome ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'} text-primary-foreground`}
-          >
-            {isSavingCategory ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
-                Saving {isIncome ? "Income" : "Expense"} Category...
-              </>
-            ) : (
-              `Add ${isIncome ? "Income" : "Expense"} Category`
-            )}
-          </Button>
-          
-          {customCategoryError && (
-            <p className="text-sm text-red-500">
-              Please create a category or select an existing one
-            </p>
-          )}
-        </div>
-        
-        {/* Display user's custom categories with delete option */}
-        {userCustomCategories.length > 0 && (
-          <div className="mt-4">
-            <h5 className="text-sm font-medium mb-2">Your Custom Categories</h5>
-            <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
-              {userCustomCategories.map(category => (
-                <div key={category.id} className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-muted/50 group">
-                  <span className="text-sm truncate flex-1">{category.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDeleteCategory(category)}
-                  >
-                    <Trash className="h-3.5 w-3.5 text-red-500" />
-                    <span className="sr-only">Delete {category.name}</span>
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Confirmation dialog for deleting categories */}
-        {showDeleteCategoryConfirm && categoryToDelete && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-card rounded-lg p-6 max-w-md w-full shadow-lg">
-              <h3 className="text-lg font-bold mb-2">Delete Category</h3>
-              <p className="mb-4">
-                Are you sure you want to delete the category "{categoryToDelete.name}"?
-              </p>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowDeleteCategoryConfirm(false);
-                    setCategoryToDelete(null);
-                  }}
-                  disabled={isDeletingCategory}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={confirmDeleteCategory}
-                  disabled={isDeletingCategory}
-                >
-                  {isDeletingCategory ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // 5. Implement event delegation for transaction list
   useEffect(() => {
@@ -2746,20 +1937,20 @@ export default function TransactionsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={exportToCSV}>
+                <DropdownMenuItem onClick={() => handleExportToCSV()}>
                   <Download className="mr-2 h-4 w-4" />
                   CSV
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportToExcel}>
+                <DropdownMenuItem onClick={() => handleExportToExcel()}>
                   <FileSpreadsheet className="mr-2 h-4 w-4" />
                   Excel
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={exportToPDF}>
+                <DropdownMenuItem onClick={() => handleExportToPDF()}>
                   <FileText className="mr-2 h-4 w-4" />
                   PDF
                 </DropdownMenuItem>
                 {scheduleExportFrequency !== 'none' && (
-                  <DropdownMenuItem onClick={scheduleExport}>
+                  <DropdownMenuItem onClick={handleScheduleExport}>
                     <Calendar className="mr-2 h-4 w-4" />
                     Schedule Export
                   </DropdownMenuItem>
@@ -2780,30 +1971,7 @@ export default function TransactionsPage() {
         <AddTransactionButton onClick={() => openTransactionForm()} />
 
         {/* Summary Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <div className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-            <h2 className="text-sm font-medium text-muted-foreground">Total Income</h2>
-            <p className="mt-1 text-2xl font-bold text-green-500">
-              <Currency value={summary.totalIncome} />
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
-            <h2 className="text-sm font-medium text-muted-foreground">Total Expenses</h2>
-            <p className="mt-1 text-2xl font-bold text-destructive">
-              <Currency value={summary.totalExpense} />
-            </p>
-          </div>
-          <div className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md sm:col-span-2 md:col-span-1">
-            <h2 className="text-sm font-medium text-muted-foreground">Net Balance</h2>
-            <p
-              className={`mt-1 text-2xl font-bold ${
-                summary.balance >= 0 ? "text-green-500" : "text-destructive"
-              }`}
-            >
-              <Currency value={summary.balance} />
-            </p>
-          </div>
-        </div>
+        <TransactionSummaryCards summary={summary} />
 
         {/* Add tab buttons for regular and recurring transactions */}
         <div className="mb-4 flex gap-2">
@@ -2832,117 +2000,13 @@ export default function TransactionsPage() {
           </div>
         ) : (
           /* Recurring transactions view */
-          <div>
-            <Collapsible>
-              <div className="mb-6 rounded-lg border bg-card shadow-sm overflow-hidden">
-                <CollapsibleTrigger asChild>
-                  <div className="p-4 border-b flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center">
-                      <RefreshCw size={16} className="mr-2 text-muted-foreground" />
-                      <h3 className="font-medium">Recurring Transactions</h3>
-                    </div>
-                    <ChevronDown size={16} className="transition-transform" />
-                  </div>
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent>
-                  <div className="p-4">
-                    {recurringTransactions.length === 0 ? (
-                      <div className="p-6 text-center">
-                        <p className="text-muted-foreground">No recurring transactions found</p>
-                        <Button
-                          className="mt-4"
-                          onClick={() => {
-                            setFormData({...formData, is_recurring: true});
-                            openTransactionForm();
-                          }}
-                        >
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Create Recurring Transaction
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="p-4 flex justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => processRecurringTransactions(recurringTransactions)}
-                          >
-                            <RefreshCw size={16} className={`${refreshing ? "animate-spin" : ""}`} />
-                            <span className="ml-2">Refresh</span>
-                          </Button>
-                        </div>
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">Description</th>
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">Amount</th>
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">Frequency</th>
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">Start Date</th>
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">End Date</th>
-                                <th className="whitespace-nowrap px-4 py-3 text-left font-medium">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {recurringTransactions.map((recurringTx) => (
-                                <tr key={recurringTx.id} className="border-b">
-                                  <td className="whitespace-nowrap px-4 py-3">
-                                    <div className="font-medium">{recurringTx.description}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                      {recurringTx.type === "income" ? "Income" : "Expense"}
-                                    </div>
-                                  </td>
-                                  <td className="whitespace-nowrap px-4 py-3">
-                                    <span className={recurringTx.type === "income" ? "text-green-600" : "text-red-600"}>
-                                      {formatCurrency(recurringTx.amount)}
-                                    </span>
-                                  </td>
-                                  <td className="whitespace-nowrap px-4 py-3">
-                                    {recurringTx.frequency.charAt(0).toUpperCase() + recurringTx.frequency.slice(1)}
-                                  </td>
-                                  <td className="whitespace-nowrap px-4 py-3">{formatDate(recurringTx.start_date)}</td>
-                                  <td className="whitespace-nowrap px-4 py-3">
-                                    {recurringTx.end_date ? formatDate(recurringTx.end_date) : "No end date"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-4 py-3">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => deactivateRecurring(recurringTx.id)}
-                                    >
-                                      <Trash className="h-4 w-4" />
-                                    </Button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-            
-            <Button
-              className="mb-4"
-              onClick={() => toggleUpcomingPreview()}
-              aria-expanded={showUpcomingPreview}
-              aria-controls="upcoming-preview"
-            >
-              {showUpcomingPreview ? 'Hide' : 'Show'} Upcoming Transactions
-            </Button>
-            
-            {showUpcomingPreview && (
-              <div id="upcoming-preview" className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
-                <h3 className="mb-4 text-lg font-medium">Upcoming Transactions</h3>
-                {/* Upcoming transactions content */}
-              </div>
-            )}
-          </div>
+          <RecurringTransactions
+            recurringTransactions={recurringTransactions}
+            categories={categories}
+            onEdit={openEditRecurringForm}
+            onDelete={deactivateRecurring}
+            onRefresh={() => processRecurringTransactions(recurringTransactions)}
+          />
         )}
 
         {/* Transaction Form Drawer */}
@@ -2960,471 +2024,54 @@ export default function TransactionsPage() {
           />
         )}
 
-        {/* Quick Filters */}
-        <div className="mb-4 flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const today = new Date().toISOString().split('T')[0];
-              setDateRange({ start: today, end: today });
-            }}
-            className="h-9"
-          >
-            Today
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const today = new Date();
-              const startOfWeek = new Date(today);
-              startOfWeek.setDate(today.getDate() - today.getDay());
-              setDateRange({
-                start: startOfWeek.toISOString().split('T')[0],
-                end: today.toISOString().split('T')[0]
-              });
-            }}
-            className="h-9"
-          >
-            This Week
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const today = new Date();
-              const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-              setDateRange({
-                start: startOfMonth.toISOString().split('T')[0],
-                end: today.toISOString().split('T')[0]
-              });
-            }}
-            className="h-9"
-          >
-            This Month
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setDateRange({ start: "", end: "" });
-              setSearchTerm("");
-              setFilterType("all");
-            }}
-            className="h-9 ml-auto"
-          >
-            Clear Filters
-          </Button>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-6 rounded-lg border bg-card shadow-sm overflow-hidden">
-          <Collapsible>
-            <div className="p-4 border-b flex items-center justify-between">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className="p-2 -ml-2 flex items-center gap-2"
-                  aria-label="Toggle filters visibility"
-                >
-                  <Filter size={16} />
-                  <span>Filters</span>
-                  <ChevronDown size={16} className="transition-transform" />
-                </Button>
-              </CollapsibleTrigger>
-              
-              <div className="flex items-center gap-3">
-                <div className="flex border rounded-md">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant={viewMode === "table" ? "default" : "ghost"} 
-                          size="sm" 
-                          onClick={() => setViewMode("table")}
-                          className="rounded-r-none h-9 px-3"
-                          aria-label="Table view"
-                        >
-                          <List size={18} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Table view</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant={viewMode === "card" ? "default" : "ghost"} 
-                          size="sm" 
-                          onClick={() => setViewMode("card")}
-                          className="rounded-l-none h-9 px-3"
-                          aria-label="Card view"
-                        >
-                          <LayoutGrid size={18} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Card view</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-            </div>
-            
-            <CollapsibleContent>
-              <div className="p-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                  <div>
-                    <label htmlFor="filter-type" className="mb-2 block text-sm font-medium">Type</label>
-                    <select
-                      id="filter-type"
-                      value={filterType}
-                      onChange={(e) => setFilterType(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2.5"
-                      aria-label="Filter by transaction type"
-                    >
-                      <option value="all">All Types</option>
-                      <option value="income">Income</option>
-                      <option value="expense">Expense</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="search-term" className="mb-2 block text-sm font-medium">Search</label>
-                    <div className="relative">
-                      <input
-                        id="search-term"
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2.5 pr-10"
-                        placeholder="Search transactions..."
-                        aria-label="Search transactions"
-                      />
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                        <Search size={16} className="text-gray-400" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="date-range" className="mb-2 block text-sm font-medium">Date Range</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="date"
-                        value={dateRange.start}
-                        onChange={(e) =>
-                          setDateRange({ ...dateRange, start: e.target.value })
-                        }
-                        className="w-full rounded-md border border-input bg-background px-3 py-2"
-                        aria-label="Start date"
-                      />
-                      <input
-                        type="date"
-                        value={dateRange.end}
-                        onChange={(e) =>
-                          setDateRange({ ...dateRange, end: e.target.value })
-                        }
-                        className="w-full rounded-md border border-input bg-background px-3 py-2"
-                        aria-label="End date"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+        {/* Transaction Filters */}
+        <TransactionFilters
+          filterType={filterType}
+          setFilterType={setFilterType}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
 
         {/* Transactions List */}
         <div className="rounded-lg border bg-card shadow-sm">
           {/* Table View */}
           {viewMode === "table" && (
-            <>
-              {loading ? (
-                <TransactionSkeleton view="table" />
-              ) : filteredAndSortedTransactions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="mb-4 rounded-full bg-primary/10 p-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-primary"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium">No transactions found</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Try a different search term or add your first transaction.
-                  </p>
-                  <Button
-                    onClick={() => openTransactionForm()}
-                    className="mt-4 min-h-[44px]"
-                  >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Transaction
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th 
-                            className="px-4 py-3 text-left text-sm font-medium cursor-pointer"
-                            onClick={() => handleSort('date')}
-                          >
-                            <div className="flex items-center">
-                              Date
-                              {sortField === 'date' && (
-                                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              )}
-                            </div>
-                          </th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
-                          <th 
-                            className="px-4 py-3 text-left text-sm font-medium cursor-pointer"
-                            onClick={() => handleSort('category')}
-                          >
-                            <div className="flex items-center">
-                              Category
-                              {sortField === 'category' && (
-                                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              )}
-                            </div>
-                          </th>
-                          <th 
-                            className="px-4 py-3 text-left text-sm font-medium cursor-pointer"
-                            onClick={() => handleSort('description')}
-                          >
-                            <div className="flex items-center">
-                              Description
-                              {sortField === 'description' && (
-                                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              )}
-                            </div>
-                          </th>
-                          <th 
-                            className="px-4 py-3 text-right text-sm font-medium cursor-pointer"
-                            onClick={() => handleSort('amount')}
-                          >
-                            <div className="flex items-center justify-end">
-                              Amount
-                              {sortField === 'amount' && (
-                                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                              )}
-                            </div>
-                          </th>
-                          <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedTransactions.map(transaction => (
-                          <tr key={transaction.id} className="border-b hover:bg-muted/50">
-                            <td className="px-4 py-3 text-sm">{formatDate(transaction.date)}</td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                  transaction.type === "income"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                }`}
-                              >
-                                {transaction.type}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                              {transaction.category_name || "Uncategorized"}
-                            </td>
-                            <td className="px-4 py-3 text-sm max-w-[250px] truncate">
-                              {transaction.description}
-                            </td>
-                            <td
-                              className={`px-4 py-3 text-right text-sm font-medium ${
-                                transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              <Currency value={transaction.amount} />
-                            </td>
-                            <td className="px-4 py-3 text-right space-x-1">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => handleEdit(transaction)}
-                                      aria-label={`Edit transaction: ${transaction.description}`}
-                                    >
-                                      <Edit2 className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Edit transaction</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                              
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon" 
-                                      onClick={() => handleDelete(transaction.id)}
-                                      aria-label={`Delete transaction: ${transaction.description}`}
-                                    >
-                                      <Trash className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Delete transaction</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </>
+            <TransactionTable
+              transactions={paginatedTransactions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              loading={loading}
+              onAddTransaction={openTransactionForm}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
           )}
 
           {/* Mobile Card View */}
           {viewMode === "card" && (
-            <>
-              {loading ? (
-                <TransactionSkeleton view="card" />
-              ) : filteredAndSortedTransactions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="mb-4 rounded-full bg-primary/10 p-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-primary"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                      <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium">No transactions found</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Try a different search term or add your first transaction.
-                  </p>
-                  <Button
-                    onClick={() => openTransactionForm()}
-                    className="mt-4 min-h-[44px]"
-                  >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Transaction
-                  </Button>
-                </div>
-              ) : (
-                <div style={{ height: '75vh', width: '100%' }}>
-                  <AutoSizer>
-                    {({ height, width }) => (
-                      <VirtualizedList
-                        height={height || 500}
-                        width={width || window.innerWidth}
-                        itemCount={paginatedTransactions.length}
-                        itemSize={180}
-                        overscanCount={5}
-                      >
-                        {CardRenderer}
-                      </VirtualizedList>
-                    )}
-                  </AutoSizer>
-                </div>
-              )}
-            </>
+            <TransactionCardView
+              transactions={paginatedTransactions}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              loading={loading}
+              onAddTransaction={openTransactionForm}
+            />
           )}
           
-          {/* Pagination - Enhanced for touch */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between border-t p-4 gap-3">
-              <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredAndSortedTransactions.length)} of {filteredAndSortedTransactions.length} transactions
-              </div>
-              <div className="flex gap-2 order-1 sm:order-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => paginate(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="h-10 w-10 p-0 touch-target"
-                >
-                  <ChevronLeft size={20} />
-                </Button>
-                {Array.from({ length: totalPages }).map((_, index) => {
-                  // Display limited page buttons with ellipsis for large number of pages
-                  if (
-                    totalPages <= 5 ||
-                    index === 0 ||
-                    index === totalPages - 1 ||
-                    (index >= currentPage - 2 && index <= currentPage)
-                  ) {
-                    return (
-                      <Button
-                        key={index}
-                        variant={currentPage === index + 1 ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => paginate(index + 1)}
-                        className="h-10 w-10 p-0 touch-target"
-                      >
-                        {index + 1}
-                      </Button>
-                    );
-                  } else if (
-                    (index === 1 && currentPage > 3) ||
-                    (index === totalPages - 2 && currentPage < totalPages - 2)
-                  ) {
-                    return <span key={index} className="flex items-center px-2">...</span>;
-                  }
-                  return null;
-                })}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="h-10 w-10 p-0 touch-target"
-                >
-                  <ChevronRight size={20} />
-                </Button>
-              </div>
-            </div>
+            <TransactionPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredAndSortedTransactions.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={paginate}
+            />
           )}
         </div>
       </div>

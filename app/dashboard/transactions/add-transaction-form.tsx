@@ -7,6 +7,7 @@ import { useUserPreferences } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { IntelligentOCRUpload } from "@/components/ui/intelligent-ocr-upload";
 import { LLMEnhancedResult } from "@/lib/llm-enhanced-ocr";
+import { CustomCategoryForm } from "@/components/transactions/custom-category-form";
 import {
   Calendar,
   X,
@@ -692,140 +693,6 @@ export default function AddTransactionForm({
     }
   };
 
-  // Custom Category Form Component
-  const CustomCategoryForm = () => {
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const [inputValue, setInputValue] = useState("");
-    
-    // Only sync from parent to local state on mount and type change
-    useEffect(() => {
-      setInputValue(newCategory.name);
-    }, [formData.type]);
-    
-    // Filter user's custom categories of the current type
-    const userCustomCategories = useMemo(() => 
-      categories.filter(c => 
-        c.user_id && // Only user's custom categories
-        (c.type === formData.type || c.type === 'both')
-      ).sort((a, b) => a.name.localeCompare(b.name)),
-    [categories, formData.type]);
-    
-    // Pure local state handling for input - no parent state updates during typing
-    const handleLocalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValue(e.target.value);
-    };
-    
-    // Only update parent state when user is done typing (blur) or submitting
-    const syncToParentState = useCallback(() => {
-      const categoryType = formData.type === "income" ? "income" : "expense";
-      setNewCategory({
-        name: inputValue,
-        type: categoryType
-      });
-    }, [formData.type, inputValue, setNewCategory]);
-    
-    // Remove unwanted dropdown elements that might appear
-    useLayoutEffect(() => {
-      const removeUnwantedDropdowns = () => {
-        if (dropdownRef.current) {
-          const unwantedDropdowns = dropdownRef.current.querySelectorAll(
-            'select.flex-1, select.high-contrast-dropdown, select.categoryTypeDropdown'
-          );
-          unwantedDropdowns.forEach(el => el.remove());
-        }
-      };
-      
-      removeUnwantedDropdowns();
-      const timer = setTimeout(removeUnwantedDropdowns, 100);
-      return () => clearTimeout(timer);
-    }, []);
-    
-    // Determine if we're creating an income or expense category
-    const isIncome = formData.type === "income";
-    const categoryType = isIncome ? "income" : "expense";
-    
-    return (
-      <div ref={dropdownRef} className="space-y-4">
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleLocalInputChange}
-            onBlur={syncToParentState}
-            placeholder={`New ${categoryType} category name`}
-            className={`w-full rounded-md border-2 ${customCategoryError ? 'border-red-500' : 'border-input'} bg-transparent px-3 py-2 text-sm font-medium`}
-          />
-          
-          {/* This hidden input ensures we maintain the correct category type */}
-          <input 
-            type="hidden" 
-            name="categoryType"
-            value={categoryType} 
-          />
-          
-          {/* Button for adding the category with appropriate styling */}
-          <Button 
-            type="button" 
-            onClick={() => {
-              // First sync local state to parent state
-              syncToParentState();
-              
-              // Then add the category after a short delay
-              setTimeout(() => handleAddCustomCategory(), 50);
-            }}
-            disabled={isSavingCategory || !inputValue.trim()}
-            className={`w-full ${isIncome ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/90'} text-primary-foreground`}
-          >
-            {isSavingCategory ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-current mr-2"></div>
-                Saving {isIncome ? "Income" : "Expense"} Category...
-              </>
-            ) : (
-              `Add ${isIncome ? "Income" : "Expense"} Category`
-            )}
-          </Button>
-          
-          {customCategoryError && (
-            <p className="text-sm text-red-500">
-              Please create a category or select an existing one
-            </p>
-          )}
-        </div>
-        
-        {/* Display user's custom categories with delete option */}
-        {userCustomCategories.length > 0 && (
-          <div className="mt-4 border-2 border-red-200 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
-            <h5 className="text-base font-medium mb-3 text-red-700 dark:text-red-300 flex items-center">
-              <Trash className="h-4 w-4 mr-2"/> 
-              Your Custom Categories
-            </h5>
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {userCustomCategories.map(category => (
-                <div key={category.id} className="flex items-center justify-between py-3 px-3 rounded-md border border-red-200 bg-white dark:bg-red-900/10 hover:bg-red-100">
-                  <span className="text-sm font-medium truncate flex-1">{category.name}</span>
-                  <Button
-                    variant="destructive"
-                    size="default"
-                    className="px-3 text-white bg-red-600 hover:bg-red-700 shadow-sm"
-                    onClick={() => handleDeleteCategory(category)}
-                    title="Delete category"
-                  >
-                    <Trash className="h-4 w-4 mr-2" />
-                    <span>DELETE</span>
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-red-600 mt-2 font-medium">
-              * Click DELETE to remove a custom category
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   // Handle LLM-enhanced OCR data extraction
   const handleOCRDataExtracted = (result: LLMEnhancedResult) => {
     const extractedData = result.extractedData;
@@ -1051,7 +918,22 @@ export default function AddTransactionForm({
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white text-xs mr-2">+</span>
                     Create New Category
                   </h4>
-                  <CustomCategoryForm />
+                  <CustomCategoryForm
+                    transactionType={formData.type}
+                    newCategory={newCategory}
+                    setNewCategory={setNewCategory}
+                    categories={categories}
+                    customCategoryError={customCategoryError}
+                    isSavingCategory={isSavingCategory}
+                    onAddCategory={handleAddCustomCategory}
+                    onDeleteCategory={handleDeleteCategory}
+                    showDeleteCategoryConfirm={showDeleteCategoryConfirm}
+                    categoryToDelete={categoryToDelete}
+                    setShowDeleteCategoryConfirm={setShowDeleteCategoryConfirm}
+                    setCategoryToDelete={setCategoryToDelete}
+                    onConfirmDeleteCategory={confirmDeleteCategory}
+                    isDeletingCategory={isDeletingCategory}
+                  />
                 </div>
               )}
             </div>
