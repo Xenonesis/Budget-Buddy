@@ -7,7 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Budget, BudgetFilter, CategorySpending } from '../types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, AlertTriangle, CheckCircle, GripVertical, Filter, TrendingUp, TrendingDown, Target, Clock } from 'lucide-react';
+import { Pencil, Trash2, AlertTriangle, CheckCircle, GripVertical, Filter, TrendingUp, TrendingDown, Target, Clock, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SortableBudgetItemProps {
@@ -85,58 +85,55 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border rounded-lg mb-3 sm:mb-4 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ${
-        isDragging ? 'shadow-lg border-primary' : 'hover:border-primary/50'
-      } group cursor-pointer`}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, y: 20 }}
+      className={`bg-card border rounded-2xl mb-4 sm:mb-5 overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 ${
+        isDragging ? 'shadow-xl border-primary ring-2 ring-primary/20' : 'hover:border-primary/50'
+      } group cursor-pointer backdrop-blur-sm`}
+      whileHover={{ scale: 1.01, y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4, type: "spring", stiffness: 300, damping: 25 }}
     >
-      <div className="p-3 sm:p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
-          <div className="flex items-center gap-2">
+      <div className="p-4 sm:p-5 md:p-7">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+          <div className="flex items-center gap-3">
             <div
               {...attributes}
               {...listeners}
-              className="touch-manipulation cursor-grab active:cursor-grabbing p-1.5 rounded hover:bg-muted"
+              className="touch-manipulation cursor-grab active:cursor-grabbing p-2.5 rounded-xl hover:bg-muted/50 transition-colors duration-200 border border-transparent hover:border-border"
               title="Drag to reorder"
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
             {getCategoryStatusIcon(percentage)}
-            <h3 className="font-medium line-clamp-1">{budget.category_name}</h3>
+            <h3 className="font-semibold text-lg line-clamp-1">{budget.category_name}</h3>
             {categorySpending && (
-              <div className="flex items-center gap-1 ml-2">
-                <span className={`text-sm ${velocity.color}`}>{velocity.icon}</span>
-                <span className="text-xs text-muted-foreground capitalize">{velocity.level}</span>
-                <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${health.bgColor} ${health.color} ml-1`}>
+              <div className="flex items-center gap-2 ml-1">
+                <span className={`text-base ${velocity.color}`}>{velocity.icon}</span>
+                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${health.bgColor} ${health.color}`}>
                   {health.status}
-                </div>
-                {/* Trend indicator - simplified for now */}
-                <div className="flex items-center ml-1">
-                  <TrendingUp className="h-3 w-3 text-emerald-500" />
                 </div>
               </div>
             )}
           </div>
-          <div className="flex flex-wrap gap-2 items-center mt-1 sm:mt-0">
-            <div className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary whitespace-nowrap">
-              {formatCurrency(budget.amount)} budget
+          <div className="flex flex-wrap gap-2.5 items-center">
+            <div className="text-base font-semibold px-3.5 py-1.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+              {formatCurrency(budget.amount)}
+              <span className="text-xs font-normal ml-1 opacity-70">budget</span>
             </div>
             {categorySpending && (
-              <div className={`text-sm px-3 py-1 rounded-full whitespace-nowrap ${
+              <div className={`text-base font-semibold px-3.5 py-1.5 rounded-full whitespace-nowrap ${
                 percentage > 100
                   ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                   : "bg-muted text-muted-foreground"
               }`}>
-                {formatCurrency(categorySpending.spent)} spent
+                {formatCurrency(categorySpending.spent)}
+                <span className="text-xs font-normal ml-1 opacity-70">spent</span>
               </div>
             )}
             {categorySpending && (
               <span
-                className={`text-sm font-medium ml-1 whitespace-nowrap ${
+                className={`text-lg font-bold whitespace-nowrap ${
                   (() => {
                     if (percentage > 100) return "text-red-600 dark:text-red-400";
                     if (percentage > 85) return "text-amber-600 dark:text-amber-400";
@@ -151,78 +148,100 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
         </div>
 
         {categorySpending && (
-          <div className="relative h-3 bg-muted rounded-full overflow-hidden mb-3 shadow-inner">
+          <div className="relative h-4 bg-muted/30 rounded-full overflow-hidden mb-4 shadow-inner backdrop-blur-sm">
+            {/* Background gradient for better depth */}
+            <div className="absolute inset-0 bg-gradient-to-r from-muted/50 to-muted/20"></div>
+            
+            {/* Animated progress bar with enhanced styling */}
             <motion.div
-              className={`h-full ${getProgressBarColor(percentage)} shadow-lg ${getProgressBarGlow(percentage)}`}
+              className={`h-full ${getProgressBarColor(percentage)} relative shadow-lg ${getProgressBarGlow(percentage)}`}
               initial={{ width: 0 }}
               animate={{ width: getProgressBarWidth(percentage) }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            />
+              transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
+            >
+              {/* Animated shine effect on the progress bar */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent opacity-0 animate-pulse"></div>
+            </motion.div>
             
-            {/* Milestone markers */}
+            {/* Enhanced milestone markers */}
             {getMilestoneMarkers(percentage).map((milestone) => (
               <div
                 key={milestone}
-                className="absolute top-0 h-full w-1 bg-white/80 rounded-full shadow-sm"
+                className="absolute top-1/2 h-2 w-2 bg-white rounded-full shadow-sm border-2 border-background transform -translate-y-1/2"
                 style={{ left: `${milestone}%` }}
               />
             ))}
             
-            {/* Current position indicator */}
+            {/* Enhanced current position indicator with pulse animation */}
             {percentage > 0 && (
               <motion.div
-                className="absolute top-0 h-full w-1 bg-white rounded-full shadow-md"
+                className="absolute top-1/2 h-3 w-3 bg-white rounded-full shadow-lg border-2 border-background transform -translate-y-1/2 -translate-x-1/2"
                 initial={{ left: 0 }}
                 animate={{ left: getProgressBarWidth(percentage) }}
-                transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-              />
+                transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+              >
+                <div className="absolute inset-0 bg-white rounded-full animate-ping opacity-30"></div>
+              </motion.div>
             )}
+            
+            {/* 100% marker */}
+            <div 
+              className="absolute top-1/2 h-3 w-0.5 bg-foreground/30 transform -translate-y-1/2"
+              style={{ left: '100%' }}
+            ></div>
           </div>
         )}
 
-        <div className="flex justify-between items-center text-sm text-muted-foreground">
-          <div>
+        <div className="flex justify-between items-center pt-3 border-t border-border/50">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-primary/30"></div>
             {categorySpending ? (
               (() => {
                 const remaining = budget.amount - (categorySpending?.spent || 0);
                 const isOverBudget = percentage > 100;
                 
                 return isOverBudget ? (
-                  <span className="text-red-600 dark:text-red-400">
-                    {formatCurrency((categorySpending?.spent || 0) - budget.amount)} over budget
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                    <span className="text-red-600 dark:text-red-400 font-medium">
+                      {formatCurrency((categorySpending?.spent || 0) - budget.amount)} over budget
+                    </span>
+                  </div>
                 ) : (
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(remaining)} remaining
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                      {formatCurrency(remaining)} remaining
+                    </span>
+                  </div>
                 );
               })()
             ) : (
-              <span className="text-muted-foreground">No spending tracked</span>
+              <span className="text-muted-foreground italic">No spending tracked</span>
             )}
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => onEdit(budget)}
-              className="h-10 w-10 p-0 touch-manipulation opacity-60 group-hover:opacity-100 transition-opacity hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600"
+              className="h-9 w-9 p-0 border-border hover:bg-accent transition-colors duration-200"
               aria-label={`Edit budget for ${budget.category_name}`}
               title={`Edit budget for ${budget.category_name}`}
             >
-              <Pencil className="h-5 w-5" />
+              <Pencil className="h-4 w-4" />
             </Button>
             
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => onDelete(budget.id)}
-              className="h-10 w-10 p-0 text-red-500 hover:text-red-600 opacity-60 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-900/20 touch-manipulation"
+              className="h-9 w-9 p-0 border-border hover:bg-accent text-red-500 hover:text-red-600 transition-colors duration-200"
               aria-label={`Delete budget for ${budget.category_name}`}
               title={`Delete budget for ${budget.category_name}`}
             >
-              <Trash2 className="h-5 w-5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -288,35 +307,50 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
   });
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      {/* Filter Controls */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 sm:mb-4 px-3 sm:px-4">
-        <h3 className="text-base sm:text-lg font-medium">Budget Progress</h3>
+    <div className="space-y-4 sm:space-y-5">
+      {/* Enhanced Filter Controls */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 px-4 sm:px-5">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BarChart3 className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Budget Progress
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Track your spending against category budgets
+            </p>
+          </div>
+        </div>
         
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <div className="flex border rounded-md overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Filter:</span>
+          </div>
+          <div className="flex border rounded-lg overflow-hidden shadow-sm">
             <Button 
-              variant={activeFilter === 'all' ? 'default' : 'ghost'}
+              variant={activeFilter === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setActiveFilter('all')}
-              className="h-9 rounded-none px-2 text-xs sm:text-sm"
+              className="h-10 rounded-none px-3 text-sm font-medium border-0"
             >
               All
             </Button>
             <Button 
-              variant={activeFilter === 'over-budget' ? 'default' : 'ghost'}
+              variant={activeFilter === 'over-budget' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setActiveFilter('over-budget')}
-              className="h-9 rounded-none px-2 text-xs sm:text-sm"
+              className="h-10 rounded-none px-3 text-sm font-medium border-0"
             >
               Over Budget
             </Button>
             <Button 
-              variant={activeFilter === 'under-budget' ? 'default' : 'ghost'}
+              variant={activeFilter === 'under-budget' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setActiveFilter('under-budget')}
-              className="h-9 rounded-none px-2 text-xs sm:text-sm"
+              className="h-10 rounded-none px-3 text-sm font-medium border-0"
             >
               Under Budget
             </Button>
@@ -326,38 +360,68 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
 
       {/* Display empty state if no budgets match the filter */}
       {filteredBudgets.length === 0 ? (
-        <div className="text-center p-6">
-          <div className="h-12 w-12 bg-muted rounded-full mx-auto flex items-center justify-center mb-3">
-            <Filter className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-base font-medium mb-1">No matching budgets</h3>
-          <p className="text-muted-foreground text-sm">
-            Try changing your filter selection
-          </p>
+        <div className="text-center p-8 sm:p-10 rounded-2xl border bg-card shadow-sm">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="h-16 w-16 bg-muted rounded-full mx-auto flex items-center justify-center mb-5"
+          >
+            <Filter className="h-8 w-8 text-muted-foreground" />
+          </motion.div>
+          <motion.h3 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="text-xl font-bold mb-2"
+          >
+            No matching budgets
+          </motion.h3>
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="text-muted-foreground mb-6 max-w-md mx-auto"
+          >
+            Try changing your filter selection or create a new budget to get started
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <Button 
+              variant="outline" 
+              onClick={() => setActiveFilter('all')}
+              className="h-11 px-5 rounded-lg"
+            >
+              View All Budgets
+            </Button>
+          </motion.div>
         </div>
       ) : (
-        <DndContext 
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={filteredBudgets.map(b => b.id)}
-            strategy={verticalListSortingStrategy}
+                  <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className="px-3 sm:px-4 pb-3 sm:pb-4">
-              {filteredBudgets.map((budget) => (
-                <SortableBudgetItem
-                  key={budget.id}
-                  budget={budget}
-                  categorySpending={categorySpending.find(cat => cat.category_id === budget.category_id)}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={filteredBudgets.map(b => b.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+                {filteredBudgets.map((budget) => (
+                  <SortableBudgetItem
+                    key={budget.id}
+                    budget={budget}
+                    categorySpending={categorySpending.find(cat => cat.category_id === budget.category_id)}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
       )}
     </div>
   );

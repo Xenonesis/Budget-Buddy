@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, BarChart2, PieChart as PieChartIcon, TrendingUp,
   DollarSign, ArrowUpCircle, AreaChart, GitBranch, 
-  ListChecks, Info as InfoIcon
+  ListChecks, Info as InfoIcon, Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -133,17 +133,15 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
     .slice(0, 6); // Show top 6 for better visibility
   }, [spendingVsBudgetData]);
 
-  // Monthly trends with real historical data instead of fake generated data
+  // Monthly trends using real current period data
   const monthlyTrendData = useMemo(() => {
-    // Instead of generating fake data, we'll use real budget vs actual spending data
-    // This would typically come from the database, but for now we'll show current month only
     const currentMonth = new Date().toLocaleString('default', { month: 'short' });
     
-    // Get the total budget and spent for current period
-    const totalBudget = budgets.reduce((acc, budget) => acc + budget.amount, 0);
-    const totalSpent = categorySpending.reduce((acc, category) => acc + category.spent, 0);
+    // Calculate totals from real budget and spending data
+    const totalBudget = budgets.reduce((acc, budget) => acc + Number(budget.amount || 0), 0);
+    const totalSpent = categorySpending.reduce((acc, category) => acc + Number(category.spent || 0), 0);
     
-    // Return actual current data instead of fake historical trend
+    // Return current period actual data
     return [{
       name: currentMonth,
       budget: totalBudget,
@@ -152,35 +150,38 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       savings: Math.max(totalBudget - totalSpent, 0),
       overBudget: totalSpent > totalBudget ? totalSpent - totalBudget : 0
     }];
-    
-    // TODO: In future, fetch real historical budget vs spending data from database
-    // This should query monthly budget amounts and actual spending for each month
   }, [budgets, categorySpending]);
 
   // Enhanced tooltip with more visual information
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
-          <p className="font-medium border-b pb-1 mb-2">{label}</p>
+        <div className="bg-card border rounded-xl p-5 shadow-xl text-foreground backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border/50">
+            <div 
+              className="h-3 w-3 rounded-full" 
+              style={{ background: payload[0]?.color || payload[0]?.fill }}
+            />
+            <h4 className="font-bold text-lg">{label}</h4>
+          </div>
+          
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-4 mb-1">
+            <div key={index} className="flex items-center justify-between gap-4 mb-2">
               <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ background: entry.color || entry.fill }}
-                />
-                <span>{entry.name}:</span>
+                <span className="text-muted-foreground">{entry.name}:</span>
               </div>
-              <span className="font-semibold">
+              <span className="font-semibold text-lg">
                 {formatCurrency(entry.value)}
               </span>
             </div>
           ))}
           
           {activeChart === 'distribution' && payload[0] && (
-            <div className="mt-2 pt-1 border-t text-xs text-muted-foreground">
-              {((payload[0].value / totalBudget) * 100).toFixed(1)}% of total budget
+            <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground flex justify-between">
+              <span>Percentage of total:</span>
+              <span className="font-medium">
+                {((payload[0].value / totalBudget) * 100).toFixed(1)}%
+              </span>
             </div>
           )}
         </div>
@@ -196,53 +197,78 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       const categoryData = spendingVsBudgetData.find(item => item.name === label);
       
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
-          <p className="font-semibold border-b pb-1 mb-2">{label}</p>
+        <div className="bg-card border rounded-xl p-5 shadow-xl text-foreground backdrop-blur-sm min-w-[280px]">
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
+            <div 
+              className="h-3 w-3 rounded-full" 
+              style={{ background: payload[0]?.color || payload[0]?.fill }}
+            />
+            <h4 className="font-bold text-lg">{label}</h4>
+          </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Budget:</span>
-              <span className="font-medium">{formatCurrency(categoryData?.budget || 0)}</span>
+              <span className="text-muted-foreground">Budget:</span>
+              <span className="font-semibold text-lg">{formatCurrency(categoryData?.budget || 0)}</span>
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Spent:</span>
-              <span className={cn(
-                "font-medium",
-                categoryData?.overBudget ? "text-red-500" : "text-green-500"
-              )}>
+              <span className="text-muted-foreground">Spent:</span>
+              <span className={`font-semibold text-lg ${
+                categoryData?.overBudget ? "text-red-500" : "text-emerald-500"
+              }`}>
                 {formatCurrency(categoryData?.spent || 0)}
               </span>
             </div>
             
             {categoryData?.overBudget ? (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Over by:</span>
-                <span className="font-medium text-red-500">
+              <div className="flex items-center justify-between bg-red-500/10 p-3 rounded-lg">
+                <span className="text-red-700 dark:text-red-300">Over by:</span>
+                <span className="font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(categoryData?.overBudgetAmount || 0)}
                 </span>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Remaining:</span>
-                <span className="font-medium text-green-500">
+              <div className="flex items-center justify-between bg-emerald-500/10 p-3 rounded-lg">
+                <span className="text-emerald-700 dark:text-emerald-300">Remaining:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(categoryData?.remaining || 0)}
                 </span>
               </div>
             )}
             
-            <div className="flex items-center justify-between mt-1 pt-1 border-t">
-              <span className="text-sm text-muted-foreground">Percent used:</span>
-              <span className={cn(
-                "font-medium",
+            <div className="pt-3 border-t border-border/50 flex items-center justify-between">
+              <span className="text-muted-foreground">Percent used:</span>
+              <span className={`font-bold text-lg ${
                 (categoryData?.percentSpent || 0) > 100 
                   ? "text-red-500" 
                   : (categoryData?.percentSpent || 0) > 90 
                     ? "text-amber-500" 
                     : "text-emerald-500"
-              )}>
+              }`}>
                 {Math.round(categoryData?.percentSpent || 0)}%
               </span>
+            </div>
+            
+            {/* Progress bar visualization */}
+            <div className="pt-2">
+              <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${
+                    (categoryData?.percentSpent || 0) > 100 
+                      ? "bg-red-500" 
+                      : (categoryData?.percentSpent || 0) > 90 
+                        ? "bg-amber-500" 
+                        : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min(categoryData?.percentSpent || 0, 100)}%` }}
+                />
+                {/* 100% marker */}
+                <div 
+                  className="absolute top-0 h-full w-0.5 bg-foreground/30"
+                  style={{ left: '100%' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -257,50 +283,69 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       const data = payload[0].payload;
       
       return (
-        <div className="bg-card border rounded-lg p-4 shadow-lg text-foreground">
-          <p className="font-semibold border-b pb-1 mb-2">{label}</p>
+        <div className="bg-card border rounded-xl p-5 shadow-xl text-foreground backdrop-blur-sm min-w-[280px]">
+          <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
+            <Calendar className="h-5 w-5 text-primary" />
+            <h4 className="font-bold text-lg">{label}</h4>
+          </div>
           
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Budget:</span>
-              <span className="font-medium">{formatCurrency(data.budget)}</span>
+              <span className="text-muted-foreground">Budget:</span>
+              <span className="font-semibold text-lg">{formatCurrency(data.budget)}</span>
             </div>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Spent:</span>
-              <span className={cn(
-                "font-medium",
-                data.spent > data.budget ? "text-red-500" : "text-green-500"
-              )}>
+              <span className="text-muted-foreground">Spent:</span>
+              <span className={`font-semibold text-lg ${
+                data.spent > data.budget ? "text-red-500" : "text-emerald-500"
+              }`}>
                 {formatCurrency(data.spent)}
               </span>
             </div>
             
             {data.spent > data.budget ? (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Over Budget:</span>
-                <span className="font-medium text-red-500">
+              <div className="flex items-center justify-between bg-red-500/10 p-3 rounded-lg">
+                <span className="text-red-700 dark:text-red-300">Over Budget:</span>
+                <span className="font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(data.overBudget)}
                 </span>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Savings:</span>
-                <span className="font-medium text-green-500">
+              <div className="flex items-center justify-between bg-emerald-500/10 p-3 rounded-lg">
+                <span className="text-emerald-700 dark:text-emerald-300">Savings:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(data.savings)}
                 </span>
               </div>
             )}
             
-            <div className="flex items-center justify-between mt-1 pt-1 border-t">
-              <span className="text-sm text-muted-foreground">Budget Used:</span>
-              <span className={cn(
-                "font-semibold",
+            <div className="pt-3 border-t border-border/50 flex items-center justify-between">
+              <span className="text-muted-foreground">Budget Used:</span>
+              <span className={`font-bold text-lg ${
                 data.spent > data.budget ? "text-red-500" : 
-                data.spent > data.budget * 0.9 ? "text-amber-500" : "text-green-500"
-              )}>
+                data.spent > data.budget * 0.9 ? "text-amber-500" : "text-emerald-500"
+              }`}>
                 {data.budget > 0 ? ((data.spent / data.budget) * 100).toFixed(1) : 0}%
               </span>
+            </div>
+            
+            {/* Progress bar visualization */}
+            <div className="pt-2">
+              <div className="relative h-2.5 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${
+                    data.spent > data.budget ? "bg-red-500" : 
+                    data.spent > data.budget * 0.9 ? "bg-amber-500" : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min((data.spent / data.budget) * 100 || 0, 100)}%` }}
+                />
+                {/* 100% marker */}
+                <div 
+                  className="absolute top-0 h-full w-0.5 bg-foreground/30"
+                  style={{ left: '100%' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -344,33 +389,33 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
       </div>
 
       {/* Mobile-optimized chart navigation */}
-      <div className="p-3 sm:p-4 border-b overflow-x-auto scrollbar-hide">
+      <div className="p-4 sm:p-5 border-b overflow-x-auto scrollbar-hide">
         <div className="flex min-w-max space-x-2">
           <Button
             variant={activeChart === 'distribution' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveChart('distribution')}
-            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+            className="px-4 text-sm h-10 whitespace-nowrap rounded-lg shadow-sm"
           >
-            <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            <PieChartIcon className="h-4 w-4 mr-2" />
             Budget Distribution
           </Button>
           <Button
             variant={activeChart === 'spending' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveChart('spending')}
-            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+            className="px-4 text-sm h-10 whitespace-nowrap rounded-lg shadow-sm"
           >
-            <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            <BarChart2 className="h-4 w-4 mr-2" />
             Spending vs Budget
           </Button>
           <Button
             variant={activeChart === 'trends' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setActiveChart('trends')}
-            className="px-3 text-xs sm:text-sm h-9 sm:h-10 whitespace-nowrap"
+            className="px-4 text-sm h-10 whitespace-nowrap rounded-lg shadow-sm"
           >
-            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            <TrendingUp className="h-4 w-4 mr-2" />
             Monthly Trends
           </Button>
         </div>
@@ -446,33 +491,33 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
             {spendingVsBudgetData.length > 0 ? (
               <div>
                 {/* Chart Type Selector - More compact for mobile */}
-                <div className="flex justify-center mb-3 sm:mb-6">
-                  <div className="flex border rounded-lg overflow-hidden">
+                <div className="flex justify-center mb-5">
+                  <div className="flex border rounded-lg overflow-hidden shadow-sm">
                     <Button 
                       variant={spendingChartType === 'bar' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setSpendingChartType('bar')}
-                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                      className="h-10 rounded-none px-4 text-sm font-medium"
                     >
-                      <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      <BarChart2 className="h-4 w-4 mr-2" />
                       Bar
                     </Button>
                     <Button 
                       variant={spendingChartType === 'pie' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setSpendingChartType('pie')}
-                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                      className="h-10 rounded-none px-4 text-sm font-medium"
                     >
-                      <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      <PieChartIcon className="h-4 w-4 mr-2" />
                       Pie
                     </Button>
                     <Button 
                       variant={spendingChartType === 'radial' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setSpendingChartType('radial')}
-                      className="h-8 sm:h-9 rounded-none text-xs sm:text-sm"
+                      className="h-10 rounded-none px-4 text-sm font-medium"
                     >
-                      <GitBranch className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                      <GitBranch className="h-4 w-4 mr-2" />
                       Radial
                     </Button>
                   </div>

@@ -1,19 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { validateAmount } from "@/lib/validation";
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, X, DollarSign, Calendar, ChevronUp, ChevronDown, BarChart3, Info, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, X, DollarSign, Calendar, ChevronUp, ChevronDown, BarChart3, Info, Copy, Settings, Activity, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { BudgetCharts } from './components/BudgetCharts';
 import { SortableBudgetList } from './components/SortableBudgetList';
 import { AnnualBudgetSummary } from './components/AnnualBudgetSummary';
 import { BudgetInsights } from './components/BudgetInsights';
+import { BudgetFilters } from './components/BudgetFilters';
+import { BudgetGoals } from './components/BudgetGoals';
+import { BudgetAnalytics } from './components/BudgetAnalytics';
+import { BudgetComparison } from './components/BudgetComparison';
 import { Budget, CategorySpending, Category, BudgetFilter } from './types';
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -51,9 +55,90 @@ export default function BudgetPage() {
   const [expandedFab, setExpandedFab] = useState(false);
   const [showBudgetSelector, setShowBudgetSelector] = useState(false);
   const [budgetOptions, setBudgetOptions] = useState<Budget[]>([]);
+  
+  // New enhanced state for filtering and sorting
+  const [searchTerm, setSearchTerm] = useState('');
+  const [budgetFilter, setBudgetFilter] = useState<BudgetFilter>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'amount' | 'spent' | 'percentage'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'monthly' | 'weekly' | 'yearly'>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'comparison'>('overview');
 
   // Computed values
   const hasExpenseCategories = categories.some(c => c.type !== "income");
+  
+  // Enhanced filtering and sorting logic
+  const filteredAndSortedData = useMemo(() => {
+    let filteredBudgets = budgets;
+    let filteredSpending = categorySpending;
+
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filteredBudgets = budgets.filter(budget => 
+        budget.category_name?.toLowerCase().includes(searchLower)
+      );
+      filteredSpending = categorySpending.filter(spending => 
+        spending.category_name.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply budget status filter
+    if (budgetFilter !== 'all') {
+      const relevantCategoryIds = new Set();
+      
+      if (budgetFilter === 'over-budget') {
+        filteredSpending = filteredSpending.filter(spending => spending.percentage > 100);
+      } else if (budgetFilter === 'under-budget') {
+        filteredSpending = filteredSpending.filter(spending => spending.percentage <= 100);
+      }
+      
+      filteredSpending.forEach(spending => relevantCategoryIds.add(spending.category_id));
+      filteredBudgets = filteredBudgets.filter(budget => relevantCategoryIds.has(budget.category_id));
+    }
+
+    // Apply period filter
+    if (periodFilter !== 'all') {
+      filteredBudgets = filteredBudgets.filter(budget => budget.period === periodFilter);
+    }
+
+    // Apply sorting
+    filteredSpending.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.category_name.toLowerCase();
+          bValue = b.category_name.toLowerCase();
+          break;
+        case 'amount':
+          aValue = a.budget;
+          bValue = b.budget;
+          break;
+        case 'spent':
+          aValue = a.spent;
+          bValue = b.spent;
+          break;
+        case 'percentage':
+          aValue = a.percentage;
+          bValue = b.percentage;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (typeof aValue === 'string') {
+        const comparison = aValue.localeCompare(bValue as string);
+        return sortOrder === 'asc' ? comparison : -comparison;
+      } else {
+        const comparison = (aValue as number) - (bValue as number);
+        return sortOrder === 'asc' ? comparison : -comparison;
+      }
+    });
+
+    return { budgets: filteredBudgets, spending: filteredSpending };
+  }, [budgets, categorySpending, searchTerm, budgetFilter, periodFilter, sortBy, sortOrder]);
   
   useEffect(() => {
     fetchBudgets();
@@ -89,27 +174,45 @@ export default function BudgetPage() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
 
-      // Fetch budgets
+      // Fetch budgets with proper category join and validation
       const { data: budgetData, error: budgetError } = await supabase
         .from("budgets")
-        .select("*, categories(name)")
-        .eq("user_id", userData.user.id);
+        .select(`
+          *,
+          categories!inner(
+            id,
+            name,
+            type,
+            is_active
+          )
+        `)
+        .eq("user_id", userData.user.id)
+        .eq("categories.is_active", true);
 
       if (budgetError) throw budgetError;
       
-      // Map budgets to include category name
+      // Map budgets to include category name and ensure proper structure
       let mappedBudgets = budgetData?.map(budget => ({
-        ...budget,
-        category_name: budget.categories?.name || 'Uncategorized',
-        order: budget.order || 0 // Ensure order property exists
+        id: budget.id,
+        user_id: budget.user_id,
+        category_id: budget.category_id,
+        category_name: budget.categories?.name || 'Unknown Category',
+        amount: Number(budget.amount), // Ensure it's a number
+        period: budget.period,
+        created_at: budget.created_at,
+        order: budget.order || 0
       })) || [];
       
-      // Sort budgets by order if available, otherwise use default order
+      // Sort budgets by order
       mappedBudgets.sort((a, b) => (a.order || 0) - (b.order || 0));
-      
       setBudgets(mappedBudgets);
 
-      // Fetch transactions to calculate spending by category
+      // Fetch transactions for spending calculation with proper date filtering
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+
       const { data: transactionData, error: transactionError } = await supabase
         .from("transactions")
         .select("*")
@@ -118,61 +221,70 @@ export default function BudgetPage() {
 
       if (transactionError) throw transactionError;
 
-      // Calculate spending by category_id
-      const categoriesSpent: { [key: string]: number } = {};
-      (transactionData || []).forEach((transaction) => {
-        if (categoriesSpent[transaction.category_id]) {
-          categoriesSpent[transaction.category_id] += transaction.amount;
-        } else {
-          categoriesSpent[transaction.category_id] = transaction.amount;
-        }
-      });
-
-      // Fetch all categories to get names
-      const { data: allCategories, error: categoryError } = await supabase
-        .from("categories")
-        .select("*");
-        
-      if (categoryError) throw categoryError;
+      // Calculate spending by category_id with proper period filtering
+      const categoriesSpent: { [key: string]: { monthly: number, weekly: number, yearly: number } } = {};
       
-      const categoryMap = new Map();
-      (allCategories || []).forEach(cat => {
-        categoryMap.set(cat.id, cat.name);
-      });
-
-      // Merge budget data with spending data
-      const spending: CategorySpending[] = [];
-
-      // First, add categories with budgets
-      (mappedBudgets || []).forEach((budget) => {
-        const spent = categoriesSpent[budget.category_id] || 0;
-        const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
-        spending.push({
-          category_id: budget.category_id,
-          category_name: budget.category_name || 'Uncategorized',
-          spent,
-          budget: budget.amount,
-          percentage,
-        });
-      });
-
-      // Then, add categories without budgets but with spending
-      Object.keys(categoriesSpent).forEach((category_id) => {
-        if (!spending.some((s) => s.category_id === category_id)) {
-          spending.push({
-            category_id,
-            category_name: categoryMap.get(category_id) || 'Uncategorized',
-            spent: categoriesSpent[category_id],
-            budget: 0,
-            percentage: 100, // 100% of 0 budget
-          });
+      (transactionData || []).forEach((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        const categoryId = transaction.category_id;
+        
+        if (!categoriesSpent[categoryId]) {
+          categoriesSpent[categoryId] = { monthly: 0, weekly: 0, yearly: 0 };
         }
+        
+        const amount = Number(transaction.amount);
+        
+        // Monthly spending (current month)
+        if (transactionDate >= startOfMonth) {
+          categoriesSpent[categoryId].monthly += amount;
+        }
+        
+        // Weekly spending (current week)  
+        if (transactionDate >= startOfWeek) {
+          categoriesSpent[categoryId].weekly += amount;
+        }
+        
+        // Yearly spending (current year)
+        if (transactionDate >= startOfYear) {
+          categoriesSpent[categoryId].yearly += amount;
+        }
+      });
+
+      // Create spending data with proper period-based calculations
+      const spending: CategorySpending[] = mappedBudgets.map((budget) => {
+        const categorySpending = categoriesSpent[budget.category_id] || { monthly: 0, weekly: 0, yearly: 0 };
+        
+        // Get the appropriate spending amount based on budget period
+        let spent = 0;
+        switch (budget.period) {
+          case 'weekly':
+            spent = categorySpending.weekly;
+            break;
+          case 'monthly':
+            spent = categorySpending.monthly;
+            break;
+          case 'yearly':
+            spent = categorySpending.yearly;
+            break;
+          default:
+            spent = categorySpending.monthly;
+        }
+        
+        const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+        
+        return {
+          category_id: budget.category_id,
+          category_name: budget.category_name,
+          spent: spent,
+          budget: budget.amount,
+          percentage: percentage,
+        };
       });
 
       // Sort by percentage (highest first)
       spending.sort((a, b) => b.percentage - a.percentage);
-
       setCategorySpending(spending);
+      
     } catch (error) {
       console.error("Error fetching budgets:", error);
       toast.error("Failed to load budget data", {
@@ -216,9 +328,7 @@ export default function BudgetPage() {
     try {
       // Validate required fields
       if (!formData.category_id || !formData.amount) {
-        toast.error("Please fill all required fields", {
-          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-        });
+        setFormError("Please fill all required fields");
         setFormLoading(false);
         return;
       }
@@ -226,9 +336,21 @@ export default function BudgetPage() {
       // Validate amount is a number and > 0
       const budgetAmount = parseFloat(formData.amount);
       if (isNaN(budgetAmount) || budgetAmount <= 0) {
-        toast.error("Please enter a valid amount greater than zero", {
-          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-        });
+        setFormError("Please enter a valid amount greater than zero");
+        setFormLoading(false);
+        return;
+      }
+      
+      // Validate category exists and is active
+      const { data: categoryCheck } = await supabase
+        .from("categories")
+        .select("id, name, is_active")
+        .eq("id", formData.category_id)
+        .eq("is_active", true)
+        .single();
+      
+      if (!categoryCheck) {
+        setFormError("Selected category is not valid or has been deleted");
         setFormLoading(false);
         return;
       }
@@ -604,12 +726,12 @@ export default function BudgetPage() {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4 pb-4 border-b">
-        <div className="flex items-center gap-3">
-          <Logo size="md" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-10 gap-4 md:gap-6 pb-6 border-b border-border/70">
+        <div className="flex items-center gap-4">
+          <Logo size="lg" />
           <div>
             <motion.h1 
-              className="text-xl md:text-2xl font-bold text-foreground"
+              className="text-2xl md:text-3xl font-bold text-foreground tracking-tight"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
@@ -617,7 +739,7 @@ export default function BudgetPage() {
               Budget Planner
             </motion.h1>
             <motion.p 
-              className="text-muted-foreground text-xs md:text-sm"
+              className="text-muted-foreground text-sm md:text-base mt-1"
               initial={{ x: -10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.2 }}
@@ -640,51 +762,39 @@ export default function BudgetPage() {
               setShowForm(true);
             }}
             size="lg"
-            className="w-full h-14 gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 shadow-md hover:shadow-lg transition-all"
+            className="w-full h-14 gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Plus className="h-6 w-6" />
             <span className="font-medium text-base">Add New Budget</span>
           </Button>
         </motion.div>
         
-        {/* Hide New Budget button on mobile - will show FAB instead */}
+        {/* Desktop buttons with enhanced styling */}
         <motion.div
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.3 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="hidden md:flex space-x-2"
+          className="hidden md:flex space-x-3"
         >
           <Button
             onClick={() => copyFromLastPeriod()}
-            className="relative overflow-hidden group"
+            variant="outline"
+            className="h-12 px-5 text-base border-border hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
             disabled={copyLoading}
           >
-            <span className="relative z-10 flex items-center gap-1">
-              {copyLoading ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-1"></div>
-                  Loading budgets...
-                </>
-              ) : (
-                <>
-                  <Copy size={16} />
-                  Copy From Last Period
-                </>
-              )}
-            </span>
-            <motion.div 
-              className="absolute inset-0 bg-primary-gradient"
-              animate={{ 
-                x: ["0%", "100%"],
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
+            {copyLoading ? (
+              <>
+                <div className="h-4 w-4 border-2 border-t-transparent border-primary rounded-full animate-spin"></div>
+                Loading...
+              </>
+            ) : (
+              <>
+                <Copy size={18} />
+                Copy From Last Period
+              </>
+            )}
           </Button>
           
           <Button 
@@ -692,25 +802,42 @@ export default function BudgetPage() {
               resetForm();
               setShowForm(!showForm);
             }}
-            className="relative overflow-hidden group h-12 px-5 text-base"
+            className="h-12 px-6 text-base bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
           >
-            <span className="relative z-10 flex items-center gap-1.5">
-              {showForm ? <X size={18} /> : <Plus size={18} />}{" "}
-              {showForm ? "Cancel" : "New Budget"}
-            </span>
-            <motion.div 
-              className="absolute inset-0 bg-primary-gradient"
-              animate={{ 
-                x: ["0%", "100%"],
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
+            {showForm ? <X size={18} /> : <Plus size={18} />}
+            {showForm ? "Cancel" : "New Budget"}
           </Button>
         </motion.div>
+      </div>
+
+      {/* Enhanced Navigation Tabs */}
+      <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
+        <div className="flex flex-wrap gap-2 mb-6 border-b border-border/30 pb-4">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'analytics', label: 'Analytics', icon: Activity },
+            { id: 'goals', label: 'Goals', icon: Target },
+            { id: 'comparison', label: 'Comparison', icon: TrendingUp }
+          ].map((view) => {
+            const Icon = view.icon;
+            return (
+              <Button
+                key={view.id}
+                variant={activeView === view.id ? 'default' : 'ghost'}
+                size="sm"
+                className={`h-10 px-4 transition-all duration-200 ${
+                  activeView === view.id 
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setActiveView(view.id as any)}
+              >
+                <Icon className="h-4 w-4 mr-2" />
+                {view.label}
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Show form errors in a more visible way */}
@@ -748,88 +875,180 @@ export default function BudgetPage() {
         )}
       </AnimatePresence>
 
-      {/* Budget Overview Cards - Improved with better visual hierarchy and responsive design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
+      {/* Enhanced Budget Overview Cards with improved visual design */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8">
         {/* Total Budget Card */}
-        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
-          <div className="flex justify-between items-start">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          whileHover={{ y: -5 }}
+          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Total Budget</h3>
-              <p className="text-xl sm:text-2xl font-bold mt-1">
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Budget</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 {formatCurrency(budgets.reduce((sum, budget) => sum + budget.amount, 0))}
               </p>
-              <div className="mt-1 text-xs text-muted-foreground">
+              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
                 {budgets.length} budget{budgets.length !== 1 ? 's' : ''} set
               </div>
             </div>
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center backdrop-blur-sm">
+              <DollarSign className="h-6 w-6 text-primary" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Total Spent Card */}
-        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform"></div>
-          <div className="flex justify-between items-start">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          whileHover={{ y: -5 }}
+          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Total Spent</h3>
-              <p className="text-xl sm:text-2xl font-bold mt-1 text-red-500">
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Spent</h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 text-red-500">
                 {formatCurrency(categorySpending.reduce((sum, cat) => sum + cat.spent, 0))}
               </p>
-              <div className="mt-1 text-xs text-muted-foreground">
+              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
                 Across {categorySpending.length} categor{categorySpending.length !== 1 ? 'ies' : 'y'}
               </div>
             </div>
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-red-500/10 flex items-center justify-center">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+            <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center backdrop-blur-sm">
+              <BarChart3 className="h-6 w-6 text-red-500" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Budget Status Card */}
-        <div className="rounded-xl border bg-card p-4 sm:p-5 shadow-sm transition-all hover:shadow-md relative overflow-hidden group">
-          <div className={`absolute top-0 right-0 w-24 h-24 ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500/5' : 'bg-emerald-500/5'} rounded-full -mr-8 -mt-8 group-hover:scale-110 transition-transform`}></div>
-          <div className="flex justify-between items-start">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          whileHover={{ y: -5 }}
+          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
+        >
+          <div className={`absolute top-0 right-0 w-32 h-32 ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500/5' : 'bg-emerald-500/5'} rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500`}></div>
+          <div className="flex justify-between items-start relative z-10">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-              <p className={`text-xl sm:text-2xl font-bold mt-1 ${
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">Status</h3>
+              <p className={`text-2xl sm:text-3xl font-bold mt-1 ${
                 categorySpending.some(cat => cat.percentage > 100) 
                   ? 'text-red-500' 
-                  : 'text-emerald-500'
+                  : 'bg-gradient-to-r from-emerald-500 to-green-500 bg-clip-text text-transparent'
               }`}>
                 {getBudgetStatusMessage()}
               </p>
-              <div className="mt-1 text-xs text-muted-foreground">
+              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                <div className={`h-1.5 w-1.5 rounded-full ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
                 {categorySpending.some(cat => cat.percentage > 90 && cat.percentage <= 100) 
                   ? `${categorySpending.filter(cat => cat.percentage > 90 && cat.percentage <= 100).length} approaching limit` 
                   : 'Your budgets are healthy'}
               </div>
             </div>
-            <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full ${
+            <div className={`h-12 w-12 rounded-xl ${
               categorySpending.some(cat => cat.percentage > 100) 
                 ? 'bg-red-500/10' 
                 : 'bg-emerald-500/10'
-            } flex items-center justify-center`}>
+            } flex items-center justify-center backdrop-blur-sm`}>
               {categorySpending.some(cat => cat.percentage > 100) ? (
-                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                <AlertTriangle className="h-6 w-6 text-red-500" />
               ) : (
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
+                <CheckCircle className="h-6 w-6 text-emerald-500" />
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Add Annual Budget Summary */}
-      {budgets.length > 0 && <AnnualBudgetSummary budgets={budgets} categorySpending={categorySpending} />}
-      
-      {/* Add Budget Charts */}
-      {budgets.length > 0 && <BudgetCharts budgets={budgets} categorySpending={categorySpending} />}
+      {/* Enhanced Content Based on Active View */}
+      <AnimatePresence mode="wait">
+        {activeView === 'overview' && (
+          <motion.div
+            key="overview"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Budget Filters */}
+            {budgets.length > 0 && (
+              <div className="mb-6">
+                <BudgetFilters
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  filter={budgetFilter}
+                  onFilterChange={setBudgetFilter}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  sortOrder={sortOrder}
+                  onSortOrderChange={setSortOrder}
+                  periodFilter={periodFilter}
+                  onPeriodFilterChange={setPeriodFilter}
+                  showFilters={showFilters}
+                  onToggleFilters={() => setShowFilters(!showFilters)}
+                  totalBudgets={budgets.length}
+                  filteredCount={filteredAndSortedData.budgets.length}
+                />
+              </div>
+            )}
 
-      {/* Add Budget Insights */}
-      {budgets.length > 0 && <BudgetInsights budgets={budgets} categorySpending={categorySpending} />}
+            {/* Annual Budget Summary */}
+            {budgets.length > 0 && <AnnualBudgetSummary budgets={budgets} categorySpending={categorySpending} />}
+            
+            {/* Budget Charts */}
+            {budgets.length > 0 && <BudgetCharts budgets={budgets} categorySpending={categorySpending} />}
+
+            {/* Budget Insights */}
+            {budgets.length > 0 && <BudgetInsights budgets={budgets} categorySpending={categorySpending} />}
+          </motion.div>
+        )}
+
+        {activeView === 'analytics' && (
+          <motion.div
+            key="analytics"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BudgetAnalytics budgets={budgets} categorySpending={categorySpending} />
+          </motion.div>
+        )}
+
+        {activeView === 'goals' && (
+          <motion.div
+            key="goals"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BudgetGoals budgets={budgets} categorySpending={categorySpending} />
+          </motion.div>
+        )}
+
+        {activeView === 'comparison' && (
+          <motion.div
+            key="comparison"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BudgetComparison budgets={budgets} categorySpending={categorySpending} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Budget form */}
       <AnimatePresence>
@@ -841,40 +1060,58 @@ export default function BudgetPage() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden mb-6"
           >
-            <form onSubmit={handleSubmit} className="rounded-xl border bg-card p-4 sm:p-6 shadow-sm">
-              <h3 className="text-xl font-bold mb-5">{isEditing ? "Edit Budget" : "Create New Budget"}</h3>
-              
-              <div className="grid grid-cols-1 gap-4 sm:gap-6">
+            <form onSubmit={handleSubmit} className="rounded-2xl border bg-card p-5 sm:p-7 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <label htmlFor="category_id" className="block text-sm font-medium mb-1">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                    {isEditing ? "Edit Budget" : "Create New Budget"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {isEditing ? "Update your budget settings" : "Set a new budget for a category"}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-5 sm:gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="category_id" className="block text-sm font-medium text-foreground">
                     Category
                   </label>
-                  <select
-                    id="category_id"
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleInputChange}
-                    className="w-full rounded-md border border-input bg-background px-3 py-3 text-base md:py-2 touch-manipulation"
-                    disabled={formLoading || !hasExpenseCategories}
-                  >
-                    <option value="">Select a category</option>
-                    {categories
-                      .filter(c => c.type !== "income")
-                      .map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="category_id"
+                      name="category_id"
+                      value={formData.category_id}
+                      onChange={handleInputChange}
+                      className="w-full rounded-lg border border-input bg-background px-4 py-3.5 text-base md:py-2.5 touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[48px]"
+                      disabled={formLoading || !hasExpenseCategories}
+                    >
+                      <option value="">Select a category</option>
+                      {categories
+                        .filter(c => c.type !== "income")
+                        .map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
                   {!hasExpenseCategories && (
-                    <p className="text-xs text-red-500 mt-1">
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
                       No expense categories available. Please create a category first.
                     </p>
                   )}
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-foreground">
                     Budget Amount
                   </label>
                   <ValidatedInput
@@ -887,11 +1124,12 @@ export default function BudgetPage() {
                     prefix="$"
                     disabled={formLoading}
                     validationFn={validateAmount}
+                    className="rounded-lg border border-input bg-background px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                   />
                 </div>
                 
-                <div>
-                  <label htmlFor="period" className="block text-sm font-medium mb-1">
+                <div className="space-y-2">
+                  <label htmlFor="period" className="block text-sm font-medium text-foreground">
                     Budget Period
                   </label>
                   <div className="relative">
@@ -900,19 +1138,21 @@ export default function BudgetPage() {
                       name="period"
                       value={formData.period}
                       onChange={handleInputChange}
-                      className="w-full rounded-md border border-input bg-background px-3 py-3 text-base md:py-2 appearance-none touch-manipulation"
+                      className="w-full rounded-lg border border-input bg-background px-4 py-3.5 text-base md:py-2.5 appearance-none touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[48px]"
                       disabled={formLoading}
                     >
                       <option value="monthly">Monthly</option>
                       <option value="weekly">Weekly</option>
                       <option value="yearly">Yearly</option>
                     </select>
-                    <Calendar className="h-4 w-4 text-muted-foreground absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-6">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-8 pt-6 border-t border-border/50">
                 <Button
                   type="button"
                   variant="outline"
@@ -921,14 +1161,14 @@ export default function BudgetPage() {
                     resetForm();
                   }}
                   disabled={formLoading}
-                  className="w-full mt-3 sm:mt-0 sm:w-auto min-h-[44px] h-12 px-5 text-base"
+                  className="w-full mt-3 sm:mt-0 sm:w-auto min-h-[46px] h-12 px-6 text-base rounded-lg transition-all duration-300 hover:shadow-md"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={formLoading}
-                  className="w-full sm:w-auto min-h-[44px] h-12 px-5 text-base"
+                  className="w-full sm:w-auto min-h-[46px] h-12 px-6 text-base rounded-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
                 >
                   {formLoading ? (
                     <>
@@ -936,7 +1176,10 @@ export default function BudgetPage() {
                       {isEditing ? "Updating..." : "Saving..."}
                     </>
                   ) : (
-                    <>{isEditing ? "Update Budget" : "Save Budget"}</>
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {isEditing ? "Update Budget" : "Save Budget"}
+                    </>
                   )}
                 </Button>
               </div>
@@ -945,157 +1188,131 @@ export default function BudgetPage() {
         )}
       </AnimatePresence>
 
-      {/* Budget Progress - Modern visualization */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden mb-6">
-        <div className="border-b p-5">
-          <h2 className="text-xl font-bold">Budget Progress</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track your spending against category budgets
-          </p>
+      {/* Enhanced Budget Progress Visualization */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="rounded-2xl border bg-card shadow-lg overflow-hidden mb-8"
+      >
+        <div className="border-b p-6 bg-gradient-to-r from-card to-card/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Budget Progress
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                Track your spending against category budgets
+              </p>
+            </div>
+            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-primary" />
+            </div>
+          </div>
         </div>
         
-        {categorySpending.length > 0 ? (
+        {filteredAndSortedData.spending.length > 0 ? (
           <SortableBudgetList
-            budgets={budgets}
-            categorySpending={categorySpending}
+            budgets={filteredAndSortedData.budgets}
+            categorySpending={filteredAndSortedData.spending}
             onReorder={handleReorderBudgets}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
+        ) : budgets.length > 0 ? (
+          <div className="p-10 text-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="rounded-full bg-muted h-16 w-16 flex items-center justify-center mx-auto mb-5"
+            >
+              <DollarSign className="h-8 w-8 text-muted-foreground" />
+            </motion.div>
+            <motion.h3 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="text-xl font-bold mb-2"
+            >
+              No budgets match your filters
+            </motion.h3>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="text-muted-foreground mb-6 max-w-md mx-auto"
+            >
+              Try adjusting your search terms or filters to see more results
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.4 }}
+            >
+              <Button 
+                onClick={() => {
+                  setSearchTerm('');
+                  setBudgetFilter('all');
+                  setPeriodFilter('all');
+                }} 
+                variant="outline"
+                className="min-h-[48px] h-12 px-6 text-base"
+              >
+                Clear Filters
+              </Button>
+            </motion.div>
+          </div>
         ) : (
-          <div className="p-8 text-center">
-            <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-3">
-              <DollarSign className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium">No budgets set yet</h3>
-            <p className="text-muted-foreground text-sm mt-1 mb-4">
-              Start by creating your first budget to track your spending
-            </p>
+          <div className="p-10 text-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="rounded-full bg-muted h-16 w-16 flex items-center justify-center mx-auto mb-5"
+            >
+              <DollarSign className="h-8 w-8 text-muted-foreground" />
+            </motion.div>
+            <motion.h3 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="text-xl font-bold mb-2"
+            >
+              No budgets set yet
+            </motion.h3>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="text-muted-foreground mb-6 max-w-md mx-auto"
+            >
+              Start by creating your first budget to track your spending and gain insights into your financial habits
+            </motion.p>
             {!showForm && (
-              <div className="space-y-4">
-                <Button onClick={() => setShowForm(true)} className="min-h-[44px] h-12 px-5 text-base bg-gradient-to-r from-primary to-primary/80 shadow-md hover:shadow-lg transition-all">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+                className="space-y-5"
+              >
+                <Button 
+                  onClick={() => setShowForm(true)} 
+                  size="lg"
+                  className="min-h-[48px] h-12 px-6 text-base bg-gradient-to-r from-primary to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+                >
                   <Plus className="mr-2 h-5 w-5" /> Add Your First Budget
                 </Button>
                 <div className="text-sm text-muted-foreground">
-                  <p>You can also use the "Add Budget" button at the top of the page</p>
+                  <p>You can also use the "New Budget" button at the top of the page</p>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         )}
-      </div>
+      </motion.div>
 
-      {/* Budget Overview Table - Convert to cards on mobile */}
-      {budgets.length > 0 && (
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="p-5 border-b">
-            <h2 className="text-xl font-bold">Budget Settings</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage all your budget configurations
-            </p>
-          </div>
-          
-          {/* Desktop table view */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="py-3 px-4 text-left font-medium text-muted-foreground">CATEGORY</th>
-                  <th className="py-3 px-4 text-left font-medium text-muted-foreground">PERIOD</th>
-                  <th className="py-3 px-4 text-left font-medium text-muted-foreground">AMOUNT</th>
-                  <th className="py-3 px-4 text-right font-medium text-muted-foreground">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {budgets.map((budget) => (
-                  <tr key={budget.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div className="h-2 w-2 rounded-full bg-primary mr-2.5"></div>
-                        <span className="font-medium">{budget.category_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 capitalize">{budget.period}</td>
-                    <td className="py-3 px-4 font-medium">{formatCurrency(budget.amount)}</td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex space-x-2 justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                          onClick={() => handleEdit(budget)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          onClick={() => handleDelete(budget.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Mobile card view */}
-          <div className="md:hidden p-3 sm:p-4 space-y-2 sm:space-y-3">
-            {budgets.map((budget) => (
-              <div 
-                key={budget.id} 
-                className="bg-card border rounded-lg p-3 sm:p-4 hover:shadow-md transition-all"
-                onTouchStart={(e) => handleTouchStart(e, budget.category_id)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                <div className="flex items-center mb-2">
-                  <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                  <span className="font-medium">{budget.category_name}</span>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                  <div>
-                    <span className="text-muted-foreground">Period:</span>
-                    <p className="font-medium capitalize">{budget.period}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Amount:</span>
-                    <p className="font-medium">{formatCurrency(budget.amount)}</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-11 w-11 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    onClick={() => handleEdit(budget)}
-                    aria-label={`Edit budget for ${budget.category_name}`}
-                  >
-                    <Pencil className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-11 w-11 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    onClick={() => handleDelete(budget.id)}
-                    aria-label={`Delete budget for ${budget.category_name}`}
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       {/* Add a confirmation modal */}
       <AnimatePresence>
@@ -1238,14 +1455,16 @@ export default function BudgetPage() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Sticky Add Budget Button - Replacement for the FAB */}
+      {/* Enhanced Mobile Sticky Add Budget Button */}
       {!showForm && (
         <div className="fixed bottom-6 left-0 right-0 px-4 z-30 md:hidden pointer-events-none">
           <div className="pointer-events-auto mx-auto max-w-md">
             <motion.div
               initial={{ y: 80, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ type: "spring", delay: 0.5 }}
+              transition={{ type: "spring", delay: 0.5, stiffness: 300, damping: 20 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <Button
                 onClick={() => {
@@ -1253,11 +1472,14 @@ export default function BudgetPage() {
                   setShowForm(true);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-full py-6 shadow-lg rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:shadow-xl transition-all"
+                size="lg"
+                className="w-full py-6 shadow-xl rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary hover:shadow-2xl transition-all duration-300 font-semibold text-base"
               >
-                <div className="flex items-center justify-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  <span className="font-medium">Create Budget</span>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center">
+                    <Plus className="h-4 w-4 text-white" />
+                  </div>
+                  <span>Create Budget</span>
                 </div>
               </Button>
             </motion.div>

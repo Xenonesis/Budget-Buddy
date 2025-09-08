@@ -472,6 +472,180 @@
   .bg-gradient-danger {
     @apply bg-gradient-to-r from-rose-600 to-red-600 dark:from-rose-500 dark:to-red-500;
   }
+  
+  .bg-gradient-animated {
+    background: linear-gradient(-45deg, #9333ea, #7c3aed, #a78bfa, #9333ea);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+  }
+  
+  .dark .bg-gradient-animated {
+    background: linear-gradient(-45deg, #7c3aed, #6d28d9, #8b5cf6, #7c3aed);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+  }
+  
+  .border-gradient-primary {
+    position: relative;
+    border: none;
+  }
+  
+  .border-gradient-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, #9333ea, #7c3aed, #a78bfa);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+  }
+  
+  .shadow-card {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .shadow-card {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 15px 10px -5px rgba(0, 0, 0, 0.08);
+  }
+  
+  .dark .shadow-card-hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 15px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  
+  /* Enhanced login page utilities */
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(120, 119, 198, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 119, 198, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .glass-morphism {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+  
+  .glow-primary-strong {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Enhanced focus states */
+  .focus-glow:focus-within {
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1), 0 0 20px rgba(124, 58, 237, 0.2);
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  .smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Enhanced button hover effects */
+  .btn-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .btn-hover-lift:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Theme transition styles */
+  .theme-transitioning * {
+    transition: background-color var(--theme-transition-duration) ease,
+                color var(--theme-transition-duration) ease,
+                border-color var(--theme-transition-duration) ease,
+                box-shadow var(--theme-transition-duration) ease !important;
+  }
+
+  .theme-transitioning {
+    transition: background-color var(--theme-transition-duration) ease,
+                color var(--theme-transition-duration) ease !important;
+  }
+
+  /* Smooth theme preview animations */
+  .theme-preview {
+    transition: all 0.2s ease;
+  }
+
+  .theme-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .stagger-5 { animation-delay: 0.5s; }
+  
+  /* Add the animate-grid keyframes for the RetroGrid component */
+  .animate-grid {
+    animation: grid 10s linear infinite;
+  }
+  
+  @keyframes grid {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(var(--cell-size), var(--cell-size));
+    }
+  }
 
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out forwards;

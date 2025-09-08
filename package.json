@@ -1,6 +1,6 @@
 {
   "name": "budget-buddy",
-  "version": "22.00",
+  "version": "22.50",
   "private": true,
   "scripts": {
     "dev": "next dev",

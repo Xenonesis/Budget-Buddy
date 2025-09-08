@@ -5,7 +5,7 @@ All notable changes to the Budget Buddy application will be documented in this f
 ## [22.00] - 2025-09-08
 
 ### Added
-- Updated to version v22.00
+- Updated to version v22.50
 - Enhanced version management and release process
 
 ## [20.00] - 2025-09-06

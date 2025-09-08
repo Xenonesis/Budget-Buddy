@@ -1,4 +1,4 @@
-# 🚀 Budget Buddy v22.00 Deployment Guide
+# 🚀 Budget Buddy v22.50 Deployment Guide
 
 ## Vercel Deployment Troubleshooting
 
@@ -53,7 +53,7 @@ To force a new deployment:
 vercel --prod --force
 
 # Or trigger via Git
-git commit --allow-empty -m "Force deployment v22.00"
+git commit --allow-empty -m "Force deployment v22.50"
 git push origin main
 ```
 
@@ -75,7 +75,7 @@ If experiencing cache issues:
 
 ### Version Information
 
-- **Current Version**: v22.00
+- **Current Version**: v22.50
 - **Last Updated**: September 8, 2025
 - **Build Target**: Next.js 15.5.0
 - **Node.js**: 18.x or higher
