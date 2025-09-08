@@ -60,7 +60,7 @@ Your enhanced charts with category-wise spending pie chart, monthly spending tre
 2. `components/dashboard/charts/monthly-spending-trend.tsx` - Enhanced trend chart  
 3. `components/dashboard/charts/year-over-year-comparison.tsx` - New YoY component
 4. `components/dashboard/enhanced-dashboard.tsx` - Unified dashboard component
-5. `components/dashboard/example-usage.tsx` - Usage examples
+5. All components use real data from the database - no mock data
 
 ### **Integration Points**:
 - **Main Dashboard**: Enhanced charts replace basic charts in charts section

@@ -280,7 +280,7 @@ export class DashboardEnhancementService {
   }
 
   /**
-   * Remove mock/fake data and replace with real calculations
+   * All calculations use real data from database
    */
   static async getEnhancedMonthlyData(userId: string, startDate: Date, endDate: Date): Promise<{
     name: string;

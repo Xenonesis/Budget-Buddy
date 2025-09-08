@@ -330,7 +330,7 @@ export function CTASection() {
                   <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-medium">JD</div>
                   <div>
                     <div className="text-sm font-medium">Jamie Davis</div>
-                    <div className="text-xs text-white/70">Saved $4,200 in 6 months</div>
+                    <div className="text-xs text-white/70">Significant savings achieved</div>
                   </div>
                 </motion.div>
               </div>

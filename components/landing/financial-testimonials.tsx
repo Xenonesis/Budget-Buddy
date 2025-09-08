@@ -14,7 +14,7 @@ interface FinancialTestimonial {
 const financialTestimonials: FinancialTestimonial[] = [
   {
     id: 1,
-    quote: "Budget Buddy transformed my financial life! I've saved over $3,000 in just 6 months by tracking my expenses and following the AI-powered recommendations. The automated categorization is incredibly accurate.",
+    quote: "Budget Buddy transformed my financial life! I've saved significantly by tracking my expenses and following the AI-powered recommendations. The automated categorization is incredibly accurate.",
     name: "Sarah Chen",
     username: "@sarahchen_finance",
     avatar: generateUserAvatar("Sarah Chen", 1)
@@ -28,7 +28,7 @@ const financialTestimonials: FinancialTestimonial[] = [
   },
   {
     id: 3,
-    quote: "The AI insights are spot-on! It identified subscription services I forgot about, saving me $200/month. The goal tracking feature helped me save for my dream vacation in record time.",
+    quote: "The AI insights are spot-on! It identified subscription services I forgot about, saving me money every month. The goal tracking feature helped me save for my dream vacation in record time.",
     name: "Emily Johnson",
     username: "@emily_saves",
     avatar: generateUserAvatar("Emily Johnson", 3)
@@ -42,7 +42,7 @@ const financialTestimonials: FinancialTestimonial[] = [
   },
   {
     id: 5,
-    quote: "Budget Buddy's analytics revealed spending patterns I never noticed. I've reduced my food expenses by 30% and increased my emergency fund by 400%. The visual reports are incredibly helpful!",
+    quote: "Budget Buddy's analytics revealed spending patterns I never noticed. I've significantly reduced my food expenses and grown my emergency fund. The visual reports are incredibly helpful!",
     name: "Jessica Williams",
     username: "@jess_budgets",
     avatar: generateUserAvatar("Jessica Williams", 5)
