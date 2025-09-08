@@ -2,19 +2,19 @@
 
 import { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Budget, BudgetFilter, CategorySpending } from '../types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, AlertTriangle, CheckCircle, DollarSign, GripVertical, Filter } from 'lucide-react';
+import { Pencil, Trash2, AlertTriangle, CheckCircle, GripVertical, Filter, TrendingUp, TrendingDown, Target, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SortableBudgetItemProps {
-  budget: Budget;
-  categorySpending: CategorySpending | undefined;
-  onEdit: (budget: Budget) => void;
-  onDelete: (id: string) => void;
+  readonly budget: Budget;
+  readonly categorySpending: CategorySpending | undefined;
+  readonly onEdit: (budget: Budget) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: SortableBudgetItemProps) {
@@ -36,11 +36,40 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
   };
 
   const getProgressBarColor = (percentage: number) => {
-    if (percentage > 100) return "bg-red-500";
-    if (percentage > 85) return "bg-amber-500";
-    if (percentage > 70) return "bg-amber-400";
-    return "bg-emerald-500";
+    if (percentage > 100) return "bg-gradient-to-r from-red-500 to-red-600";
+    if (percentage > 85) return "bg-gradient-to-r from-amber-500 to-orange-500";
+    if (percentage > 70) return "bg-gradient-to-r from-yellow-500 to-amber-500";
+    return "bg-gradient-to-r from-emerald-500 to-green-500";
   };
+
+  const getProgressBarGlow = (percentage: number) => {
+    if (percentage > 100) return "shadow-red-500/25";
+    if (percentage > 85) return "shadow-amber-500/25";
+    if (percentage > 70) return "shadow-yellow-500/25";
+    return "shadow-emerald-500/25";
+  };
+
+  const getMilestoneMarkers = (percentage: number) => {
+    const milestones = [25, 50, 75, 90, 100];
+    return milestones.filter((milestone: number) => milestone <= percentage);
+  };
+
+  const getSpendingVelocity = (percentage: number, daysInPeriod: number = 30) => {
+    const dailyRate = percentage / daysInPeriod;
+    if (dailyRate > 2) return { level: 'high', color: 'text-red-500', icon: '🚀' };
+    if (dailyRate > 1) return { level: 'medium', color: 'text-amber-500', icon: '⚡' };
+    return { level: 'low', color: 'text-emerald-500', icon: '🐌' };
+  };
+
+  const getBudgetHealth = (percentage: number) => {
+    if (percentage > 100) return { status: 'over', color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20' };
+    if (percentage > 90) return { status: 'warning', color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-900/20' };
+    if (percentage > 75) return { status: 'caution', color: 'text-yellow-500', bgColor: 'bg-yellow-50 dark:bg-yellow-900/20' };
+    return { status: 'good', color: 'text-emerald-500', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20' };
+  };
+
+  const velocity = getSpendingVelocity(percentage);
+  const health = getBudgetHealth(percentage);
 
   const getCategoryStatusIcon = (percentage: number) => {
     if (percentage > 100) {
@@ -53,12 +82,17 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
   };
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border rounded-lg mb-3 sm:mb-4 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 ${
-        isDragging ? 'shadow-lg border-primary' : ''
-      }`}
+      className={`bg-card border rounded-lg mb-3 sm:mb-4 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ${
+        isDragging ? 'shadow-lg border-primary' : 'hover:border-primary/50'
+      } group cursor-pointer`}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
@@ -73,6 +107,19 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
             </div>
             {getCategoryStatusIcon(percentage)}
             <h3 className="font-medium line-clamp-1">{budget.category_name}</h3>
+            {categorySpending && (
+              <div className="flex items-center gap-1 ml-2">
+                <span className={`text-sm ${velocity.color}`}>{velocity.icon}</span>
+                <span className="text-xs text-muted-foreground capitalize">{velocity.level}</span>
+                <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${health.bgColor} ${health.color} ml-1`}>
+                  {health.status}
+                </div>
+                {/* Trend indicator - simplified for now */}
+                <div className="flex items-center ml-1">
+                  <TrendingUp className="h-3 w-3 text-emerald-500" />
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 items-center mt-1 sm:mt-0">
             <div className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary whitespace-nowrap">
@@ -90,11 +137,11 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
             {categorySpending && (
               <span
                 className={`text-sm font-medium ml-1 whitespace-nowrap ${
-                  percentage > 100
-                    ? "text-red-600 dark:text-red-400"
-                    : percentage > 85
-                    ? "text-amber-600 dark:text-amber-400"
-                    : "text-emerald-600 dark:text-emerald-400"
+                  (() => {
+                    if (percentage > 100) return "text-red-600 dark:text-red-400";
+                    if (percentage > 85) return "text-amber-600 dark:text-amber-400";
+                    return "text-emerald-600 dark:text-emerald-400";
+                  })()
                 }`}
               >
                 {Math.round(percentage)}%
@@ -104,28 +151,52 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
         </div>
 
         {categorySpending && (
-          <div className="h-2 bg-muted rounded-full overflow-hidden mb-2 sm:mb-3">
+          <div className="relative h-3 bg-muted rounded-full overflow-hidden mb-3 shadow-inner">
             <motion.div
-              className={`h-full ${getProgressBarColor(percentage)}`}
+              className={`h-full ${getProgressBarColor(percentage)} shadow-lg ${getProgressBarGlow(percentage)}`}
               initial={{ width: 0 }}
               animate={{ width: getProgressBarWidth(percentage) }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             />
+            
+            {/* Milestone markers */}
+            {getMilestoneMarkers(percentage).map((milestone) => (
+              <div
+                key={milestone}
+                className="absolute top-0 h-full w-1 bg-white/80 rounded-full shadow-sm"
+                style={{ left: `${milestone}%` }}
+              />
+            ))}
+            
+            {/* Current position indicator */}
+            {percentage > 0 && (
+              <motion.div
+                className="absolute top-0 h-full w-1 bg-white rounded-full shadow-md"
+                initial={{ left: 0 }}
+                animate={{ left: getProgressBarWidth(percentage) }}
+                transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              />
+            )}
           </div>
         )}
 
         <div className="flex justify-between items-center text-sm text-muted-foreground">
           <div>
             {categorySpending ? (
-              percentage <= 100 ? (
-                <span className="text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(budget.amount - (categorySpending?.spent || 0))} remaining
-                </span>
-              ) : (
-                <span className="text-red-600 dark:text-red-400">
-                  {formatCurrency((categorySpending?.spent || 0) - budget.amount)} over budget
-                </span>
-              )
+              (() => {
+                const remaining = budget.amount - (categorySpending?.spent || 0);
+                const isOverBudget = percentage > 100;
+                
+                return isOverBudget ? (
+                  <span className="text-red-600 dark:text-red-400">
+                    {formatCurrency((categorySpending?.spent || 0) - budget.amount)} over budget
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(remaining)} remaining
+                  </span>
+                );
+              })()
             ) : (
               <span className="text-muted-foreground">No spending tracked</span>
             )}
@@ -136,7 +207,7 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
               variant="ghost"
               size="sm"
               onClick={() => onEdit(budget)}
-              className="h-10 w-10 p-0 touch-manipulation"
+              className="h-10 w-10 p-0 touch-manipulation opacity-60 group-hover:opacity-100 transition-opacity hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600"
               aria-label={`Edit budget for ${budget.category_name}`}
               title={`Edit budget for ${budget.category_name}`}
             >
@@ -147,7 +218,7 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
               variant="ghost"
               size="sm"
               onClick={() => onDelete(budget.id)}
-              className="h-10 w-10 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 touch-manipulation"
+              className="h-10 w-10 p-0 text-red-500 hover:text-red-600 opacity-60 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-900/20 touch-manipulation"
               aria-label={`Delete budget for ${budget.category_name}`}
               title={`Delete budget for ${budget.category_name}`}
             >
@@ -156,16 +227,16 @@ function SortableBudgetItem({ budget, categorySpending, onEdit, onDelete }: Sort
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 interface SortableBudgetListProps {
-  budgets: Budget[];
-  categorySpending: CategorySpending[];
-  onReorder: (newOrder: Budget[]) => void;
-  onEdit: (budget: Budget) => void;
-  onDelete: (id: string) => void;
+  readonly budgets: readonly Budget[];
+  readonly categorySpending: readonly CategorySpending[];
+  readonly onReorder: (newOrder: Budget[]) => void;
+  readonly onEdit: (budget: Budget) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdit, onDelete }: SortableBudgetListProps) {
@@ -190,7 +261,9 @@ export function SortableBudgetList({ budgets, categorySpending, onReorder, onEdi
       const newIndex = budgets.findIndex((budget) => budget.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newBudgets = arrayMove(budgets, oldIndex, newIndex);
+        const newBudgets = [...budgets]; // Create a mutable copy
+        const [movedItem] = newBudgets.splice(oldIndex, 1);
+        newBudgets.splice(newIndex, 0, movedItem);
         // Update with new order
         onReorder(newBudgets);
       }

@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BudgetCharts } from './components/BudgetCharts';
 import { SortableBudgetList } from './components/SortableBudgetList';
 import { AnnualBudgetSummary } from './components/AnnualBudgetSummary';
+import { BudgetInsights } from './components/BudgetInsights';
 import { Budget, CategorySpending, Category, BudgetFilter } from './types';
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -826,6 +827,9 @@ export default function BudgetPage() {
       
       {/* Add Budget Charts */}
       {budgets.length > 0 && <BudgetCharts budgets={budgets} categorySpending={categorySpending} />}
+
+      {/* Add Budget Insights */}
+      {budgets.length > 0 && <BudgetInsights budgets={budgets} categorySpending={categorySpending} />}
 
       {/* Budget form */}
       <AnimatePresence>

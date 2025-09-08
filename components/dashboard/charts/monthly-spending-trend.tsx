@@ -807,7 +807,7 @@ function MonthlySpendingTrendComponent({
                     y={insights.monthlyAverage.spending} 
                     stroke="var(--muted-foreground)" 
                     strokeDasharray="5 5"
-                    label={{ value: "Avg Spending", position: "topRight" }}
+                    label={{ value: "Avg Spending", position: "top" }}
                   />
                 )}
                 
