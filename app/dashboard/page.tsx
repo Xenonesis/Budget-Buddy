@@ -973,16 +973,25 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Monthly Budget Overview */}
+      {/* Monthly Spending Trend Overview */}
       {sectionVisibility.find(s => s.id === 'budget-overview')?.visible && (
         <div className="mb-8 md:mb-10">
-          <MonthlyBudgetOverview />
+          <div className="h-[500px]">
+            <MonthlySpendingTrend
+              data={enhancedChartData.monthlyTrendData}
+              selectedCategories={selectedCategories}
+              onCategoryToggle={handleCategoryToggle}
+              showYearOverYear={true}
+              onMonthClick={handleMonthClick}
+              className="h-full"
+            />
+          </div>
         </div>
       )}
 
       {/* Enhanced Charts with Interactive Features */}
       {sectionVisibility.find(s => s.id === 'charts')?.visible && (
-        <div className="mb-8 md:mb-10 space-y-6" role="region" aria-label="Enhanced Financial Charts">
+        <div className="mb-8 md:mb-10 space-y-8" role="region" aria-label="Enhanced Financial Charts">
           {/* Drill-down breadcrumb with enhanced styling */}
           {drillDownData && (
             <div className="rounded-lg border bg-gradient-to-r from-primary/5 to-accent/5 p-4 border-primary/20">
@@ -1009,33 +1018,24 @@ export default function DashboardPage() {
           )}
 
           {/* Main Charts Grid */}
-          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
-            {/* Enhanced Expense Pie Chart */}
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-1">
+            {/* Enhanced Expense Pie Chart - Full Width */}
             <div className="h-96">
               <EnhancedExpensePieChart
                 categoryData={enhancedChartData.categoryData}
                 onCategoryClick={handleCategoryClick}
               />
             </div>
-            
-            {/* Monthly Spending Trend */}
-            <div className="h-96">
-              <MonthlySpendingTrend
-                data={enhancedChartData.monthlyTrendData}
-                selectedCategories={selectedCategories}
-                onCategoryToggle={handleCategoryToggle}
-                showYearOverYear={true}
-                onMonthClick={handleMonthClick}
-              />
-            </div>
           </div>
 
           {/* Year-over-Year Comparison - Full Width */}
-          <div className="h-96">
-            <YearOverYearComparison
-              onYearClick={handleYearClick}
-              className="h-full"
-            />
+          <div className="w-full">
+            <div className="h-96">
+              <YearOverYearComparison
+                onYearClick={handleYearClick}
+                className="h-full"
+              />
+            </div>
           </div>
 
           {/* Legacy Income vs Expenses Chart */}
