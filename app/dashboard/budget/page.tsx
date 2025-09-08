@@ -18,6 +18,8 @@ import { BudgetFilters } from './components/BudgetFilters';
 import { BudgetGoals } from './components/BudgetGoals';
 import { BudgetAnalytics } from './components/BudgetAnalytics';
 import { BudgetComparison } from './components/BudgetComparison';
+import { HistoricalTrends } from './components/HistoricalTrends';
+import { BudgetManagementTools } from './components/BudgetManagementTools';
 import { Budget, CategorySpending, Category, BudgetFilter } from './types';
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -63,7 +65,7 @@ export default function BudgetPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [periodFilter, setPeriodFilter] = useState<'all' | 'monthly' | 'weekly' | 'yearly'>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'goals' | 'comparison'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'trends' | 'tools' | 'goals' | 'comparison'>('overview');
 
   // Computed values
   const hasExpenseCategories = categories.some(c => c.type !== "income");
@@ -816,8 +818,10 @@ export default function BudgetPage() {
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'analytics', label: 'Analytics', icon: Activity },
+            { id: 'trends', label: 'Trends', icon: TrendingUp },
+            { id: 'tools', label: 'Tools', icon: Settings },
             { id: 'goals', label: 'Goals', icon: Target },
-            { id: 'comparison', label: 'Comparison', icon: TrendingUp }
+            { id: 'comparison', label: 'Comparison', icon: Calendar }
           ].map((view) => {
             const Icon = view.icon;
             return (
@@ -1022,6 +1026,34 @@ export default function BudgetPage() {
             transition={{ duration: 0.3 }}
           >
             <BudgetAnalytics budgets={budgets} categorySpending={categorySpending} />
+          </motion.div>
+        )}
+
+        {activeView === 'trends' && (
+          <motion.div
+            key="trends"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <HistoricalTrends />
+          </motion.div>
+        )}
+
+        {activeView === 'tools' && (
+          <motion.div
+            key="tools"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BudgetManagementTools 
+              budgets={budgets} 
+              categorySpending={categorySpending}
+              onBudgetsUpdate={fetchBudgets}
+            />
           </motion.div>
         )}
 

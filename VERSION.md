@@ -1,4 +1,4 @@
-# Budget Buddy v23
+# Budget Buddy v23.25
 
 ![Budget Buddy Logo](https://iaddy.netlify.app/assets/img/budget-buddy-logo.png)
 
