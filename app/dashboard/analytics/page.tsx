@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +30,9 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
+import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-expense-pie-chart";
+import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
+import { YearOverYearComparison } from "@/components/dashboard/charts/year-over-year-comparison";
 import { supabase } from "@/lib/supabase";
 import { getRandomColor } from "@/lib/colors";
 import { useUserPreferences } from "@/lib/store";
@@ -85,51 +88,6 @@ const styles = {
   // New enhanced legend style
   chartLegend: "flex flex-wrap items-center gap-4 mb-5 justify-center sm:justify-end bg-card/80 p-3 rounded-lg border border-primary/30 shadow-md"
 };
-
-// Sample data for the charts
-const sampleMonthlyData = [
-  { name: "Jan", income: 3800, expense: 2200, balance: 1600, month: "2023-01" },
-  { name: "Feb", income: 3900, expense: 2300, balance: 1600, month: "2023-02" },
-  { name: "Mar", income: 4000, expense: 2400, balance: 1600, month: "2023-03" },
-  { name: "Apr", income: 4100, expense: 2500, balance: 1600, month: "2023-04" },
-  { name: "May", income: 4200, expense: 2600, balance: 1600, month: "2023-05" },
-  { name: "Jun", income: 4300, expense: 2700, balance: 1600, month: "2023-06" },
-  { name: "Jul", income: 4400, expense: 2800, balance: 1600, month: "2023-07" },
-  { name: "Aug", income: 4500, expense: 2900, balance: 1600, month: "2023-08" },
-  { name: "Sep", income: 4600, expense: 3000, balance: 1600, month: "2023-09" },
-  { name: "Oct", income: 4700, expense: 3100, balance: 1600, month: "2023-10" },
-  { name: "Nov", income: 4800, expense: 3200, balance: 1600, month: "2023-11" },
-  { name: "Dec", income: 4900, expense: 3300, balance: 1600, month: "2023-12" }
-];
-
-const sampleExpenseData = [
-  { name: "Housing", value: 1200, color: "#FF6384" },
-  { name: "Food", value: 800, color: "#36A2EB" },
-  { name: "Transportation", value: 400, color: "#FFCE56" },
-  { name: "Entertainment", value: 300, color: "#4BC0C0" },
-  { name: "Shopping", value: 250, color: "#9966FF" }
-];
-
-const sampleIncomeData = [
-  { name: "Salary", value: 3500, color: "#FF6384" },
-  { name: "Freelance", value: 800, color: "#36A2EB" },
-  { name: "Investments", value: 400, color: "#FFCE56" }
-];
-
-const sampleTransactions = [
-  { id: "1", description: "Grocery Shopping", date: "2023-06-15", category_name: "Food", amount: 85.20, type: "expense" },
-  { id: "2", description: "Salary", date: "2023-06-01", category_name: "Income", amount: 3500, type: "income" },
-  { id: "3", description: "Restaurant", date: "2023-06-10", category_name: "Food", amount: 45.80, type: "expense" },
-  { id: "4", description: "Utilities", date: "2023-06-05", category_name: "Bills", amount: 120.50, type: "expense" },
-  { id: "5", description: "Freelance Work", date: "2023-06-20", category_name: "Income", amount: 800, type: "income" },
-  { id: "6", description: "Rent", date: "2023-05-01", category_name: "Housing", amount: 1200, type: "expense" },
-  { id: "7", description: "Salary", date: "2023-05-01", category_name: "Income", amount: 3500, type: "income" },
-  { id: "8", description: "Gas", date: "2023-05-10", category_name: "Transportation", amount: 65.30, type: "expense" },
-  { id: "9", description: "Movie", date: "2023-04-15", category_name: "Entertainment", amount: 25.00, type: "expense" },
-  { id: "10", description: "Bonus", date: "2023-04-01", category_name: "Income", amount: 500, type: "income" },
-  { id: "11", description: "Rent", date: "2023-04-01", category_name: "Housing", amount: 1200, type: "expense" },
-  { id: "12", description: "Shopping", date: "2023-03-20", category_name: "Shopping", amount: 150.75, type: "expense" }
-];
 
 // Helper function to format currency values
 const formatCurrency = (value: number) => {
@@ -198,6 +156,31 @@ export default function AnalyticsPage() {
   const [expenseData, setExpenseData] = useState<any[]>([]);
   const [incomeData, setIncomeData] = useState<any[]>([]);
   const userPreferences = useUserPreferences();
+
+  // Enhanced chart states
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [drillDownData, setDrillDownData] = useState<any>(null);
+
+  // Enhanced chart interaction handlers
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const handleCategoryClick = (category: any) => {
+    setDrillDownData({ type: 'category', data: category });
+  };
+
+  const handleMonthClick = (month: string, year: number) => {
+    setDrillDownData({ type: 'month', data: { month, year } });
+  };
+
+  const handleYearClick = (year: number) => {
+    setDrillDownData({ type: 'year', data: { year } });
+  };
 
   // Function to fetch transactions from the database
   const fetchTransactions = async () => {
@@ -406,6 +389,53 @@ export default function AnalyticsPage() {
   };
   
   const monthlyChange = calculateMonthlyChange();
+
+  // Transform data for enhanced charts
+  const enhancedChartData = useMemo(() => {
+    // Transform expense data for enhanced pie chart
+    const enhancedCategoryData = expenseData.map(category => ({
+      ...category,
+      subcategories: [] // We'll populate this when we have subcategory data
+    }));
+
+    // Transform monthly data for trend chart
+    const monthlyTrendData = monthlyData.map(month => ({
+      month: month.name,
+      year: new Date(month.month + '-01').getFullYear(),
+      totalSpending: month.expense,
+      categoryBreakdown: expenseData.reduce((acc, cat) => {
+        // Distribute expenses across categories (simplified)
+        acc[cat.name] = month.expense * (cat.value / totalExpenses) || 0;
+        return acc;
+      }, {} as { [key: string]: number }),
+      transactionCount: transactions.filter(t => 
+        t.date.startsWith(month.month) && t.type === 'expense'
+      ).length
+    }));
+
+    // Create yearly data for YoY comparison
+    const currentYear = new Date().getFullYear();
+    const yearlyData = [
+      {
+        year: currentYear,
+        monthlyData: monthlyTrendData.filter(m => m.year === currentYear),
+        totalSpending: totalExpenses,
+        averageMonthlySpending: totalExpenses / Math.max(monthlyTrendData.filter(m => m.year === currentYear).length, 1)
+      },
+      {
+        year: currentYear - 1,
+        monthlyData: monthlyTrendData.filter(m => m.year === currentYear - 1),
+        totalSpending: monthlyTrendData.filter(m => m.year === currentYear - 1).reduce((sum, m) => sum + m.totalSpending, 0),
+        averageMonthlySpending: monthlyTrendData.filter(m => m.year === currentYear - 1).reduce((sum, m) => sum + m.totalSpending, 0) / Math.max(monthlyTrendData.filter(m => m.year === currentYear - 1).length, 1)
+      }
+    ].filter(year => year.monthlyData.length > 0);
+
+    return {
+      categoryData: enhancedCategoryData,
+      monthlyTrendData,
+      yearlyData
+    };
+  }, [expenseData, monthlyData, totalExpenses, transactions]);
 
   if (isPageLoading) {
     return (
@@ -715,6 +745,13 @@ export default function AnalyticsPage() {
                   >
                     <PieChartIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Categories
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="enhanced" 
+                    className="rounded-lg text-xs sm:text-sm py-1.5 px-4 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20"
+                  >
+                    <TrendingUp className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    Enhanced
                   </TabsTrigger>
                   <TabsTrigger 
                     value="overview" 
@@ -1316,6 +1353,58 @@ export default function AnalyticsPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </TabsContent>
+                
+                {/* Enhanced Charts Tab */}
+                <TabsContent value="enhanced" className="space-y-5 animate-in fade-in">
+                  {/* Drill-down breadcrumb */}
+                  {drillDownData && (
+                    <div className="rounded-lg border bg-muted/50 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span>Viewing:</span>
+                          <span className="font-medium">
+                            {drillDownData.type === 'category' && `${drillDownData.data.name} Category`}
+                            {drillDownData.type === 'month' && `${drillDownData.data.month} ${drillDownData.data.year}`}
+                            {drillDownData.type === 'year' && `Year ${drillDownData.data.year}`}
+                          </span>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => setDrillDownData(null)}>
+                          Clear Filter
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Enhanced Charts Grid */}
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    {/* Enhanced Expense Pie Chart */}
+                    <div className="h-96">
+                      <EnhancedExpensePieChart
+                        categoryData={enhancedChartData.categoryData}
+                        onCategoryClick={handleCategoryClick}
+                      />
+                    </div>
+                    
+                    {/* Monthly Spending Trend */}
+                    <div className="h-96">
+                      <MonthlySpendingTrend
+                        data={enhancedChartData.monthlyTrendData}
+                        selectedCategories={selectedCategories}
+                        onCategoryToggle={handleCategoryToggle}
+                        showYearOverYear={true}
+                        onMonthClick={handleMonthClick}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Year-over-Year Comparison - Full Width */}
+                  <div className="h-96">
+                    <YearOverYearComparison
+                      onYearClick={handleYearClick}
+                      className="h-full"
+                    />
                   </div>
                 </TabsContent>
                 

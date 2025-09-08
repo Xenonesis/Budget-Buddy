@@ -354,6 +354,12 @@ export async function generateGoogleAIInsights(
   try {
     const settings = await getUserAISettings(userId);
     if (!settings?.google_api_key || !settings.enabled) return getExampleInsights();
+
+    const modelName = "gemini-1.5-flash";
+    const quotaStatus = getQuotaStatus('gemini', modelName, userId);
+    if (!quotaStatus.canMakeRequest) {
+      return `You've reached your daily quota for Gemini AI (${quotaStatus.usage} requests). Your quota will reset in ${quotaStatus.timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
+    }
     
     try {
       // Use gemini-1.5-flash instead of the deprecated model

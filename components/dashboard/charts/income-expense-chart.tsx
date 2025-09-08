@@ -61,11 +61,11 @@ function IncomeExpenseChartComponent({ monthlyData }: IncomeExpenseChartProps) {
             <p className="text-muted-foreground">No transaction data available for the selected period.</p>
           </div>
         ) : (
-          <div className="h-64">
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={chartData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                margin={{ top: 20, right: 40, left: 60, bottom: 80 }}
               >
                 <defs>
                   <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
@@ -79,22 +79,28 @@ function IncomeExpenseChartComponent({ monthlyData }: IncomeExpenseChartProps) {
                   tick={{
                     fill: 'var(--foreground)',
                     fontWeight: 600,
-                    fontSize: 12,
+                    fontSize: 11,
                     className: 'month-label'
                   }}
                   tickLine={{ stroke: 'var(--border)' }}
                   axisLine={{ stroke: 'var(--border)' }}
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                 />
                 <YAxis
-                  tick={{ fill: 'var(--muted-foreground)' }}
+                  tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                   tickFormatter={(value) => {
                     if (value === 0) return '0';
+                    if (value >= 100000) return `${(value/100000).toFixed(1)}L`;
                     if (value >= 1000) return `${(value/1000).toFixed(1)}k`;
                     return value.toString();
                   }}
                   tickLine={{ stroke: 'var(--border)' }}
                   axisLine={{ stroke: 'var(--border)' }}
                   domain={[0, maxValue]}
+                  width={55}
                 />
                 <Tooltip
                   formatter={(value) => formatCurrency(value as number)}
@@ -111,9 +117,11 @@ function IncomeExpenseChartComponent({ monthlyData }: IncomeExpenseChartProps) {
                   cursor={{ strokeDasharray: '3 3' }}
                 />
                 <Legend
-                  wrapperStyle={{ paddingTop: 10 }}
+                  wrapperStyle={{ paddingTop: 20, paddingBottom: 10 }}
                   iconType="circle"
                   iconSize={10}
+                  align="center"
+                  verticalAlign="bottom"
                 />
                 <Area
                   type="monotone"

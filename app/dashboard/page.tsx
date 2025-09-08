@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, getFromLocalStorage, saveToLocalStorage, STORAGE_KEYS, isOnline, syncOfflineChanges } from "@/lib/utils";
 import Link from "next/link";
@@ -14,12 +14,15 @@ import { AVAILABLE_WIDGETS, getDefaultLayout } from "@/lib/widget-config";
 import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from "@/lib/simple-widget-config";
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ExpenseCategoryChart } from "@/components/dashboard/charts/expense-category-chart";
+import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-expense-pie-chart";
+import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
+import { YearOverYearComparison } from "@/components/dashboard/charts/year-over-year-comparison";
 import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
 import { TimeRangeSelector } from '@/components/ui/time-range-selector';
 import { AlertNotificationSystem } from '@/components/ui/alert-notification-system';
+import { DashboardEnhancementService } from '@/lib/dashboard-enhancement-service';
 
 // Validation function to clean up duplicate widgets
 function validateAndCleanLayout(layout: WidgetLayout): WidgetLayout {
@@ -60,9 +63,15 @@ interface DashboardStats {
   totalExpense: number;
   balance: number;
   recentTransactions: Transaction[];
-  monthlyData: { name: string; income: number; expense: number }[];
+  monthlyData: { name: string; income: number; expense: number; transactionCount?: number }[];
   categoryData: { name: string; value: number; color: string }[];
   topCategories: { name: string; count: number; total: number; color: string }[];
+  previousYearData?: {
+    year: number;
+    monthlyData: any[];
+    totalSpending: number;
+    averageMonthlySpending: number;
+  };
 }
 
 // Enhanced colors for better visualization
@@ -88,10 +97,10 @@ function getMonthlyData(transactions: any[]) {
   }
   
   const now = new Date();
-  const monthsMap: Record<string, { name: string; income: number; expense: number; balance: number }> = {};
+  const monthsMap: Record<string, { name: string; income: number; expense: number; balance: number; transactionCount: number }> = {};
   
-  // Get the past 6 months in YYYY-MM format
-  for (let i = 0; i < 6; i++) {
+  // Get the past 12 months in YYYY-MM format for better historical data
+  for (let i = 0; i < 12; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleString('default', { month: 'short' });
@@ -100,7 +109,8 @@ function getMonthlyData(transactions: any[]) {
       name: monthName,
       income: 0,
       expense: 0,
-      balance: 0 // Will calculate after summing income and expense
+      balance: 0, // Will calculate after summing income and expense
+      transactionCount: 0
     };
   }
   
@@ -118,6 +128,8 @@ function getMonthlyData(transactions: any[]) {
       } else if (tx.type === 'expense') {
         monthsMap[monthKey].expense += amount;
       }
+      // Count all transactions
+      monthsMap[monthKey].transactionCount += 1;
     }
   });
   
@@ -127,8 +139,8 @@ function getMonthlyData(transactions: any[]) {
     return month;
   });
   
-  // Sort by most recent month first
-  return result.reverse();
+  // Sort by most recent month first, but only return months with data
+  return result.reverse().filter(month => month.transactionCount > 0 || month.income > 0 || month.expense > 0);
 }
 
 // Optimize category data calculation with a single pass through transactions
@@ -238,6 +250,11 @@ export default function DashboardPage() {
     sectionVisibility,
     setTimeRange
   } = useUserPreferences();
+  
+  // Enhanced chart states
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [drillDownData, setDrillDownData] = useState<any>(null);
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalIncome: 0,
     totalExpense: 0,
@@ -247,8 +264,114 @@ export default function DashboardPage() {
     categoryData: [],
     topCategories: [],
   });
+  const [enhancedMetrics, setEnhancedMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
+
+  // Enhanced chart interaction handlers
+  const handleCategoryToggle = useCallback((category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  }, []);
+
+  const handleCategoryClick = useCallback((category: any) => {
+    setDrillDownData({ type: 'category', data: category });
+  }, []);
+
+  const handleMonthClick = useCallback((month: string, year: number) => {
+    setDrillDownData({ type: 'month', data: { month, year } });
+  }, []);
+
+  const handleYearClick = useCallback((year: number) => {
+    setDrillDownData({ type: 'year', data: { year } });
+  }, []);
+
+  // Transform data for enhanced charts with drill-down filtering
+  const enhancedChartData = useMemo(() => {
+    // Apply drill-down filtering if active
+    let filteredStats = stats;
+    
+    if (drillDownData) {
+      switch (drillDownData.type) {
+        case 'category':
+          // Filter to show only selected category data
+          filteredStats = {
+            ...stats,
+            categoryData: stats.categoryData.filter(cat => cat.name === drillDownData.data.name),
+            // Filter monthly data to show only this category's spending
+            monthlyData: stats.monthlyData.map(month => ({
+              ...month,
+              expense: month.expense * (drillDownData.data.value / stats.totalExpense) || 0
+            }))
+          };
+          break;
+        case 'month':
+          // Filter to show only selected month data
+          const selectedMonthData = stats.monthlyData.find(month => 
+            month.name.includes(drillDownData.data.month)
+          );
+          if (selectedMonthData) {
+            filteredStats = {
+              ...stats,
+              monthlyData: [selectedMonthData],
+              totalExpense: selectedMonthData.expense,
+              totalIncome: selectedMonthData.income
+            };
+          }
+          break;
+        case 'year':
+          // Show year-specific data (would need historical data from database)
+          // For now, just show current data
+          break;
+      }
+    }
+    
+    // Transform category data for enhanced pie chart
+    const enhancedCategoryData = filteredStats.categoryData.map(category => ({
+      ...category,
+      subcategories: [] // We'll populate this when we have subcategory data
+    }));
+
+    // Use real monthly data from database
+    const monthlyTrendData = filteredStats.monthlyData.map(month => {
+      // Create category breakdown for this month
+      const categoryBreakdown = filteredStats.categoryData.reduce((acc, cat) => {
+        // Use actual category proportions from database
+        acc[cat.name] = month.expense * (cat.value / filteredStats.totalExpense) || 0;
+        return acc;
+      }, {} as { [key: string]: number });
+
+      return {
+        month: month.name,
+        year: new Date().getFullYear(),
+        totalSpending: month.expense,
+        categoryBreakdown,
+        transactionCount: month.transactionCount || 0
+      };
+    });
+
+    // Create yearly data for YoY comparison using real historical data
+    const currentYear = new Date().getFullYear();
+    const yearlyData = [
+      {
+        year: currentYear,
+        monthlyData: monthlyTrendData,
+        totalSpending: filteredStats.totalExpense,
+        averageMonthlySpending: filteredStats.totalExpense / Math.max(monthlyTrendData.length, 1)
+      },
+      // Previous year data will be fetched from database separately
+      ...(filteredStats.previousYearData ? [filteredStats.previousYearData] : [])
+    ];
+
+    return {
+      categoryData: enhancedCategoryData,
+      monthlyTrendData,
+      yearlyData
+    };
+  }, [stats, drillDownData]);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [currentLayout, setCurrentLayout] = useState<WidgetLayout>(
     dashboardLayout || getSimpleDefaultLayout()
@@ -419,16 +542,85 @@ export default function DashboardPage() {
         }
       });
 
-      // Create the new stats object
-      const newStats = {
+      // Get enhanced metrics using the new service
+      const enhancedMetricsData = await DashboardEnhancementService.getDashboardMetrics(
+        userData.user.id, 
+        startDate, 
+        endDate
+      );
+      setEnhancedMetrics(enhancedMetricsData);
+
+      // Get enhanced monthly data with real calculations
+      const enhancedMonthlyData = await DashboardEnhancementService.getEnhancedMonthlyData(
+        userData.user.id,
+        startDate,
+        endDate
+      );
+
+      // Create the new stats object with enhanced data
+      const newStats: DashboardStats = {
         totalIncome,
         totalExpense,
         balance: totalIncome - totalExpense,
         recentTransactions: processedTransactions.slice(0, 5),
-        monthlyData: getMonthlyData(processedTransactions),
+        monthlyData: enhancedMonthlyData.length > 0 ? enhancedMonthlyData : getMonthlyData(processedTransactions),
         categoryData: getCategoryData(processedTransactions),
         topCategories: getTopCategories(processedTransactions),
       };
+
+      // Fetch previous year data for year-over-year comparison
+      try {
+        const previousYearStart = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate());
+        const previousYearEnd = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate());
+        
+        const { data: previousYearTransactions } = await supabase
+          .from("transactions")
+          .select(`
+            *,
+            categories:category_id (
+              name,
+              type
+            )
+          `)
+          .eq("user_id", userData.user.id)
+          .gte("date", previousYearStart.toISOString().split('T')[0])
+          .lte("date", previousYearEnd.toISOString().split('T')[0])
+          .order("date", { ascending: false });
+
+        if (previousYearTransactions && previousYearTransactions.length > 0) {
+          const processedPreviousYear = previousYearTransactions.map(t => ({
+            ...t,
+            category: t.categories?.name || 'Uncategorized'
+          }));
+
+          const previousYearExpense = processedPreviousYear
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
+
+          const previousYearMonthlyData = getMonthlyData(processedPreviousYear);
+
+          newStats.previousYearData = {
+            year: startDate.getFullYear() - 1,
+            monthlyData: previousYearMonthlyData.map(month => ({
+              month: month.name,
+              year: startDate.getFullYear() - 1,
+              totalSpending: month.expense,
+              categoryBreakdown: getCategoryData(processedPreviousYear.filter(t => 
+                t.date.substring(5, 7) === previousYearMonthlyData.find(m => m.name === month.name)?.name
+              )).reduce((acc, cat) => {
+                acc[cat.name] = cat.value;
+                return acc;
+              }, {} as { [key: string]: number }),
+              transactionCount: month.transactionCount || 0
+            })),
+            totalSpending: previousYearExpense,
+            averageMonthlySpending: previousYearExpense / Math.max(previousYearMonthlyData.length, 1)
+          };
+        }
+      } catch (previousYearError) {
+        console.error("Error fetching previous year data:", previousYearError);
+        // Continue without previous year data
+      }
 
       // Save the fetched data to localStorage for offline use
       saveToLocalStorage(STORAGE_KEYS.TRANSACTIONS, newStats, 60); // Cache for 60 minutes
@@ -475,34 +667,97 @@ export default function DashboardPage() {
     setDashboardLayout(newLayout);
   };
 
-  // Prepare widget data
+  // Real budget data state
+  const [realBudgetData, setRealBudgetData] = useState({
+    budgetTotal: 0,
+    budgetUsed: 0,
+    budgetRemaining: 0
+  });
+
+  // Fetch real budget data
+  useEffect(() => {
+    const fetchBudgetData = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          const { RealBudgetService } = await import('@/lib/real-budget-service');
+          const budgetSummary = await RealBudgetService.getBudgetSummary(userData.user.id);
+          setRealBudgetData({
+            budgetTotal: budgetSummary.totalBudget,
+            budgetUsed: budgetSummary.totalSpent,
+            budgetRemaining: budgetSummary.totalRemaining
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching budget data:', error);
+      }
+    };
+
+    fetchBudgetData();
+  }, [timeRange, customDateRange]);
+
+  // Prepare widget data with real budget information
   const widgetData = {
     totalIncome: stats.totalIncome,
     totalExpense: stats.totalExpense,
     recentTransactions: stats.recentTransactions,
-    budgetUsed: stats.totalExpense,
-    budgetTotal: 5000, // This should come from user's budget settings
+    budgetUsed: realBudgetData.budgetUsed,
+    budgetTotal: realBudgetData.budgetTotal || stats.totalExpense * 1.2, // Fallback to 120% of current spending
     monthlyIncome: stats.totalIncome,
     monthlyExpense: stats.totalExpense,
     topCategories: stats.topCategories
   };
 
-  // Add passive event listeners for scroll and touch events
+  // Add passive event listeners for scroll and touch events with real functionality
   useEffect(() => {
-    const handleTouchStart = () => {
-      // Touch start handler for pull-to-refresh
+    let pullToRefreshStartY = 0;
+    let isPulling = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (window.scrollY === 0) {
+        pullToRefreshStartY = e.touches[0].clientY;
+        isPulling = true;
+      }
     };
     
-    const handleTouchMove = () => {
-      // Touch move handler for mobile
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isPulling && window.scrollY === 0) {
+        const currentY = e.touches[0].clientY;
+        const pullDistance = currentY - pullToRefreshStartY;
+        
+        if (pullDistance > 100) {
+          // Visual feedback for pull-to-refresh
+          document.body.style.transform = `translateY(${Math.min(pullDistance - 100, 50)}px)`;
+        }
+      }
     };
     
-    const handleTouchEnd = () => {
-      // Touch end handler
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (isPulling) {
+        const currentY = e.changedTouches[0].clientY;
+        const pullDistance = currentY - pullToRefreshStartY;
+        
+        document.body.style.transform = '';
+        
+        if (pullDistance > 150) {
+          // Trigger refresh
+          fetchData();
+        }
+        
+        isPulling = false;
+      }
     };
     
     const handleScroll = () => {
-      // Scroll handler for sticky headers
+      // Auto-hide/show header on scroll for better mobile experience
+      const header = document.querySelector('header');
+      if (header) {
+        if (window.scrollY > 100) {
+          header.style.transform = 'translateY(-100%)';
+        } else {
+          header.style.transform = 'translateY(0)';
+        }
+      }
     };
     
     const options = { passive: true };
@@ -516,6 +771,7 @@ export default function DashboardPage() {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('scroll', handleScroll);
+      document.body.style.transform = '';
     };
   }, []);
 
@@ -597,12 +853,22 @@ export default function DashboardPage() {
             Total Income
           </div>
           <div className="mt-3 md:mt-4 text-2xl md:text-3xl font-bold">{formatCurrency(stats.totalIncome)}</div>
-          <div className="mt-2 flex items-center text-xs sm:text-sm text-green-600">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-              <polyline points="16 7 22 7 22 13"></polyline>
-            </svg>
-            <span>Monthly Income</span>
+          <div className="mt-2 flex items-center text-xs sm:text-sm">
+            {enhancedMetrics && enhancedMetrics.incomeGrowthRate !== 0 && (
+              <>
+                {enhancedMetrics.incomeGrowthRate > 0 ? (
+                  <TrendingUpIcon className="mr-1 h-4 w-4 text-green-600" />
+                ) : (
+                  <ArrowDownIcon className="mr-1 h-4 w-4 text-red-600" />
+                )}
+                <span className={enhancedMetrics.incomeGrowthRate > 0 ? 'text-green-600' : 'text-red-600'}>
+                  {enhancedMetrics.incomeGrowthRate > 0 ? '+' : ''}{enhancedMetrics.incomeGrowthRate.toFixed(1)}% vs last period
+                </span>
+              </>
+            )}
+            {(!enhancedMetrics || enhancedMetrics.incomeGrowthRate === 0) && (
+              <span className="text-muted-foreground">Current period income</span>
+            )}
           </div>
         </div>
         
@@ -616,12 +882,22 @@ export default function DashboardPage() {
             Total Expenses
           </div>
           <div className="mt-3 md:mt-4 text-2xl md:text-3xl font-bold">{formatCurrency(stats.totalExpense)}</div>
-          <div className="mt-2 flex items-center text-xs sm:text-sm text-red-600">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
-              <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
-              <polyline points="16 17 22 17 22 11"></polyline>
-            </svg>
-            <span>Monthly Expenses</span>
+          <div className="mt-2 flex items-center text-xs sm:text-sm">
+            {enhancedMetrics && enhancedMetrics.expenseGrowthRate !== 0 && (
+              <>
+                {enhancedMetrics.expenseGrowthRate > 0 ? (
+                  <TrendingUpIcon className="mr-1 h-4 w-4 text-red-600" />
+                ) : (
+                  <ArrowDownIcon className="mr-1 h-4 w-4 text-green-600" />
+                )}
+                <span className={enhancedMetrics.expenseGrowthRate > 0 ? 'text-red-600' : 'text-green-600'}>
+                  {enhancedMetrics.expenseGrowthRate > 0 ? '+' : ''}{enhancedMetrics.expenseGrowthRate.toFixed(1)}% vs last period
+                </span>
+              </>
+            )}
+            {(!enhancedMetrics || enhancedMetrics.expenseGrowthRate === 0) && (
+              <span className="text-muted-foreground">Current period expenses</span>
+            )}
           </div>
         </div>
         
@@ -636,15 +912,51 @@ export default function DashboardPage() {
             Current Balance
           </div>
           <div className={`mt-3 md:mt-4 text-2xl md:text-3xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`} aria-live="polite">{formatCurrency(stats.balance)}</div>
-          <div className="mt-2 flex items-center text-xs sm:text-sm text-muted-foreground">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span>As of {formatDate(new Date())}</span>
+          <div className="mt-2 flex items-center justify-between text-xs sm:text-sm">
+            <div className="flex items-center text-muted-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>As of {formatDate(new Date())}</span>
+            </div>
+            {enhancedMetrics && enhancedMetrics.savingsRate !== undefined && (
+              <div className={`flex items-center ${enhancedMetrics.savingsRate >= 20 ? 'text-green-600' : enhancedMetrics.savingsRate >= 10 ? 'text-yellow-600' : 'text-red-600'}`}>
+                <span className="text-xs">Savings: {enhancedMetrics.savingsRate.toFixed(1)}%</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      )}
+
+      {/* Enhanced Metrics Section */}
+      {enhancedMetrics && sectionVisibility.find(s => s.id === 'stats-cards')?.visible && (
+        <div className="mb-6 md:mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-primary">{enhancedMetrics.totalTransactions}</div>
+              <div className="text-xs text-muted-foreground">Total Transactions</div>
+            </div>
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-primary">{formatCurrency(enhancedMetrics.averageTransactionAmount)}</div>
+              <div className="text-xs text-muted-foreground">Avg Transaction</div>
+            </div>
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-primary">{enhancedMetrics.mostActiveDay}</div>
+              <div className="text-xs text-muted-foreground">Most Active Day</div>
+            </div>
+            <div className="bg-card border rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-primary truncate" title={enhancedMetrics.mostActiveCategory}>
+                {enhancedMetrics.mostActiveCategory.length > 10 ? 
+                  enhancedMetrics.mostActiveCategory.substring(0, 10) + '...' : 
+                  enhancedMetrics.mostActiveCategory
+                }
+              </div>
+              <div className="text-xs text-muted-foreground">Top Category</div>
+            </div>
+          </div>
+        </div>
       )}
       
       {/* Customizable Widgets Section */}
@@ -668,20 +980,69 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Charts - More responsive and visually appealing */}
+      {/* Enhanced Charts with Interactive Features */}
       {sectionVisibility.find(s => s.id === 'charts')?.visible && (
-        <div className="mb-8 md:mb-10 grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2" role="region" aria-label="Financial Charts">
-          <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="income-expense-chart-title" tabIndex={0}>Income vs. Expenses</h2>
-            <div aria-labelledby="income-expense-chart-title" className="h-72 md:h-80">
-              <IncomeExpenseChart monthlyData={stats.monthlyData} />
+        <div className="mb-8 md:mb-10 space-y-6" role="region" aria-label="Enhanced Financial Charts">
+          {/* Drill-down breadcrumb with enhanced styling */}
+          {drillDownData && (
+            <div className="rounded-lg border bg-gradient-to-r from-primary/5 to-accent/5 p-4 border-primary/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  <span className="text-muted-foreground">Filtering by:</span>
+                  <span className="font-semibold text-foreground px-3 py-1 bg-primary/10 rounded-full">
+                    {drillDownData.type === 'category' && `${drillDownData.data.name} Category`}
+                    {drillDownData.type === 'month' && `${drillDownData.data.month} ${drillDownData.data.year}`}
+                    {drillDownData.type === 'year' && `Year ${drillDownData.data.year}`}
+                  </span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setDrillDownData(null)}
+                  className="hover:bg-primary/10 transition-colors"
+                >
+                  Clear Filter
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Main Charts Grid */}
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
+            {/* Enhanced Expense Pie Chart */}
+            <div className="h-96">
+              <EnhancedExpensePieChart
+                categoryData={enhancedChartData.categoryData}
+                onCategoryClick={handleCategoryClick}
+              />
+            </div>
+            
+            {/* Monthly Spending Trend */}
+            <div className="h-96">
+              <MonthlySpendingTrend
+                data={enhancedChartData.monthlyTrendData}
+                selectedCategories={selectedCategories}
+                onCategoryToggle={handleCategoryToggle}
+                showYearOverYear={true}
+                onMonthClick={handleMonthClick}
+              />
             </div>
           </div>
-          
+
+          {/* Year-over-Year Comparison - Full Width */}
+          <div className="h-96">
+            <YearOverYearComparison
+              onYearClick={handleYearClick}
+              className="h-full"
+            />
+          </div>
+
+          {/* Legacy Income vs Expenses Chart */}
           <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="expense-categories-chart-title" tabIndex={0}>Expense Categories</h2>
-            <div aria-labelledby="expense-categories-chart-title" className="h-72 md:h-80">
-              <ExpenseCategoryChart categoryData={stats.categoryData} />
+            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="income-expense-chart-title" tabIndex={0}>Income vs. Expenses</h2>
+            <div aria-labelledby="income-expense-chart-title" className="h-96 md:h-[28rem]">
+              <IncomeExpenseChart monthlyData={stats.monthlyData} />
             </div>
           </div>
         </div>

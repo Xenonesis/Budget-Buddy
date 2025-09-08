@@ -133,30 +133,28 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
     .slice(0, 6); // Show top 6 for better visibility
   }, [spendingVsBudgetData]);
 
-  // Monthly trends with better data visualization
+  // Monthly trends with real historical data instead of fake generated data
   const monthlyTrendData = useMemo(() => {
-    // Create a 6-month trend using the current data as the last month
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    // Instead of generating fake data, we'll use real budget vs actual spending data
+    // This would typically come from the database, but for now we'll show current month only
+    const currentMonth = new Date().toLocaleString('default', { month: 'short' });
     
-    // Get the total budget and spent
+    // Get the total budget and spent for current period
     const totalBudget = budgets.reduce((acc, budget) => acc + budget.amount, 0);
     const totalSpent = categorySpending.reduce((acc, category) => acc + category.spent, 0);
     
-    // Create realistic trend data
-    return months.map((month, i) => {
-      const factor = 0.5 + (i / (months.length - 1)) * 0.5; // Ranges from 0.5 to 1.0
-      const budgetAmount = Math.round(totalBudget * (i === months.length - 1 ? 1 : 0.8 + Math.random() * 0.4));
-      const spentAmount = Math.round(totalSpent * factor * (i === months.length - 1 ? 1 : 0.7 + Math.random() * 0.6));
-      
-      return {
-        name: month,
-        budget: budgetAmount,
-        spent: spentAmount,
-        remaining: Math.max(budgetAmount - spentAmount, 0),
-        savings: Math.max(budgetAmount - spentAmount, 0),
-        overBudget: spentAmount > budgetAmount ? spentAmount - budgetAmount : 0
-      };
-    });
+    // Return actual current data instead of fake historical trend
+    return [{
+      name: currentMonth,
+      budget: totalBudget,
+      spent: totalSpent,
+      remaining: Math.max(totalBudget - totalSpent, 0),
+      savings: Math.max(totalBudget - totalSpent, 0),
+      overBudget: totalSpent > totalBudget ? totalSpent - totalBudget : 0
+    }];
+    
+    // TODO: In future, fetch real historical budget vs spending data from database
+    // This should query monthly budget amounts and actual spending for each month
   }, [budgets, categorySpending]);
 
   // Enhanced tooltip with more visual information

@@ -19,6 +19,12 @@ import {
   type AIModel,
   type AIProvider
 } from "@/lib/ai";
+import { 
+  generateRealFinancialInsights, 
+  type RealFinancialInsight,
+  type Transaction,
+  type Budget
+} from "@/lib/real-financial-insights";
 
 import {
   QuotaStatusCard,
@@ -39,8 +45,9 @@ export default function AIInsightsPage() {
   // Core state
   const [aiEnabled, setAiEnabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [insights, setInsights] = useState<FinancialInsight[]>([]);
+  const [insights, setInsights] = useState<(FinancialInsight | RealFinancialInsight)[]>([]);
   const [insightLoading, setInsightLoading] = useState<boolean>(false);
+  const [aiSummarizeLoading, setAiSummarizeLoading] = useState<boolean>(false);
 
   // Chat state
   const [conversations, setConversations] = useState<any[]>([]);
@@ -185,25 +192,21 @@ export default function AIInsightsPage() {
         .select("*")
         .eq("user_id", userId);
       
-      // Generate insights
+      // Generate real data insights
       if (transactions && budgets) {
         try {
-          const generatedInsights = await generateGoogleAIInsights(
-            userId, 
-            transactions, 
-            budgets
+          const realInsights = generateRealFinancialInsights(
+            transactions as Transaction[], 
+            budgets as Budget[]
           );
-          
-          if (typeof generatedInsights === 'string') {
-            setQuotaError(generatedInsights);
-            setInsights([]);
-          } else if (generatedInsights) {
-            setInsights(generatedInsights);
-            setQuotaError(null);
-          }
+          setInsights(realInsights);
+          setQuotaError(null);
         } catch (error) {
-          console.error("Error generating insights:", error);
+          console.error("Error generating real insights:", error);
+          setInsights([]);
         }
+      } else {
+        setInsights([]);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -285,29 +288,78 @@ export default function AIInsightsPage() {
         .eq("user_id", userId);
       
       if (transactions && budgets) {
-        const generatedInsights = await generateGoogleAIInsights(
-          userId, 
-          transactions, 
-          budgets
+        const realInsights = generateRealFinancialInsights(
+          transactions as Transaction[], 
+          budgets as Budget[]
         );
-        
-        if (typeof generatedInsights === 'string') {
-          setQuotaError(generatedInsights);
-          setInsights([]);
-          toast.error("Quota limit reached");
-        } else if (generatedInsights) {
-          setInsights(generatedInsights);
-          setQuotaError(null);
-          toast.success("Insights refreshed successfully");
-        } else {
-          toast.error("Unable to generate new insights");
-        }
+        setInsights(realInsights);
+        setQuotaError(null);
+        toast.success("Insights refreshed successfully");
+      } else {
+        setInsights([]);
+        toast.info("No transaction or budget data found");
       }
     } catch (error) {
       console.error("Error refreshing insights:", error);
       toast.error("Failed to refresh insights");
     } finally {
       setInsightLoading(false);
+    }
+  };
+
+  const handleAISummarize = async (insight: FinancialInsight | RealFinancialInsight) => {
+    if (!userId || !aiEnabled || aiSummarizeLoading) return;
+
+    setAiSummarizeLoading(true);
+    try {
+      // Create a prompt for AI to enhance the insight
+      const prompt = `Please provide an enhanced analysis and actionable recommendations for this financial insight:
+
+Title: ${insight.title}
+Description: ${insight.description}
+Category: ${insight.category || 'General'}
+Amount: ${insight.amount ? `$${insight.amount.toFixed(2)}` : 'N/A'}
+
+Please provide:
+1. A deeper analysis of what this means
+2. Specific actionable recommendations
+3. Potential long-term implications
+4. Tips for improvement
+
+Keep the response concise but insightful.`;
+
+      const aiResponse = await chatWithAI(userId, [
+        { role: "system", content: "You are a financial advisor providing personalized insights." },
+        { role: "user", content: prompt }
+      ], currentModelConfig);
+
+      if (aiResponse) {
+        // Update the insight with AI enhancement
+        const enhancedInsight: RealFinancialInsight = {
+          ...insight,
+          description: aiResponse,
+          isAISummarized: true,
+          confidence: Math.min((insight.confidence || 0.8) + 0.1, 1.0) // Slightly increase confidence
+        };
+
+        // Update the insights array
+        setInsights(prevInsights => 
+          prevInsights.map(i => 
+            i.title === insight.title && i.category === insight.category 
+              ? enhancedInsight 
+              : i
+          )
+        );
+
+        toast.success("Insight enhanced with AI analysis");
+      } else {
+        toast.error("Failed to enhance insight with AI");
+      }
+    } catch (error) {
+      console.error("Error enhancing insight with AI:", error);
+      toast.error("Failed to enhance insight with AI");
+    } finally {
+      setAiSummarizeLoading(false);
     }
   };
 
@@ -708,6 +760,9 @@ export default function AIInsightsPage() {
               loading={insightLoading}
               onRefresh={handleRefreshInsights}
               onSpeakInsight={speakFunctionRef.current || undefined}
+              onAISummarize={handleAISummarize}
+              aiSummarizeLoading={aiSummarizeLoading}
+              isAIEnabled={aiEnabled}
             />
           </div>
         );
@@ -724,6 +779,9 @@ export default function AIInsightsPage() {
                   loading={insightLoading}
                   onRefresh={handleRefreshInsights}
                   onSpeakInsight={speakFunctionRef.current || undefined}
+                  onAISummarize={handleAISummarize}
+                  aiSummarizeLoading={aiSummarizeLoading}
+                  isAIEnabled={aiEnabled}
                 />
               </div>
               

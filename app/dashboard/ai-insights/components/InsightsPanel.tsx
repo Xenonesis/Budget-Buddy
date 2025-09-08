@@ -4,15 +4,19 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Info, Volume2, Eye, Zap, Target, DollarSign, Loader2 } from "lucide-react";
+import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Info, Volume2, Eye, Zap, Target, DollarSign, Loader2, Sparkles, Brain } from "lucide-react";
 import { FinancialInsight } from "@/lib/ai";
+import { RealFinancialInsight } from "@/lib/real-financial-insights";
 
 interface InsightsPanelProps {
-  insights: FinancialInsight[];
+  insights: (FinancialInsight | RealFinancialInsight)[];
   loading: boolean;
   onRefresh: () => void;
   className?: string;
   onSpeakInsight?: (text: string) => void;
+  onAISummarize?: (insight: FinancialInsight | RealFinancialInsight) => Promise<void>;
+  aiSummarizeLoading?: boolean;
+  isAIEnabled?: boolean;
 }
 
 export function InsightsPanel({ 
@@ -20,7 +24,10 @@ export function InsightsPanel({
   loading, 
   onRefresh, 
   className = "",
-  onSpeakInsight 
+  onSpeakInsight,
+  onAISummarize,
+  aiSummarizeLoading = false,
+  isAIEnabled = false
 }: Readonly<InsightsPanelProps>) {
   const [selectedInsight, setSelectedInsight] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'compact'>('cards');
@@ -107,12 +114,22 @@ export function InsightsPanel({
     }).format(Math.abs(amount));
   };
 
-  const speakInsight = (insight: FinancialInsight) => {
+  const speakInsight = (insight: FinancialInsight | RealFinancialInsight) => {
     if (onSpeakInsight) {
       const amountText = insight.amount ? ` The amount is ${formatCurrency(insight.amount)}.` : '';
       const text = `${insight.title}. ${insight.description}${amountText}`;
       onSpeakInsight(text);
     }
+  };
+
+  const handleAISummarize = async (insight: FinancialInsight | RealFinancialInsight) => {
+    if (onAISummarize) {
+      await onAISummarize(insight);
+    }
+  };
+
+  const isRealInsight = (insight: FinancialInsight | RealFinancialInsight): insight is RealFinancialInsight => {
+    return 'rawData' in insight;
   };
 
   const insightStats = {
@@ -129,11 +146,11 @@ export function InsightsPanel({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Zap className="h-6 w-6 text-primary" />
-              AI Insights
+              <TrendingUp className="h-6 w-6 text-primary" />
+              Financial Insights
             </h2>
             <p className="text-sm text-muted-foreground">
-              Personalized financial recommendations powered by AI
+              Real-time analysis of your financial data {isAIEnabled && "with optional AI enhancement"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -189,19 +206,19 @@ export function InsightsPanel({
             </div>
             <h3 className="text-xl font-semibold mb-3">No insights available</h3>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Generate AI-powered insights to get personalized financial recommendations, 
+              Add some transactions and budgets to get personalized financial insights, 
               spending analysis, and budget optimization tips.
             </p>
             <Button onClick={onRefresh} disabled={loading} size="lg" className="shadow-lg">
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating Insights...
+                  Analyzing Data...
                 </>
               ) : (
                 <>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Generate AI Insights
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Analyze Financial Data
                 </>
               )}
             </Button>
@@ -240,6 +257,16 @@ export function InsightsPanel({
                     <Badge variant={getInsightBadgeVariant(insight.type)} className="shrink-0 text-xs">
                       {insight.type}
                     </Badge>
+                    {isRealInsight(insight) && !insight.isAISummarized && (
+                      <Badge variant="outline" className="shrink-0 text-xs bg-blue-50 text-blue-700 border-blue-200">
+                        Real Data
+                      </Badge>
+                    )}
+                    {isRealInsight(insight) && insight.isAISummarized && (
+                      <Badge variant="outline" className="shrink-0 text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        AI Enhanced
+                      </Badge>
+                    )}
                     {onSpeakInsight && (
                       <Button
                         variant="ghost"
@@ -275,19 +302,52 @@ export function InsightsPanel({
                     </div>
                   )}
                   
-                  {/* Category Badge */}
-                  {insight.category && (
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-xs">
-                        📊 {insight.category}
-                      </Badge>
+                  {/* Category Badge and AI Summarize Button */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {insight.category && (
+                        <Badge variant="outline" className="text-xs">
+                          📊 {insight.category}
+                        </Badge>
+                      )}
+                      {isRealInsight(insight) && insight.rawData && (
+                        <Badge variant="outline" className="text-xs bg-gray-50">
+                          {insight.rawData.percentage && `${insight.rawData.percentage > 0 ? '+' : ''}${insight.rawData.percentage.toFixed(1)}%`}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isAIEnabled && onAISummarize && isRealInsight(insight) && !insight.isAISummarized && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAISummarize(insight);
+                          }}
+                          disabled={aiSummarizeLoading}
+                          className="h-7 px-2 text-xs"
+                        >
+                          {aiSummarizeLoading ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              AI...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Summarize with AI
+                            </>
+                          )}
+                        </Button>
+                      )}
                       {selectedInsight === index && (
                         <div className="text-xs text-muted-foreground">
                           Click to collapse
                         </div>
                       )}
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               )}
               
