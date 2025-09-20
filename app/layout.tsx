@@ -101,7 +101,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
-          defaultTheme="system"
+          defaultTheme="dark"
           storageKey="budget-buddy-theme"
         >
           {children}

@@ -32,14 +32,23 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
   className = ""
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const [windowWidth, setWindowWidth] = useState(1024); // Always start with default
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
   const [direction, setDirection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Handle client-side mounting
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      setWindowWidth(window.innerWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isMounted) return;
     
     const handleResize = () => {
       const newWidth = window.innerWidth;
@@ -58,10 +67,10 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [windowWidth, currentIndex, testimonials.length]);
+  }, [windowWidth, currentIndex, testimonials.length, isMounted]);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || !isMounted) return;
 
     const startAutoPlay = () => {
       autoPlayRef.current = setInterval(() => {
@@ -87,7 +96,7 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
         clearInterval(autoPlayRef.current);
       }
     };
-  }, [isAutoPlaying, currentIndex, windowWidth, direction, testimonials.length]);
+  }, [isAutoPlaying, currentIndex, windowWidth, direction, testimonials.length, isMounted]);
 
   const visibleCount = getVisibleCount(windowWidth);
   const maxIndex = testimonials.length - visibleCount;
@@ -130,6 +139,33 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
     setCurrentIndex(index);
     pauseAutoPlay();
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!isMounted) {
+    return (
+      <div className={`px-4 py-8 sm:py-16 bg-gradient-to-b from-background to-muted/20 overflow-hidden ${className}`}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-gradient-primary">
+              {title}
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+              {subtitle}
+            </p>
+          </div>
+          <div className="relative">
+            <div className="flex justify-center">
+              <div className="w-full md:w-1/2 p-2">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 h-full bg-background border border-border shadow-lg">
+                  <div className="h-32 animate-pulse bg-muted rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`px-4 py-8 sm:py-16 bg-gradient-to-b from-background to-muted/20 overflow-hidden ${className}`}>
