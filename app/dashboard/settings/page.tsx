@@ -471,12 +471,37 @@ export default function SettingsPage() {
   };
 
   const handleAiSettingsChange = (field: keyof NonNullable<Profile['ai_settings']>, value: any) => {
+    const updatedAiSettings = {
+      ...formData.ai_settings,
+      [field]: value
+    } as NonNullable<Profile['ai_settings']>;
+
+    // Auto-enable AI when any API key is provided
+    const apiKeyFields = [
+      'google_api_key', 'mistral_api_key', 'anthropic_api_key', 'groq_api_key',
+      'deepseek_api_key', 'llama_api_key', 'cohere_api_key', 'gemini_api_key',
+      'qwen_api_key', 'openrouter_api_key', 'cerebras_api_key', 'xai_api_key',
+      'unbound_api_key', 'openai_api_key', 'ollama_api_key', 'lmstudio_api_key'
+    ];
+
+    // If an API key field is being set with a non-empty value, auto-enable AI
+    if (apiKeyFields.includes(field as string) && value && value.trim() !== '') {
+      updatedAiSettings.enabled = true;
+    }
+
+    // Also check if any existing API keys are present and auto-enable if so
+    const hasAnyApiKey = apiKeyFields.some(keyField => {
+      const keyValue = keyField === field ? value : updatedAiSettings[keyField as keyof typeof updatedAiSettings];
+      return keyValue && typeof keyValue === 'string' && keyValue.trim() !== '';
+    });
+
+    if (hasAnyApiKey && !updatedAiSettings.enabled) {
+      updatedAiSettings.enabled = true;
+    }
+
     setFormData({
       ...formData,
-      ai_settings: {
-        ...formData.ai_settings,
-        [field]: value
-      } as NonNullable<Profile['ai_settings']>
+      ai_settings: updatedAiSettings
     });
   };
 
