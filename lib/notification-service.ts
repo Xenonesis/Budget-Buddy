@@ -105,15 +105,44 @@ export class NotificationService {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw new Error('User not authenticated');
 
-    const { data, error } = await supabase
+    // First, try to get existing settings
+    const { data: existingSettings } = await supabase
       .from('notification_settings')
-      .upsert({
-        user_id: userData.user.id,
-        ...settings,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
+      .select('*')
+      .eq('user_id', userData.user.id)
       .single();
+
+    let data, error;
+
+    if (existingSettings) {
+      // Update existing settings
+      const result = await supabase
+        .from('notification_settings')
+        .update({
+          ...settings,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userData.user.id)
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    } else {
+      // Create new settings
+      const result = await supabase
+        .from('notification_settings')
+        .insert({
+          user_id: userData.user.id,
+          ...settings,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) throw error;
     return data;
