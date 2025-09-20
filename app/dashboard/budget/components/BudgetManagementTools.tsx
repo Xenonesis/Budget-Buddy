@@ -278,12 +278,14 @@ export function BudgetManagementTools({ budgets, categorySpending, onBudgetsUpda
       } else {
         // Update selected budgets
         for (const update of updates) {
-          const { error } = await supabase
-            .from('budgets')
-            .update({ amount: update.amount })
-            .eq('id', update.id);
+          if (update) {
+            const { error } = await supabase
+              .from('budgets')
+              .update({ amount: update.amount })
+              .eq('id', update.id);
 
-          if (error) throw error;
+            if (error) throw error;
+          }
         }
 
         toast.success(`Budgets ${bulkOperation}d by ${bulkPercentage}%`);

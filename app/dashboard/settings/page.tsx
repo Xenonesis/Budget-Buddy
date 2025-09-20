@@ -62,6 +62,7 @@ interface Profile {
         provider: 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter' | 'cerebras' | 'xAI' | 'unbound' | 'openai' | 'ollama' | 'lmstudio';
         model: string;
       };
+      enable_financial_insights: boolean;
     };
 }
 
@@ -145,8 +146,9 @@ export default function SettingsPage() {
       defaultModel: {
         provider: 'mistral' as AIProvider,
         model: 'mistral-small' as AIModel
-      }
-    } as NonNullable<Profile['ai_settings']>
+      },
+      enable_financial_insights: false,
+    }
   });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
     null
@@ -225,22 +227,29 @@ export default function SettingsPage() {
             gender: userData.user.user_metadata?.gender || '',
             timezone: userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
             ai_settings: userData.user.user_metadata?.ai_settings || {
-              google_api_key: '',
-              mistral_api_key: '',
-              anthropic_api_key: '',
-              groq_api_key: '',
-              deepseek_api_key: '',
-              llama_api_key: '',
-              cohere_api_key: '',
-              gemini_api_key: '',
-              qwen_api_key: '',
-              openrouter_api_key: '',
-              mistral_model: 'mistral-small',
+              google_api_key: "",
+              mistral_api_key: "",
+              anthropic_api_key: "",
+              groq_api_key: "",
+              deepseek_api_key: "",
+              llama_api_key: "",
+              cohere_api_key: "",
+              gemini_api_key: "",
+              qwen_api_key: "",
+              openrouter_api_key: "",
+              cerebras_api_key: "",
+              xai_api_key: "",
+              unbound_api_key: "",
+              openai_api_key: "",
+              ollama_api_key: "",
+              lmstudio_api_key: "",
+              mistral_model: "mistral-small",
               enabled: false,
               defaultModel: {
                 provider: 'mistral' as AIProvider,
                 model: 'mistral-small' as AIModel
-              }
+              },
+              enable_financial_insights: false,
             },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -286,13 +295,20 @@ export default function SettingsPage() {
                 gemini_api_key: "",
                 qwen_api_key: "",
                 openrouter_api_key: "",
+                cerebras_api_key: "",
+                xai_api_key: "",
+                unbound_api_key: "",
+                openai_api_key: "",
+                ollama_api_key: "",
+                lmstudio_api_key: "",
                 mistral_model: "mistral-small",
                 enabled: false,
                 defaultModel: {
                   provider: 'mistral' as AIProvider,
                   model: 'mistral-small' as AIModel
-                }
-              } as NonNullable<Profile['ai_settings']>
+                },
+                enable_financial_insights: false,
+              }
             });
           }
         }
@@ -324,14 +340,21 @@ export default function SettingsPage() {
             gemini_api_key: "",
             qwen_api_key: "",
             openrouter_api_key: "",
+            cerebras_api_key: "",
+            xai_api_key: "",
+            unbound_api_key: "",
+            openai_api_key: "",
+            ollama_api_key: "",
+            lmstudio_api_key: "",
             mistral_model: "mistral-small",
             enabled: false,
             defaultModel: {
               provider: 'mistral' as AIProvider,
               model: 'mistral-small' as AIModel
-            }
-          } as NonNullable<Profile['ai_settings']>
-        });
+            },
+            enable_financial_insights: false,
+          }
+      });
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -404,13 +427,20 @@ export default function SettingsPage() {
             gemini_api_key: "",
             qwen_api_key: "",
             openrouter_api_key: "",
+            cerebras_api_key: "",
+            xai_api_key: "",
+            unbound_api_key: "",
+            openai_api_key: "",
+            ollama_api_key: "",
+            lmstudio_api_key: "",
             mistral_model: "mistral-small",
             enabled: false,
             defaultModel: {
               provider: 'mistral' as AIProvider,
               model: 'mistral-small' as AIModel
-            }
-          } as Profile['ai_settings']
+            },
+            enable_financial_insights: false,
+          }
         });
         setMessage({ type: "success", text: "Profile updated successfully" });
       }
@@ -1397,6 +1427,20 @@ export default function SettingsPage() {
                       id="ai_enabled"
                       checked={formData.ai_settings?.enabled ?? false}
                       onCheckedChange={(checked) => handleAiSettingsChange("enabled", checked)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="ai_financial_insights">Enable AI Financial Insights</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Allow AI to provide deeper financial insights.
+                      </p>
+                    </div>
+                    <Switch
+                      id="ai_financial_insights"
+                      checked={formData.ai_settings?.enable_financial_insights ?? false}
+                      onCheckedChange={(checked) => handleAiSettingsChange("enable_financial_insights", checked)}
                     />
                   </div>
                   

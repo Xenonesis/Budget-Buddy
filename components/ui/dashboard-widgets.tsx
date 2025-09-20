@@ -44,6 +44,7 @@ export function QuickStatsWidget({ data }: Readonly<{ data: any }>) {
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
   const [showAllInsights, setShowAllInsights] = useState(false);
+  const [isAiInsightsEnabled, setIsAiInsightsEnabled] = useState(false);
 
   const totalIncome = data?.totalIncome || 0;
   const totalExpense = data?.totalExpense || 0;
@@ -69,49 +70,56 @@ export function QuickStatsWidget({ data }: Readonly<{ data: any }>) {
   useEffect(() => {
     const getUserAndInsights = async () => {
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          // setUserId(userData.user.id); // Not needed since we're not storing it
-          
-          // Fetch transaction data for AI insights
-          const { data: transactions } = await supabase
-            .from("transactions")
-            .select(`
-              *,
-              categories:category_id (
-                name,
-                type
-              )
-            `)
-            .eq("user_id", userData.user.id)
-            .order("date", { ascending: false })
-            .limit(100); // Get recent transactions for analysis
-          
-          if (transactions && transactions.length > 0) {
-            setLoadingInsights(true);
-            setInsightsError(null);
+        // First, fetch the AI insights setting
+        const response = await fetch('/api/settings/ai');
+        const settings = await response.json();
+        setIsAiInsightsEnabled(settings.enable_financial_insights);
+
+        if (settings.enable_financial_insights) {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            // setUserId(userData.user.id); // Not needed since we're not storing it
             
-            // Prepare transaction data for AI
-            const processedTransactions = transactions.map(t => ({
-              id: t.id,
-              amount: t.amount,
-              category: t.categories?.name || 'Uncategorized',
-              description: t.description,
-              date: t.date,
-              type: t.type
-            }));
+            // Fetch transaction data for AI insights
+            const { data: transactions } = await supabase
+              .from("transactions")
+              .select(`
+                *,
+                categories:category_id (
+                  name,
+                  type
+                )
+              `)
+              .eq("user_id", userData.user.id)
+              .order("date", { ascending: false })
+              .limit(100); // Get recent transactions for analysis
             
-            // Get AI insights
-            const insights = await generateGoogleAIInsights(
-              userData.user.id,
-              processedTransactions,
-              [] // Could add budget data here if available
-            );
-            
-            if (Array.isArray(insights)) {
-              setAiInsights(insights);
-            } else if (typeof insights === 'string') {
-              setInsightsError(insights);
+            if (transactions && transactions.length > 0) {
+              setLoadingInsights(true);
+              setInsightsError(null);
+              
+              // Prepare transaction data for AI
+              const processedTransactions = transactions.map(t => ({
+                id: t.id,
+                amount: t.amount,
+                category: t.categories?.name || 'Uncategorized',
+                description: t.description,
+                date: t.date,
+                type: t.type
+              }));
+              
+              // Get AI insights
+              const insights = await generateGoogleAIInsights(
+                userData.user.id,
+                processedTransactions,
+                [] // Could add budget data here if available
+              );
+              
+              if (Array.isArray(insights)) {
+                setAiInsights(insights);
+              } else if (typeof insights === 'string') {
+                setInsightsError(insights);
+              }
             }
           }
         }
