@@ -565,14 +565,17 @@ export default function DashboardLayout({
           {/* User section */}
           <div className="flex items-center justify-between px-3 py-4 mb-2 bg-accent/20 rounded-lg border border-accent/10">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary transition-all duration-300 hover:bg-primary/20 user-avatar ring-2 ring-primary/20">
-                {user?.user_metadata?.name?.[0] || user?.email?.[0] || "U"}
+              <div className="relative">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary transition-all duration-300 hover:bg-primary/20 user-avatar ring-2 ring-primary/20">
+                  {user?.user_metadata?.name?.[0] || user?.email?.[0] || "U"}
+                </div>
+                <div className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
               </div>
-              <div>
-                <p className="text-sm font-medium truncate max-w-[130px]">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium truncate max-w-[150px]">
                   {user?.user_metadata?.name || user?.email?.split('@')[0] || "User"}
                 </p>
-                <p className="text-xs text-muted-foreground truncate max-w-[130px]">{user?.email || ""}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[150px]">{user?.email || ""}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -720,14 +723,14 @@ export default function DashboardLayout({
                     </div>
                   )}
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse purely-decorative" />
+                <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-primary animate-pulse" />
               </div>
               {!collapsed && (
-                <div>
-                  <div className="font-medium">{user?.user_metadata?.name || user?.email?.split('@')[0] || "User"}</div>
-                  <div className="text-sm text-muted-foreground">{user?.email || ""}</div>
-                </div>
-              )}
+              <div className="flex flex-col gap-1">
+                <div className="font-medium truncate max-w-[150px]">{user?.user_metadata?.name || user?.email?.split('@')[0] || "User"}</div>
+                <div className="text-sm text-muted-foreground truncate max-w-[150px]">{user?.email || ""}</div>
+              </div>
+            )}
             </div>
           </div>
 
