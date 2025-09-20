@@ -27,7 +27,7 @@ export class NotificationService {
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userData.user.id)
-      .eq('read', false);
+      .eq('is_read', false);
 
     if (error) throw error;
     return count || 0;
@@ -37,7 +37,7 @@ export class NotificationService {
   static async markAsRead(notificationId: string): Promise<void> {
     const { error } = await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('id', notificationId);
 
     if (error) throw error;
@@ -50,9 +50,9 @@ export class NotificationService {
 
     const { error } = await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('user_id', userData.user.id)
-      .eq('read', false);
+      .eq('is_read', false);
 
     if (error) throw error;
   }

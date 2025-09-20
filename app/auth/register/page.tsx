@@ -102,6 +102,10 @@ export default function RegisterPage() {
       // Reset preferences for a clean state
       resetPreferences();
       
+      console.log("Starting registration process...");
+      console.log("Email:", email);
+      console.log("Name:", name);
+      
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -114,9 +118,24 @@ export default function RegisterPage() {
         }
       });
 
-      if (signUpError) throw signUpError;
+      console.log("Signup response:", { data, error: signUpError });
+
+      if (signUpError) {
+        console.error("Signup error details:", {
+          message: signUpError.message,
+          status: signUpError.status,
+          code: signUpError.code,
+          details: signUpError
+        });
+        throw signUpError;
+      }
+
+      console.log("User created successfully:", data.user?.id);
 
       if (data.user) {
+        console.log("Attempting to create profile manually...");
+        
+        // Try to create the profile manually (in addition to any trigger)
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
@@ -126,13 +145,39 @@ export default function RegisterPage() {
             currency: 'USD'
           });
           
-        if (profileError && profileError.code !== '23505') {
-          console.error("Error creating profile:", profileError);
+        console.log("Profile creation result:", { error: profileError });
+          
+        // Handle profile creation errors
+        if (profileError) {
+          console.error("Profile creation error details:", {
+            message: profileError.message,
+            code: profileError.code,
+            details: profileError.details,
+            hint: profileError.hint
+          });
+          
+          // If it's not a duplicate key error (23505), it might be a permissions issue
+          if (profileError.code !== '23505') {
+            // Try to handle the error gracefully
+            console.warn("Profile creation failed, but user account was created. Profile may be created by trigger.");
+            
+            // Don't throw error here - the trigger might have handled it
+            console.log("Continuing despite profile creation error...");
+          }
+        } else {
+          console.log("Profile created successfully!");
         }
       }
 
+      console.log("Registration completed successfully!");
       setShowSuccessMessage(true);
     } catch (error: any) {
+      console.error("Registration failed:", {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        stack: error.stack
+      });
       setError(error.message || "Failed to create account");
     } finally {
       setLoading(false);

@@ -75,7 +75,7 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
   const handleMarkAllAsRead = async () => {
     try {
       await NotificationService.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
       toast.success('All notifications marked as read');
     } catch (error) {
@@ -90,7 +90,7 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
       await NotificationService.deleteNotification(notificationId);
       const deletedNotification = notifications.find(n => n.id === notificationId);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      if (deletedNotification && !deletedNotification.read) {
+      if (deletedNotification && !deletedNotification.is_read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
       toast.success('Notification deleted');
@@ -102,7 +102,7 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
 
   // Handle notification click
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.read) {
+    if (!notification.is_read) {
       handleMarkAsRead(notification.id);
     }
     
@@ -152,7 +152,7 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
 
   // Filter notifications
   const filteredNotifications = notifications.filter(notification => {
-    if (filter === 'unread') return !notification.read;
+    if (filter === 'unread') return !notification.is_read;
     return true;
   });
 
@@ -257,7 +257,7 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
                           transition={{ delay: index * 0.05 }}
                           className={cn(
                             "p-4 hover:bg-muted/50 cursor-pointer transition-colors",
-                            !notification.read && "bg-blue-50/50 dark:bg-blue-950/20"
+                            !notification.is_read && "bg-blue-50/50 dark:bg-blue-950/20"
                           )}
                           onClick={() => handleNotificationClick(notification)}
                         >
@@ -273,12 +273,12 @@ export function NotificationCenter({ className, onNotificationClick }: Notificat
                               <div className="flex items-start justify-between gap-2">
                                 <h4 className={cn(
                                   "text-sm font-medium truncate",
-                                  !notification.read && "font-semibold"
+                                  !notification.is_read && "font-semibold"
                                 )}>
                                   {notification.title}
                                 </h4>
                                 <div className="flex items-center gap-1 flex-shrink-0">
-                                  {!notification.read && (
+                                  {!notification.is_read && (
                                     <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
                                   )}
                                   <Button

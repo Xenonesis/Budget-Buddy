@@ -1,7 +1,29 @@
-import { supabase } from "@/lib/supabase";
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function GET() {
+  const cookieStore = await cookies();
+  
+  // Create a Supabase client with the user's session
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          // Not needed for GET requests
+        },
+        remove(name: string, options: CookieOptions) {
+          // Not needed for GET requests
+        },
+      },
+    }
+  );
+
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData.user) {
@@ -25,6 +47,27 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const cookieStore = await cookies();
+  
+  // Create a Supabase client with the user's session
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          // Not needed for this operation
+        },
+        remove(name: string, options: CookieOptions) {
+          // Not needed for this operation
+        },
+      },
+    }
+  );
+
   const { data: userData } = await supabase.auth.getUser();
 
   if (!userData.user) {

@@ -75,7 +75,7 @@ export default function NotificationsPage() {
   const handleMarkAllAsRead = async () => {
     try {
       await NotificationService.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -133,7 +133,7 @@ export default function NotificationsPage() {
   // Filter and sort notifications
   const filteredAndSortedNotifications = notifications
     .filter(notification => {
-      if (filter === 'unread') return !notification.read;
+      if (filter === 'unread') return !notification.is_read;
       if (filter !== 'all') return notification.type === filter;
       return true;
     })
@@ -142,15 +142,17 @@ export default function NotificationsPage() {
         case 'oldest':
           return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         case 'priority':
-          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
-          return priorityOrder[b.priority] - priorityOrder[a.priority];
+          const priorityOrder: Record<string, number> = { urgent: 4, high: 3, medium: 2, low: 1 };
+          const aPriority = a.priority || 'low';
+          const bPriority = b.priority || 'low';
+          return priorityOrder[bPriority] - priorityOrder[aPriority];
         case 'newest':
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   if (loading) {
     return (
@@ -247,7 +249,7 @@ export default function NotificationsPage() {
                   >
                     <Card className={cn(
                       "hover:shadow-md transition-shadow cursor-pointer group",
-                      !notification.read && "ring-2 ring-blue-200 dark:ring-blue-800"
+                      !notification.is_read && "ring-2 ring-blue-200 dark:ring-blue-800"
                     )}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
@@ -262,7 +264,7 @@ export default function NotificationsPage() {
                             <div className="flex items-start justify-between gap-2">
                               <h3 className={cn(
                                 "text-base font-medium",
-                                !notification.read && "font-semibold"
+                                !notification.is_read && "font-semibold"
                               )}>
                                 {notification.title}
                               </h3>
@@ -276,8 +278,8 @@ export default function NotificationsPage() {
                                     High
                                   </Badge>
                                 )}
-                                {!notification.read && (
-                                  <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                                {!notification.is_read && (
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
                                 )}
                                 <Button
                                   variant="ghost"
@@ -309,7 +311,7 @@ export default function NotificationsPage() {
                                     {notification.action_label || 'View'}
                                   </Button>
                                 )}
-                                {!notification.read && (
+                                {!notification.is_read && (
                                   <Button
                                     variant="ghost"
                                     size="sm"

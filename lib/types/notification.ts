@@ -1,12 +1,12 @@
 export interface Notification {
   id: string;
   user_id: string;
-  type: 'bill_reminder' | 'budget_warning' | 'goal_achievement' | 'system_update';
+  type: 'info' | 'warning' | 'error' | 'success' | 'bill_reminder' | 'budget_warning' | 'goal_achievement' | 'system_update';
   title: string;
   message: string;
-  data: Record<string, any>;
-  read: boolean;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  data?: Record<string, any>;
+  is_read: boolean;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
   created_at: string;
   scheduled_for?: string;
   expires_at?: string;
