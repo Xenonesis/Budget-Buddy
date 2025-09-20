@@ -572,7 +572,18 @@ export default function TransactionsPage() {
       if (!data || data.length === 0) {
         console.log("No categories found, creating defaults");
         await createDefaultCategories(userData.user.id);
-        return fetchCategories(); // Fetch again after creating defaults
+        // Fetch again after creating defaults, but only once
+        const { data: newData, error: newError } = await supabase
+          .from("categories")
+          .select("*")
+          .or(`user_id.is.null,user_id.eq.${userData.user.id}`)
+          .eq('is_active', true)
+          .order("name");
+        
+        if (!newError && newData) {
+          setCategories(newData);
+        }
+        return;
       }
       
       setCategories(data || []);
@@ -588,6 +599,21 @@ export default function TransactionsPage() {
   const createDefaultCategories = async (userId: string) => {
     try {
       console.log("Creating default categories for user:", userId);
+      
+      // First, check what categories already exist for this user
+      const { data: existingCategories, error: fetchError } = await supabase
+        .from("categories")
+        .select("name")
+        .or(`user_id.is.null,user_id.eq.${userId}`)
+        .eq('is_active', true);
+
+      if (fetchError) {
+        console.error("Error fetching existing categories:", fetchError);
+        return;
+      }
+
+      const existingCategoryNames = new Set(existingCategories?.map(cat => cat.name) || []);
+      console.log("Existing categories:", Array.from(existingCategoryNames));
       
       // Expanded list of categories
       const defaultCategories = [
@@ -612,16 +638,40 @@ export default function TransactionsPage() {
         { name: "Other Income", type: "income", is_active: true, user_id: userId },
       ];
 
-      console.log("Inserting default categories:", defaultCategories);
+      // Filter out categories that already exist
+      const categoriesToCreate = defaultCategories.filter(category => 
+        !existingCategoryNames.has(category.name)
+      );
+
+      console.log("Categories to create:", categoriesToCreate.map(c => c.name));
       
-      // Try to insert one by one to ensure at least some succeed
-      for (const category of defaultCategories) {
-        const { error } = await supabase.from("categories").insert([category]);
-        if (error) {
-          console.error(`Error creating category ${category.name}:`, error);
-        } else {
-          console.log(`Category ${category.name} created successfully`);
+      if (categoriesToCreate.length === 0) {
+        console.log("All default categories already exist");
+        return;
+      }
+
+      // Insert only the categories that don't exist
+      const { data, error } = await supabase
+        .from("categories")
+        .insert(categoriesToCreate)
+        .select();
+
+      if (error) {
+        console.error("Error creating default categories:", error);
+        // If batch insert fails, try one by one as fallback
+        console.log("Trying individual category creation as fallback...");
+        for (const category of categoriesToCreate) {
+          const { error: individualError } = await supabase
+            .from("categories")
+            .insert([category]);
+          if (individualError) {
+            console.error(`Error creating category ${category.name}:`, individualError);
+          } else {
+            console.log(`Category ${category.name} created successfully`);
+          }
         }
+      } else {
+        console.log(`Successfully created ${data?.length || 0} default categories`);
       }
     } catch (error) {
       console.error("Error creating default categories:", error);
