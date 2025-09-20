@@ -30,52 +30,60 @@ const CTABubbles = dynamic(() => import('@/app/page-animations').then(mod => mod
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col bg-background">
+    <main className="flex min-h-screen flex-col bg-background relative overflow-x-hidden">
       <Header />
       
-      {/* Hero section */}
-      <HeroSection
-        title="Welcome to Budget Buddy"
-        subtitle={{
-          regular: "Take control of your finances with ",
-          gradient: "our intuitive budgeting tool",
-        }}
-        description="Track your expenses, set budgets, and achieve your financial goals with our easy-to-use platform designed for everyone."
-        ctaText="Get Started"
-        ctaHref="/auth/register"
-        bottomImage={{
-          light: "/hero-banner.png",
-          dark: "/hero-banner.png",
-        }}
-        gridOptions={{
-          angle: 65,
-          opacity: 0.4,
-          cellSize: 50,
-          lightLineColor: "#4a4a4a",
-          darkLineColor: "#2a2a2a",
-        }}
-      />
-
-      {/* Features section - "Everything you need to manage your money" */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FeatureBubbles />
+      {/* Hero section with mobile-optimized background */}
+      <div className="relative">
+        <HeroSection
+          title="Welcome to Budget Buddy"
+          subtitle={{
+            regular: "Take control of your finances with ",
+            gradient: "our intuitive budgeting tool",
+          }}
+          description="Track your expenses, set budgets, and achieve your financial goals with our easy-to-use platform designed for everyone."
+          ctaText="Get Started"
+          ctaHref="/auth/register"
+          bottomImage={{
+            light: "/hero-banner.png",
+            dark: "/hero-banner.png",
+          }}
+          gridOptions={{
+            angle: 65,
+            opacity: 0.4,
+            cellSize: 50,
+            lightLineColor: "#4a4a4a",
+            darkLineColor: "#2a2a2a",
+          }}
+        />
       </div>
-      <FeaturesSection />
 
-      {/* Testimonials section */}
-      <div className="absolute inset-0 opacity-60">
-        <TestimonialBubbles />
+      {/* Features section with contained background animations */}
+      <div className="relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
+          <FeatureBubbles />
+        </div>
+        <FeaturesSection />
       </div>
-      <TestimonialsSection />
+
+      {/* Testimonials section with mobile-optimized background */}
+      <div className="relative">
+        <div className="absolute inset-0 opacity-60 hidden sm:block">
+          <TestimonialBubbles />
+        </div>
+        <TestimonialsSection />
+      </div>
 
       {/* Pricing section */}
       <PricingSection />
 
-      {/* CTA section */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <CTABubbles />
+      {/* CTA section with contained background */}
+      <div className="relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
+          <CTABubbles />
+        </div>
+        <CTASection />
       </div>
-      <CTASection />
 
       {/* About Section */}
       <AboutSection />

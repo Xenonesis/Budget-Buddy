@@ -42,12 +42,12 @@ export function Header() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 bg-background/0"
+      className="fixed top-0 left-0 right-0 z-50 bg-background/95 md:bg-background/0 backdrop-blur-sm md:backdrop-blur-0"
       style={{
-        backdropFilter: useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(8px)']),
-        WebkitBackdropFilter: useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(8px)']),
-        backgroundColor: useTransform(scrollY, [0, 100], ['rgba(var(--background-rgb), 0)', 'rgba(var(--background-rgb), 0.8)']),
-        boxShadow: useTransform(scrollY, [0, 100], ['none', '0 4px 20px rgba(0,0,0,0.05)']),
+        backdropFilter: useTransform(scrollY, [0, 100], ['blur(4px)', 'blur(8px)']),
+        WebkitBackdropFilter: useTransform(scrollY, [0, 100], ['blur(4px)', 'blur(8px)']),
+        backgroundColor: useTransform(scrollY, [0, 100], ['rgba(var(--background-rgb), 0.95)', 'rgba(var(--background-rgb), 0.98)']),
+        boxShadow: useTransform(scrollY, [0, 100], ['0 1px 3px rgba(0,0,0,0.1)', '0 4px 20px rgba(0,0,0,0.15)']),
         y: headerY
       }}
     >

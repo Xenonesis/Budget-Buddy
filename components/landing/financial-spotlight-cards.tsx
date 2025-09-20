@@ -98,7 +98,7 @@ const financialFeatures = [
 
 export function FinancialSpotlightCards() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 md:mt-16">
       {financialFeatures.map((feature, index) => (
         <motion.div
           key={feature.title}
@@ -106,15 +106,16 @@ export function FinancialSpotlightCards() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ delay: index * 0.1, duration: 0.5 }}
+          className="w-full"
         >
           <CardSpotlight
-            className="h-full bg-background/95 border-border/50 backdrop-blur-sm hover:bg-background/98 transition-all duration-300"
+            className="h-full bg-background/95 border-border/50 backdrop-blur-sm hover:bg-background/98 transition-all duration-300 p-4 sm:p-6"
             color={feature.color}
             radius={300}
           >
             {/* Highlight Badge */}
             <motion.div
-              className="absolute -top-3 -right-3 bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg z-10"
+              className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg z-10"
               initial={{ opacity: 0, scale: 0 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -126,7 +127,7 @@ export function FinancialSpotlightCards() {
 
             {/* Icon */}
             <motion.div
-              className="flex h-16 w-16 items-center justify-center rounded-xl mb-6 relative overflow-hidden"
+              className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl mb-4 sm:mb-6 relative overflow-hidden"
               style={{ backgroundColor: `${feature.color}15` }}
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.2 }}
@@ -139,7 +140,7 @@ export function FinancialSpotlightCards() {
                 transition={{ duration: 0.3 }}
               />
               <motion.div
-                className="relative z-10 transition-colors duration-300"
+                className="relative z-10 transition-colors duration-300 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6"
                 style={{ color: feature.color }}
                 whileHover={{ color: "white" }}
               >
@@ -150,7 +151,7 @@ export function FinancialSpotlightCards() {
             {/* Content */}
             <div className="relative z-20">
               <motion.h3
-                className="text-xl font-bold mb-3 text-foreground"
+                className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-foreground"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
@@ -160,7 +161,7 @@ export function FinancialSpotlightCards() {
               </motion.h3>
 
               <motion.p
-                className="text-muted-foreground mb-6 text-sm leading-relaxed"
+                className="text-muted-foreground mb-4 sm:mb-6 text-sm leading-relaxed"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}

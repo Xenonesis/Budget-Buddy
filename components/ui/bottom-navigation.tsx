@@ -74,13 +74,13 @@ function BottomNavigationComponent() {
   ], [pathname]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-xl shadow-lg md:hidden" aria-label="Mobile navigation">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background backdrop-blur-xl shadow-lg md:hidden" aria-label="Mobile navigation">
       <div className="flex items-center justify-around">
         {navItems.map((item) => (
           <NavItemButton key={item.href} item={item} />
         ))}
       </div>
-      <div className="h-safe-area-bottom bg-background/95"></div>
+      <div className="h-safe-area-bottom bg-background"></div>
     </nav>
   );
 }
@@ -111,4 +111,4 @@ const MemoizedAddTransactionButton = memo(AddTransactionButtonComponent);
 MemoizedAddTransactionButton.displayName = 'AddTransactionButton';
 
 // Export both the memoized versions with the original names
-export { MemoizedBottomNavigation as BottomNavigation, MemoizedAddTransactionButton as AddTransactionButton }; 
+export { MemoizedBottomNavigation as BottomNavigation, MemoizedAddTransactionButton as AddTransactionButton };

@@ -15,7 +15,7 @@ import { FinancialSpotlightCards } from "./financial-spotlight-cards";
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-20 md:py-32 relative overflow-hidden">
+    <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-20"
@@ -32,7 +32,7 @@ export function FeaturesSection() {
 
       <div className="container mx-auto px-4 relative">
         <motion.div
-          className="max-w-xl mx-auto text-center mb-16"
+          className="max-w-xl mx-auto text-center mb-8 sm:mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -45,7 +45,7 @@ export function FeaturesSection() {
             transition={{ duration: 0.6 }}
           >
             <motion.h2
-              className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 relative"
+              className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl mb-3 sm:mb-4 relative px-2 sm:px-0"
               animate={{
                 textShadow: ["0px 0px 0px rgba(0,0,0,0)", "0px 0px 8px rgba(var(--primary-rgb), 0.3)", "0px 0px 0px rgba(0,0,0,0)"]
               }}
@@ -56,7 +56,7 @@ export function FeaturesSection() {
               }}
             >
               Everything you need to <span className="text-gradient-primary relative inline-block">
-                manage your money
+                <span className="block sm:inline">manage your money</span>
                 <motion.div
                   className="absolute -bottom-1 left-0 right-0 h-[2px] bg-primary/30 rounded-full"
                   initial={{ width: 0 }}
@@ -68,7 +68,7 @@ export function FeaturesSection() {
             </motion.h2>
           </motion.div>
           <motion.p
-            className="text-lg text-muted-foreground"
+            className="text-base sm:text-lg text-muted-foreground px-2 sm:px-0"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
@@ -89,7 +89,7 @@ export function FeaturesSection() {
 function AdvancedAnalyticsSection() {
   return (
     <motion.div
-      className="mt-24 border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500"
+      className="mt-12 sm:mt-16 md:mt-20 lg:mt-24 border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -97,9 +97,9 @@ function AdvancedAnalyticsSection() {
       whileHover={{ y: -5 }}
     >
       <div className="grid md:grid-cols-2">
-        <div className="p-8 md:p-12 flex flex-col justify-center order-2 md:order-1">
+        <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center order-2 md:order-1">
           <motion.h3
-            className="text-2xl font-bold mb-4"
+            className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -108,7 +108,7 @@ function AdvancedAnalyticsSection() {
             <span className="text-gradient-primary">Advanced Budget Analytics</span>
           </motion.h3>
           <motion.p
-            className="text-muted-foreground mb-6"
+            className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -117,7 +117,7 @@ function AdvancedAnalyticsSection() {
             Get powerful insights into your spending patterns with our intuitive analytics dashboard. Identify trends, spot opportunities to save, and make data-driven financial decisions.
           </motion.p>
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"
+            className="grid grid-cols-1 gap-3 mb-6 sm:mb-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -189,7 +189,7 @@ function AdvancedAnalyticsSection() {
           </motion.div>
         </div>
         <motion.div
-          className="bg-muted/30 p-6 flex items-center justify-center order-1 md:order-2"
+          className="bg-muted/30 p-4 sm:p-6 flex items-center justify-center order-1 md:order-2 min-h-[300px] sm:min-h-[400px]"
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, amount: 0.4 }}
@@ -209,7 +209,7 @@ function AdvancedAnalyticsSection() {
               second: "Smart Analytics"
             }}
             lightColor="#22c55e"
-            className="scale-90 sm:scale-100"
+            className="scale-75 sm:scale-90 md:scale-100"
           />
         </motion.div>
       </div>

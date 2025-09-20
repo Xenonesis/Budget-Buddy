@@ -367,6 +367,31 @@
   .mobile-heading-adjust {
     @apply text-xl md:text-2xl;
   }
+
+  /* Enhanced mobile interaction styles */
+  @media (max-width: 768px) {
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Ensure text remains readable on mobile */
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    
+    /* Improve button spacing on mobile */
+    button, .btn, a[role="button"] {
+      min-height: 44px;
+      padding: 0.75rem 1rem;
+    }
+    
+    /* Better spacing for interactive elements */
+    .interactive-element {
+      margin: 0.5rem 0;
+    }
+  }
   
   .focus-visible-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
