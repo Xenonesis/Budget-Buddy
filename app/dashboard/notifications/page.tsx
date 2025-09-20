@@ -350,7 +350,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="bill-reminders">Bill Reminders</Label>
                       <Switch
                         id="bill-reminders"
-                        checked={settings.bill_reminders}
+                        checked={settings?.bill_reminders || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ bill_reminders: checked })
                         }
@@ -361,7 +361,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="budget-warnings">Budget Warnings</Label>
                       <Switch
                         id="budget-warnings"
-                        checked={settings.budget_warnings}
+                        checked={settings?.budget_warnings || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ budget_warnings: checked })
                         }
@@ -372,7 +372,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="goal-achievements">Goal Achievements</Label>
                       <Switch
                         id="goal-achievements"
-                        checked={settings.goal_achievements}
+                        checked={settings?.goal_achievements || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ goal_achievements: checked })
                         }
@@ -383,7 +383,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="system-updates">System Updates</Label>
                       <Switch
                         id="system-updates"
-                        checked={settings.system_updates}
+                        checked={settings?.system_updates || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ system_updates: checked })
                         }
@@ -400,7 +400,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="email-notifications">Email Notifications</Label>
                       <Switch
                         id="email-notifications"
-                        checked={settings.email_notifications}
+                        checked={settings?.email_notifications || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ email_notifications: checked })
                         }
@@ -411,7 +411,7 @@ export default function NotificationsPage() {
                       <Label htmlFor="push-notifications">Push Notifications</Label>
                       <Switch
                         id="push-notifications"
-                        checked={settings.push_notifications}
+                        checked={settings?.push_notifications || false}
                         onCheckedChange={(checked) => 
                           updateSettings({ push_notifications: checked })
                         }
@@ -427,7 +427,7 @@ export default function NotificationsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="reminder-days">Bill Reminder Days</Label>
                       <Select
-                        value={settings.reminder_days_before.toString()}
+                        value={settings?.reminder_days_before?.toString() || '3'}
                         onValueChange={(value) => 
                           updateSettings({ reminder_days_before: parseInt(value) })
                         }
@@ -447,7 +447,7 @@ export default function NotificationsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="budget-threshold">Budget Warning Threshold</Label>
                       <Select
-                        value={settings.budget_warning_threshold.toString()}
+                        value={settings?.budget_warning_threshold?.toString() || '80'}
                         onValueChange={(value) => 
                           updateSettings({ budget_warning_threshold: parseInt(value) })
                         }
