@@ -1,0 +1,1 @@
+export { Header as ModernHeader } from '../landing/header';

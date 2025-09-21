@@ -12,12 +12,14 @@ interface CategoryData {
   value: number;
   color: string;
   subcategories?: SubcategoryData[];
+  [key: string]: any; // Index signature for Recharts compatibility
 }
 
 interface SubcategoryData {
   name: string;
   value: number;
   color: string;
+  [key: string]: any; // Index signature for Recharts compatibility
 }
 
 interface EnhancedExpensePieChartProps {
@@ -223,7 +225,7 @@ function EnhancedExpensePieChartComponent({ categoryData, onCategoryClick }: Enh
                 ))}
               </defs>
               <Pie
-                data={displayData}
+                data={displayData as (CategoryData | SubcategoryData)[]}
                 cx="50%"
                 cy="50%"
                 labelLine={false}

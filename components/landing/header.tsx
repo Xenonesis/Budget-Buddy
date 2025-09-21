@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import { Menu, X, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   name: string;
@@ -21,8 +22,13 @@ const navItems: NavItem[] = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
-  const headerY = useTransform(scrollY, [0, 150], [0, -5]);
+
+  // Handle scroll effect for background changes only
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setScrolled(latest > 100);
+  });
 
   // Scroll to section smoothly
   const scrollToSection = (id: string) => {
@@ -42,154 +48,125 @@ export function Header() {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 bg-background md:bg-background/0 md:backdrop-blur-0"
-      style={{
-        backdropFilter: useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(8px)']),
-        WebkitBackdropFilter: useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(8px)']),
-        backgroundColor: useTransform(scrollY, [0, 100], ['rgba(var(--background-rgb), 1)', 'rgba(var(--background-rgb), 0.98)']),
-        boxShadow: useTransform(scrollY, [0, 100], ['0 1px 3px rgba(0,0,0,0.1)', '0 4px 20px rgba(0,0,0,0.15)']),
-        y: headerY
-      }}
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        // Force solid background on mobile, conditional on desktop
+        "bg-background md:bg-transparent",
+        scrolled 
+          ? "md:bg-background/80 md:backdrop-blur-xl border-b border-border/50 shadow-lg" 
+          : "md:bg-gradient-to-r md:from-background/20 md:via-background/10 md:to-background/20 md:backdrop-blur-sm",
+        // Always solid on mobile when menu is open
+        mobileMenuOpen ? "bg-background shadow-lg border-b" : ""
+      )}
+      initial={{ y: -100 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4 relative">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          
+          {/* Logo with enhanced animation */}
           <motion.div
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
-            className="font-bold text-2xl flex items-center gap-2 flex"
           >
-            <Link href="/" className="flex items-center gap-2 relative brand-link">
-              <Logo size="md" withText textClassName="text-2xl" />
+            <Link href="/" className="flex items-center gap-3 group">
+              <motion.div
+                className="relative"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+              >
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-violet-500/20 blur-md group-hover:blur-lg transition-all duration-300" />
+                <Logo size="sm" />
+              </motion.div>
+              <span className="font-bold text-xl bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent hover:from-primary hover:to-violet-500 transition-all duration-300">
+                Budget Buddy
+              </span>
             </Link>
           </motion.div>
 
-          {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <motion.a
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(item.href.substring(1));
-                }}
-                whileHover={{ y: -2 }}
-              >
-                {item.name}
-              </motion.a>
-            ))}
+          {/* Desktop Navigation with pill design */}
+          <nav className="hidden md:flex items-center">
+            <div className="flex items-center gap-2 p-2 rounded-full bg-muted/30 backdrop-blur-sm border border-border/50">
+              {navItems.map((item, index) => (
+                <motion.button
+                  key={item.name}
+                  className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 rounded-full group"
+                  onClick={() => scrollToSection(item.href.substring(1))}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="relative z-10">{item.name}</span>
+                  <motion.div
+                    className="absolute inset-0 rounded-full bg-primary/10 opacity-0 group-hover:opacity-100"
+                    layoutId="navHover"
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.button>
+              ))}
+            </div>
           </nav>
 
-          {/* Sign in and Sign up buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-3">
             <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button
-                variant="ghost"
-                asChild
-                className="relative overflow-hidden group"
+              <Button 
+                variant="ghost" 
+                asChild 
+                className="relative border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
               >
-                <Link href="/auth/login">
-                  <span className="relative z-10">Sign in</span>
-                  <motion.div
-                    className="absolute inset-0 bg-primary/10 rounded-md"
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileHover={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </Link>
+                <Link href="/auth/login">Sign in</Link>
               </Button>
             </motion.div>
+            
             <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative overflow-hidden rounded-md"
             >
-              <Button
-                asChild
-                className="relative overflow-hidden"
-              >
-                <Link href="/auth/register" className="group">
-                  <span className="relative z-10 flex items-center gap-1">
-                    Get started
-                    <motion.div
-                      animate={{ x: [0, 3, 0] }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        repeatDelay: 1
-                      }}
-                    >
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </motion.div>
-                  </span>
+              <Button asChild className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 shadow-lg shadow-primary/25">
+                <Link href="/auth/register" className="flex items-center gap-2">
                   <motion.div
-                    className="absolute inset-0 bg-primary-gradient"
-                    animate={{
-                      x: ["0%", "100%"],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }}
-                  />
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                  </motion.div>
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
             </motion.div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-full hover:bg-muted/80 transition-colors relative"
+              className="relative p-3 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50 hover:bg-muted/70 transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <motion.div
-                className="absolute inset-0 bg-primary/10 rounded-full"
-                initial={{ scale: 0 }}
-                whileHover={{ scale: 1.5, opacity: 0 }}
-                transition={{ duration: 0.5 }}
-              />
-              {mobileMenuOpen ? <X size={24} /> : <motion.div
-                animate={{ rotate: [0, 5, 0, -5, 0] }}
-                transition={{ repeat: Infinity, repeatType: "loop", duration: 5, repeatDelay: 3 }}
+                animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <motion.path
-                    d="M4 6H20"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                  />
-                  <motion.path
-                    d="M4 12H20"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  />
-                  <motion.path
-                    d="M4 18H20"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                  />
-                </svg>
-              </motion.div>}
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </motion.div>
             </motion.button>
           </div>
         </div>
@@ -199,19 +176,20 @@ export function Header() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-40 md:hidden bg-black/50"
+            className="fixed inset-0 z-40 md:hidden bg-black/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-50 flex flex-col"
+              className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-50 flex flex-col shadow-2xl"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
+              style={{ backgroundColor: 'hsl(var(--background))' }} // Force solid background
             >
               <div className="p-4 border-b flex justify-between items-center">
                 <div className="font-bold">Navigation</div>
