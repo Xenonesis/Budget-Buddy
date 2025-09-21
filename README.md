@@ -14,7 +14,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.12-38B2AC.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-[🚀 Live Demo](https://budget-buddy-demo.vercel.app) • [📖 Documentation](docs/) • [🐛 Report Bug](https://github.com/Xenonesis/Budget-Tracker-/issues) • [💡 Request Feature](https://github.com/Xenonesis/Budget-Tracker-/issues)
+[🚀 Live Demo](https://budget--buddy.vercel.app) • [📖 Documentation](docs/) • [🐛 Report Bug](https://github.com/Xenonesis/Budget-Tracker-/issues) • [💡 Request Feature](https://github.com/Xenonesis/Budget-Tracker-/issues)
 
 </div>
 
@@ -4128,7 +4128,7 @@ Special thanks to all the amazing people and projects that make Budget Buddy pos
 ### 🚀 Ready to Transform Your Financial Life?
 
 [![Get Started](https://img.shields.io/badge/Get_Started-4CAF50?style=for-the-badge&logo=rocket&logoColor=white)](https://budget-buddy-demo.vercel.app/auth/register)
-[![View Demo](https://img.shields.io/badge/View_Demo-2196F3?style=for-the-badge&logo=play&logoColor=white)](https://budget-buddy-demo.vercel.app)
+[![View Demo](https://img.shields.io/badge/View_Demo-2196F3?style=for-the-badge&logo=play&logoColor=white)](https://budget--buddy.vercel.app)
 [![Star on GitHub](https://img.shields.io/badge/Star_on_GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Xenonesis/Budget-Tracker-)
 
 **Made with ❤️ by the Budget Buddy Team**
