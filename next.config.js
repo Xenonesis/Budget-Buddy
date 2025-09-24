@@ -3,7 +3,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  serverExternalPackages: ['@supabase/supabase-js'],
+  serverExternalPackages: ['@supabase/supabase-js', 'puppeteer'],
   images: {
     dangerouslyAllowSVG: true,
     formats: ['image/webp', 'image/avif'],
@@ -35,12 +35,19 @@ const nextConfig = {
         stream: false,
         util: false,
         buffer: false,
+        tls: false,
+        net: false,
       };
     }
     
     // Handle canvas for server-side rendering
     if (isServer) {
       config.externals.push('canvas');
+    }
+    
+    // Exclude puppeteer from client-side bundles
+    if (!isServer) {
+      config.externals.push('puppeteer');
     }
     
     return config;

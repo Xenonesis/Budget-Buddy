@@ -26,6 +26,7 @@ import {
   generatePredictiveInsights,
   createContextualMemory
 } from './ai-intelligence-engine';
+import { financeNewsService } from './finance-news-service';
 
 // Types for AI interactions
 export interface AIMessage {
@@ -646,6 +647,17 @@ async function enhanceMessagesWithFinancialContext(
       const existingContent = systemMessage.content.replace(/^You are a helpful financial assistant\.?\s*/i, '').trim();
       if (existingContent) {
         enhancedSystemContent += `\n\nADDITIONAL INSTRUCTIONS:\n${existingContent}`;
+      }
+    }
+
+    // Check if the last user message is finance-related and add news context
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+    if (lastUserMessage?.content) {
+      const { financeNewsService } = await import('./finance-news-service');
+      const newsContext = await financeNewsService.getFinanceNewsContext(lastUserMessage.content);
+      
+      if (newsContext) {
+        enhancedSystemContent += `\n\n${newsContext}`;
       }
     }
 
