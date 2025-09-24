@@ -45,10 +45,24 @@ import {
   Sparkles,
   History,
   FileQuestion,
-  Network
+  Network,
+  Shield,
+  Smartphone,
+  Palette,
+  Zap,
+  Lock,
+  Heart,
+  Star,
+  Target,
+  TrendingUp,
+  Headphones,
+  Globe2,
+  MousePointerClick,
+  Accessibility
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table as UITable, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Add CSS for grid pattern background
 const gridPatternStyle = {
@@ -168,8 +182,8 @@ export default function AboutPage() {
               {[
                 { id: "mission", label: "Mission", icon: <Info className="w-3.5 h-3.5" /> },
                 { id: "app-details", label: "App Details", icon: <Sparkles className="w-3.5 h-3.5" /> },
-                { id: "team", label: "Team", icon: <Users className="w-3.5 h-3.5" /> },
                 { id: "faq", label: "FAQ", icon: <FileQuestion className="w-3.5 h-3.5" /> },
+                { id: "team", label: "Team", icon: <Users className="w-3.5 h-3.5" /> },
                 { id: "stack", label: "Tech Stack", icon: <Layers className="w-3.5 h-3.5" /> },
                 { id: "compare", label: "Comparison", icon: <BarChart className="w-3.5 h-3.5" /> },
               ].map((item) => (
@@ -194,12 +208,13 @@ export default function AboutPage() {
       </div>
       
       <div className="container max-w-5xl px-4">
+        {/* Mission and Features Section */}
         <div id="mission" className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-16 scroll-mt-20">
           <AnimateInView className="md:col-span-2">
-            <Card className="h-full overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <Card className="h-full overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-primary/10">
               <CardHeader className="bg-gradient-to-r from-primary/5 to-violet-500/5 border-b border-primary/10 p-6">
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M15 14c.2-1 .7-1.7 1.5-2"></path><path d="M8 9a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2"></path><path d="M17 9v9"></path><path d="M20 9h-6V5a2 2 0 1 1 4 0v6h4"></path></svg>
+                  <Target className="w-5 h-5 text-primary" />
                   Our Mission
                 </CardTitle>
                 <CardDescription className="text-base">
@@ -207,74 +222,159 @@ export default function AboutPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-6">
-                <p className="leading-relaxed">
+                <p className="leading-relaxed text-foreground/90">
                   Budget Buddy revolutionizes personal finance management by combining cutting-edge AI technology with 
                   intuitive design. Our platform integrates 20+ AI providers including Google Gemini to deliver 
                   personalized financial insights, voice-powered transaction input, and intelligent spending analysis 
                   that adapts to your unique financial patterns.
                 </p>
-                <p className="leading-relaxed">
+                <p className="leading-relaxed text-foreground/90">
                   Built on modern web technologies including Next.js 15, React 19, and Supabase, Budget Buddy offers 
                   real-time data synchronization, drag-and-drop budget management, and comprehensive analytics with 
                   interactive visualizations. Our voice interface and AI-powered insights make financial management 
                   as simple as having a conversation with your personal finance assistant.
                 </p>
-                <p className="leading-relaxed">
+                <p className="leading-relaxed text-foreground/90">
                   We believe financial empowerment should be accessible to everyone. That's why we've created a 
                   platform that not only tracks your finances but actively helps you make smarter decisions through 
                   predictive analytics, automated categorization, and export capabilities for Excel and PDF reports.
                 </p>
-                <div className="flex flex-wrap gap-3 mt-6 items-center">
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">AI-Powered</Badge>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Voice Enabled</Badge>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Real-time Sync</Badge>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">Export Ready</Badge>
+                <div className="flex flex-wrap gap-2 mt-6">
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1 font-medium">
+                    <Zap className="w-3 h-3 mr-1" />
+                    AI-Powered
+                  </Badge>
+                  <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/20 px-3 py-1 font-medium">
+                    <Headphones className="w-3 h-3 mr-1" />
+                    Voice Enabled
+                  </Badge>
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1 font-medium">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    Real-time Sync
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 px-3 py-1 font-medium">
+                    <Database className="w-3 h-3 mr-1" />
+                    Export Ready
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
           </AnimateInView>
           
           <AnimateInView delay={200}>
-            <Card className="h-full shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <Card className="h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-primary/10">
               <CardHeader className="bg-gradient-to-r from-primary/5 to-violet-500/5 border-b border-primary/10 p-6">
                 <CardTitle className="flex items-center gap-2 text-xl">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22v-5"></path><path d="M9 8V2"></path><path d="M15 8V2"></path><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path><path d="M15 8v7"></path><path d="M9 8v7"></path></svg>
+                  <Star className="w-5 h-5 text-primary" />
                   Key Features
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ul className="space-y-2 grid sm:grid-cols-1 gap-2">
+                <div className="space-y-3">
                   {[
-                    "Transaction tracking with drag & drop sorting",
-                    "Dynamic budget creation and management",
-                    "Interactive charts with Recharts visualization",
-                    "AI-powered financial insights (20+ providers)",
-                    "Voice interface for transaction input",
-                    "Dark & light theme support",
-                    "Responsive mobile-first design",
-                    "Excel and PDF export functionality",
-                    "Real-time data sync with Supabase",
-                    "Advanced filtering and search",
-                    "Recurring transaction automation",
-                    "Annual budget summaries",
-                    "Secure authentication system",
-                    "Copy-to-clipboard functionality",
-                    "Animated UI with Framer Motion",
-                    "Comprehensive analytics dashboard"
+                    { icon: <MousePointerClick className="w-4 h-4" />, text: "Drag & drop transaction sorting" },
+                    { icon: <BarChart className="w-4 h-4" />, text: "Dynamic budget creation" },
+                    { icon: <BarChart4 className="w-4 h-4" />, text: "Interactive charts with Recharts" },
+                    { icon: <Sparkles className="w-4 h-4" />, text: "AI insights (20+ providers)" },
+                    { icon: <Headphones className="w-4 h-4" />, text: "Voice transaction input" },
+                    { icon: <Palette className="w-4 h-4" />, text: "Dark & light theme support" },
+                    { icon: <Smartphone className="w-4 h-4" />, text: "Mobile-first responsive design" },
+                    { icon: <Database className="w-4 h-4" />, text: "Excel and PDF export" },
+                    { icon: <Network className="w-4 h-4" />, text: "Real-time data sync" },
+                    { icon: <LayoutGrid className="w-4 h-4" />, text: "Advanced filtering & search" },
+                    { icon: <Calendar className="w-4 h-4" />, text: "Recurring transactions" },
+                    { icon: <Trophy className="w-4 h-4" />, text: "Annual budget summaries" },
+                    { icon: <Shield className="w-4 h-4" />, text: "Secure authentication" },
+                    { icon: <Accessibility className="w-4 h-4" />, text: "Copy-to-clipboard functionality" },
+                    { icon: <Zap className="w-4 h-4" />, text: "Animated UI with Framer Motion" },
+                    { icon: <BarChart className="w-4 h-4" />, text: "Comprehensive analytics" }
                   ].map((feature, index) => (
-                    <li 
+                    <div 
                       key={index}
-                      className="flex items-start rounded-md p-2 hover:bg-muted/50 transition-colors group"
+                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-all duration-200 group"
                     >
-                      <span className="mr-2 text-primary group-hover:scale-110 transition-transform">•</span>
-                      <span className="group-hover:translate-x-1 transition-transform">{feature}</span>
-                    </li>
+                      <div className="text-primary group-hover:scale-110 transition-transform">
+                        {feature.icon}
+                      </div>
+                      <span className="text-sm group-hover:translate-x-1 transition-transform text-foreground/90">{feature.text}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </CardContent>
             </Card>
           </AnimateInView>
         </div>
+
+        {/* What Makes Us Different Section */}
+        <AnimateInView>
+          <Card className="mb-10 sm:mb-12 shadow-lg hover:shadow-xl transition-all duration-300 border-primary/10 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Heart className="w-5 h-5 text-primary" />
+                What Makes Us Different
+              </CardTitle>
+              <CardDescription className="text-base">
+                Discover the unique advantages that set Budget Buddy apart
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: <Zap className="w-6 h-6" />,
+                    title: "AI-First Approach",
+                    description: "Unlike traditional budgeting apps, we've built AI into every feature from day one, providing intelligent insights and automated categorization.",
+                    color: "from-yellow-500/20 to-orange-500/20"
+                  },
+                  {
+                    icon: <Headphones className="w-6 h-6" />,
+                    title: "Voice-Powered Interface",
+                    description: "Add transactions and get insights using natural voice commands - a feature rarely found in financial apps.",
+                    color: "from-purple-500/20 to-pink-500/20"
+                  },
+                  {
+                    icon: <Globe2 className="w-6 h-6" />,
+                    title: "Multi-Provider AI",
+                    description: "Access to 20+ AI providers ensures you always get the best insights, with automatic fallbacks and model selection.",
+                    color: "from-blue-500/20 to-cyan-500/20"
+                  },
+                  {
+                    icon: <Lock className="w-6 h-6" />,
+                    title: "Privacy-First Design",
+                    description: "Your financial data stays secure with bank-level encryption and zero-knowledge architecture.",
+                    color: "from-green-500/20 to-emerald-500/20"
+                  },
+                  {
+                    icon: <Smartphone className="w-6 h-6" />,
+                    title: "Mobile Excellence",
+                    description: "Built mobile-first with progressive web app capabilities for native-like experience on any device.",
+                    color: "from-indigo-500/20 to-violet-500/20"
+                  },
+                  {
+                    icon: <TrendingUp className="w-6 h-6" />,
+                    title: "Predictive Analytics",
+                    description: "Advanced forecasting helps you plan ahead with spending predictions and budget optimization suggestions.",
+                    color: "from-red-500/20 to-pink-500/20"
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="group">
+                    <div className={`p-4 rounded-xl bg-gradient-to-br ${item.color} border border-primary/10 hover:border-primary/20 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg`}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="text-primary group-hover:scale-110 transition-transform">
+                          {item.icon}
+                        </div>
+                        <h3 className="font-semibold text-foreground">{item.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </AnimateInView>
         
         <AnimateInView>
           <Card id="app-details" className="mb-10 sm:mb-12 shadow-md hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-white/90 dark:bg-gray-950/90 overflow-hidden scroll-mt-20">
@@ -634,6 +734,227 @@ export default function AboutPage() {
                       Show Earlier Versions
                     </Button>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </AnimateInView>
+
+        {/* FAQ Section */}
+        <AnimateInView>
+          <Card id="faq" className="mb-10 sm:mb-12 shadow-lg hover:shadow-xl transition-all duration-300 border-primary/10 overflow-hidden scroll-mt-20">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <FileQuestion className="w-5 h-5 text-primary" />
+                Frequently Asked Questions
+              </CardTitle>
+              <CardDescription className="text-base">
+                Get answers to common questions about Budget Buddy
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {[
+                  {
+                    question: "Is Budget Buddy free to use?",
+                    answer: "Yes! Budget Buddy offers a comprehensive free tier with all core features including transaction tracking, budgeting, and basic AI insights. Premium features like advanced AI analytics and unlimited voice commands are available in our paid plans."
+                  },
+                  {
+                    question: "How secure is my financial data?",
+                    answer: "We use bank-level encryption (AES-256) and follow strict security protocols. Your data is encrypted both in transit and at rest. We never store your banking credentials, and you can delete your account and data at any time."
+                  },
+                  {
+                    question: "Which AI providers does Budget Buddy support?",
+                    answer: "We support 20+ AI providers including OpenAI (GPT-4), Google Gemini, Anthropic Claude, Cohere, Mistral, and many more. The system automatically selects the best provider based on your query and available API keys."
+                  },
+                  {
+                    question: "Can I use Budget Buddy on my mobile device?",
+                    answer: "Absolutely! Budget Buddy is built mobile-first and works perfectly on all devices. We also offer progressive web app (PWA) capabilities, so you can install it like a native app on your phone."
+                  },
+                  {
+                    question: "How does the voice interface work?",
+                    answer: "Our voice interface uses advanced speech recognition to let you add transactions, ask questions, and get insights using natural language. Just click the microphone icon and speak normally - no special commands needed!"
+                  },
+                  {
+                    question: "Can I export my data?",
+                    answer: "Yes! You can export your transactions, budgets, and reports in multiple formats including Excel (.xlsx), PDF, and CSV. This ensures you always have access to your financial data."
+                  },
+                  {
+                    question: "Do you support multiple currencies?",
+                    answer: "Budget Buddy supports 25+ international currencies with real-time exchange rates. You can track expenses in different currencies and view consolidated reports in your preferred currency."
+                  },
+                  {
+                    question: "How often is my data synced?",
+                    answer: "All changes are synced in real-time across all your devices. When you add a transaction on your phone, it immediately appears on your desktop and vice versa."
+                  },
+                  {
+                    question: "Can I set up recurring transactions?",
+                    answer: "Yes! You can easily set up recurring transactions for subscriptions, bills, and regular income. The system will automatically add these transactions based on your specified schedule."
+                  },
+                  {
+                    question: "What makes Budget Buddy different from other budgeting apps?",
+                    answer: "Budget Buddy uniquely combines AI-powered insights, voice interface, real-time sync, and support for multiple AI providers. We focus on making financial management conversational and intelligent, not just transactional."
+                  }
+                ].map((item, index) => {
+                  const [isOpen, setIsOpen] = useState(false);
+                  return (
+                    <div key={index} className="border border-border/50 rounded-lg overflow-hidden hover:border-primary/30 transition-all duration-200">
+                      <button
+                        className="w-full p-4 text-left bg-muted/20 hover:bg-muted/40 transition-colors duration-200 flex items-center justify-between group"
+                        onClick={() => setIsOpen(!isOpen)}
+                      >
+                        <span className="font-medium text-foreground pr-4">{item.question}</span>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground group-hover:text-primary transition-all duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 text-muted-foreground leading-relaxed bg-card">
+                              {item.answer}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-8 p-6 bg-gradient-to-r from-primary/5 to-violet-500/5 rounded-lg border border-primary/10">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <MessageCircle className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2 text-foreground">Still have questions?</h3>
+                    <p className="text-muted-foreground mb-4 text-sm">
+                      Can't find what you're looking for? Our support team is here to help!
+                    </p>
+                    <div className="flex gap-3 flex-wrap">
+                      <Button variant="outline" size="sm" className="h-8" asChild>
+                        <Link href="/resources/contact-us">
+                          <Mail className="w-3 h-3 mr-1.5" />
+                          Contact Support
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-8" asChild>
+                        <Link href="https://github.com/Xenonesis" target="_blank" rel="noopener noreferrer">
+                          <Github className="w-3 h-3 mr-1.5" />
+                          GitHub Issues
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </AnimateInView>
+
+        {/* Statistics Section */}
+        <AnimateInView>
+          <Card className="mb-10 sm:mb-12 shadow-lg hover:shadow-xl transition-all duration-300 border-primary/10 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Zap className="w-5 h-5 text-primary" />
+                Core Capabilities
+              </CardTitle>
+              <CardDescription className="text-base">
+                Discover the powerful features that make Budget Buddy unique
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  {
+                    icon: <Sparkles className="w-8 h-8" />,
+                    number: "20+",
+                    label: "AI Providers",
+                    description: "OpenAI, Google Gemini, Claude, Mistral, Groq, and more",
+                    color: "from-purple-500/20 to-purple-600/20",
+                    textColor: "text-purple-600"
+                  },
+                  {
+                    icon: <Headphones className="w-8 h-8" />,
+                    number: "Voice",
+                    label: "Interface",
+                    description: "Natural language commands for transactions and insights",
+                    color: "from-blue-500/20 to-blue-600/20",
+                    textColor: "text-blue-600"
+                  },
+                  {
+                    icon: <MousePointerClick className="w-8 h-8" />,
+                    number: "Drag &",
+                    label: "Drop UI",
+                    description: "Intuitive budget and transaction management",
+                    color: "from-green-500/20 to-green-600/20",
+                    textColor: "text-green-600"
+                  },
+                  {
+                    icon: <Database className="w-8 h-8" />,
+                    number: "Real-time",
+                    label: "Sync",
+                    description: "Instant updates across all devices with Supabase",
+                    color: "from-amber-500/20 to-amber-600/20",
+                    textColor: "text-amber-600"
+                  }
+                ].map((stat, index) => (
+                  <div key={index} className="group">
+                    <div className={`p-6 rounded-xl bg-gradient-to-br ${stat.color} border border-border/50 hover:border-primary/30 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg text-center`}>
+                      <div className={`${stat.textColor} mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                        {stat.icon}
+                      </div>
+                      <div className="space-y-2">
+                        <div className={`text-3xl font-bold ${stat.textColor}`}>
+                          {stat.number}
+                        </div>
+                        <div className="font-semibold text-foreground">
+                          {stat.label}
+                        </div>
+                        <div className="text-sm text-muted-foreground leading-relaxed">
+                          {stat.description}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-4 bg-gradient-to-r from-primary/5 to-violet-500/5 rounded-lg border border-primary/10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Code className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">Modern Tech Stack</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Next.js 15, React 19, TypeScript, and Tailwind CSS
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-gradient-to-r from-emerald-500/5 to-green-500/5 rounded-lg border border-emerald-500/10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <BarChart4 className="w-5 h-5 text-emerald-600" />
+                    <h3 className="font-semibold text-foreground">Smart Analytics</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Interactive charts with Recharts and predictive insights
+                  </p>
+                </div>
+                
+                <div className="p-4 bg-gradient-to-r from-violet-500/5 to-purple-500/5 rounded-lg border border-violet-500/10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Shield className="w-5 h-5 text-violet-600" />
+                    <h3 className="font-semibold text-foreground">Enterprise Security</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Bank-level encryption with Supabase and secure authentication
+                  </p>
                 </div>
               </div>
             </CardContent>
