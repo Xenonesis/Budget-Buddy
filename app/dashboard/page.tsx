@@ -16,8 +16,6 @@ import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, Settings } from "lucide-rea
 import { cn } from "@/lib/utils";
 import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-expense-pie-chart";
 import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
-import { YearOverYearComparison } from "@/components/dashboard/charts/year-over-year-comparison";
-import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
 import { TimeRangeSelector } from '@/components/ui/time-range-selector';
@@ -1028,23 +1026,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Year-over-Year Comparison - Full Width */}
-          <div className="w-full">
-            <div className="h-96">
-              <YearOverYearComparison
-                onYearClick={handleYearClick}
-                className="h-full"
-              />
-            </div>
-          </div>
-
-          {/* Legacy Income vs Expenses Chart */}
-          <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h2 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold" id="income-expense-chart-title" tabIndex={0}>Income vs. Expenses</h2>
-            <div aria-labelledby="income-expense-chart-title" className="h-96 md:h-[28rem]">
-              <IncomeExpenseChart monthlyData={stats.monthlyData} />
-            </div>
-          </div>
         </div>
       )}
       
