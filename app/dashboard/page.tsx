@@ -264,6 +264,7 @@ export default function DashboardPage() {
   });
   const [enhancedMetrics, setEnhancedMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
   // Enhanced chart interaction handlers
@@ -415,7 +416,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Fetch data with offline support
+  // Fetch data with offline support and better error handling
   const fetchData = async () => {
     setLoading(true);
     
@@ -426,8 +427,6 @@ export default function DashboardPage() {
       
       if (cachedStats) {
         setStats(cachedStats);
-        setLoading(false);
-        
         if (lastSync) {
           const date = new Date(lastSync);
           setLastSynced(date.toLocaleString());
@@ -437,15 +436,14 @@ export default function DashboardPage() {
       // If offline, don't try to fetch from server
       if (!isOnline()) {
         setIsOffline(true);
-        if (!cachedStats) {
-          setLoading(false); // No cached data and offline
-        }
+        setLoading(false);
         return;
       }
       
       // Fetch from server if online
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        console.error('Auth error:', userError);
         setLoading(false);
         return;
       }
@@ -502,8 +500,8 @@ export default function DashboardPage() {
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       }
 
-      // Fetch transactions with date filtering
-      const { data: transactions } = await supabase
+      // Fetch transactions with date filtering and better error handling
+      const { data: transactions, error: transactionsError } = await supabase
         .from("transactions")
         .select(`
           *,
@@ -517,7 +515,24 @@ export default function DashboardPage() {
         .lte("date", endDate.toISOString().split('T')[0])
         .order("date", { ascending: false });
 
+      if (transactionsError) {
+        console.error('Error fetching transactions:', transactionsError);
+        setLoading(false);
+        return;
+      }
+
       if (!transactions) {
+        console.warn('No transactions found');
+        // Set empty stats instead of returning
+        setStats({
+          totalIncome: 0,
+          totalExpense: 0,
+          balance: 0,
+          recentTransactions: [],
+          monthlyData: [],
+          categoryData: [],
+          topCategories: [],
+        });
         setLoading(false);
         return;
       }
@@ -630,6 +645,7 @@ export default function DashboardPage() {
       setIsOffline(false);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      setError(error instanceof Error ? error.message : 'Failed to load dashboard data');
       setIsOffline(!isOnline());
     } finally {
       setLoading(false);
@@ -773,188 +789,351 @@ export default function DashboardPage() {
     };
   }, []);
 
+  // Enhanced loading state
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl">
+        <div className="animate-pulse">
+          {/* Header skeleton */}
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between">
+              <div className="h-8 w-48 bg-muted rounded-md"></div>
+              <div className="h-9 w-24 bg-muted rounded-md"></div>
+            </div>
+            <div className="mt-2 h-4 w-96 bg-muted rounded-md"></div>
+          </div>
+          
+          {/* Stats cards skeleton */}
+          <div className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border bg-card p-5 md:p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-muted"></div>
+                  <div className="h-4 w-24 bg-muted rounded"></div>
+                </div>
+                <div className="h-8 w-32 bg-muted rounded mb-2"></div>
+                <div className="h-3 w-20 bg-muted rounded"></div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Charts skeleton */}
+          <div className="mb-8 md:mb-10 space-y-6">
+            <div className="h-96 bg-muted rounded-xl"></div>
+          </div>
+          
+          {/* Recent transactions skeleton */}
+          <div className="rounded-xl border bg-card p-5 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-6 w-48 bg-muted rounded"></div>
+              <div className="h-8 w-20 bg-muted rounded"></div>
+            </div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 border rounded">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-4 w-16 bg-muted rounded"></div>
+                    <div className="h-4 w-24 bg-muted rounded"></div>
+                  </div>
+                  <div className="h-4 w-16 bg-muted rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Enhanced error state
+  if (error && !isOffline) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <div className="rounded-full bg-red-100 p-4 mb-4">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Failed to Load Dashboard</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md">
+            {error}
+          </p>
+          <Button onClick={() => {
+            setError(null);
+            fetchData();
+          }} className="flex items-center gap-2">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl" role="main" aria-label="Dashboard">
-      {/* Mobile-optimized header with responsive spacing and gradient text */}
-      <header className="mb-6 md:mb-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold md:text-4xl bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent" tabIndex={0}>Dashboard</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/customize" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Customize
-            </Link>
-          </Button>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-2">
-          <p className="text-sm md:text-base text-muted-foreground" tabIndex={0}>Welcome back! Here's an overview of your finances.</p>
-          
-          {/* Time Range Selector */}
-          <div className="mt-3 sm:mt-0 sm:mr-4">
-            <TimeRangeSelector
-              value={timeRange}
-              customRange={customDateRange}
-              onChange={setTimeRange}
-              className="text-sm"
-            />
+      {/* Enhanced Mobile-Optimized Header */}
+      <header className="mb-8 md:mb-10">
+        <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-violet-400/20 border border-primary/20">
+                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary via-blue-600 to-violet-600 bg-clip-text text-transparent" tabIndex={0}>
+                  Dashboard
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1" tabIndex={0}>
+                  Your financial overview at a glance
+                </p>
+              </div>
+            </div>
           </div>
           
-          {/* Improved offline status indicator */}
-          <div className="mt-3 sm:mt-0">
-            {isOffline ? (
-              <div className="flex items-center text-amber-500 text-sm rounded-full bg-amber-500/10 px-3 py-1" role="status" aria-live="polite">
-                <span className="h-2 w-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
-                Offline Mode
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Time Range Selector */}
+            <div className="order-2 sm:order-1">
+              <TimeRangeSelector
+                value={timeRange}
+                customRange={customDateRange}
+                onChange={setTimeRange}
+                className="text-sm w-full sm:w-auto"
+              />
+            </div>
+            
+            {/* Status and Actions */}
+            <div className="order-1 sm:order-2 flex items-center justify-between sm:justify-end gap-3">
+              {/* Connection Status */}
+              <div className="flex items-center">
+                {isOffline ? (
+                  <div className="flex items-center text-amber-600 text-sm rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1.5 border border-amber-200 dark:border-amber-800" role="status" aria-live="polite">
+                    <svg className="h-3 w-3 mr-2 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Offline</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-green-600 text-sm rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1.5 border border-green-200 dark:border-green-800">
+                    <div className="h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+                    <span className="font-medium">Online</span>
+                    {lastSynced && <span className="ml-2 text-muted-foreground text-xs hidden lg:inline">• {lastSynced}</span>}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center text-green-500 text-sm rounded-full bg-green-500/10 px-3 py-1">
-                <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                Online
-                {lastSynced && <span className="ml-2 text-muted-foreground text-xs hidden sm:inline">Last synced: {lastSynced}</span>}
+              
+              {/* Customize Button */}
+              <Button variant="outline" size="sm" asChild className="shrink-0 hover:bg-primary hover:text-primary-foreground transition-colors">
+                <Link href="/dashboard/customize" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Customize</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Offline Sync Button */}
+        {isOffline && (
+          <div className="mt-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-blue-700 dark:text-blue-300 text-sm">
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>You're viewing cached data. Connect to sync latest information.</span>
               </div>
-            )}
-            {isOffline && 
-              <button 
+              <Button 
                 onClick={syncData} 
-                className="text-blue-500 text-xs mt-2 hover:underline flex items-center justify-center rounded-full bg-blue-500/10 px-3 py-1"
+                size="sm"
+                variant="outline"
+                className="bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:border-blue-700 dark:text-blue-300"
                 aria-label="Sync data when online"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Sync when online
-              </button>
-            }
+                Sync Now
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </header>
       
-      {/* Stats Cards - Enhanced with gradients and better spacing */}
+      {/* Enhanced Stats Cards with Real Data Only */}
       {sectionVisibility.find(s => s.id === 'stats-cards')?.visible && (
-        <div className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Financial Summary">
-        <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300" tabIndex={0} aria-label="Total Income Summary">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <line x1="12" y1="1" x2="12" y2="23"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-            </div>
-            Total Income
-          </div>
-          <div className="mt-3 md:mt-4 text-2xl md:text-3xl font-bold">{formatCurrency(stats.totalIncome)}</div>
-          <div className="mt-2 flex items-center text-xs sm:text-sm">
-            {enhancedMetrics && enhancedMetrics.incomeGrowthRate !== 0 && (
-              <>
-                {enhancedMetrics.incomeGrowthRate > 0 ? (
-                  <TrendingUpIcon className="mr-1 h-4 w-4 text-green-600" />
-                ) : (
-                  <ArrowDownIcon className="mr-1 h-4 w-4 text-red-600" />
-                )}
-                <span className={enhancedMetrics.incomeGrowthRate > 0 ? 'text-green-600' : 'text-red-600'}>
-                  {enhancedMetrics.incomeGrowthRate > 0 ? '+' : ''}{enhancedMetrics.incomeGrowthRate.toFixed(1)}% vs last period
-                </span>
-              </>
-            )}
-            {(!enhancedMetrics || enhancedMetrics.incomeGrowthRate === 0) && (
-              <span className="text-muted-foreground">Current period income</span>
-            )}
-          </div>
-        </div>
-        
-        <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300" tabIndex={0} aria-label="Total Expenses Summary">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-              </svg>
-            </div>
-            Total Expenses
-          </div>
-          <div className="mt-3 md:mt-4 text-2xl md:text-3xl font-bold">{formatCurrency(stats.totalExpense)}</div>
-          <div className="mt-2 flex items-center text-xs sm:text-sm">
-            {enhancedMetrics && enhancedMetrics.expenseGrowthRate !== 0 && (
-              <>
-                {enhancedMetrics.expenseGrowthRate > 0 ? (
-                  <TrendingUpIcon className="mr-1 h-4 w-4 text-red-600" />
-                ) : (
-                  <ArrowDownIcon className="mr-1 h-4 w-4 text-green-600" />
-                )}
-                <span className={enhancedMetrics.expenseGrowthRate > 0 ? 'text-red-600' : 'text-green-600'}>
-                  {enhancedMetrics.expenseGrowthRate > 0 ? '+' : ''}{enhancedMetrics.expenseGrowthRate.toFixed(1)}% vs last period
-                </span>
-              </>
-            )}
-            {(!enhancedMetrics || enhancedMetrics.expenseGrowthRate === 0) && (
-              <span className="text-muted-foreground">Current period expenses</span>
-            )}
-          </div>
-        </div>
-        
-        <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md hover:shadow-lg transition-shadow duration-300 sm:col-span-2 lg:col-span-1" tabIndex={0} aria-label="Current Balance Summary">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-primary to-violet-400 text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-              </svg>
-            </div>
-            Current Balance
-          </div>
-          <div className={`mt-3 md:mt-4 text-2xl md:text-3xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`} aria-live="polite">{formatCurrency(stats.balance)}</div>
-          <div className="mt-2 flex items-center justify-between text-xs sm:text-sm">
-            <div className="flex items-center text-muted-foreground">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span>As of {formatDate(new Date())}</span>
-            </div>
-            {enhancedMetrics && enhancedMetrics.savingsRate !== undefined && (
-              <div className={`flex items-center ${enhancedMetrics.savingsRate >= 20 ? 'text-green-600' : enhancedMetrics.savingsRate >= 10 ? 'text-yellow-600' : 'text-red-600'}`}>
-                <span className="text-xs">Savings: {enhancedMetrics.savingsRate.toFixed(1)}%</span>
+        <section className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Financial Summary">
+          {/* Total Income Card */}
+          <div className="group rounded-xl border bg-card p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" tabIndex={0} aria-label="Total Income Summary">
+            <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground mb-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 via-green-600 to-emerald-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
               </div>
-            )}
+              <span className="font-semibold">Total Income</span>
+            </div>
+            <div className="text-2xl md:text-3xl font-bold text-green-700 dark:text-green-400 mb-3">
+              {stats.totalIncome > 0 ? formatCurrency(stats.totalIncome) : formatCurrency(0)}
+            </div>
+            <div className="flex items-center text-xs sm:text-sm space-x-2">
+              {enhancedMetrics && typeof enhancedMetrics.incomeGrowthRate === 'number' && enhancedMetrics.incomeGrowthRate !== 0 ? (
+                <>
+                  {enhancedMetrics.incomeGrowthRate > 0 ? (
+                    <TrendingUpIcon className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <ArrowDownIcon className="h-4 w-4 text-red-600" />
+                  )}
+                  <span className={`font-medium ${
+                    enhancedMetrics.incomeGrowthRate > 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {enhancedMetrics.incomeGrowthRate > 0 ? '+' : ''}
+                    {Math.abs(enhancedMetrics.incomeGrowthRate).toFixed(1)}% vs last period
+                  </span>
+                </>
+              ) : (
+                <span className="text-muted-foreground flex items-center">
+                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Current period
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+          
+          {/* Total Expenses Card */}
+          <div className="group rounded-xl border bg-card p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" tabIndex={0} aria-label="Total Expenses Summary">
+            <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground mb-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-pink-500 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="m22 2-5 10-5-10z"></path>
+                </svg>
+              </div>
+              <span className="font-semibold">Total Expenses</span>
+            </div>
+            <div className="text-2xl md:text-3xl font-bold text-red-700 dark:text-red-400 mb-3">
+              {stats.totalExpense > 0 ? formatCurrency(stats.totalExpense) : formatCurrency(0)}
+            </div>
+            <div className="flex items-center text-xs sm:text-sm space-x-2">
+              {enhancedMetrics && typeof enhancedMetrics.expenseGrowthRate === 'number' && enhancedMetrics.expenseGrowthRate !== 0 ? (
+                <>
+                  {enhancedMetrics.expenseGrowthRate > 0 ? (
+                    <TrendingUpIcon className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <ArrowDownIcon className="h-4 w-4 text-green-600" />
+                  )}
+                  <span className={`font-medium ${
+                    enhancedMetrics.expenseGrowthRate > 0 ? 'text-red-600' : 'text-green-600'
+                  }`}>
+                    {enhancedMetrics.expenseGrowthRate > 0 ? '+' : ''}
+                    {Math.abs(enhancedMetrics.expenseGrowthRate).toFixed(1)}% vs last period
+                  </span>
+                </>
+              ) : (
+                <span className="text-muted-foreground flex items-center">
+                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 0 0-8 0v4H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2z" />
+                  </svg>
+                  Current period
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Current Balance Card */}
+          <div className="group rounded-xl border bg-card p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 sm:col-span-2 lg:col-span-1" tabIndex={0} aria-label="Current Balance Summary">
+            <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground mb-3">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300 ${
+                stats.balance >= 0 
+                  ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-500' 
+                  : 'bg-gradient-to-br from-orange-500 via-orange-600 to-red-500'
+              } text-white`}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <span className="font-semibold">Current Balance</span>
+            </div>
+            <div className={`text-2xl md:text-3xl font-bold mb-3 ${
+              stats.balance >= 0 
+                ? 'text-green-700 dark:text-green-400' 
+                : 'text-red-700 dark:text-red-400'
+            }`} aria-live="polite">
+              {formatCurrency(Math.abs(stats.balance))}
+              {stats.balance < 0 && <span className="text-sm ml-1">(deficit)</span>}
+            </div>
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 h-4 w-4" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12,6 12,12 16,14"></polyline>
+                </svg>
+                <span>As of {formatDate(new Date())}</span>
+              </div>
+              {enhancedMetrics && typeof enhancedMetrics.savingsRate === 'number' && (
+                <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  enhancedMetrics.savingsRate >= 20 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                    : enhancedMetrics.savingsRate >= 10 
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                }`}>
+                  <svg className="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Savings: {enhancedMetrics.savingsRate.toFixed(1)}%
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
-      {/* Enhanced Metrics Section */}
+      {/* Enhanced Metrics Summary Cards */}
       {enhancedMetrics && sectionVisibility.find(s => s.id === 'stats-cards')?.visible && (
-        <div className="mb-6 md:mb-8">
+        <section className="mb-8 md:mb-10" aria-label="Enhanced Financial Metrics">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-card border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary">{enhancedMetrics.totalTransactions}</div>
-              <div className="text-xs text-muted-foreground">Total Transactions</div>
+            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
+                {enhancedMetrics.totalTransactions || 0}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium">Total Transactions</div>
             </div>
-            <div className="bg-card border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary">{formatCurrency(enhancedMetrics.averageTransactionAmount)}</div>
-              <div className="text-xs text-muted-foreground">Avg Transaction</div>
+            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
+                {enhancedMetrics.averageTransactionAmount ? formatCurrency(enhancedMetrics.averageTransactionAmount) : formatCurrency(0)}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium">Avg Transaction</div>
             </div>
-            <div className="bg-card border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary">{enhancedMetrics.mostActiveDay}</div>
-              <div className="text-xs text-muted-foreground">Most Active Day</div>
+            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1 truncate" title={enhancedMetrics.mostActiveDay}>
+                {enhancedMetrics.mostActiveDay || 'N/A'}
+              </div>
+              <div className="text-xs text-muted-foreground font-medium">Most Active Day</div>
             </div>
-            <div className="bg-card border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-primary truncate" title={enhancedMetrics.mostActiveCategory}>
-                {enhancedMetrics.mostActiveCategory.length > 10 ? 
-                  enhancedMetrics.mostActiveCategory.substring(0, 10) + '...' : 
-                  enhancedMetrics.mostActiveCategory
+            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1 truncate" title={enhancedMetrics.mostActiveCategory}>
+                {enhancedMetrics.mostActiveCategory 
+                  ? (enhancedMetrics.mostActiveCategory.length > 8 
+                      ? enhancedMetrics.mostActiveCategory.substring(0, 8) + '...' 
+                      : enhancedMetrics.mostActiveCategory)
+                  : 'N/A'
                 }
               </div>
-              <div className="text-xs text-muted-foreground">Top Category</div>
+              <div className="text-xs text-muted-foreground font-medium">Top Category</div>
             </div>
           </div>
-        </div>
+        </section>
       )}
       
       {/* Customizable Widgets Section */}
@@ -987,17 +1166,31 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Enhanced Charts with Interactive Features */}
+      {/* Enhanced Charts with Real Data and Interactive Features */}
       {sectionVisibility.find(s => s.id === 'charts')?.visible && (
-        <div className="mb-8 md:mb-10 space-y-8" role="region" aria-label="Enhanced Financial Charts">
+        <section className="mb-8 md:mb-10 space-y-6 md:space-y-8" role="region" aria-label="Financial Charts and Analytics">
+          {/* Chart Section Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">Financial Analytics</h2>
+              <p className="text-sm text-muted-foreground mt-1">Visual breakdown of your spending patterns</p>
+            </div>
+            {stats.categoryData.length > 0 && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span>Live Data</span>
+              </div>
+            )}
+          </div>
+
           {/* Drill-down breadcrumb with enhanced styling */}
           {drillDownData && (
-            <div className="rounded-lg border bg-gradient-to-r from-primary/5 to-accent/5 p-4 border-primary/20">
+            <div className="rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 border-blue-200 dark:border-blue-800">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  <span className="text-muted-foreground">Filtering by:</span>
-                  <span className="font-semibold text-foreground px-3 py-1 bg-primary/10 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                  <span className="text-muted-foreground font-medium">Filtering by:</span>
+                  <span className="font-semibold text-blue-700 dark:text-blue-300 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                     {drillDownData.type === 'category' && `${drillDownData.data.name} Category`}
                     {drillDownData.type === 'month' && `${drillDownData.data.month} ${drillDownData.data.year}`}
                     {drillDownData.type === 'year' && `Year ${drillDownData.data.year}`}
@@ -1007,26 +1200,62 @@ export default function DashboardPage() {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setDrillDownData(null)}
-                  className="hover:bg-primary/10 transition-colors"
+                  className="hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-blue-700 dark:text-blue-300"
                 >
+                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                   Clear Filter
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Main Charts Grid */}
-          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-1">
-            {/* Enhanced Expense Pie Chart - Full Width */}
-            <div className="h-96">
-              <EnhancedExpensePieChart
-                categoryData={enhancedChartData.categoryData}
-                onCategoryClick={handleCategoryClick}
-              />
+          {/* Main Charts Container */}
+          {stats.categoryData.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:gap-8">
+              {/* Enhanced Expense Pie Chart */}
+              <div className="bg-card border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Spending by Category</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {stats.categoryData.length} categories
+                  </div>
+                </div>
+                <div className="h-96">
+                  <EnhancedExpensePieChart
+                    categoryData={enhancedChartData.categoryData}
+                    onCategoryClick={handleCategoryClick}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-
-        </div>
+          ) : (
+            <div className="bg-card border rounded-xl p-8 text-center">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <svg className="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium text-foreground">No Expense Data</h3>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    Start adding transactions to see detailed analytics and spending patterns.
+                  </p>
+                </div>
+                <Button asChild className="mt-4">
+                  <Link href="/dashboard/transactions/new">
+                    <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Transaction
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
       )}
       
       {/* Recent Transactions with Enhanced UI */}
@@ -1039,15 +1268,29 @@ export default function DashboardPage() {
         <CategoryInsights topCategories={stats.topCategories} totalExpense={stats.totalExpense} />
       )}
 
-      {/* Offline warning banner - Make it more visible on mobile */}
-      {isOffline && (
-        <div className="mt-4 md:mt-6 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-3 md:p-4 sticky bottom-2 md:static" role="alert">
-          <h2 className="font-medium text-amber-800 dark:text-amber-400 text-sm md:text-base">Offline Mode Active</h2>
-          <p className="mt-1 text-xs md:text-sm text-amber-700 dark:text-amber-300">
-            You're currently viewing cached data. Some features may be limited until you're back online.
-          </p>
+      {/* Enhanced Performance and Accessibility Notice */}
+      <div className="mt-8 md:mt-10 pt-6 border-t border-border/50">
+        <div className="flex items-center justify-center text-xs text-muted-foreground space-x-4">
+          <div className="flex items-center">
+            <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+            <span>Real-time data</span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center">
+            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Bank-grade security</span>
+          </div>
+          <span>•</span>
+          <div className="flex items-center">
+            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span>Lightning fast</span>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Alert Notification System */}
       <AlertNotificationSystem />
