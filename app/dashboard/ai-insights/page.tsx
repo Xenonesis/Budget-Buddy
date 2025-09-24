@@ -51,9 +51,7 @@ export default function AIInsightsPage() {
 
   // Chat state
   const [conversations, setConversations] = useState<any[]>([]);
-  const [chatMessages, setChatMessages] = useState<AIMessage[]>([
-    { role: "system", content: "You are a helpful financial assistant." }
-  ]);
+  const [chatMessages, setChatMessages] = useState<AIMessage[]>([]);
   const [chatLoading, setChatLoading] = useState<boolean>(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState<string>("");
@@ -329,7 +327,6 @@ Please provide:
 Keep the response concise but insightful.`;
 
       const aiResponse = await chatWithAI(userId, [
-        { role: "system", content: "You are a financial advisor providing personalized insights." },
         { role: "user", content: prompt }
       ], currentModelConfig);
 
@@ -382,7 +379,7 @@ Keep the response concise but insightful.`;
   };
 
   const handleNewConversation = () => {
-    setChatMessages([{ role: "system", content: "You are a helpful financial assistant." }]);
+    setChatMessages([]);
     setActiveConversationId(null);
     setConversationTitle("");
     setIsTitleEditing(false);
@@ -397,13 +394,10 @@ Keep the response concise but insightful.`;
         .order("created_at", { ascending: true });
 
       if (messages) {
-        const formattedMessages = [
-          { role: "system" as const, content: "You are a helpful financial assistant." },
-          ...messages.map(msg => ({
-            role: msg.role as "user" | "assistant",
-            content: msg.content
-          }))
-        ];
+        const formattedMessages = messages.map(msg => ({
+          role: msg.role as "user" | "assistant",
+          content: msg.content
+        }));
         setChatMessages(formattedMessages);
       }
 
@@ -521,7 +515,13 @@ Keep the response concise but insightful.`;
     
     // Voice commands for insights
     if (lowerCommand.includes('read insights') || lowerCommand.includes('read my insights') || lowerCommand.includes('show insights') || lowerCommand.includes('financial insights')) {
-      const response = await handleSendMessage("Show me my current financial insights");
+      await handleSendMessage("Show me my current financial insights");
+      return;
+    }
+    
+    // Voice commands for specialized financial advice
+    if (lowerCommand.includes('help') || lowerCommand.includes('what can you do') || lowerCommand.includes('commands')) {
+      await handleSendMessage("What financial topics can you help me with?");
       return;
     }
     

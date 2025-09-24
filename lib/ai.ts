@@ -6,6 +6,20 @@ import {
   getQuotaStatus,
   formatTimeUntilReset 
 } from './quota-manager';
+import { 
+  getUserFinancialProfile, 
+  buildFinancialSystemMessage, 
+  buildQuickFinancialSummary,
+  type UserFinancialProfile 
+} from './ai-financial-context';
+import {
+  validateAIResponse,
+  addFinancialDisclaimers,
+  detectFinancialTopicType,
+  checkRateLimit,
+  logAIInteraction,
+  anonymizeFinancialData
+} from './ai-privacy-security';
 
 // Types for AI interactions
 export interface AIMessage {
@@ -598,12 +612,59 @@ function getExampleInsights(): FinancialInsight[] {
   ];
 }
 
+/**
+ * Enhances AI messages with user's financial context for personalized advice
+ */
+async function enhanceMessagesWithFinancialContext(
+  userId: string, 
+  messages: AIMessage[]
+): Promise<AIMessage[]> {
+  try {
+    // Get user's financial profile
+    const financialProfile = await getUserFinancialProfile(userId);
+    
+    if (!financialProfile) {
+      console.log('No financial profile found, using basic system message');
+      return messages;
+    }
+
+    // Find existing system message or create one
+    let systemMessage = messages.find(msg => msg.role === 'system');
+    const otherMessages = messages.filter(msg => msg.role !== 'system');
+
+    // Create enhanced system message with financial context
+    let enhancedSystemContent = buildFinancialSystemMessage(financialProfile);
+    
+    // If there was an existing system message, append it to our enhanced message
+    if (systemMessage?.content.trim()) {
+      const existingContent = systemMessage.content.replace(/^You are a helpful financial assistant\.?\s*/i, '').trim();
+      if (existingContent) {
+        enhancedSystemContent += `\n\nADDITIONAL INSTRUCTIONS:\n${existingContent}`;
+      }
+    }
+
+    return [
+      { role: 'system', content: enhancedSystemContent },
+      ...otherMessages
+    ];
+  } catch (error) {
+    console.error('Error enhancing messages with financial context:', error);
+    // Return original messages if enhancement fails
+    return messages;
+  }
+}
+
 export async function chatWithAI(
   userId: string,
   messages: AIMessage[],
   modelConfig?: ModelConfig
 ): Promise<string | null> {
   try {
+    // Check rate limiting
+    if (!checkRateLimit(userId)) {
+      return "You've reached the maximum number of AI requests for this hour. Please try again later.";
+    }
+
     const settings = await getUserAISettings(userId);
     if (!settings?.enabled) {
       return "AI features are not enabled. Please configure your API keys in settings.";
@@ -611,58 +672,124 @@ export async function chatWithAI(
     
     // Use provided model config or default from settings
     const config = modelConfig || settings.defaultModel;
+
+    // Check for specialized financial commands first
+    const lastUserMessage = messages[messages.length - 1];
+    if (lastUserMessage && lastUserMessage.role === 'user') {
+      const { handleFinancialCommand, getAvailableFinancialCommands } = await import('./ai-financial-commands');
+      
+      // Check for help/commands requests
+      const lowerContent = lastUserMessage.content.toLowerCase();
+      if (lowerContent.includes('what can you') || lowerContent.includes('help') && lowerContent.includes('topic') || 
+          lowerContent.includes('what financial') || lowerContent.includes('commands') || lowerContent.includes('what do you do')) {
+        return getAvailableFinancialCommands();
+      }
+      
+      const commandResponse = await handleFinancialCommand(userId, lastUserMessage.content);
+      if (commandResponse) {
+        return commandResponse;
+      }
+    }
+
+    // Enhance messages with financial context
+    const enhancedMessages = await enhanceMessagesWithFinancialContext(userId, messages);
     
-    // Get API key for the provider
+    // Get AI response and validate it
+    let rawResponse: string | null = null;
     let apiKey = '';
+    
     switch (config.provider) {
       case 'mistral':
         apiKey = settings.mistral_api_key || '';
-        return chatWithMistralAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithMistralAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'anthropic':
         apiKey = settings.anthropic_api_key || '';
-        return chatWithClaudeAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithClaudeAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'groq':
         apiKey = settings.groq_api_key || '';
-        return chatWithGroqAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithGroqAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'deepseek':
         apiKey = settings.deepseek_api_key || '';
-        return chatWithDeepSeekAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithDeepSeekAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'llama':
         apiKey = settings.llama_api_key || '';
-        return chatWithLlamaAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithLlamaAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'cohere':
         apiKey = settings.cohere_api_key || '';
-        return chatWithCohereAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithCohereAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'gemini':
         apiKey = settings.gemini_api_key || settings.google_api_key || '';
-        return chatWithGeminiAI(apiKey, messages, config.model as string, userId);
+        rawResponse = await chatWithGeminiAI(apiKey, enhancedMessages, config.model as string, userId);
+        break;
       case 'qwen':
         apiKey = settings.qwen_api_key || '';
-        return chatWithQwenAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithQwenAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'openrouter':
         apiKey = settings.openrouter_api_key || '';
-        return chatWithOpenRouterAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithOpenRouterAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'cerebras':
         apiKey = settings.cerebras_api_key || '';
-        return chatWithCerebrasAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithCerebrasAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'xAI':
         apiKey = settings.xai_api_key || '';
-        return chatWithXaiAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithXaiAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'unbound':
         apiKey = settings.unbound_api_key || '';
-        return chatWithUnboundAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithUnboundAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'openai':
         apiKey = settings.openai_api_key || '';
-        return chatWithOpenAIAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithOpenAIAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'ollama':
         apiKey = settings.ollama_api_key || '';
-        return chatWithOllamaAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithOllamaAI(apiKey, enhancedMessages, config.model as string);
+        break;
       case 'lmstudio':
         apiKey = settings.lmstudio_api_key || '';
-        return chatWithLmStudioAI(apiKey, messages, config.model as string);
+        rawResponse = await chatWithLmStudioAI(apiKey, enhancedMessages, config.model as string);
+        break;
       default:
         return `Unknown AI provider selected: ${config.provider}.`;
     }
+
+    // Validate and enhance the response
+    if (!rawResponse) {
+      return "I couldn't generate a response. Please try again.";
+    }
+
+    // Validate the response for safety
+    const validation = validateAIResponse(rawResponse);
+    
+    if (!validation.isValid) {
+      console.error('AI response validation failed:', validation.errors);
+      logAIInteraction(userId, lastUserMessage?.content || '', rawResponse, validation);
+      return "I apologize, but I can't provide that response as it may contain inappropriate financial advice. Please rephrase your question or consult with a qualified financial professional.";
+    }
+
+    // Detect topic type and add appropriate disclaimers
+    const topicType = detectFinancialTopicType(rawResponse);
+    const finalResponse = addFinancialDisclaimers(rawResponse, topicType);
+
+    // Log the interaction for audit purposes
+    logAIInteraction(userId, lastUserMessage?.content || '', finalResponse, validation);
+
+    // Show warnings to console if any
+    if (validation.warnings.length > 0) {
+      console.warn('AI response warnings:', validation.warnings);
+    }
+
+    return finalResponse;
   } catch (error) {
     console.error('Error in chatWithAI:', error);
     return "There was an error communicating with the AI assistant. Please try again later.";
