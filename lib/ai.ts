@@ -20,6 +20,12 @@ import {
   logAIInteraction,
   anonymizeFinancialData
 } from './ai-privacy-security';
+import {
+  buildUserPersonalityProfile,
+  personalizeAIResponse,
+  generatePredictiveInsights,
+  createContextualMemory
+} from './ai-intelligence-engine';
 
 // Types for AI interactions
 export interface AIMessage {
@@ -777,9 +783,20 @@ export async function chatWithAI(
       return "I apologize, but I can't provide that response as it may contain inappropriate financial advice. Please rephrase your question or consult with a qualified financial professional.";
     }
 
+    // Personalize response based on user profile and preferences
+    const personalizedResponse = await personalizeAIResponse(userId, rawResponse, {
+      topic: detectFinancialTopicType(rawResponse),
+      questionType: lastUserMessage?.content.toLowerCase().includes('?') ? 'question' : 'statement'
+    });
+
     // Detect topic type and add appropriate disclaimers
-    const topicType = detectFinancialTopicType(rawResponse);
-    const finalResponse = addFinancialDisclaimers(rawResponse, topicType);
+    const topicType = detectFinancialTopicType(personalizedResponse);
+    const finalResponse = addFinancialDisclaimers(personalizedResponse, topicType);
+
+    // Create contextual memory for future conversations
+    if (enhancedMessages.length > 1) {
+      await createContextualMemory('current_conversation', userId, enhancedMessages);
+    }
 
     // Log the interaction for audit purposes
     logAIInteraction(userId, lastUserMessage?.content || '', finalResponse, validation);

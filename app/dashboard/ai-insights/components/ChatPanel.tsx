@@ -192,7 +192,7 @@ export function ChatPanel({
       
       <CardContent className="flex-1 flex flex-col p-0">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4 min-h-0">
           {displayMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-8">
               <div className="rounded-full bg-muted p-4 mb-4">
@@ -252,7 +252,7 @@ export function ChatPanel({
                       </div>
                     )}
                     
-                    <div className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md ${
+                    <div className={`flex-1 min-w-0 max-w-[85%] rounded-lg px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md ${
                       message.role === 'user' 
                         ? 'bg-primary text-primary-foreground ml-auto' 
                         : 'bg-muted'
@@ -277,7 +277,7 @@ export function ChatPanel({
                           />
                         </div>
                       ) : (
-                        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                        <div className="text-sm whitespace-pre-wrap break-words leading-relaxed overflow-hidden word-break">
                           {message.content}
                         </div>
                       )}

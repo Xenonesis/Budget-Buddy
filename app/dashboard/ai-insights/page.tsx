@@ -754,16 +754,20 @@ Keep the response concise but insightful.`;
 
       case 'insights-focus':
         return (
-          <div className="max-w-4xl mx-auto">
-            <InsightsPanel
-              insights={insights}
-              loading={insightLoading}
-              onRefresh={handleRefreshInsights}
-              onSpeakInsight={speakFunctionRef.current || undefined}
-              onAISummarize={handleAISummarize}
-              aiSummarizeLoading={aiSummarizeLoading}
-              isAIEnabled={aiEnabled}
-            />
+          <div className="max-w-6xl mx-auto">
+            <div className="space-y-6">
+              <InsightsPanel
+                insights={insights}
+                loading={insightLoading}
+                onRefresh={handleRefreshInsights}
+                onSpeakInsight={speakFunctionRef.current || undefined}
+                onAISummarize={handleAISummarize}
+                aiSummarizeLoading={aiSummarizeLoading}
+                isAIEnabled={aiEnabled}
+                smartInsights={true}
+                onSendMessage={handleSendMessage}
+              />
+            </div>
           </div>
         );
 
@@ -772,7 +776,7 @@ Keep the response concise but insightful.`;
           <div className="space-y-6">
             {/* Main Content Grid */}
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Insights Panel - Takes 2 columns */}
+              {/* Financial Insights with Smart Insights integrated */}
               <div className="lg:col-span-2 space-y-6">
                 <InsightsPanel
                   insights={insights}
@@ -782,6 +786,8 @@ Keep the response concise but insightful.`;
                   onAISummarize={handleAISummarize}
                   aiSummarizeLoading={aiSummarizeLoading}
                   isAIEnabled={aiEnabled}
+                  smartInsights={true}
+                  onSendMessage={handleSendMessage}
                 />
               </div>
               

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Info, Volume2, Eye, Zap, Target, DollarSign, Loader2, Sparkles, Brain } from "lucide-react";
 import { FinancialInsight } from "@/lib/ai";
 import { RealFinancialInsight } from "@/lib/real-financial-insights";
+import { SmartInsightsPanel } from "./SmartInsightsPanel";
 
 interface InsightsPanelProps {
   insights: (FinancialInsight | RealFinancialInsight)[];
@@ -17,6 +18,8 @@ interface InsightsPanelProps {
   onAISummarize?: (insight: FinancialInsight | RealFinancialInsight) => Promise<void>;
   aiSummarizeLoading?: boolean;
   isAIEnabled?: boolean;
+  smartInsights?: boolean;
+  onSendMessage?: (message: string) => Promise<string | null>;
 }
 
 export function InsightsPanel({ 
@@ -27,7 +30,9 @@ export function InsightsPanel({
   onSpeakInsight,
   onAISummarize,
   aiSummarizeLoading = false,
-  isAIEnabled = false
+  isAIEnabled = false,
+  smartInsights = false,
+  onSendMessage
 }: Readonly<InsightsPanelProps>) {
   const [selectedInsight, setSelectedInsight] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'compact'>('cards');
@@ -197,6 +202,14 @@ export function InsightsPanel({
           </div>
         )}
       </div>
+
+      {/* Smart Insights Panel - Only show when enabled */}
+      {smartInsights && onSendMessage && (
+        <SmartInsightsPanel
+          onSendMessage={onSendMessage}
+          className="mb-6"
+        />
+      )}
 
       {insights.length === 0 ? (
         <Card className="border-dashed border-2">
