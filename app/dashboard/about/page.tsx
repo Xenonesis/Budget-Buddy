@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -12,35 +11,17 @@ import { TechLogo } from "@/components/ui/tech-logo";
 import TeamSection from "@/components/ui/team";
 import { 
   BarChart4, 
-  BookOpen, 
   Code, 
   Github, 
   GitBranch, 
   LayoutGrid, 
   Lightbulb, 
-  Linkedin, 
   Mail, 
   MessageCircle, 
-  Award, 
   Calendar, 
   Trophy,
   ExternalLink,
-  Globe,
-  Instagram,
-  UserCircle,
-  Users,
-  ChevronDown,
-  ChevronUp,
-  Table,
-  Cpu,
-  Check,
-  X,
-  ArrowUpRight,
-  DollarSign,
-  BarChart,
-  Layers,
-  Database,
-  Home,
+  Globe2,
   Info,
   Sparkles,
   History,
@@ -56,9 +37,18 @@ import {
   Target,
   TrendingUp,
   Headphones,
-  Globe2,
   MousePointerClick,
-  Accessibility
+  Accessibility,
+  Users,
+  Layers,
+  BarChart,
+  Database,
+  ChevronDown,
+  Cpu,
+  ArrowUpRight,
+  Table,
+  Check,
+  X
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table as UITable, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -371,6 +361,95 @@ export default function AboutPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </AnimateInView>
+        
+        {/* Blockchain Integration with Nitrolite Section */}
+        <AnimateInView>
+          <Card className="mb-10 sm:mb-12 shadow-lg hover:shadow-xl transition-all duration-300 border-primary/10 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-violet-400/10 border-b border-primary/10 p-6">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5z"></path><path d="M2 12h20"></path><path d="M2 18h20"></path></svg>
+                Blockchain Integration with Nitrolite
+              </CardTitle>
+              <CardDescription className="text-base">
+                Gasless crypto transactions and blockchain capabilities powered by Nitrolite
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5z"></path><path d="M2 12h20"></path><path d="M2 18h20"></path></svg>
+                    Gasless Transactions
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Send cryptocurrency without worrying about gas fees. Nitrolite enables seamless blockchain 
+                    interactions by sponsoring transaction costs, making crypto accessible to everyone.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>No gas fee requirements</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Multi-chain support (Ethereum, Sepolia)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>WalletConnect integration</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    Key Features
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Advanced blockchain features integrated directly into your financial management workflow.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Real-time transaction tracking</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>On-chain expense history</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Secure wallet connections</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-primary/5 to-violet-500/5 rounded-lg p-4 border border-primary/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-primary mb-1">Open Source Blockchain Integration</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Explore the Nitrolite integration on GitHub for technical details and implementation guides.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full h-9 border-primary/20 hover:bg-primary/5 text-xs w-auto group transition-all"
+                    asChild
+                  >
+                    <Link href="https://github.com/Xenonesis/Buddy-buddy-crypto" target="_blank" rel="noopener noreferrer">
+                      <Github className="w-3.5 h-3.5 mr-1.5 group-hover:scale-110 transition-transform" />
+                      <span className="group-hover:translate-x-0.5 transition-transform">View Nitrolite</span>
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
