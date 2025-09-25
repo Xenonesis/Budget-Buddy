@@ -25,7 +25,8 @@ import {
   Ban,
   Menu,
   X,
-  Bell
+  Bell,
+  Globe
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn, getAppVersion } from '@/lib/utils'
@@ -133,77 +134,143 @@ export default function DashboardLayout({
     collapsed?: boolean;
     isLast?: boolean;
   }) => {
-    const isActive = pathname === item.href;
+    const isExternal = item.href.startsWith('http');
+    const isActive = !isExternal && pathname === item.href;
     const itemRef = isLast ? lastNavItemRef : null;
+    
+    const commonProps = {
+      className: `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 relative group overflow-hidden ${
+        isActive
+          ? "bg-primary/15 text-primary shadow-sm"
+          : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+      }`,
+      onClick,
+      title: collapsed ? item.title : undefined,
+      'data-testid': `nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`,
+      'aria-label': item.shortcutKey ? `${item.title} (Shortcut: ${item.shortcutKey})` : item.title,
+    };
     
     return (
       <li>
-        <Link
-          href={item.href}
-          className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 relative group overflow-hidden ${
-            isActive
-              ? "bg-primary/15 text-primary shadow-sm"
-              : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
-          }`}
-          onClick={onClick}
-          title={collapsed ? item.title : undefined}
-          data-testid={`nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-          aria-current={isActive ? 'page' : undefined}
-          ref={itemRef}
-          aria-label={`${item.title}${item.shortcutKey ? ` (Shortcut: ${item.shortcutKey})` : ''}`}
-        >
-          {/* Hover animation background */}
-          <span 
-            className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`} 
-            aria-hidden="true"
-          ></span>
-          
-          {/* Icon with animation */}
-          <span 
-            className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
-              isActive 
-                ? 'scale-110 text-primary' 
-                : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
-            }`} 
-            aria-hidden="true"
+        {isExternal ? (
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...commonProps}
           >
-            {item.icon}
-          </span>
-          
-          {/* Title text */}
-          <span 
-            className={`relative z-10 transition-all duration-300 ${
-              collapsed 
-                ? 'opacity-0 w-0 overflow-hidden' 
-                : 'opacity-100'
-            }`}
-          >
-            {item.title}
-          </span>
-          
-          {/* Active indicator */}
-          {isActive && (
+            {/* Hover animation background */}
             <span 
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" 
+              className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`} 
               aria-hidden="true"
             ></span>
-          )}
-          
-          {/* Collapsed hover indicator */}
-          {collapsed && (
+            
+            {/* Icon with animation */}
             <span 
-              className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300" 
+              className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
+                isActive 
+                  ? 'scale-110 text-primary' 
+                  : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
+              }`} 
+              aria-hidden="true"
+            >
+              {item.icon}
+            </span>
+            
+            {/* Title text */}
+            <span 
+              className={`relative z-10 transition-all duration-300 ${
+                collapsed 
+                  ? 'opacity-0 w-0 overflow-hidden' 
+                  : 'opacity-100'
+              }`}
+            >
+              {item.title}
+            </span>
+            
+            {/* Active indicator */}
+            {isActive && (
+              <span 
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" 
+                aria-hidden="true"
+              ></span>
+            )}
+            
+            {/* Collapsed hover indicator */}
+            {collapsed && (
+              <span 
+                className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300" 
+                aria-hidden="true"
+              ></span>
+            )}
+            
+            {/* Keyboard shortcut */}
+            {item.shortcutKey && !collapsed && (
+              <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
+                {item.shortcutKey}
+              </kbd>
+            )}
+          </a>
+        ) : (
+          <Link
+            href={item.href}
+            {...commonProps}
+            aria-current={isActive ? 'page' : undefined}
+            ref={itemRef}
+          >
+            {/* Hover animation background */}
+            <span 
+              className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`} 
               aria-hidden="true"
             ></span>
-          )}
-          
-          {/* Keyboard shortcut */}
-          {item.shortcutKey && !collapsed && (
-            <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
-              {item.shortcutKey}
-            </kbd>
-          )}
-        </Link>
+            
+            {/* Icon with animation */}
+            <span 
+              className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
+                isActive 
+                  ? 'scale-110 text-primary' 
+                  : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
+              }`} 
+              aria-hidden="true"
+            >
+              {item.icon}
+            </span>
+            
+            {/* Title text */}
+            <span 
+              className={`relative z-10 transition-all duration-300 ${
+                collapsed 
+                  ? 'opacity-0 w-0 overflow-hidden' 
+                  : 'opacity-100'
+              }`}
+            >
+              {item.title}
+            </span>
+            
+            {/* Active indicator */}
+            {isActive && (
+              <span 
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" 
+                aria-hidden="true"
+              ></span>
+            )}
+            
+            {/* Collapsed hover indicator */}
+            {collapsed && (
+              <span 
+                className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300" 
+                aria-hidden="true"
+              ></span>
+            )}
+            
+            {/* Keyboard shortcut */}
+            {item.shortcutKey && !collapsed && (
+              <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
+                {item.shortcutKey}
+              </kbd>
+            )}
+          </Link>
+        )}
       </li>
     );
   }, []);
@@ -489,6 +556,12 @@ export default function DashboardLayout({
           href: "/dashboard/about",
           icon: <LifeBuoy className="h-5 w-5" />,
           label: "About"
+        },
+        {
+          title: "Nitrolite",
+          href: "https://nitrolite.vercel.app",
+          icon: <Globe className="h-5 w-5" />,
+          label: "Nitrolite"
         },
       ],
     },
