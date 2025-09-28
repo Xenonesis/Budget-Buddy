@@ -1,38 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  History, 
   Plus, 
+  MessageCircle, 
   Trash2, 
   Edit2, 
   Check, 
   X, 
-  MessageSquare,
+  Clock,
+  Search,
+  Filter,
+  MoreVertical,
   Calendar
 } from "lucide-react";
-
-interface Conversation {
-  id: string;
-  title: string;
-  created_at: string;
-  last_updated: string;
-  message_count?: number;
-}
+import { formatDistanceToNow } from "date-fns";
 
 interface ConversationHistoryProps {
-  conversations: Conversation[];
+  conversations: any[];
   activeConversationId: string | null;
   conversationTitle: string;
   isTitleEditing: boolean;
   onNewConversation: () => void;
   onLoadConversation: (id: string) => void;
   onDeleteConversation: (id: string) => void;
-  onUpdateTitle: (title: string) => void;
+  onUpdateTitle: (id: string, title: string) => void;
   onStartTitleEdit: () => void;
   onCancelTitleEdit: () => void;
   className?: string;
@@ -51,155 +47,288 @@ export function ConversationHistory({
   onCancelTitleEdit,
   className = ""
 }: ConversationHistoryProps) {
-  const [editingTitle, setEditingTitle] = useState(conversationTitle);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingTitle, setEditingTitle] = useState("");
+  const [showSearchFilter, setShowSearchFilter] = useState(false);
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isTitleEditing && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [isTitleEditing]);
+
+  // Set editing title when editing starts
+  useEffect(() => {
+    if (isTitleEditing) {
+      setEditingTitle(conversationTitle);
+    }
+  }, [isTitleEditing, conversationTitle]);
+
+  // Filter conversations based on search
+  const filteredConversations = conversations.filter(conv =>
+    conv.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSaveTitle = () => {
-    onUpdateTitle(editingTitle);
+    if (activeConversationId && editingTitle.trim()) {
+      onUpdateTitle(activeConversationId, editingTitle.trim());
+    }
   };
 
   const handleCancelEdit = () => {
-    setEditingTitle(conversationTitle);
+    setEditingTitle("");
     onCancelTitleEdit();
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return 'Today';
-    if (diffDays === 2) return 'Yesterday';
-    if (diffDays <= 7) return `${diffDays - 1} days ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-    });
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveTitle();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
+  const formatConversationDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch {
+      return 'Unknown time';
+    }
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-3">
+    <Card className={`flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/10 border-2 shadow-lg ${className}`}>
+      <CardHeader className="pb-4 border-b bg-gradient-to-r from-muted/20 via-muted/10 to-background">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <History className="h-5 w-5" />
-            Conversations
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-full blur-sm"></div>
+              <div className="relative w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
+                <MessageCircle className="h-4 w-4 text-white" />
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                Conversations
+              </div>
+              <div className="text-xs text-muted-foreground font-normal">
+                {conversations.length} total
+              </div>
+            </div>
           </CardTitle>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onNewConversation}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            New
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSearchFilter(!showSearchFilter)}
+              className="h-8 w-8 p-0 lg:hidden"
+              title="Search & Filter"
+            >
+              <Search className="h-3 w-3" />
+            </Button>
+            
+            <Button
+              onClick={onNewConversation}
+              size="sm"
+              className="flex items-center gap-2 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 shadow-md hover:shadow-lg transition-all hover:scale-105"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden lg:inline">New</span>
+            </Button>
+          </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
+
+        {/* Search and Filter - Always visible on desktop, toggleable on mobile */}
+        <div className={`space-y-3 ${showSearchFilter || (typeof window !== 'undefined' && window.innerWidth >= 1024) ? 'block' : 'hidden lg:block'}`}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search conversations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-9 bg-background/60 border-border/50 focus:border-primary/50 transition-all"
+            />
+          </div>
+          
+          {searchTerm && (
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Found {filteredConversations.length} conversations</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchTerm("")}
+                className="h-6 px-2 text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Active Conversation Title Editor */}
         {activeConversationId && (
-          <div className="p-3 bg-muted/50 rounded-lg border-2 border-primary/20">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Current Chat</span>
-            </div>
-            
+          <div className="pt-3 border-t border-border/30">
             {isTitleEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="space-y-2">
                 <Input
+                  ref={editInputRef}
                   value={editingTitle}
                   onChange={(e) => setEditingTitle(e.target.value)}
-                  className="flex-1 h-8 text-sm"
+                  onKeyDown={handleKeyPress}
                   placeholder="Enter conversation title..."
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') handleSaveTitle();
-                    if (e.key === 'Escape') handleCancelEdit();
-                  }}
-                  autoFocus
+                  className="h-8 text-sm"
                 />
-                <Button size="sm" variant="ghost" onClick={handleSaveTitle}>
-                  <Check className="h-3 w-3" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
-                  <X className="h-3 w-3" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveTitle}
+                    size="sm"
+                    className="h-7 px-3 text-xs"
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                  <Button
+                    onClick={handleCancelEdit}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-3 text-xs"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium truncate flex-1">
-                  {conversationTitle || 'Untitled Conversation'}
-                </span>
-                <Button size="sm" variant="ghost" onClick={onStartTitleEdit}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {conversationTitle || "Untitled Conversation"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Current conversation</p>
+                </div>
+                <Button
+                  onClick={onStartTitleEdit}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-primary/10"
+                >
                   <Edit2 className="h-3 w-3" />
                 </Button>
               </div>
             )}
           </div>
         )}
+      </CardHeader>
 
-        {/* Conversation List */}
-        {conversations.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="rounded-full bg-muted p-4 w-fit mx-auto mb-3">
-              <MessageSquare className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              No conversations yet
-            </p>
-            <Button variant="outline" size="sm" onClick={onNewConversation}>
-              Start your first chat
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {conversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                className={`group p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:bg-muted/50 ${
-                  activeConversationId === conversation.id 
-                    ? 'border-primary/50 bg-primary/5' 
-                    : 'border-border hover:border-primary/30'
-                }`}
-                onClick={() => onLoadConversation(conversation.id)}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium truncate">
-                      {conversation.title || 'Untitled Conversation'}
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(conversation.last_updated)}
-                      </div>
-                      {conversation.message_count && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {conversation.message_count} messages
-                        </Badge>
-                      )}
-                    </div>
+      <CardContent className="flex-1 overflow-hidden p-0">
+        <div className="h-full overflow-y-auto overflow-x-hidden">
+          {filteredConversations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+              {conversations.length === 0 ? (
+                <>
+                  <div className="w-16 h-16 bg-gradient-to-br from-muted to-muted-foreground/20 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <MessageCircle className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  
+                  <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+                    Start a new conversation with your AI financial assistant to get personalized help and insights.
+                  </p>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteConversation(conversation.id);
-                    }}
+                    onClick={onNewConversation}
+                    className="flex items-center gap-2"
                   >
-                    <Trash2 className="h-3 w-3 text-destructive" />
+                    <Plus className="h-4 w-4" />
+                    Start Your First Chat
                   </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                </>
+              ) : (
+                <>
+                  <Search className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No matches found</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Try adjusting your search terms
+                  </p>
+                  <Button
+                    onClick={() => setSearchTerm("")}
+                    variant="outline"
+                  >
+                    Clear Search
+                  </Button>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2 p-4">
+              {filteredConversations.map((conversation) => {
+                const isActive = conversation.id === activeConversationId;
+                
+                return (
+                  <div
+                    key={conversation.id}
+                    className={`group relative rounded-lg border transition-all duration-200 hover:shadow-md cursor-pointer ${
+                      isActive 
+                        ? 'border-primary/50 bg-primary/5 shadow-sm ring-1 ring-primary/20' 
+                        : 'border-border/50 bg-card/50 hover:border-border hover:bg-card'
+                    }`}
+                    onClick={() => onLoadConversation(conversation.id)}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className={`text-sm font-medium truncate ${
+                              isActive ? 'text-primary' : 'text-foreground'
+                            }`}>
+                              {conversation.title || `Chat ${conversation.id.slice(0, 8)}`}
+                            </h4>
+                            {isActive && (
+                              <Badge variant="secondary" className="text-xs px-2 py-0 bg-primary/10 text-primary border-primary/20">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{formatConversationDate(conversation.updated_at)}</span>
+                            <span className="text-border">•</span>
+                            <Calendar className="h-3 w-3" />
+                            <span>{new Date(conversation.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteConversation(conversation.id);
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            title="Delete conversation"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Active indicator */}
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-blue-600 rounded-r-full"></div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

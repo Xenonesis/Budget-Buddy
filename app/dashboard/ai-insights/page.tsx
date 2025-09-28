@@ -19,7 +19,6 @@ import {
   type AIModel,
   type AIProvider
 } from "@/lib/ai";
-// Removed financial insights imports - now handled by dedicated Financial Insights page
 
 import {
   QuotaStatusCard,
@@ -30,6 +29,7 @@ import {
   VoiceInterface
 } from "./components";
 
+// Layout modes matching the components
 type LayoutMode = 'default' | 'chat-focus' | 'voice-focus';
 
 export default function AIInsightsPage() {
@@ -57,13 +57,29 @@ export default function AIInsightsPage() {
   const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
   const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
 
-  // UI state
+  // Responsive UI state
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('default');
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [quotaError, setQuotaError] = useState<string | null>(null);
   const [quotaStatus, setQuotaStatus] = useState<any>(null);
   
   // Voice interface state
   const speakFunctionRef = useRef<((text: string) => void) | null>(null);
+
+  // Responsive breakpoint detection
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024; // lg breakpoint
+      setIsMobile(mobile);
+      
+      // Auto-adjust layout mode based on screen size - simplified for new layout modes
+      // Mobile responsiveness is now handled via CSS and component logic
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [layoutMode]);
 
   // Initialize data
   useEffect(() => {
@@ -98,11 +114,9 @@ export default function AIInsightsPage() {
         const providers = await getAvailableAIProviders(userId);
         setAvailableProviders(providers);
         
-        // Get the user's actual default model from their settings
         const userSettings = await getUserAISettings(userId);
         
         if (userSettings?.defaultModel) {
-          // Use the user's saved default model, but validate it exists
           const validModel = getValidModelForProvider(
             userSettings.defaultModel.provider, 
             userSettings.defaultModel.model
@@ -112,7 +126,6 @@ export default function AIInsightsPage() {
             model: validModel
           });
         } else if (providers.length > 0) {
-          // Fallback to first available provider if no default is set
           setCurrentModelConfig({
             provider: providers[0],
             model: getValidModelForProvider(providers[0])
@@ -125,15 +138,13 @@ export default function AIInsightsPage() {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'ai-settings-updated' && e.newValue) {
-        // Refetch AI settings when they are updated in Settings page
         refetchAISettingsInternal();
         toast.success("AI settings updated! Using your new default provider and model.");
-        localStorage.removeItem('ai-settings-updated'); // Clean up
+        localStorage.removeItem('ai-settings-updated');
       }
     };
 
     const handleWindowFocus = () => {
-      // Refetch settings when user returns to this page (e.g., from Settings)
       refetchAISettingsInternal();
     };
 
@@ -147,53 +158,29 @@ export default function AIInsightsPage() {
   }, [userId]);
 
   const initializeData = async () => {
-    try {
-      await Promise.all([
-        checkAIEnabled(),
-        fetchInsightsAndChats(),
-        fetchAISettings(),
-        fetchQuotaStatus()
-      ]);
-    } catch (error) {
-      console.error("Error initializing data:", error);
-      toast.error("Failed to initialize AI assistant");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkAIEnabled = async () => {
     if (!userId) return;
+
+    setLoading(true);
     try {
+      // Check AI enablement
       const enabled = await isAIEnabled(userId);
       setAiEnabled(enabled);
-    } catch (error) {
-      console.error("Error checking AI status:", error);
-      setAiEnabled(false);
-    }
-  };
 
-  const fetchQuotaStatus = async () => {
-    if (!userId) return;
-    try {
-      const status = await getUserQuotaStatus(userId);
-      setQuotaStatus(status);
-    } catch (error) {
-      console.error("Error fetching quota status:", error);
-    }
-  };
+      if (!enabled) {
+        setLoading(false);
+        return;
+      }
 
-  const fetchAISettings = async () => {
-    if (!userId) return;
-    try {
+      // Fetch quota status
+      await fetchQuotaStatus();
+
+      // Fetch AI providers and models
       const providers = await getAvailableAIProviders(userId);
       setAvailableProviders(providers);
-      
-      // Get the user's actual default model from their settings
+
+      // Get user's AI settings
       const userSettings = await getUserAISettings(userId);
-      
       if (userSettings?.defaultModel) {
-        // Use the user's saved default model, but validate it exists
         const validModel = getValidModelForProvider(
           userSettings.defaultModel.provider, 
           userSettings.defaultModel.model
@@ -203,48 +190,45 @@ export default function AIInsightsPage() {
           model: validModel
         });
       } else if (providers.length > 0) {
-        // Fallback to first available provider if no default is set
         setCurrentModelConfig({
           provider: providers[0],
           model: getValidModelForProvider(providers[0])
         });
       }
-    } catch (error) {
-      console.error("Error fetching AI settings:", error);
-    }
-  };
 
-  const fetchInsightsAndChats = async () => {
-    if (!userId) return;
-    
-    try {
       // Fetch conversations
       const { data: conversationsData } = await supabase
         .from("ai_conversations")
         .select("*")
         .eq("user_id", userId)
-        .order("last_updated", { ascending: false });
-      
+        .order("updated_at", { ascending: false });
+
       if (conversationsData) {
         setConversations(conversationsData);
       }
 
-      // Fetch financial data for insights
-      const { data: transactions } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", userId)
-        .order("date", { ascending: false })
-        .limit(100);
-        
-      const { data: budgets } = await supabase
-        .from("budgets")
-        .select("*")
-        .eq("user_id", userId);
-      
-      // Financial insights functionality moved to dedicated page
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error initializing AI Insights:", error);
+      toast.error("Failed to initialize AI assistant");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchQuotaStatus = async () => {
+    if (!userId) return;
+
+    try {
+      const status = await getUserQuotaStatus(userId);
+      setQuotaStatus(status);
+      
+      if (!status?.status?.canMakeRequest) {
+        setQuotaError(status?.status?.message || "Quota limit exceeded");
+      } else {
+        setQuotaError(null);
+      }
+    } catch (error) {
+      console.error("Error fetching quota status:", error);
     }
   };
 
@@ -256,25 +240,13 @@ export default function AIInsightsPage() {
     setChatMessages(newMessages);
 
     try {
-      // Check if user is asking for insights
-      const lowerMessage = message.toLowerCase();
-      const insightKeywords = [
-        'insights', 'financial insights', 'show insights', 'my insights',
-        'spending patterns', 'financial analysis', 'budget analysis',
-        'financial overview', 'what insights', 'current insights'
-      ];
-      
-      const isInsightRequest = insightKeywords.some(keyword => 
-        lowerMessage.includes(keyword)
-      );
+      const isInsightRequest = /\b(insight|analysis|analyze|spending|budget|financial|recommend|advice)\b/i.test(message);
 
       let response: string;
 
       if (isInsightRequest) {
-        // Redirect user to Financial Insights page
-        response = "For financial insights, please visit the dedicated Financial Insights page in your dashboard. You'll find detailed analysis of your spending patterns, budget alerts, and personalized recommendations there.";
+        response = "For detailed financial insights, please visit the dedicated Financial Insights page in your dashboard. You'll find comprehensive analysis of your spending patterns, budget alerts, and personalized recommendations there.";
       } else {
-        // Regular AI chat response
         const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
         response = aiResponse || "I'm sorry, I couldn't process your request right now.";
       }
@@ -283,29 +255,57 @@ export default function AIInsightsPage() {
         const updatedMessages = [...newMessages, { role: "assistant" as const, content: response }];
         setChatMessages(updatedMessages);
         
-        // Save conversation if active
         if (activeConversationId) {
           await saveConversation(activeConversationId, updatedMessages);
         }
         
-        return response; // Return the response for voice speaking
+        return response;
       }
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
+      setChatMessages(newMessages.slice(0, -1));
     } finally {
       setChatLoading(false);
     }
-    
+
     return null;
   };
 
-  // Insights functionality moved to dedicated Financial Insights page
+  const saveConversation = async (conversationId: string, messages: AIMessage[]) => {
+    if (!userId) return;
+
+    try {
+      await supabase
+        .from("ai_messages")
+        .delete()
+        .eq("conversation_id", conversationId);
+
+      const messagesToSave = messages.map((msg, index) => ({
+        conversation_id: conversationId,
+        user_id: userId,
+        role: msg.role,
+        content: msg.content,
+        created_at: new Date().toISOString()
+      }));
+
+      await supabase
+        .from("ai_messages")
+        .insert(messagesToSave);
+
+      await supabase
+        .from("ai_conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", conversationId);
+
+    } catch (error) {
+      console.error("Error saving conversation:", error);
+    }
+  };
 
   const handleModelConfigChange = async (provider: AIProvider, model: string) => {
     setCurrentModelConfig({ provider, model: model as AIModel });
     
-    // Fetch models for the new provider if not already loaded
     if (!availableModels[provider] && !loadingModels[provider]) {
       setLoadingModels(prev => ({ ...prev, [provider]: true }));
       try {
@@ -355,13 +355,22 @@ export default function AIInsightsPage() {
 
   const handleDeleteConversation = async (conversationId: string) => {
     try {
-      await supabase.from("ai_conversations").delete().eq("id", conversationId);
+      await supabase
+        .from("ai_messages")
+        .delete()
+        .eq("conversation_id", conversationId);
+
+      await supabase
+        .from("ai_conversations")
+        .delete()
+        .eq("id", conversationId);
+
       setConversations(prev => prev.filter(c => c.id !== conversationId));
       
       if (activeConversationId === conversationId) {
         handleNewConversation();
       }
-      
+
       toast.success("Conversation deleted");
     } catch (error) {
       console.error("Error deleting conversation:", error);
@@ -369,23 +378,18 @@ export default function AIInsightsPage() {
     }
   };
 
-  const handleUpdateTitle = async (title: string) => {
-    if (!activeConversationId) return;
-    
+  const handleUpdateTitle = async (conversationId: string, newTitle: string) => {
     try {
       await supabase
         .from("ai_conversations")
-        .update({ title })
-        .eq("id", activeConversationId);
-      
-      setConversationTitle(title);
-      setIsTitleEditing(false);
-      
-      // Update local state
+        .update({ title: newTitle })
+        .eq("id", conversationId);
+
       setConversations(prev => 
-        prev.map(c => c.id === activeConversationId ? { ...c, title } : c)
+        prev.map(c => c.id === conversationId ? { ...c, title: newTitle } : c)
       );
-      
+      setConversationTitle(newTitle);
+      setIsTitleEditing(false);
       toast.success("Title updated");
     } catch (error) {
       console.error("Error updating title:", error);
@@ -393,269 +397,125 @@ export default function AIInsightsPage() {
     }
   };
 
-  const saveConversation = async (conversationId: string, messages: AIMessage[]) => {
-    try {
-      // Save messages (excluding system message)
-      const messagesToSave = messages.slice(1).map(msg => ({
-        conversation_id: conversationId,
-        role: msg.role,
-        content: msg.content,
-        user_id: userId
-      }));
-
-      await supabase.from("ai_messages").upsert(messagesToSave);
-    } catch (error) {
-      console.error("Error saving conversation:", error);
-    }
-  };
-
-  const getDefaultModelForProvider = (provider: string): string => {
-    const defaults: Record<string, string> = {
-      mistral: 'mistral-small',
-      anthropic: 'claude-3-5-sonnet',
-      groq: 'llama-3.1-8b',
-      gemini: 'gemini-1.5-flash',
-      openai: 'gpt-4o'
-    };
-    return defaults[provider] || 'mistral-small';
-  };
-
-  // Format insights for chat display
-  const formatInsightsForChat = (insights: FinancialInsight[]): string => {
-    if (insights.length === 0) {
-      return "I don't have any financial insights available right now. Would you like me to generate some fresh insights for you?";
-    }
-
-    // Return a minimal message since visual cards will handle the display
-    return `💡 I found ${insights.length} financial insights for you:`;
-  };
-
-  // Get emoji for insight type
-  const getInsightEmoji = (type: string): string => {
-    const emojiMap: Record<string, string> = {
-      'spending_pattern': '📈',
-      'saving_suggestion': '💡',
-      'budget_warning': '⚠️',
-      'investment_tip': '🎯',
-      'warning': '🚨',
-      'success': '✅',
-      'trend': '📊',
-      'decline': '📉'
-    };
-    return emojiMap[type] || '📋';
-  };
-
-  const handleSpeakTextSetup = (speakFunction: (text: string) => void) => {
-    speakFunctionRef.current = speakFunction;
-  };
-
-  const handleVoiceCommand = async (command: string) => {
-    if (!command.trim()) return;
-    
-    const lowerCommand = command.toLowerCase();
-    
-    // Voice commands for insights
-    if (lowerCommand.includes('read insights') || lowerCommand.includes('read my insights') || lowerCommand.includes('show insights') || lowerCommand.includes('financial insights')) {
-      await handleSendMessage("Show me my current financial insights");
-      return;
-    }
-    
-    // Voice commands for specialized financial advice
-    if (lowerCommand.includes('help') || lowerCommand.includes('what can you do') || lowerCommand.includes('commands')) {
-      await handleSendMessage("What financial topics can you help me with?");
-      return;
-    }
-    
-    if (lowerCommand.includes('refresh insights') || lowerCommand.includes('generate insights')) {
-      if (speakFunctionRef.current) {
-        speakFunctionRef.current('Financial insights are now available on the dedicated Financial Insights page.');
-      }
-      return;
-    }
-    
-    if (lowerCommand.includes('switch to chat') || lowerCommand.includes('open chat')) {
+  // Mobile layout switcher
+  const handleMobileLayoutSwitch = (mode: 'chat' | 'history') => {
+    if (mode === 'chat') {
       setLayoutMode('chat-focus');
-      if (speakFunctionRef.current) {
-        speakFunctionRef.current('Switching to chat mode. You can now ask me anything!');
-      }
-      return;
-    }
-    
-    if (lowerCommand.includes('switch to insights') || lowerCommand.includes('show insights')) {
-      if (speakFunctionRef.current) {
-        speakFunctionRef.current('Financial insights are now available on the dedicated Financial Insights page in your dashboard.');
-      }
-      return;
-    }
-
-    if (lowerCommand.includes('switch to voice') || lowerCommand.includes('voice mode')) {
-      setLayoutMode('voice-focus');
-      if (speakFunctionRef.current) {
-        speakFunctionRef.current('Voice mode activated. You can ask me anything using your voice!');
-      }
-      return;
-    }
-
-    // Enhanced feedback for general questions
-    if (speakFunctionRef.current) {
-      speakFunctionRef.current('Let me think about that...');
-    }
-    
-    // Treat all other voice input as AI conversation
-    try {
-      const aiResponse = await handleSendMessage(command);
-      
-      // Auto-speak the AI response
-      if (aiResponse && speakFunctionRef.current) {
-        // Wait a moment for the loading state to clear
-        setTimeout(() => {
-          speakFunctionRef.current!(aiResponse);
-        }, 500);
-      }
-      
-    } catch (error) {
-      console.error('Error processing voice command:', error);
-      if (speakFunctionRef.current) {
-        speakFunctionRef.current('Sorry, I had trouble processing that. Could you try asking again?');
-      }
+    } else {
+      setLayoutMode('default');
     }
   };
 
-  // Render loading state
+  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <span className="text-muted-foreground">Loading...</span>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-muted-foreground">Loading AI Assistant...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Render empty state if AI not enabled
+  // AI not enabled state
   if (!aiEnabled) {
-    return <EmptyState onConfigureSettings={() => router.push('/dashboard/settings')} />;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <EmptyState 
+            onConfigureSettings={() => router.push('/dashboard/settings')}
+          />
+        </div>
+      </div>
+    );
   }
 
-  // Main layout based on layout mode
+  // Responsive layout rendering
   const renderMainContent = () => {
-    switch (layoutMode) {
-      case 'voice-focus':
+    if (isMobile) {
+      // Mobile layouts
+      if (layoutMode === 'default') {
         return (
-          <div className="max-w-5xl mx-auto space-y-8">
-            {/* Voice-first interface */}
-            <div className="text-center">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <div className="mb-6">
-                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-full border border-primary/20 mb-4">
-                      <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">AI Voice Assistant Active</span>
-                    </div>
-                  </div>
-                  
-                  <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                    AI Voice Assistant
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                    Ask me anything about your finances! I can help with budgeting, expense analysis, 
-                    financial planning, and much more. Just speak naturally.
-                  </p>
-                  
-                  {/* Voice Interface */}
-                  <div className="bg-gradient-to-br from-primary/5 via-blue-50/50 to-purple-50/30 dark:from-primary/10 dark:via-blue-950/20 dark:to-purple-950/10 rounded-2xl p-8 mb-8 border border-primary/10">
-                    <VoiceInterface
-                      onTranscriptAction={handleVoiceCommand}
-                      onSpeakTextAction={handleSpeakTextSetup}
-                      disabled={chatLoading}
-                      mode="center"
-                      className="justify-center"
-                    />
-                  </div>
-
-                  {/* Example Questions Grid */}
-                  <div className="bg-card/50 backdrop-blur rounded-2xl p-6 mb-8 border border-border/50">
-                    <h3 className="text-xl font-semibold mb-4 text-center">Try asking me:</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200/50">
-                          <div className="text-green-600 text-lg">💰</div>
-                          <span>"How much did I spend on groceries this month?"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200/50">
-                          <div className="text-blue-600 text-lg">📊</div>
-                          <span>"What's my biggest expense category?"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200/50">
-                          <div className="text-purple-600 text-lg">💡</div>
-                          <span>"Give me budget recommendations"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200/50">
-                          <div className="text-orange-600 text-lg">📈</div>
-                          <span>"How are my savings looking?"</span>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-pink-50 dark:bg-pink-950/20 rounded-lg border border-pink-200/50">
-                          <div className="text-pink-600 text-lg">🎯</div>
-                          <span>"Help me plan a vacation budget"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200/50">
-                          <div className="text-red-600 text-lg">⚠️</div>
-                          <span>"Am I overspending anywhere?"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-950/20 rounded-lg border border-teal-200/50">
-                          <div className="text-teal-600 text-lg">📋</div>
-                          <span>"Read my financial insights"</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-950/20 rounded-lg border border-indigo-200/50">
-                          <div className="text-indigo-600 text-lg">🔮</div>
-                          <span>"What's my financial forecast?"</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-4">
+            {/* Mobile Navigation */}
+            <div className="flex gap-2 bg-card/50 backdrop-blur rounded-lg p-2">
+              <button
+                onClick={() => handleMobileLayoutSwitch('chat')}
+                className="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => handleMobileLayoutSwitch('history')}
+                className="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-primary/10 text-primary transition-colors"
+              >
+                History
+              </button>
             </div>
-
-            {/* Recent Chat Messages (Voice Mode) */}
-            {chatMessages.length > 1 && (
-              <div className="bg-card/80 backdrop-blur border rounded-2xl p-6 max-w-4xl mx-auto">
-                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  Recent Conversation
-                </h3>
-                <div className="space-y-4 max-h-80 overflow-y-auto">
-                  {chatMessages.slice(-4).map((message, index) => (
-                    message.role !== 'system' && (
-                      <div key={index} className={`flex gap-4 ${message.role === 'user' ? 'justify-start' : 'justify-start'}`}>
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                          message.role === 'user' 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
-                        }`}>
-                          {message.role === 'user' ? '👤' : '🤖'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={`inline-block max-w-full p-4 rounded-2xl ${
-                            message.role === 'user'
-                              ? 'bg-primary/10 border border-primary/20'
-                              : 'bg-muted/80 border border-border/50'
-                          }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  ))}
-                </div>
-              </div>
-            )}
+            
+            <ConversationHistory
+              conversations={conversations}
+              activeConversationId={activeConversationId}
+              conversationTitle={conversationTitle}
+              isTitleEditing={isTitleEditing}
+              onNewConversation={handleNewConversation}
+              onLoadConversation={(id) => {
+                handleLoadConversation(id);
+                handleMobileLayoutSwitch('chat');
+              }}
+              onDeleteConversation={handleDeleteConversation}
+              onUpdateTitle={handleUpdateTitle}
+              onStartTitleEdit={() => setIsTitleEditing(true)}
+              onCancelTitleEdit={() => setIsTitleEditing(false)}
+              className="h-[calc(100vh-12rem)]"
+            />
           </div>
         );
+      }
 
+      // Mobile chat (default mobile view)
+      return (
+        <div className="space-y-4">
+          {/* Mobile Navigation */}
+          <div className="flex gap-2 bg-card/50 backdrop-blur rounded-lg p-2">
+            <button
+              onClick={() => handleMobileLayoutSwitch('chat')}
+              className="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-primary/10 text-primary transition-colors"
+            >
+              Chat
+            </button>
+            <button
+              onClick={() => handleMobileLayoutSwitch('history')}
+              className="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground"
+            >
+              History ({conversations.length})
+            </button>
+          </div>
+          
+          <ChatPanel
+            messages={chatMessages}
+            loading={chatLoading}
+            currentModelConfig={currentModelConfig}
+            availableProviders={availableProviders}
+            availableModels={availableModels}
+            loadingModels={loadingModels}
+            insights={[]}
+            onSendMessageAction={handleSendMessage}
+            onModelConfigChangeAction={handleModelConfigChange}
+            onRequestInsights={() => {}}
+            className="h-[calc(100vh-12rem)]"
+          />
+        </div>
+      );
+    }
+
+    // Desktop layouts
+    switch (layoutMode) {
       case 'chat-focus':
         return (
           <div className="grid xl:grid-cols-4 lg:grid-cols-3 gap-6">
@@ -691,45 +551,82 @@ export default function AIInsightsPage() {
           </div>
         );
 
-      // insights-focus mode removed - now handled by dedicated Financial Insights page
-
-      default:
+      case 'voice-focus':
         return (
-          <div className="space-y-6">
-            {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Conversation History - Takes 1 column */}
-              <div>
-                <ConversationHistory
-                  conversations={conversations}
-                  activeConversationId={activeConversationId}
-                  conversationTitle={conversationTitle}
-                  isTitleEditing={isTitleEditing}
-                  onNewConversation={handleNewConversation}
-                  onLoadConversation={handleLoadConversation}
-                  onDeleteConversation={handleDeleteConversation}
-                  onUpdateTitle={handleUpdateTitle}
-                  onStartTitleEdit={() => setIsTitleEditing(true)}
-                  onCancelTitleEdit={() => setIsTitleEditing(false)}
-                />
-              </div>
+          <div className="max-w-4xl mx-auto space-y-6">
+            <VoiceInterface
+              onTranscriptAction={handleSendMessage}
+              onSpeakTextAction={(speakFn) => { speakFunctionRef.current = speakFn; }}
+              onListeningChangeAction={() => {}}
+              onTranscriptUpdateAction={() => {}}
+              disabled={chatLoading}
+              className="justify-center"
+            />
+            
+            <div className="grid lg:grid-cols-2 gap-6">
+              <ChatPanel
+                messages={chatMessages}
+                loading={chatLoading}
+                currentModelConfig={currentModelConfig}
+                availableProviders={availableProviders}
+                availableModels={availableModels}
+                loadingModels={loadingModels}
+                insights={[]}
+                onSendMessageAction={handleSendMessage}
+                onModelConfigChangeAction={handleModelConfigChange}
+                onRequestInsights={() => {}}
+                className="h-[500px]"
+              />
               
-              {/* AI Chat Panel - Takes 2 columns */}
-              <div className="lg:col-span-2">
-                <ChatPanel
-                  messages={chatMessages}
-                  loading={chatLoading}
-                  currentModelConfig={currentModelConfig}
-                  availableProviders={availableProviders}
-                  availableModels={availableModels}
-                  loadingModels={loadingModels}
-                  insights={[]} // Empty insights since this is now chat-focused
-                  onSendMessageAction={handleSendMessage}
-                  onModelConfigChangeAction={handleModelConfigChange}
-                  onRequestInsights={() => {}} // No-op since insights are in separate page
-                  className="h-[600px]"
-                />
-              </div>
+              <ConversationHistory
+                conversations={conversations}
+                activeConversationId={activeConversationId}
+                conversationTitle={conversationTitle}
+                isTitleEditing={isTitleEditing}
+                onNewConversation={handleNewConversation}
+                onLoadConversation={handleLoadConversation}
+                onDeleteConversation={handleDeleteConversation}
+                onUpdateTitle={handleUpdateTitle}
+                onStartTitleEdit={() => setIsTitleEditing(true)}
+                onCancelTitleEdit={() => setIsTitleEditing(false)}
+                className="h-[500px]"
+              />
+            </div>
+          </div>
+        );
+
+      default: // default
+        return (
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div>
+              <ConversationHistory
+                conversations={conversations}
+                activeConversationId={activeConversationId}
+                conversationTitle={conversationTitle}
+                isTitleEditing={isTitleEditing}
+                onNewConversation={handleNewConversation}
+                onLoadConversation={handleLoadConversation}
+                onDeleteConversation={handleDeleteConversation}
+                onUpdateTitle={handleUpdateTitle}
+                onStartTitleEdit={() => setIsTitleEditing(true)}
+                onCancelTitleEdit={() => setIsTitleEditing(false)}
+              />
+            </div>
+            
+            <div className="lg:col-span-2">
+              <ChatPanel
+                messages={chatMessages}
+                loading={chatLoading}
+                currentModelConfig={currentModelConfig}
+                availableProviders={availableProviders}
+                availableModels={availableModels}
+                loadingModels={loadingModels}
+                insights={[]}
+                onSendMessageAction={handleSendMessage}
+                onModelConfigChangeAction={handleModelConfigChange}
+                onRequestInsights={() => {}}
+                className="h-[600px]"
+              />
             </div>
           </div>
         );
@@ -743,8 +640,17 @@ export default function AIInsightsPage() {
           layoutMode={layoutMode}
           insightLoading={false}
           quotaStatus={quotaStatus}
-          onLayoutChange={setLayoutMode}
-          onRefreshInsights={() => {}} // No-op since insights are in separate page
+          onLayoutChange={(mode) => {
+            if (isMobile) {
+              // Mobile layout changes handled separately
+              if (mode === 'voice-focus') {
+                setLayoutMode('voice-focus');
+              }
+            } else {
+              setLayoutMode(mode as LayoutMode);
+            }
+          }}
+          onRefreshInsights={() => {}}
           onOpenSettings={() => router.push('/dashboard/settings')}
         />
 
