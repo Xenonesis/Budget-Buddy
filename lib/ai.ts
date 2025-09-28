@@ -138,7 +138,7 @@ export async function getUserAISettings(userId: string): Promise<AISettings | nu
     if (settings.defaultModel && settings.defaultModel.provider === 'gemini') {
       const model = settings.defaultModel.model;
       if (model === 'gemini-pro-vision' || model === 'gemini-1.0-pro' || model.includes('vision')) {
-        settings.defaultModel.model = 'gemini-1.5-flash';
+        settings.defaultModel.model = 'gemini-2.0-flash-exp';
       }
     }
     
@@ -149,7 +149,7 @@ export async function getUserAISettings(userId: string): Promise<AISettings | nu
       // If it's a Gemini model, make sure it's valid
       if (settings.gemini_api_key && modelToUse.startsWith('gemini-')) {
         if (modelToUse === 'gemini-pro-vision' || modelToUse === 'gemini-1.0-pro' || modelToUse.includes('vision')) {
-          modelToUse = 'gemini-1.5-flash';
+          modelToUse = 'gemini-2.0-flash-exp';
         }
       }
       
@@ -376,16 +376,16 @@ export async function generateGoogleAIInsights(
     const settings = await getUserAISettings(userId);
     if (!settings?.google_api_key || !settings.enabled) return getExampleInsights();
 
-    const modelName = "gemini-1.5-flash";
+    const modelName = "gemini-2.0-flash-exp";
     const quotaStatus = getQuotaStatus('gemini', modelName, userId);
     if (!quotaStatus.canMakeRequest) {
       return `You've reached your daily quota for Gemini AI (${quotaStatus.usage} requests). Your quota will reset in ${quotaStatus.timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
     }
     
     try {
-      // Use gemini-1.5-flash instead of the deprecated model
+      // Use gemini-2.0-flash-exp instead of the deprecated model
       const apiKey = settings.gemini_api_key || settings.google_api_key;
-      const modelName = "gemini-1.5-flash"; // Updated to supported model
+      const modelName = "gemini-2.0-flash-exp"; // Updated to supported model
       
       // Check quota before making request
       if (!canMakeRequest('gemini', modelName, userId)) {
@@ -627,20 +627,23 @@ async function enhanceMessagesWithFinancialContext(
   messages: AIMessage[]
 ): Promise<AIMessage[]> {
   try {
-    // Get user's financial profile
-    const financialProfile = await getUserFinancialProfile(userId);
+    // Get user's actual financial data from the database
+    const { supabase } = await import('./supabase');
     
-    if (!financialProfile) {
-      console.log('No financial profile found, using basic system message');
-      return messages;
-    }
+    const [transactionsResult, budgetsResult] = await Promise.all([
+      supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(100),
+      supabase.from('budgets').select('*').eq('user_id', userId)
+    ]);
+    
+    const transactions = transactionsResult.data || [];
+    const budgets = budgetsResult.data || [];
 
     // Find existing system message or create one
     let systemMessage = messages.find(msg => msg.role === 'system');
     const otherMessages = messages.filter(msg => msg.role !== 'system');
 
-    // Create enhanced system message with financial context
-    let enhancedSystemContent = buildFinancialSystemMessage(financialProfile);
+    // Create enhanced system message with actual financial context
+    let enhancedSystemContent = buildFinancialSystemMessageFromData(transactions, budgets, userId);
     
     // If there was an existing system message, append it to our enhanced message
     if (systemMessage?.content.trim()) {
@@ -653,11 +656,15 @@ async function enhanceMessagesWithFinancialContext(
     // Check if the last user message is finance-related and add news context
     const lastUserMessage = messages.filter(m => m.role === 'user').pop();
     if (lastUserMessage?.content) {
-      const { financeNewsService } = await import('./finance-news-service');
-      const newsContext = await financeNewsService.getFinanceNewsContext(lastUserMessage.content);
-      
-      if (newsContext) {
-        enhancedSystemContent += `\n\n${newsContext}`;
+      try {
+        const { financeNewsService } = await import('./finance-news-service');
+        const newsContext = await financeNewsService.getFinanceNewsContext(lastUserMessage.content);
+        
+        if (newsContext) {
+          enhancedSystemContent += `\n\n${newsContext}`;
+        }
+      } catch (newsError) {
+        console.log('Could not fetch news context:', newsError);
       }
     }
 
@@ -667,9 +674,96 @@ async function enhanceMessagesWithFinancialContext(
     ];
   } catch (error) {
     console.error('Error enhancing messages with financial context:', error);
-    // Return original messages if enhancement fails
-    return messages;
+    // Return basic system message if enhancement fails
+    const basicSystemMessage = {
+      role: 'system' as const,
+      content: "You are a helpful financial assistant. You can provide general financial advice and answer questions about personal finance, budgeting, and money management. Always remind users that your advice is educational and they should consult with qualified financial professionals for personalized guidance."
+    };
+    
+    return [
+      basicSystemMessage,
+      ...messages.filter(msg => msg.role !== 'system')
+    ];
   }
+}
+
+/**
+ * Builds financial system message from actual user data
+ */
+function buildFinancialSystemMessageFromData(
+  transactions: any[], 
+  budgets: any[], 
+  userId: string
+): string {
+  // Calculate financial metrics from actual data
+  const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const netWorth = income - expenses;
+  
+  // Get current month data
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  const thisMonthTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date);
+    return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+  });
+  
+  const monthlyIncome = thisMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const monthlyExpenses = thisMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  
+  // Calculate spending by category
+  const expenseTransactions = transactions.filter(t => t.type === 'expense');
+  const spendingByCategory = expenseTransactions.reduce((acc, t) => {
+    const category = t.category || 'Other';
+    acc[category] = (acc[category] || 0) + Math.abs(t.amount);
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const topCategories = Object.entries(spendingByCategory)
+    .sort(([,a], [,b]) => (b as number) - (a as number))
+    .slice(0, 5)
+    .map(([category, amount]) => `${category}: $${(amount as number).toFixed(2)}`)
+    .join(', ');
+
+  let systemMessage = `You are an advanced financial assistant with access to the user's complete financial data. You should provide personalized, data-driven advice based on their actual financial situation.
+
+USER'S CURRENT FINANCIAL PROFILE:
+- Total Transactions: ${transactions.length}
+- Net Worth: $${netWorth.toLocaleString()}
+- All-time Income: $${income.toLocaleString()}
+- All-time Expenses: $${expenses.toLocaleString()}
+
+CURRENT MONTH ACTIVITY:
+- Monthly Income: $${monthlyIncome.toLocaleString()}
+- Monthly Expenses: $${monthlyExpenses.toLocaleString()}
+- Monthly Net: $${(monthlyIncome - monthlyExpenses).toLocaleString()}
+
+SPENDING PATTERNS:
+- Top Expense Categories: ${topCategories || 'No expenses recorded'}
+
+BUDGET STATUS:
+- Active Budgets: ${budgets.length}`;
+
+  if (budgets.length > 0) {
+    const budgetSummary = budgets.map(b => `${b.category}: $${b.amount}`).join(', ');
+    systemMessage += `\n- Budget Categories: ${budgetSummary}`;
+  }
+
+  systemMessage += `\n\nIMPORTANT GUIDELINES:
+1. You have access to the user's actual financial data shown above - use it to provide specific, personalized advice
+2. When asked about balances, spending, budgets, or financial status, reference their actual data
+3. Calculate current balance from their transaction history (income minus expenses)
+4. Provide specific insights based on their spending patterns and budget usage
+5. Give actionable advice based on their real financial situation
+6. Always be encouraging and supportive while being honest about their financial health
+7. Reference actual numbers from their data when relevant
+8. If they have no data in a category, encourage them to add it for better insights
+
+When users ask about their financial information, you should provide specific details from their actual data, not general responses. Always end financial advice with an appropriate disclaimer about consulting qualified financial professionals.`;
+
+  return systemMessage;
 }
 
 export async function chatWithAI(
@@ -691,18 +785,27 @@ export async function chatWithAI(
     // Use provided model config or default from settings
     const config = modelConfig || settings.defaultModel;
 
-    // Check for specialized financial commands first
+    // Check for enhanced financial commands first (for direct data queries)
     const lastUserMessage = messages[messages.length - 1];
     if (lastUserMessage && lastUserMessage.role === 'user') {
-      const { handleFinancialCommand, getAvailableFinancialCommands } = await import('./ai-financial-commands');
+      const { clientEnhancedAICommands } = await import('./client-enhanced-ai-commands');
       
       // Check for help/commands requests
       const lowerContent = lastUserMessage.content.toLowerCase();
       if (lowerContent.includes('what can you') || lowerContent.includes('help') && lowerContent.includes('topic') || 
           lowerContent.includes('what financial') || lowerContent.includes('commands') || lowerContent.includes('what do you do')) {
+        const { getAvailableFinancialCommands } = await import('./ai-financial-commands');
         return getAvailableFinancialCommands();
       }
       
+      // Try enhanced commands first (for balance, spending, etc.)
+      const enhancedResponse = await clientEnhancedAICommands.processQuery(userId, lastUserMessage.content);
+      if (enhancedResponse) {
+        return enhancedResponse;
+      }
+      
+      // Fall back to specialized financial commands for complex analysis
+      const { handleFinancialCommand } = await import('./ai-financial-commands');
       const commandResponse = await handleFinancialCommand(userId, lastUserMessage.content);
       if (commandResponse) {
         return commandResponse;
@@ -1215,16 +1318,16 @@ async function chatWithGeminiAI(
     }
     
     // Validate model - prevent using deprecated models
-    if (model === 'gemini-pro-vision' || model === 'gemini-1.0-pro' || model.includes('vision')) {
-      console.warn(`Deprecated Gemini model requested: ${model}. Switching to gemini-1.5-flash.`);
-      model = 'gemini-1.5-flash';
+    if (model === 'gemini-pro-vision' || model === 'gemini-1.0-pro' || model.includes('vision') || model === 'gemini-1.5-flash') {
+      console.warn(`Deprecated Gemini model requested: ${model}. Switching to gemini-2.0-flash-exp.`);
+      model = 'gemini-2.0-flash-exp';
     }
     
     // Only allow supported models
-    const supportedModels = ['gemini-pro', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+    const supportedModels = ['gemini-pro', 'gemini-1.5-pro', 'gemini-2.0-flash-exp', 'gemini-1.5-pro-exp-0801', 'gemini-1.5-flash-exp-0801'];
     if (!supportedModels.includes(model)) {
-      console.warn(`Unsupported Gemini model requested: ${model}. Switching to gemini-1.5-flash.`);
-      model = 'gemini-1.5-flash';
+      console.warn(`Unsupported Gemini model requested: ${model}. Switching to gemini-2.0-flash-exp.`);
+      model = 'gemini-2.0-flash-exp';
     }
     
     // Check if using newer Gemini 1.5 models
@@ -1691,7 +1794,7 @@ const getDefaultModelForProvider = (provider: string): string => {
     case 'deepseek': return 'deepseek-chat';
     case 'llama': return 'llama-3.1-8b';
     case 'cohere': return 'command-r';
-    case 'gemini': return 'gemini-1.5-flash';
+    case 'gemini': return 'gemini-2.0-flash-exp';
     case 'qwen': return 'qwen-2.5-7b';
     case 'openrouter': return 'openrouter-default';
     case 'cerebras': return 'cerebras-llama-3.1-8b';

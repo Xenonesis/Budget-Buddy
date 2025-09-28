@@ -7,5 +7,8 @@ export { ConversationHistory } from './ConversationHistory';
 export { PageHeader } from './PageHeader';
 export { EmptyState } from './EmptyState';
 export { VoiceInterface } from './VoiceInterface';
+export { NewsPanel } from './NewsPanel';
 export { TypingIndicator } from './TypingIndicator';
 export { InsightMessage } from './InsightMessage';
+export { MessageRenderer } from './MessageRenderer';
+export { MessageActions } from './MessageActions';

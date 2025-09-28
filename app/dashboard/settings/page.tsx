@@ -776,7 +776,7 @@ export default function SettingsPage() {
       case 'deepseek': return 'deepseek-chat';
       case 'llama': return 'llama-3.1-8b';
       case 'cohere': return 'command-r';
-      case 'gemini': return 'gemini-1.5-flash';
+      case 'gemini': return 'gemini-2.0-flash-exp';
       case 'qwen': return 'qwen-2.5-7b';
       case 'openrouter': return 'openrouter-default';
       case 'cerebras': return 'cerebras-llama-3.1-8b';
@@ -891,7 +891,7 @@ export default function SettingsPage() {
           <>
             <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
             <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-            <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash (Balanced)</SelectItem>
+            <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp (Latest)</SelectItem>
             <SelectItem value="gemini-1.5-pro-exp-0801">Gemini 1.5 Pro Exp 0801</SelectItem>
             <SelectItem value="gemini-1.5-flash-exp-0801">Gemini 1.5 Flash Exp 0801</SelectItem>
             <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
@@ -928,7 +928,7 @@ export default function SettingsPage() {
             <SelectItem value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Most Powerful)</SelectItem>
             <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
             <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-            <SelectItem value="google/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+            <SelectItem value="google/gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
             <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
             <SelectItem value="meta-llama/llama-3.1-405b">Llama 3.1 405B (Most Powerful)</SelectItem>
             <SelectItem value="meta-llama/llama-3.1-70b">Llama 3.1 70B</SelectItem>
