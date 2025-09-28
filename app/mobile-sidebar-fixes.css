@@ -1,0 +1,92 @@
+/* Mobile sidebar text visibility fixes */
+@media (max-width: 768px) {
+  /* Force text visibility in sidebar on mobile */
+  .sidebar-mobile-fix * {
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+  
+  /* Ensure all text has proper color */
+  .sidebar-mobile-fix {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .sidebar-mobile-fix .text-foreground {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .sidebar-mobile-fix .text-muted-foreground {
+    color: hsl(var(--muted-foreground)) !important;
+    opacity: 1 !important;
+  }
+  
+  .sidebar-mobile-fix .text-primary {
+    color: hsl(var(--primary)) !important;
+  }
+  
+  /* Ensure buttons and input text are visible */
+  .sidebar-mobile-fix button,
+  .sidebar-mobile-fix button span,
+  .sidebar-mobile-fix input,
+  .sidebar-mobile-fix p,
+  .sidebar-mobile-fix h2,
+  .sidebar-mobile-fix h3,
+  .sidebar-mobile-fix h4,
+  .sidebar-mobile-fix div {
+    color: inherit !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force minimum readable font sizes */
+  .sidebar-mobile-fix .mobile-text-adjust {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  
+  .sidebar-mobile-fix .text-xs {
+    font-size: 14px !important;
+  }
+  
+  .sidebar-mobile-fix .text-sm {
+    font-size: 16px !important;
+  }
+  
+  .sidebar-mobile-fix .text-lg {
+    font-size: 18px !important;
+  }
+  
+  /* Ensure placeholder text is visible */
+  .sidebar-mobile-fix input::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+    opacity: 0.8 !important;
+  }
+  
+  /* Fix any webkit appearance issues */
+  .sidebar-mobile-fix input,
+  .sidebar-mobile-fix button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  /* Ensure contrast for light/dark themes */
+  .dark .sidebar-mobile-fix * {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark .sidebar-mobile-fix .text-muted-foreground {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+}
+
+/* Additional iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .sidebar-mobile-fix * {
+    -webkit-text-size-adjust: 100% !important;
+  }
+  
+  .sidebar-mobile-fix input {
+    font-size: 16px !important;
+  }
+}

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./tailwind-theme.css";
 @import "./globals-chat-fixes.css";
+@import "./mobile-sidebar-fixes.css";
  
 @layer base {
   :root {
@@ -382,15 +383,70 @@
       text-size-adjust: 100%;
     }
     
-    /* Improve button spacing on mobile */
+    /* Force visible text on mobile */
+    * {
+      -webkit-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
+    }
+    
+    /* Ensure minimum text sizes on mobile */
+    .mobile-text-adjust {
+      font-size: 16px !important;
+      line-height: 1.5 !important;
+    }
+    
+    /* Improve button text visibility on mobile */
     button, .btn, a[role="button"] {
       min-height: 44px;
       padding: 0.75rem 1rem;
+      font-size: 16px !important;
+      line-height: 1.5 !important;
+      -webkit-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
+    }
+    
+    /* Force text visibility in input fields */
+    input, textarea, select {
+      font-size: 16px !important;
+      -webkit-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
     }
     
     /* Better spacing for interactive elements */
     .interactive-element {
       margin: 0.5rem 0;
+    }
+    
+    /* Ensure sidebar text is visible on mobile */
+    .sidebar-mobile-fix * {
+      -webkit-text-size-adjust: 100% !important;
+      text-size-adjust: 100% !important;
+      color: hsl(var(--foreground)) !important;
+    }
+    
+    .sidebar-mobile-fix .text-muted-foreground {
+      color: hsl(var(--muted-foreground)) !important;
+      opacity: 1 !important;
+    }
+    
+    .sidebar-mobile-fix .text-primary {
+      color: hsl(var(--primary)) !important;
+    }
+    
+    /* Force minimum font sizes for small text */
+    .text-xs {
+      font-size: 14px !important;
+    }
+    
+    .text-sm {
+      font-size: 16px !important;
+    }
+    
+    /* Ensure button text is always visible */
+    .sidebar-mobile-fix button span,
+    .sidebar-mobile-fix button {
+      color: hsl(var(--foreground)) !important;
+      opacity: 1 !important;
     }
   }
   
