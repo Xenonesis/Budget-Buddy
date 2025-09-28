@@ -12,6 +12,7 @@ import { VoiceInterface } from "./VoiceInterface";
 import { TypingIndicator } from "./TypingIndicator";
 import { InsightMessage } from "./InsightMessage";
 import { MessageRenderer } from "./MessageRenderer";
+import "./chat-overflow-fixes.css";
 
 interface ChatPanelProps {
   readonly messages: AIMessage[];
@@ -42,20 +43,82 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [inputMessage, setInputMessage] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(false);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true);
 
   const [isListening, setIsListening] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesStartRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const speakFunctionRef = useRef<((text: string) => void) | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
+    // Fallback: use messagesEndRef if container scroll fails
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const scrollToTop = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = 0;
+    }
+    // Fallback: use messagesStartRef
+    setTimeout(() => {
+      messagesStartRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  // Handle scroll events to show/hide scroll buttons
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const isScrollable = container.scrollHeight > container.clientHeight;
+      const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      
+      setShowScrollButtons(isScrollable);
+      setIsNearBottom(isAtBottom);
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Scroll to bottom when messages change with slight delay to ensure DOM is updated
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, [messages]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      // Initial check
+      handleScroll();
+      
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [messages]);
+
+  // Additional effect to ensure scrolling works after component mounts
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   // Auto-speak AI responses when enabled
   useEffect(() => {
@@ -106,6 +169,10 @@ export function ChatPanel({
     if (inputMessage.trim() && !loading) {
       onSendMessageAction(inputMessage.trim());
       setInputMessage("");
+      // Force scroll to bottom after sending message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   };
 
@@ -126,7 +193,7 @@ export function ChatPanel({
   const displayMessages = messages.slice(1);
 
   return (
-    <Card className={`flex flex-col h-full ${className} bg-gradient-to-br from-background via-background to-muted/20 border-2 shadow-lg`}>
+    <Card className={`flex flex-col ${className} bg-gradient-to-br from-background via-background to-muted/20 border-2 shadow-lg chat-container`}>
       <CardHeader className="pb-4 border-b bg-gradient-to-r from-primary/5 via-blue-50/50 to-purple-50/30 dark:from-primary/10 dark:via-blue-950/20 dark:to-purple-950/10">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-3 text-lg">
@@ -205,9 +272,16 @@ export function ChatPanel({
       
       <CardContent className="flex-1 flex flex-col p-0">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6 min-h-0 bg-gradient-to-b from-background/50 to-muted/10">
-          {displayMessages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+        <div className="flex-1 overflow-hidden relative">
+          <div 
+            ref={messagesContainerRef}
+            className="overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gradient-to-b from-background/50 to-muted/10 chat-messages-area"
+            style={{ height: '400px', maxHeight: '400px', scrollBehavior: 'smooth' }}
+            onScroll={handleScroll}
+          >
+            <div ref={messagesStartRef} className="h-0" />
+            {displayMessages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-8">
               <div className="relative mb-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-full blur-xl"></div>
                 <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center shadow-lg">
@@ -295,21 +369,21 @@ export function ChatPanel({
                 return (
                 <div 
                   key={messageKey} 
-                  className={`flex gap-4 animate-fade-in ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-2 sm:gap-4 animate-fade-in ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg ring-2 ring-primary/20">
-                      <Bot className="h-5 w-5 text-white" />
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg ring-2 ring-primary/20">
+                      <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
                   )}
                   
-                  <div className={`flex-1 min-w-0 max-w-[85%] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md group ${
+                  <div className={`flex-1 min-w-0 max-w-[80%] sm:max-w-[85%] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md group overflow-hidden message-bubble ${
                     message.role === 'user' 
                       ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground ml-auto shadow-primary/20' 
                       : 'bg-card/80 backdrop-blur border border-border/50 shadow-black/5'
                   }`}>
-                    <div className="p-4">
+                    <div className="p-4 chat-message-container">
                       {/* Enhanced message rendering */}
                       {message.role === 'assistant' && 
                        insights.length > 0 && 
@@ -317,36 +391,38 @@ export function ChatPanel({
                         message.content.toLowerCase().includes('analysis') ||
                         message.content.toLowerCase().includes('budget') ||
                         message.content.toLowerCase().includes('spending')) ? (
-                        <div className="space-y-4">
+                        <div className="space-y-4 break-words">
                           <InsightMessage 
                             insights={insights}
                             onActionClick={actionHandler}
                           />
                         </div>
                       ) : (
-                        <MessageRenderer
-                          content={message.content}
-                          role={message.role as 'user' | 'assistant'}
-                          onSpeak={message.role === 'assistant' ? handleSpeakMessage : undefined}
-                        />
+                        <div className="break-words overflow-wrap-anywhere">
+                          <MessageRenderer
+                            content={message.content}
+                            role={message.role as 'user' | 'assistant'}
+                            onSpeak={message.role === 'assistant' ? handleSpeakMessage : undefined}
+                          />
+                        </div>
                       )}
                     </div>
                   </div>
                   
                   {message.role === 'user' && (
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center shadow-lg ring-2 ring-muted-foreground/10">
-                      <User className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center shadow-lg ring-2 ring-muted-foreground/10">
+                      <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                   )}
                 </div>
                 );
               })}
               {loading && (
-                <div className="flex gap-4 justify-start">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg ring-2 ring-primary/20">
-                    <Bot className="h-5 w-5 text-white" />
+                <div className="flex gap-2 sm:gap-4 justify-start">
+                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg ring-2 ring-primary/20">
+                    <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div className="bg-card/80 backdrop-blur border border-border/50 rounded-2xl p-4 shadow-sm">
+                  <div className="bg-card/80 backdrop-blur border border-border/50 rounded-2xl p-3 sm:p-4 shadow-sm overflow-hidden">
                     <TypingIndicator />
                   </div>
                 </div>
@@ -354,10 +430,51 @@ export function ChatPanel({
             </>
           )}
           <div ref={messagesEndRef} />
+          </div>
+          
+          {/* Scroll Navigation Buttons */}
+          {showScrollButtons && (
+            <div className="absolute right-4 bottom-4 flex flex-col gap-2 z-20 pointer-events-none">"
+              {!isNearBottom && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={scrollToBottom}
+                  className="h-10 w-10 p-0 rounded-full bg-background/90 backdrop-blur-sm border-2 shadow-lg hover:shadow-xl transition-all hover:scale-110 pointer-events-auto"
+                  title="Scroll to bottom"
+                >
+                  <svg 
+                    className="h-4 w-4" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={scrollToTop}
+                className="h-10 w-10 p-0 rounded-full bg-background/90 backdrop-blur-sm border-2 shadow-lg hover:shadow-xl transition-all hover:scale-110 pointer-events-auto"
+                title="Scroll to top"
+              >
+                <svg 
+                  className="h-4 w-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </Button>
+            </div>
+          )}
         </div>
         
         {/* Enhanced Input Area */}
-        <div className="border-t bg-gradient-to-r from-background via-muted/10 to-background p-6">
+        <div className="flex-shrink-0 border-t bg-gradient-to-r from-background via-muted/10 to-background p-6">
           {/* Voice Listening Feedback */}
           {isListening && (
             <div className="mb-4 flex items-center gap-3 text-sm bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-4 shadow-sm">

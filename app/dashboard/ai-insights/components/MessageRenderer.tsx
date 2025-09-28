@@ -30,7 +30,7 @@ const MarkdownComponents = {
     </div>
   ),
   p: ({ children, ...props }: any) => (
-    <p className="text-sm leading-relaxed mb-2 text-foreground/90" {...props}>
+    <p className="text-sm leading-relaxed mb-2 text-foreground/90 break-words overflow-wrap-anywhere max-w-full" {...props}>
       {children}
     </p>
   ),
@@ -62,7 +62,7 @@ const MarkdownComponents = {
     );
   },
   pre: ({ children, ...props }: any) => (
-    <pre className="bg-muted/50 border rounded-lg p-3 overflow-x-auto text-xs mb-3" {...props}>
+    <pre className="bg-muted/50 border rounded-lg p-3 overflow-x-auto text-xs mb-3 max-w-full whitespace-pre-wrap break-words" {...props}>
       {children}
     </pre>
   ),
@@ -105,8 +105,8 @@ export function MessageRenderer({ content, role, onSpeak }: MessageRendererProps
 
   if (role === 'user') {
     return (
-      <div className="space-y-3">
-        <div className="text-sm leading-relaxed break-words">
+      <div className="space-y-3 w-full overflow-hidden">
+        <div className="text-sm leading-relaxed chat-message-content">
           {content}
         </div>
         <MessageActions content={content} role={role} />
@@ -115,8 +115,8 @@ export function MessageRenderer({ content, role, onSpeak }: MessageRendererProps
   }
 
   return (
-    <div className="space-y-3">
-      <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+    <div className="space-y-3 w-full overflow-hidden">
+      <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed chat-message-content">
         <ReactMarkdown 
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeHighlight]}

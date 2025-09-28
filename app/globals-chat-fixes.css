@@ -1,0 +1,204 @@
+/* Global Chat UI Fixes for Budget Buddy */
+/* This file should be imported in the main layout or globals.css */
+
+/* Ensure all chat elements respect container boundaries */
+.chat-container,
+.chat-container * {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
+}
+
+/* Prevent horizontal scrolling in any chat-related container */
+.chat-container,
+.chat-messages-area,
+.message-bubble {
+  overflow-x: hidden !important;
+}
+
+/* Force text content to wrap properly */
+.chat-message-container,
+.chat-message-content {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  hyphens: auto !important;
+  white-space: pre-wrap !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Handle very long words and URLs */
+.chat-message-content a,
+.chat-message-content code:not(pre code),
+.chat-message-content span {
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Code blocks should scroll horizontally but not break container */
+.chat-message-content pre {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  word-break: normal !important;
+}
+
+.chat-message-content pre code {
+  white-space: pre !important;
+  word-break: normal !important;
+}
+
+/* Responsive message bubble constraints */
+@media (max-width: 640px) {
+  .message-bubble {
+    max-width: min(90vw, 95%) !important;
+  }
+  
+  .chat-message-container {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .message-bubble {
+    max-width: min(80vw, 85%) !important;
+  }
+}
+
+/* Ensure flex containers don't overflow */
+.chat-messages-area > div {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Enhanced scrollbar for chat messages only */
+.chat-container .chat-messages-area,
+.chat-messages-area {
+  /* Show scrollbar only when needed */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  
+  /* Firefox scrollbar styling */
+  scrollbar-width: auto;
+  scrollbar-color: rgba(99, 102, 241, 0.3) rgba(0, 0, 0, 0.1);
+}
+
+/* Webkit scrollbar for chat areas */
+.chat-container .chat-messages-area::-webkit-scrollbar,
+.chat-messages-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.chat-container .chat-messages-area::-webkit-scrollbar-track,
+.chat-messages-area::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  margin: 2px;
+}
+
+.chat-container .chat-messages-area::-webkit-scrollbar-thumb,
+.chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.4), rgba(99, 102, 241, 0.6));
+  border-radius: 5px;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  transition: all 0.3s ease;
+}
+
+.chat-container .chat-messages-area::-webkit-scrollbar-thumb:hover,
+.chat-messages-area::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(99, 102, 241, 0.8));
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.chat-container .chat-messages-area::-webkit-scrollbar-thumb:active,
+.chat-messages-area::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.8), rgba(99, 102, 241, 1));
+}
+
+/* Dark mode scrollbar adjustments */
+.dark .chat-container .chat-messages-area,
+.dark .chat-messages-area {
+  scrollbar-color: rgba(139, 92, 246, 0.5) rgba(255, 255, 255, 0.1);
+}
+
+.dark .chat-container .chat-messages-area::-webkit-scrollbar-track,
+.dark .chat-messages-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .chat-container .chat-messages-area::-webkit-scrollbar-thumb,
+.dark .chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(139, 92, 246, 0.6));
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.dark .chat-container .chat-messages-area::-webkit-scrollbar-thumb:hover,
+.dark .chat-messages-area::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(139, 92, 246, 0.8));
+}
+
+/* Safety net for any missed elements */
+[class*="chat-"] {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Specific fixes for message content */
+.prose p,
+.prose li,
+.prose div {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  max-width: 100% !important;
+}
+
+/* Table responsiveness in messages */
+.chat-message-content table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: auto !important;
+  overflow-x: auto !important;
+  display: block !important;
+  white-space: nowrap !important;
+}
+
+.chat-message-content table tbody,
+.chat-message-content table thead {
+  display: table !important;
+  width: 100% !important;
+}
+
+.chat-message-content table tr {
+  display: table-row !important;
+}
+
+.chat-message-content table th,
+.chat-message-content table td {
+  display: table-cell !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  max-width: 200px !important;
+}
+
+/* Image responsiveness */
+.chat-message-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+/* List items */
+.chat-message-content ul,
+.chat-message-content ol {
+  max-width: 100% !important;
+  padding-left: 1rem !important;
+}
+
+.chat-message-content li {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}

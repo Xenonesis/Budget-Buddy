@@ -12,6 +12,7 @@ import { VoiceInterface } from "./VoiceInterface";
 import { TypingIndicator } from "./TypingIndicator";
 import { InsightMessage } from "./InsightMessage";
 import { MessageRenderer } from "./MessageRenderer";
+import "./chat-overflow-fixes.css";
 
 interface MobileResponsiveChatPanelProps {
   readonly messages: AIMessage[];
@@ -48,18 +49,79 @@ export function MobileResponsiveChatPanel({
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesStartRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const speakFunctionRef = useRef<((text: string) => void) | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
+    // Fallback: use messagesEndRef if container scroll fails
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const scrollToTop = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = 0;
+    }
+    // Fallback: use messagesStartRef
+    setTimeout(() => {
+      messagesStartRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  // Handle scroll events for mobile
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      const isScrollable = container.scrollHeight > container.clientHeight;
+      const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      
+      setShowScrollButtons(isScrollable);
+      setIsNearBottom(isAtBottom);
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Scroll to bottom when messages change with slight delay to ensure DOM is updated
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, [messages]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      handleScroll();
+      
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [messages]);
+
+  // Additional effect to ensure scrolling works after component mounts
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   // Auto-speak AI responses when enabled
   useEffect(() => {
@@ -110,6 +172,10 @@ export function MobileResponsiveChatPanel({
     if (inputMessage.trim() && !loading) {
       onSendMessageAction(inputMessage.trim());
       setInputMessage("");
+      // Force scroll to bottom after sending message
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   };
 
@@ -170,7 +236,7 @@ export function MobileResponsiveChatPanel({
   ];
 
   return (
-    <Card className={`flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20 border-2 shadow-lg ${
+    <Card className={`flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20 border-2 shadow-lg chat-container overflow-hidden ${
       isFullscreen && isMobile ? 'fixed inset-0 z-50 rounded-none' : ''
     } ${className}`}>
       <CardHeader className={`border-b bg-gradient-to-r from-primary/5 via-blue-50/50 to-purple-50/30 dark:from-primary/10 dark:via-blue-950/20 dark:to-purple-950/10 ${
@@ -315,9 +381,16 @@ export function MobileResponsiveChatPanel({
       
       <CardContent className="flex-1 flex flex-col p-0">
         {/* Messages Area */}
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden space-y-4 min-h-0 bg-gradient-to-b from-background/50 to-muted/10 ${
-          isMobile ? 'p-4' : 'p-6 space-y-6'
-        }`}>
+        <div className="relative flex-1">
+          <div 
+            ref={messagesContainerRef}
+            className={`overflow-y-auto overflow-x-hidden space-y-4 bg-gradient-to-b from-background/50 to-muted/10 chat-messages-area ${
+              isMobile ? 'p-4 h-80' : 'p-6 space-y-6 h-96'
+            }`}
+            style={{ scrollBehavior: 'smooth' }}
+            onScroll={handleScroll}
+          >
+            <div ref={messagesStartRef} className="h-0" />
           {displayMessages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-8">
               <div className="relative mb-6">
@@ -388,7 +461,7 @@ export function MobileResponsiveChatPanel({
                 return (
                 <div 
                   key={messageKey} 
-                  className={`flex gap-3 animate-fade-in ${message.role === 'user' ? 'justify-end' : 'justify-start'} ${
+                  className={`flex animate-fade-in ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full ${
                     isMobile ? 'gap-2' : 'gap-4'
                   }`}
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -401,12 +474,14 @@ export function MobileResponsiveChatPanel({
                     </div>
                   )}
                   
-                  <div className={`flex-1 min-w-0 max-w-[85%] rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md group ${
+                  <div className={`flex-1 min-w-0 rounded-2xl shadow-sm transition-all duration-300 hover:shadow-md group overflow-hidden message-bubble ${
+                    isMobile ? 'max-w-[90%]' : 'max-w-[85%]'
+                  } ${
                     message.role === 'user' 
                       ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground ml-auto shadow-primary/20' 
                       : 'bg-card/80 backdrop-blur border border-border/50 shadow-black/5'
                   }`}>
-                    <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
+                    <div className={`chat-message-container ${isMobile ? 'p-3' : 'p-4'}`}>
                       {message.role === 'assistant' && 
                        insights.length > 0 && 
                        (message.content.toLowerCase().includes('insight') || 
@@ -454,6 +529,51 @@ export function MobileResponsiveChatPanel({
             </>
           )}
           <div ref={messagesEndRef} />
+          </div>
+          
+          {/* Mobile Scroll Navigation Buttons */}
+          {showScrollButtons && (
+            <div className={`absolute flex flex-col gap-2 z-10 ${isMobile ? 'right-2 bottom-2' : 'right-4 bottom-4'}`}>
+              {!isNearBottom && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={scrollToBottom}
+                  className={`p-0 rounded-full bg-background/90 backdrop-blur-sm border-2 shadow-lg hover:shadow-xl transition-all hover:scale-110 ${
+                    isMobile ? 'h-8 w-8' : 'h-10 w-10'
+                  }`}
+                  title="Scroll to latest message"
+                >
+                  <svg 
+                    className={isMobile ? 'h-3 w-3' : 'h-4 w-4'} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={scrollToTop}
+                className={`p-0 rounded-full bg-background/90 backdrop-blur-sm border-2 shadow-lg hover:shadow-xl transition-all hover:scale-110 ${
+                  isMobile ? 'h-8 w-8' : 'h-10 w-10'
+                }`}
+                title="Scroll to top"
+              >
+                <svg 
+                  className={isMobile ? 'h-3 w-3' : 'h-4 w-4'} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </Button>
+            </div>
+          )}
         </div>
         
         {/* Enhanced Input Area */}

@@ -1,0 +1,207 @@
+/* Chat Overflow and Text Wrapping Fixes */
+
+/* Global word breaking and text wrapping */
+.chat-message-container {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.chat-message-content {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  white-space: pre-wrap;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Ensure long URLs and text break properly */
+.chat-message-content a,
+.chat-message-content code,
+.chat-message-content pre {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* Handle table overflow */
+.chat-message-content table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+.chat-message-content table tbody,
+.chat-message-content table thead,
+.chat-message-content table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.chat-message-content table th,
+.chat-message-content table td {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Fix message bubble width constraints */
+.message-bubble {
+  max-width: min(80vw, 85%);
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .message-bubble {
+    max-width: min(90vw, 95%);
+  }
+  
+  .chat-message-container {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+/* Fix for extremely long words or URLs */
+.force-break {
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+/* Prevent horizontal scrolling in chat container */
+.chat-container {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+.chat-messages-area {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  /* Only show scrollbar when content overflows */
+  overflow-y: auto !important;
+  
+  /* Firefox */
+  scrollbar-width: auto;
+  scrollbar-color: rgba(99, 102, 241, 0.4) rgba(0, 0, 0, 0.1);
+  
+  /* Smooth scrolling behavior */
+  scroll-behavior: smooth;
+}
+
+/* Additional safety for message content */
+.chat-message-content * {
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.chat-message-content img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Custom Scrollbar Styles for Better Navigation */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.chat-messages-area::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+.chat-messages-area::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  margin: 4px 0;
+}
+
+.chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.4), rgba(99, 102, 241, 0.6));
+  border-radius: 6px;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  transition: all 0.3s ease;
+  min-height: 40px;
+}
+
+.chat-messages-area::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(99, 102, 241, 0.8));
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: scaleX(1.1);
+}
+
+.chat-messages-area::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.8), rgba(99, 102, 241, 1));
+}
+
+/* Dark mode scrollbar */
+.dark .chat-messages-area {
+  scrollbar-color: rgba(139, 92, 246, 0.5) rgba(255, 255, 255, 0.1);
+}
+
+.dark .chat-messages-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.4), rgba(139, 92, 246, 0.6));
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.dark .chat-messages-area::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(139, 92, 246, 0.8));
+}
+
+.dark .chat-messages-area::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.8), rgba(139, 92, 246, 1));
+}
+
+/* Mobile responsive scrollbar */
+@media (max-width: 768px) {
+  .chat-messages-area::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .chat-messages-area::-webkit-scrollbar-thumb {
+    min-height: 30px;
+  }
+}
+
+/* Smooth scrolling behavior is already included in the main .chat-messages-area selector */
+
+/* Enhanced scrollbar visibility on hover */
+.chat-container:hover .chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.5), rgba(99, 102, 241, 0.7));
+}
+
+.dark .chat-container:hover .chat-messages-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.5), rgba(139, 92, 246, 0.7));
+}
+
+/* Force scrollable containers to be properly sized - styles are already in main .chat-messages-area selector */
+
+/* Ensure proper scroll container behavior */
+.chat-container .chat-messages-area {
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth !important;
+}
+
+/* Force smooth scrolling for all chat containers */
+.chat-messages-area * {
+  scroll-behavior: smooth;
+}
+
+/* Fix any flex container issues that might prevent scrolling */
+.chat-container,
+.chat-container > *,
+.chat-messages-area {
+  min-height: 0 !important;
+}

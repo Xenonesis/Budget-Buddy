@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useUserPreferences } from "@/lib/store";
@@ -13,7 +13,6 @@ import {
   getAIModelsForProvider,
   getUserAISettings,
   getValidModelForProvider,
-  type FinancialInsight,
   type AIMessage,
   type AIModelConfig,
   type AIModel,
@@ -21,16 +20,10 @@ import {
 } from "@/lib/ai";
 
 import {
-  QuotaStatusCard,
-  ChatPanel,
-  ConversationHistory,
-  PageHeader,
-  EmptyState,
-  VoiceInterface
+  ChatInterface,
+  Sidebar,
+  EmptyState
 } from "./components";
-
-// Layout modes matching the components
-type LayoutMode = 'default' | 'chat-focus' | 'voice-focus';
 
 export default function AIInsightsPage() {
   const router = useRouter();
@@ -45,9 +38,7 @@ export default function AIInsightsPage() {
   const [chatMessages, setChatMessages] = useState<AIMessage[]>([]);
   const [chatLoading, setChatLoading] = useState<boolean>(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [conversationTitle, setConversationTitle] = useState<string>("");
-  const [isTitleEditing, setIsTitleEditing] = useState<boolean>(false);
-
+  
   // AI Configuration state
   const [currentModelConfig, setCurrentModelConfig] = useState<AIModelConfig>({
     provider: 'mistral',
@@ -57,29 +48,10 @@ export default function AIInsightsPage() {
   const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
   const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
 
-  // Responsive UI state
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('default');
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [quotaError, setQuotaError] = useState<string | null>(null);
+  // UI state
   const [quotaStatus, setQuotaStatus] = useState<any>(null);
-  
-  // Voice interface state
-  const speakFunctionRef = useRef<((text: string) => void) | null>(null);
-
-  // Responsive breakpoint detection
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
-      setIsMobile(mobile);
-      
-      // Auto-adjust layout mode based on screen size - simplified for new layout modes
-      // Mobile responsiveness is now handled via CSS and component logic
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, [layoutMode]);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [conversationLoading, setConversationLoading] = useState<boolean>(false);
 
   // Initialize data
   useEffect(() => {
@@ -88,28 +60,11 @@ export default function AIInsightsPage() {
     }
   }, [userId]);
 
-  // Welcome message for voice mode
-  useEffect(() => {
-    if (layoutMode === 'voice-focus' && speakFunctionRef.current) {
-      const timer = setTimeout(() => {
-        if (speakFunctionRef.current) {
-          speakFunctionRef.current(
-            "Welcome to your AI financial assistant! I'm here to help with all your money questions. " +
-            "You can ask me about your spending, budgets, savings, or anything financial. " +
-            "Just click the microphone and start talking!"
-          );
-        }
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [layoutMode, speakFunctionRef.current]);
-
-  // Listen for settings changes via localStorage and window focus
+  // Listen for AI settings changes
   useEffect(() => {
     if (!userId) return;
 
-    const refetchAISettingsInternal = async () => {
+    const refetchAISettings = async () => {
       try {
         const providers = await getAvailableAIProviders(userId);
         setAvailableProviders(providers);
@@ -138,14 +93,14 @@ export default function AIInsightsPage() {
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'ai-settings-updated' && e.newValue) {
-        refetchAISettingsInternal();
-        toast.success("AI settings updated! Using your new default provider and model.");
+        refetchAISettings();
+        toast.success("AI settings updated!");
         localStorage.removeItem('ai-settings-updated');
       }
     };
 
     const handleWindowFocus = () => {
-      refetchAISettingsInternal();
+      refetchAISettings();
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -201,10 +156,45 @@ export default function AIInsightsPage() {
         .from("ai_conversations")
         .select("*")
         .eq("user_id", userId)
-        .order("updated_at", { ascending: false });
+        .order("last_updated", { ascending: false });
 
       if (conversationsData) {
-        setConversations(conversationsData);
+        // Generate titles for conversations that don't have them
+        const conversationsWithTitles = conversationsData.map(conv => {
+          let title = conv.title || "New Conversation";
+          
+          // If no title, try to generate one from the first message
+          if (!conv.title && conv.messages) {
+            try {
+              const messages = typeof conv.messages === 'string' 
+                ? JSON.parse(conv.messages) 
+                : conv.messages;
+              
+              if (Array.isArray(messages) && messages.length > 0) {
+                const firstUserMessage = messages.find(m => m.role === 'user');
+                if (firstUserMessage?.content) {
+                  title = generateConversationTitle(firstUserMessage.content);
+                }
+              }
+            } catch (e) {
+              console.warn("Error parsing messages for title generation:", e);
+            }
+          }
+          
+          return {
+            ...conv,
+            title,
+            updated_at: conv.last_updated // Normalize the column name for UI
+          };
+        });
+        
+        setConversations(conversationsWithTitles);
+        
+        // Auto-load the first conversation if none is currently active
+        if (conversationsWithTitles.length > 0 && !activeConversationId) {
+          const firstConv = conversationsWithTitles[0];
+          handleLoadConversation(firstConv.id);
+        }
       }
 
     } catch (error) {
@@ -221,12 +211,6 @@ export default function AIInsightsPage() {
     try {
       const status = await getUserQuotaStatus(userId);
       setQuotaStatus(status);
-      
-      if (!status?.status?.canMakeRequest) {
-        setQuotaError(status?.status?.message || "Quota limit exceeded");
-      } else {
-        setQuotaError(null);
-      }
     } catch (error) {
       console.error("Error fetching quota status:", error);
     }
@@ -240,6 +224,18 @@ export default function AIInsightsPage() {
     setChatMessages(newMessages);
 
     try {
+      // Create new conversation if none exists
+      let conversationId = activeConversationId;
+      if (!conversationId) {
+        try {
+          conversationId = await createNewConversation(message);
+          setActiveConversationId(conversationId);
+        } catch (convError) {
+          console.error("Failed to create conversation, continuing with temporary storage:", convError);
+          // Continue without conversation ID for this session
+        }
+      }
+
       const isInsightRequest = /\b(insight|analysis|analyze|spending|budget|financial|recommend|advice)\b/i.test(message);
 
       let response: string;
@@ -247,16 +243,27 @@ export default function AIInsightsPage() {
       if (isInsightRequest) {
         response = "For detailed financial insights, please visit the dedicated Financial Insights page in your dashboard. You'll find comprehensive analysis of your spending patterns, budget alerts, and personalized recommendations there.";
       } else {
-        const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
-        response = aiResponse || "I'm sorry, I couldn't process your request right now.";
+        try {
+          const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
+          response = aiResponse || "I'm sorry, I couldn't process your request right now. Please check your AI configuration or try again later.";
+        } catch (aiError) {
+          console.error("AI Service Error:", aiError);
+          response = "I'm having trouble connecting to the AI service. Please check your settings or try again in a moment.";
+        }
       }
       
       if (response) {
         const updatedMessages = [...newMessages, { role: "assistant" as const, content: response }];
         setChatMessages(updatedMessages);
         
-        if (activeConversationId) {
-          await saveConversation(activeConversationId, updatedMessages);
+        // Only save to database if we have a valid conversation ID
+        if (conversationId && !conversationId.startsWith('temp_')) {
+          try {
+            await saveConversation(conversationId, updatedMessages);
+          } catch (saveError) {
+            console.error("Failed to save conversation to database:", saveError);
+            // Continue anyway - the conversation is still available in memory
+          }
         }
         
         return response;
@@ -275,28 +282,25 @@ export default function AIInsightsPage() {
   const saveConversation = async (conversationId: string, messages: AIMessage[]) => {
     if (!userId) return;
 
+    // Skip saving if it's a temporary conversation
+    if (conversationId.startsWith('temp_')) {
+      console.log("Skipping save for temporary conversation:", conversationId);
+      return;
+    }
+
     try {
-      await supabase
-        .from("ai_messages")
-        .delete()
-        .eq("conversation_id", conversationId);
-
-      const messagesToSave = messages.map((msg, index) => ({
-        conversation_id: conversationId,
-        user_id: userId,
-        role: msg.role,
-        content: msg.content,
-        created_at: new Date().toISOString()
-      }));
-
-      await supabase
-        .from("ai_messages")
-        .insert(messagesToSave);
-
-      await supabase
+      // Update conversation with messages in JSONB format (existing schema)
+      const { error: updateError } = await supabase
         .from("ai_conversations")
-        .update({ updated_at: new Date().toISOString() })
+        .update({ 
+          messages: JSON.stringify(messages),
+          last_updated: new Date().toISOString() 
+        })
         .eq("id", conversationId);
+
+      if (updateError) {
+        console.error("Error updating conversation:", updateError);
+      }
 
     } catch (error) {
       console.error("Error saving conversation:", error);
@@ -319,47 +323,164 @@ export default function AIInsightsPage() {
     }
   };
 
+  const createNewConversation = async (firstMessage: string): Promise<string> => {
+    if (!userId) throw new Error("User ID not found");
+
+    try {
+      // Generate conversation title from first message
+      const title = generateConversationTitle(firstMessage);
+      
+      // Try to insert with existing schema structure
+      const { data, error } = await supabase
+        .from("ai_conversations")
+        .insert({
+          user_id: userId,
+          messages: JSON.stringify([]),
+          created_at: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating conversation:", error);
+        // If the above fails, try with a different approach
+        const fallbackId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+        
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("ai_conversations")
+          .insert({
+            id: fallbackId,
+            user_id: userId,
+            messages: JSON.stringify([]),
+            created_at: new Date().toISOString(),
+            last_updated: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (fallbackError) {
+          console.error("Fallback conversation creation also failed:", fallbackError);
+          // Create a temporary conversation ID for local use
+          const tempId = `temp_${Date.now()}`;
+          const tempConversation = {
+            id: tempId,
+            user_id: userId,
+            messages: JSON.stringify([]),
+            created_at: new Date().toISOString(),
+            last_updated: new Date().toISOString(),
+            title: title // Keep title for local display
+          };
+          
+          setConversations(prev => [tempConversation, ...prev]);
+          return tempId;
+        }
+        
+        setConversations(prev => [fallbackData, ...prev]);
+        return fallbackData.id;
+      }
+
+      // Update local conversations list
+      setConversations(prev => [data, ...prev]);
+      
+      return data.id;
+    } catch (err) {
+      console.error("Unexpected error in createNewConversation:", err);
+      // Fallback to temporary local conversation
+      const tempId = `temp_${Date.now()}`;
+      const tempConversation = {
+        id: tempId,
+        user_id: userId,
+        messages: JSON.stringify([]),
+        created_at: new Date().toISOString(),
+        last_updated: new Date().toISOString(),
+        title: generateConversationTitle(firstMessage) // Keep title for local display
+      };
+      
+      setConversations(prev => [tempConversation, ...prev]);
+      toast.error("Failed to save conversation to database, using temporary storage");
+      return tempId;
+    }
+  };
+
+  const generateConversationTitle = (message: string): string => {
+    // Extract key financial terms or use first few words
+    const financialTerms = ['budget', 'spending', 'savings', 'investment', 'money', 'finance', 'expense'];
+    const words = message.toLowerCase().split(' ');
+    
+    const relevantTerm = financialTerms.find(term => 
+      words.some(word => word.includes(term))
+    );
+    
+    if (relevantTerm) {
+      return `${relevantTerm.charAt(0).toUpperCase() + relevantTerm.slice(1)} Discussion`;
+    }
+    
+    // Fallback to first 4-6 words
+    const titleWords = message.split(' ').slice(0, 5);
+    let title = titleWords.join(' ');
+    if (title.length > 30) {
+      title = title.substring(0, 30) + '...';
+    }
+    
+    return title || 'New Conversation';
+  };
+
   const handleNewConversation = () => {
     setChatMessages([]);
     setActiveConversationId(null);
-    setConversationTitle("");
-    setIsTitleEditing(false);
   };
 
   const handleLoadConversation = async (conversationId: string) => {
     try {
-      const { data: messages } = await supabase
-        .from("ai_messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
+      setConversationLoading(true);
+      
+      const { data: conversation, error } = await supabase
+        .from("ai_conversations")
+        .select("messages")
+        .eq("id", conversationId)
+        .single();
 
-      if (messages) {
-        const formattedMessages = messages.map(msg => ({
-          role: msg.role as "user" | "assistant",
-          content: msg.content
-        }));
-        setChatMessages(formattedMessages);
+      if (error) {
+        console.error("Error fetching conversation:", error);
+        toast.error("Failed to load conversation");
+        return;
       }
 
-      const conversation = conversations.find(c => c.id === conversationId);
-      if (conversation) {
-        setConversationTitle(conversation.title || "");
-        setActiveConversationId(conversationId);
+      if (conversation?.messages) {
+        let messages: AIMessage[] = [];
+        try {
+          // Parse the messages from JSONB
+          messages = typeof conversation.messages === 'string' 
+            ? JSON.parse(conversation.messages) 
+            : conversation.messages;
+          
+          if (Array.isArray(messages)) {
+            setChatMessages(messages);
+          } else {
+            setChatMessages([]);
+          }
+        } catch (parseError) {
+          console.error("Error parsing conversation messages:", parseError);
+          setChatMessages([]);
+        }
+      } else {
+        setChatMessages([]);
       }
+
+      setActiveConversationId(conversationId);
     } catch (error) {
       console.error("Error loading conversation:", error);
       toast.error("Failed to load conversation");
+    } finally {
+      setConversationLoading(false);
     }
   };
 
   const handleDeleteConversation = async (conversationId: string) => {
     try {
-      await supabase
-        .from("ai_messages")
-        .delete()
-        .eq("conversation_id", conversationId);
-
+      // With the existing schema, we only need to delete from ai_conversations
+      // as messages are stored as JSONB in the same table
       await supabase
         .from("ai_conversations")
         .delete()
@@ -380,42 +501,39 @@ export default function AIInsightsPage() {
 
   const handleUpdateTitle = async (conversationId: string, newTitle: string) => {
     try {
+      // Since the database schema doesn't have a title column,
+      // we'll update the local state only and the last_updated timestamp
       await supabase
         .from("ai_conversations")
-        .update({ title: newTitle })
+        .update({ last_updated: new Date().toISOString() })
         .eq("id", conversationId);
 
       setConversations(prev => 
         prev.map(c => c.id === conversationId ? { ...c, title: newTitle } : c)
       );
-      setConversationTitle(newTitle);
-      setIsTitleEditing(false);
-      toast.success("Title updated");
+      toast.success("Conversation renamed (stored locally)");
     } catch (error) {
-      console.error("Error updating title:", error);
-      toast.error("Failed to update title");
-    }
-  };
-
-  // Mobile layout switcher
-  const handleMobileLayoutSwitch = (mode: 'chat' | 'history') => {
-    if (mode === 'chat') {
-      setLayoutMode('chat-focus');
-    } else {
-      setLayoutMode('default');
+      console.error("Error updating conversation:", error);
+      // Even if the database update fails, we can still update locally
+      setConversations(prev => 
+        prev.map(c => c.id === conversationId ? { ...c, title: newTitle } : c)
+      );
+      toast.success("Conversation renamed locally");
     }
   };
 
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-muted-foreground">Loading AI Assistant...</p>
-            </div>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center space-y-4 animate-in fade-in-0 duration-500">
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary to-blue-600 rounded-full opacity-20 animate-ping"></div>
+            <div className="relative w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <div>
+            <p className="text-lg font-medium">Loading AI Assistant</p>
+            <p className="text-sm text-muted-foreground">Preparing your financial companion...</p>
           </div>
         </div>
       </div>
@@ -425,242 +543,44 @@ export default function AIInsightsPage() {
   // AI not enabled state
   if (!aiEnabled) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <EmptyState 
-            onConfigureSettings={() => router.push('/dashboard/settings')}
-          />
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <EmptyState 
+          onConfigureSettings={() => router.push('/dashboard/settings')}
+        />
       </div>
     );
   }
 
-  // Responsive layout rendering
-  const renderMainContent = () => {
-    if (isMobile) {
-      // Mobile layouts
-      if (layoutMode === 'default') {
-        return (
-          <div className="space-y-4">
-            {/* Mobile Navigation */}
-            <div className="flex gap-2 bg-card/50 backdrop-blur rounded-lg p-2">
-              <button
-                onClick={() => handleMobileLayoutSwitch('chat')}
-                className="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground"
-              >
-                Chat
-              </button>
-              <button
-                onClick={() => handleMobileLayoutSwitch('history')}
-                className="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-primary/10 text-primary transition-colors"
-              >
-                History
-              </button>
-            </div>
-            
-            <ConversationHistory
-              conversations={conversations}
-              activeConversationId={activeConversationId}
-              conversationTitle={conversationTitle}
-              isTitleEditing={isTitleEditing}
-              onNewConversation={handleNewConversation}
-              onLoadConversation={(id) => {
-                handleLoadConversation(id);
-                handleMobileLayoutSwitch('chat');
-              }}
-              onDeleteConversation={handleDeleteConversation}
-              onUpdateTitle={handleUpdateTitle}
-              onStartTitleEdit={() => setIsTitleEditing(true)}
-              onCancelTitleEdit={() => setIsTitleEditing(false)}
-              className="h-[calc(100vh-12rem)]"
-            />
-          </div>
-        );
-      }
-
-      // Mobile chat (default mobile view)
-      return (
-        <div className="space-y-4">
-          {/* Mobile Navigation */}
-          <div className="flex gap-2 bg-card/50 backdrop-blur rounded-lg p-2">
-            <button
-              onClick={() => handleMobileLayoutSwitch('chat')}
-              className="flex-1 py-2 px-4 text-sm font-medium rounded-md bg-primary/10 text-primary transition-colors"
-            >
-              Chat
-            </button>
-            <button
-              onClick={() => handleMobileLayoutSwitch('history')}
-              className="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground"
-            >
-              History ({conversations.length})
-            </button>
-          </div>
-          
-          <ChatPanel
-            messages={chatMessages}
-            loading={chatLoading}
-            currentModelConfig={currentModelConfig}
-            availableProviders={availableProviders}
-            availableModels={availableModels}
-            loadingModels={loadingModels}
-            insights={[]}
-            onSendMessageAction={handleSendMessage}
-            onModelConfigChangeAction={handleModelConfigChange}
-            onRequestInsights={() => {}}
-            className="h-[calc(100vh-12rem)]"
-          />
-        </div>
-      );
-    }
-
-    // Desktop layouts
-    switch (layoutMode) {
-      case 'chat-focus':
-        return (
-          <div className="grid xl:grid-cols-4 lg:grid-cols-3 gap-6">
-            <div className="xl:col-span-3 lg:col-span-2">
-              <ChatPanel
-                messages={chatMessages}
-                loading={chatLoading}
-                currentModelConfig={currentModelConfig}
-                availableProviders={availableProviders}
-                availableModels={availableModels}
-                loadingModels={loadingModels}
-                insights={[]}
-                onSendMessageAction={handleSendMessage}
-                onModelConfigChangeAction={handleModelConfigChange}
-                onRequestInsights={() => {}}
-                className="h-[600px]"
-              />
-            </div>
-            <div className="xl:col-span-1 lg:col-span-1">
-              <ConversationHistory
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                conversationTitle={conversationTitle}
-                isTitleEditing={isTitleEditing}
-                onNewConversation={handleNewConversation}
-                onLoadConversation={handleLoadConversation}
-                onDeleteConversation={handleDeleteConversation}
-                onUpdateTitle={handleUpdateTitle}
-                onStartTitleEdit={() => setIsTitleEditing(true)}
-                onCancelTitleEdit={() => setIsTitleEditing(false)}
-              />
-            </div>
-          </div>
-        );
-
-      case 'voice-focus':
-        return (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <VoiceInterface
-              onTranscriptAction={handleSendMessage}
-              onSpeakTextAction={(speakFn) => { speakFunctionRef.current = speakFn; }}
-              onListeningChangeAction={() => {}}
-              onTranscriptUpdateAction={() => {}}
-              disabled={chatLoading}
-              className="justify-center"
-            />
-            
-            <div className="grid lg:grid-cols-2 gap-6">
-              <ChatPanel
-                messages={chatMessages}
-                loading={chatLoading}
-                currentModelConfig={currentModelConfig}
-                availableProviders={availableProviders}
-                availableModels={availableModels}
-                loadingModels={loadingModels}
-                insights={[]}
-                onSendMessageAction={handleSendMessage}
-                onModelConfigChangeAction={handleModelConfigChange}
-                onRequestInsights={() => {}}
-                className="h-[500px]"
-              />
-              
-              <ConversationHistory
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                conversationTitle={conversationTitle}
-                isTitleEditing={isTitleEditing}
-                onNewConversation={handleNewConversation}
-                onLoadConversation={handleLoadConversation}
-                onDeleteConversation={handleDeleteConversation}
-                onUpdateTitle={handleUpdateTitle}
-                onStartTitleEdit={() => setIsTitleEditing(true)}
-                onCancelTitleEdit={() => setIsTitleEditing(false)}
-                className="h-[500px]"
-              />
-            </div>
-          </div>
-        );
-
-      default: // default
-        return (
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div>
-              <ConversationHistory
-                conversations={conversations}
-                activeConversationId={activeConversationId}
-                conversationTitle={conversationTitle}
-                isTitleEditing={isTitleEditing}
-                onNewConversation={handleNewConversation}
-                onLoadConversation={handleLoadConversation}
-                onDeleteConversation={handleDeleteConversation}
-                onUpdateTitle={handleUpdateTitle}
-                onStartTitleEdit={() => setIsTitleEditing(true)}
-                onCancelTitleEdit={() => setIsTitleEditing(false)}
-              />
-            </div>
-            
-            <div className="lg:col-span-2">
-              <ChatPanel
-                messages={chatMessages}
-                loading={chatLoading}
-                currentModelConfig={currentModelConfig}
-                availableProviders={availableProviders}
-                availableModels={availableModels}
-                loadingModels={loadingModels}
-                insights={[]}
-                onSendMessageAction={handleSendMessage}
-                onModelConfigChangeAction={handleModelConfigChange}
-                onRequestInsights={() => {}}
-                className="h-[600px]"
-              />
-            </div>
-          </div>
-        );
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <PageHeader
-          layoutMode={layoutMode}
-          insightLoading={false}
-          quotaStatus={quotaStatus}
-          onLayoutChange={(mode) => {
-            if (isMobile) {
-              // Mobile layout changes handled separately
-              if (mode === 'voice-focus') {
-                setLayoutMode('voice-focus');
-              }
-            } else {
-              setLayoutMode(mode as LayoutMode);
-            }
-          }}
-          onRefreshInsights={() => {}}
-          onOpenSettings={() => router.push('/dashboard/settings')}
-        />
+    <div className="flex h-screen bg-background">
+      {/* Sidebar */}
+      <Sidebar
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onNewConversation={handleNewConversation}
+        onLoadConversation={handleLoadConversation}
+        onDeleteConversation={handleDeleteConversation}
+        onUpdateTitle={handleUpdateTitle}
+        onOpenSettings={() => router.push('/dashboard/settings')}
+        quotaStatus={quotaStatus}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-        <QuotaStatusCard
-          quotaError={quotaError}
-          quotaStatus={quotaStatus}
-          onRefreshStatus={fetchQuotaStatus}
+      {/* Main Chat Area */}
+      <div className="flex-1 overflow-hidden">
+        <ChatInterface
+          messages={chatMessages}
+          loading={chatLoading || conversationLoading}
+          currentModelConfig={currentModelConfig}
+          availableProviders={availableProviders}
+          availableModels={availableModels}
+          loadingModels={loadingModels}
+          insights={[]}
+          onSendMessage={handleSendMessage}
+          onModelConfigChange={handleModelConfigChange}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
-
-        {renderMainContent()}
       </div>
     </div>
   );

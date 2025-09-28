@@ -14,3 +14,8 @@ export { TypingIndicator } from './TypingIndicator';
 export { InsightMessage } from './InsightMessage';
 export { MessageRenderer } from './MessageRenderer';
 export { MessageActions } from './MessageActions';
+export { AIProviderModelSelector } from './AIProviderModelSelector';
+
+// New demo-style components
+export { Sidebar } from './Sidebar';
+export { ChatInterface } from './ChatInterface';
