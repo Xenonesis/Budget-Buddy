@@ -1,0 +1,1 @@
+export { FinancialInsightsPanel } from './FinancialInsightsPanel';

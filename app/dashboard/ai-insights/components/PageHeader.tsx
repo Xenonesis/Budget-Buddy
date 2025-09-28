@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { LayoutToggle } from "./LayoutToggle";
 
-type LayoutMode = 'default' | 'chat-focus' | 'insights-focus' | 'voice-focus';
+type LayoutMode = 'default' | 'chat-focus' | 'voice-focus';
 
 interface PageHeaderProps {
   layoutMode: LayoutMode;

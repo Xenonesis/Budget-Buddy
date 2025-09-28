@@ -19,16 +19,10 @@ import {
   type AIModel,
   type AIProvider
 } from "@/lib/ai";
-import { 
-  generateRealFinancialInsights, 
-  type RealFinancialInsight,
-  type Transaction,
-  type Budget
-} from "@/lib/real-financial-insights";
+// Removed financial insights imports - now handled by dedicated Financial Insights page
 
 import {
   QuotaStatusCard,
-  InsightsPanel,
   ChatPanel,
   ConversationHistory,
   PageHeader,
@@ -36,7 +30,7 @@ import {
   VoiceInterface
 } from "./components";
 
-type LayoutMode = 'default' | 'chat-focus' | 'insights-focus' | 'voice-focus';
+type LayoutMode = 'default' | 'chat-focus' | 'voice-focus';
 
 export default function AIInsightsPage() {
   const router = useRouter();
@@ -45,9 +39,6 @@ export default function AIInsightsPage() {
   // Core state
   const [aiEnabled, setAiEnabled] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [insights, setInsights] = useState<(FinancialInsight | RealFinancialInsight)[]>([]);
-  const [insightLoading, setInsightLoading] = useState<boolean>(false);
-  const [aiSummarizeLoading, setAiSummarizeLoading] = useState<boolean>(false);
 
   // Chat state
   const [conversations, setConversations] = useState<any[]>([]);
@@ -251,22 +242,7 @@ export default function AIInsightsPage() {
         .select("*")
         .eq("user_id", userId);
       
-      // Generate real data insights
-      if (transactions && budgets) {
-        try {
-          const realInsights = generateRealFinancialInsights(
-            transactions as Transaction[], 
-            budgets as Budget[]
-          );
-          setInsights(realInsights);
-          setQuotaError(null);
-        } catch (error) {
-          console.error("Error generating real insights:", error);
-          setInsights([]);
-        }
-      } else {
-        setInsights([]);
-      }
+      // Financial insights functionality moved to dedicated page
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -294,9 +270,9 @@ export default function AIInsightsPage() {
 
       let response: string;
 
-      if (isInsightRequest && insights.length > 0) {
-        // Format insights for chat display
-        response = formatInsightsForChat(insights);
+      if (isInsightRequest) {
+        // Redirect user to Financial Insights page
+        response = "For financial insights, please visit the dedicated Financial Insights page in your dashboard. You'll find detailed analysis of your spending patterns, budget alerts, and personalized recommendations there.";
       } else {
         // Regular AI chat response
         const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
@@ -324,102 +300,7 @@ export default function AIInsightsPage() {
     return null;
   };
 
-  // Handle insights request from chat
-  const handleRequestInsights = () => {
-    handleSendMessage("Show me my current financial insights");
-  };
-
-  const handleRefreshInsights = async () => {
-    if (!userId || insightLoading) return;
-
-    setInsightLoading(true);
-    try {
-      const { data: transactions } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", userId)
-        .order("date", { ascending: false })
-        .limit(100);
-        
-      const { data: budgets } = await supabase
-        .from("budgets")
-        .select("*")
-        .eq("user_id", userId);
-      
-      if (transactions && budgets) {
-        const realInsights = generateRealFinancialInsights(
-          transactions as Transaction[], 
-          budgets as Budget[]
-        );
-        setInsights(realInsights);
-        setQuotaError(null);
-        toast.success("Insights refreshed successfully");
-      } else {
-        setInsights([]);
-        toast.info("No transaction or budget data found");
-      }
-    } catch (error) {
-      console.error("Error refreshing insights:", error);
-      toast.error("Failed to refresh insights");
-    } finally {
-      setInsightLoading(false);
-    }
-  };
-
-  const handleAISummarize = async (insight: FinancialInsight | RealFinancialInsight) => {
-    if (!userId || !aiEnabled || aiSummarizeLoading) return;
-
-    setAiSummarizeLoading(true);
-    try {
-      // Create a prompt for AI to enhance the insight
-      const prompt = `Please provide an enhanced analysis and actionable recommendations for this financial insight:
-
-Title: ${insight.title}
-Description: ${insight.description}
-Category: ${insight.category || 'General'}
-Amount: ${insight.amount ? `$${insight.amount.toFixed(2)}` : 'N/A'}
-
-Please provide:
-1. A deeper analysis of what this means
-2. Specific actionable recommendations
-3. Potential long-term implications
-4. Tips for improvement
-
-Keep the response concise but insightful.`;
-
-      const aiResponse = await chatWithAI(userId, [
-        { role: "user", content: prompt }
-      ], currentModelConfig);
-
-      if (aiResponse) {
-        // Update the insight with AI enhancement
-        const enhancedInsight: RealFinancialInsight = {
-          ...insight,
-          description: aiResponse,
-          isAISummarized: true,
-          confidence: Math.min((insight.confidence || 0.8) + 0.1, 1.0) // Slightly increase confidence
-        };
-
-        // Update the insights array
-        setInsights(prevInsights => 
-          prevInsights.map(i => 
-            i.title === insight.title && i.category === insight.category 
-              ? enhancedInsight 
-              : i
-          )
-        );
-
-        toast.success("Insight enhanced with AI analysis");
-      } else {
-        toast.error("Failed to enhance insight with AI");
-      }
-    } catch (error) {
-      console.error("Error enhancing insight with AI:", error);
-      toast.error("Failed to enhance insight with AI");
-    } finally {
-      setAiSummarizeLoading(false);
-    }
-  };
+  // Insights functionality moved to dedicated Financial Insights page
 
   const handleModelConfigChange = async (provider: AIProvider, model: string) => {
     setCurrentModelConfig({ provider, model: model as AIModel });
@@ -586,9 +467,8 @@ Keep the response concise but insightful.`;
     }
     
     if (lowerCommand.includes('refresh insights') || lowerCommand.includes('generate insights')) {
-      handleRefreshInsights();
       if (speakFunctionRef.current) {
-        speakFunctionRef.current('Generating new financial insights for you.');
+        speakFunctionRef.current('Financial insights are now available on the dedicated Financial Insights page.');
       }
       return;
     }
@@ -602,9 +482,8 @@ Keep the response concise but insightful.`;
     }
     
     if (lowerCommand.includes('switch to insights') || lowerCommand.includes('show insights')) {
-      setLayoutMode('insights-focus');
       if (speakFunctionRef.current) {
-        speakFunctionRef.current('Switching to insights mode.');
+        speakFunctionRef.current('Financial insights are now available on the dedicated Financial Insights page in your dashboard.');
       }
       return;
     }
@@ -788,10 +667,10 @@ Keep the response concise but insightful.`;
                 availableProviders={availableProviders}
                 availableModels={availableModels}
                 loadingModels={loadingModels}
-                insights={insights}
+                insights={[]}
                 onSendMessageAction={handleSendMessage}
                 onModelConfigChangeAction={handleModelConfigChange}
-                onRequestInsights={handleRequestInsights}
+                onRequestInsights={() => {}}
                 className="h-[600px]"
               />
             </div>
@@ -812,45 +691,13 @@ Keep the response concise but insightful.`;
           </div>
         );
 
-      case 'insights-focus':
-        return (
-          <div className="max-w-6xl mx-auto">
-            <div className="space-y-6">
-              <InsightsPanel
-                insights={insights}
-                loading={insightLoading}
-                onRefresh={handleRefreshInsights}
-                onSpeakInsight={speakFunctionRef.current || undefined}
-                onAISummarize={handleAISummarize}
-                aiSummarizeLoading={aiSummarizeLoading}
-                isAIEnabled={aiEnabled}
-                smartInsights={true}
-                onSendMessage={handleSendMessage}
-              />
-            </div>
-          </div>
-        );
+      // insights-focus mode removed - now handled by dedicated Financial Insights page
 
       default:
         return (
           <div className="space-y-6">
             {/* Main Content Grid */}
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Financial Insights with Smart Insights integrated */}
-              <div className="lg:col-span-2 space-y-6">
-                <InsightsPanel
-                  insights={insights}
-                  loading={insightLoading}
-                  onRefresh={handleRefreshInsights}
-                  onSpeakInsight={speakFunctionRef.current || undefined}
-                  onAISummarize={handleAISummarize}
-                  aiSummarizeLoading={aiSummarizeLoading}
-                  isAIEnabled={aiEnabled}
-                  smartInsights={true}
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
-              
               {/* Conversation History - Takes 1 column */}
               <div>
                 <ConversationHistory
@@ -866,23 +713,23 @@ Keep the response concise but insightful.`;
                   onCancelTitleEdit={() => setIsTitleEditing(false)}
                 />
               </div>
-            </div>
-            
-            {/* Chat Panel - Full Width */}
-            <div className="w-full">
-              <ChatPanel
-                messages={chatMessages}
-                loading={chatLoading}
-                currentModelConfig={currentModelConfig}
-                availableProviders={availableProviders}
-                availableModels={availableModels}
-                loadingModels={loadingModels}
-                insights={insights}
-                onSendMessageAction={handleSendMessage}
-                onModelConfigChangeAction={handleModelConfigChange}
-                onRequestInsights={handleRequestInsights}
-                className="h-[500px]"
-              />
+              
+              {/* AI Chat Panel - Takes 2 columns */}
+              <div className="lg:col-span-2">
+                <ChatPanel
+                  messages={chatMessages}
+                  loading={chatLoading}
+                  currentModelConfig={currentModelConfig}
+                  availableProviders={availableProviders}
+                  availableModels={availableModels}
+                  loadingModels={loadingModels}
+                  insights={[]} // Empty insights since this is now chat-focused
+                  onSendMessageAction={handleSendMessage}
+                  onModelConfigChangeAction={handleModelConfigChange}
+                  onRequestInsights={() => {}} // No-op since insights are in separate page
+                  className="h-[600px]"
+                />
+              </div>
             </div>
           </div>
         );
@@ -894,10 +741,10 @@ Keep the response concise but insightful.`;
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <PageHeader
           layoutMode={layoutMode}
-          insightLoading={insightLoading}
+          insightLoading={false}
           quotaStatus={quotaStatus}
           onLayoutChange={setLayoutMode}
-          onRefreshInsights={handleRefreshInsights}
+          onRefreshInsights={() => {}} // No-op since insights are in separate page
           onOpenSettings={() => router.push('/dashboard/settings')}
         />
 

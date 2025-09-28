@@ -18,6 +18,7 @@ import {
   ArrowRightLeft,
   Lightbulb,
   Settings,
+  TrendingUp,
   ChevronLeft,
   User,
   LogOut,
@@ -526,18 +527,25 @@ export default function DashboardLayout({
           shortcutKey: 'Alt+2'
         },
         {
+          title: "Financial Insights",
+          href: "/dashboard/financial-insights",
+          icon: <TrendingUp className="h-5 w-5" />,
+          label: "Financial Insights",
+          shortcutKey: 'Alt+5'
+        },
+        {
           title: "AI Insights",
           href: "/dashboard/ai-insights",
           icon: <Lightbulb className="h-5 w-5" />,
           label: "AI Insights",
-          shortcutKey: 'Alt+5'
+          shortcutKey: 'Alt+6'
         },
         {
           title: "Notifications",
           href: "/dashboard/notifications",
           icon: <Bell className="h-5 w-5" />,
           label: "Notifications",
-          shortcutKey: 'Alt+6'
+          shortcutKey: 'Alt+7'
         },
       ],
     },
