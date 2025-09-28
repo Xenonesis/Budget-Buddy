@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Send, Bot, User, Loader2, Settings, Volume2, VolumeX, BarChart3, Sparkles, MessageCircle } from "lucide-react";
-import { AIMessage, AIModelConfig, FinancialInsight } from "@/lib/ai";
-import { ModelSelector } from "./ModelSelector";
+import { Send, Bot, User, Loader2, Volume2, VolumeX, BarChart3, Sparkles, MessageCircle } from "lucide-react";
+import { AIMessage, AIModelConfig, FinancialInsight, AIProvider } from "@/lib/ai";
+import { AIProviderModelSelector } from "./AIProviderModelSelector";
 import { VoiceInterface } from "./VoiceInterface";
 import { TypingIndicator } from "./TypingIndicator";
 import { InsightMessage } from "./InsightMessage";
@@ -17,12 +17,12 @@ interface ChatPanelProps {
   readonly messages: AIMessage[];
   readonly loading: boolean;
   readonly currentModelConfig: AIModelConfig;
-  readonly availableProviders: string[];
+  readonly availableProviders: AIProvider[];
   readonly availableModels: Record<string, any[]>;
   readonly loadingModels: Record<string, boolean>;
   readonly insights?: FinancialInsight[];
   readonly onSendMessageAction: (message: string) => Promise<string | null> | void;
-  readonly onModelConfigChangeAction: (provider: string | undefined, model: string) => void;
+  readonly onModelConfigChangeAction: (provider: AIProvider, model: string) => void;
   readonly onRequestInsights?: () => void;
   readonly className?: string;
 }
@@ -171,18 +171,16 @@ export function ChatPanel({
               {autoSpeak ? <Volume2 className="h-3 w-3 mr-1" /> : <VolumeX className="h-3 w-3 mr-1" />}
               Auto-speak
             </Button>
-            <div className="flex items-center gap-1">
-              <Settings className="h-3 w-3 text-muted-foreground" />
-              <ModelSelector
-                provider={currentModelConfig.provider}
-                model={currentModelConfig.model}
-                availableModels={availableModels}
-                loadingModels={loadingModels}
-                onChange={onModelConfigChangeAction}
-                disabled={loading}
-                className="w-auto min-w-[120px]"
-              />
-            </div>
+            <AIProviderModelSelector
+              currentProvider={currentModelConfig.provider}
+              currentModel={currentModelConfig.model}
+              availableProviders={availableProviders}
+              availableModels={availableModels}
+              loadingModels={loadingModels}
+              onChange={onModelConfigChangeAction}
+              disabled={loading}
+              className="flex-shrink-0"
+            />
           </div>
         </div>
         

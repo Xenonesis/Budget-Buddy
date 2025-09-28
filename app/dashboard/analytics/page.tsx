@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
         .from('transactions')
         .select(`
           *,
-          categories (name)
+          categories!category_id (name)
         `)
         .eq('user_id', user.id)
         .order('date', { ascending: false });

@@ -84,8 +84,13 @@ export function generateRealFinancialInsights(
 
   // 2. Budget Analysis
   budgets.forEach(budget => {
+    // Skip if budget category is undefined or null
+    if (!budget.category) {
+      return;
+    }
+    
     const categoryTransactions = currentMonthTransactions.filter(t => 
-      t.category.toLowerCase() === budget.category.toLowerCase() && t.type === 'expense'
+      t.category && budget.category && t.category.toLowerCase() === budget.category.toLowerCase() && t.type === 'expense'
     );
     const spent = categoryTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const budgetAmount = budget.period === 'monthly' ? budget.amount : 
@@ -266,7 +271,7 @@ function detectSubscriptions(transactions: Transaction[]): Transaction[] {
   return transactions.filter(t => 
     t.type === 'expense' && 
     subscriptionKeywords.some(keyword => 
-      t.description.toLowerCase().includes(keyword)
+      t.description && t.description.toLowerCase().includes(keyword)
     )
   );
 }

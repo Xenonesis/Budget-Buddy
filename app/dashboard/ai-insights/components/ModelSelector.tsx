@@ -141,10 +141,16 @@ export function ModelSelector({
           <>
             <option value="openrouter-default">OpenRouter Default</option>
             <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+            <option value="anthropic/claude-3-5-sonnet">Claude 3.5 Sonnet</option>
             <option value="google/gemini-pro">Gemini Pro</option>
+            <option value="google/gemini-1.5-pro">Gemini 1.5 Pro</option>
             <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
             <option value="openai/gpt-4">GPT-4</option>
             <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="openai/gpt-4o">GPT-4o</option>
+            <option value="x-ai/grok-beta">Grok Beta</option>
+            <option value="x-ai/grok-vision-beta">Grok Vision Beta</option>
+            <option value="x-ai/grok-4-fast-free">Grok 4 Fast (Free)</option>
           </>
         );
       case 'cerebras':

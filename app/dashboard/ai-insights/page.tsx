@@ -7,12 +7,12 @@ import { useUserPreferences } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import { 
   isAIEnabled, 
-  generateGoogleAIInsights,
   getUserQuotaStatus,
   chatWithAI,
   getAvailableAIProviders,
   getAIModelsForProvider,
   getUserAISettings,
+  getValidModelForProvider,
   type FinancialInsight,
   type AIMessage,
   type AIModelConfig,
@@ -98,6 +98,63 @@ export default function AIInsightsPage() {
     }
   }, [layoutMode, speakFunctionRef.current]);
 
+  // Listen for settings changes via localStorage and window focus
+  useEffect(() => {
+    if (!userId) return;
+
+    const refetchAISettingsInternal = async () => {
+      try {
+        const providers = await getAvailableAIProviders(userId);
+        setAvailableProviders(providers);
+        
+        // Get the user's actual default model from their settings
+        const userSettings = await getUserAISettings(userId);
+        
+        if (userSettings?.defaultModel) {
+          // Use the user's saved default model, but validate it exists
+          const validModel = getValidModelForProvider(
+            userSettings.defaultModel.provider, 
+            userSettings.defaultModel.model
+          );
+          setCurrentModelConfig({
+            provider: userSettings.defaultModel.provider,
+            model: validModel
+          });
+        } else if (providers.length > 0) {
+          // Fallback to first available provider if no default is set
+          setCurrentModelConfig({
+            provider: providers[0],
+            model: getValidModelForProvider(providers[0])
+          });
+        }
+      } catch (error) {
+        console.error("Error refetching AI settings:", error);
+      }
+    };
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'ai-settings-updated' && e.newValue) {
+        // Refetch AI settings when they are updated in Settings page
+        refetchAISettingsInternal();
+        toast.success("AI settings updated! Using your new default provider and model.");
+        localStorage.removeItem('ai-settings-updated'); // Clean up
+      }
+    };
+
+    const handleWindowFocus = () => {
+      // Refetch settings when user returns to this page (e.g., from Settings)
+      refetchAISettingsInternal();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [userId]);
+
   const initializeData = async () => {
     try {
       await Promise.all([
@@ -144,17 +201,21 @@ export default function AIInsightsPage() {
       // Get the user's actual default model from their settings
       const userSettings = await getUserAISettings(userId);
       
-      if (userSettings && userSettings.defaultModel) {
-        // Use the user's saved default model
+      if (userSettings?.defaultModel) {
+        // Use the user's saved default model, but validate it exists
+        const validModel = getValidModelForProvider(
+          userSettings.defaultModel.provider, 
+          userSettings.defaultModel.model
+        );
         setCurrentModelConfig({
-          provider: userSettings.defaultModel.provider as AIProvider,
-          model: userSettings.defaultModel.model as AIModel
+          provider: userSettings.defaultModel.provider,
+          model: validModel
         });
       } else if (providers.length > 0) {
         // Fallback to first available provider if no default is set
         setCurrentModelConfig({
-          provider: providers[0] as AIProvider,
-          model: getDefaultModelForProvider(providers[0]) as AIModel
+          provider: providers[0],
+          model: getValidModelForProvider(providers[0])
         });
       }
     } catch (error) {
@@ -360,20 +421,19 @@ Keep the response concise but insightful.`;
     }
   };
 
-  const handleModelConfigChange = async (provider: string | undefined, model: string) => {
-    const newProvider = (provider || currentModelConfig.provider) as AIProvider;
-    setCurrentModelConfig({ provider: newProvider, model: model as AIModel });
+  const handleModelConfigChange = async (provider: AIProvider, model: string) => {
+    setCurrentModelConfig({ provider, model: model as AIModel });
     
     // Fetch models for the new provider if not already loaded
-    if (!availableModels[newProvider] && !loadingModels[newProvider]) {
-      setLoadingModels(prev => ({ ...prev, [newProvider]: true }));
+    if (!availableModels[provider] && !loadingModels[provider]) {
+      setLoadingModels(prev => ({ ...prev, [provider]: true }));
       try {
-        const models = await getAIModelsForProvider(newProvider);
-        setAvailableModels(prev => ({ ...prev, [newProvider]: models }));
+        const models = await getAIModelsForProvider(provider);
+        setAvailableModels(prev => ({ ...prev, [provider]: models }));
       } catch (error) {
-        console.error(`Error fetching models for ${newProvider}:`, error);
+        console.error(`Error fetching models for ${provider}:`, error);
       } finally {
-        setLoadingModels(prev => ({ ...prev, [newProvider]: false }));
+        setLoadingModels(prev => ({ ...prev, [provider]: false }));
       }
     }
   };

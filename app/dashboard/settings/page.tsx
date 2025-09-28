@@ -401,6 +401,10 @@ export default function SettingsPage() {
       } else {
         console.log("Profile updated successfully");
         setProfile(updatedProfile);
+        
+        // Notify other pages that AI settings have been updated
+        localStorage.setItem('ai-settings-updated', Date.now().toString());
+        
         setFormData({
           name: updatedProfile.name || '',
           email: updatedProfile.email || '',
@@ -941,6 +945,9 @@ export default function SettingsPage() {
             <SelectItem value="openai/gpt-4">GPT-4</SelectItem>
             <SelectItem value="openai/gpt-4-turbo">GPT-4 Turbo</SelectItem>
             <SelectItem value="openai/gpt-4o">GPT-4o (Most Powerful)</SelectItem>
+            <SelectItem value="x-ai/grok-beta">xAI Grok Beta</SelectItem>
+            <SelectItem value="x-ai/grok-vision-beta">xAI Grok Vision Beta</SelectItem>
+            <SelectItem value="x-ai/grok-4-fast-free">xAI Grok 4 Fast (Free)</SelectItem>
           </>
         );
       case 'cerebras':

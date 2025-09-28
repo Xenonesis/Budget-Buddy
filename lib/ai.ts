@@ -64,7 +64,7 @@ export type AIModel =
   // Qwen models
   | 'qwen-turbo' | 'qwen-plus' | 'qwen-max' | 'qwen-1.5-7b' | 'qwen-1.5-14b' | 'qwen-1.5-32b' | 'qwen-1.5-72b' | 'qwen-2-0.5b' | 'qwen-2-1.5b' | 'qwen-2-7b' | 'qwen-2-72b' | 'qwen-2.5-0.5b' | 'qwen-2.5-1.5b' | 'qwen-2.5-3b' | 'qwen-2.5-7b' | 'qwen-2.5-14b' | 'qwen-2.5-32b' | 'qwen-2.5-72b'
   // OpenRouter models (can be many models from different providers)
-  | 'openrouter-default' | 'anthropic/claude-3-opus' | 'google/gemini-pro' | 'meta-llama/llama-3-70b-instruct' | 'meta-llama/llama-3.1-405b' | 'meta-llama/llama-3.1-70b' | 'meta-llama/llama-3.1-8b' | 'mistralai/mistral-7b-instruct' | 'mistralai/mistral-large' | 'mistralai/mixtral-8x22b' | 'mistralai/mixtral-8x7b' | 'openai/gpt-3.5-turbo' | 'openai/gpt-4' | 'openai/gpt-4-turbo' | 'openai/gpt-4o'
+  | 'openrouter-default' | 'anthropic/claude-3-opus' | 'anthropic/claude-3-5-sonnet' | 'google/gemini-pro' | 'google/gemini-1.5-pro' | 'meta-llama/llama-3-70b-instruct' | 'meta-llama/llama-3.1-405b' | 'meta-llama/llama-3.1-70b' | 'meta-llama/llama-3.1-8b' | 'mistralai/mistral-7b-instruct' | 'mistralai/mistral-large' | 'mistralai/mixtral-8x22b' | 'mistralai/mixtral-8x7b' | 'openai/gpt-3.5-turbo' | 'openai/gpt-4' | 'openai/gpt-4-turbo' | 'openai/gpt-4o' | 'x-ai/grok-beta' | 'x-ai/grok-vision-beta' | 'x-ai/grok-4-fast-free'
   // Cerebras models
   | 'cerebras-gemma-2b' | 'cerebras-llama3-8b' | 'cerebras-llama-3.1-8b' | 'cerebras-llama-3.1-70b'
   // xAI models
@@ -1768,7 +1768,7 @@ function getDefaultModelsForProvider(provider: string): AIModel[] {
     case 'qwen':
       return ['qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen-2.5-7b', 'qwen-2.5-14b', 'qwen-2.5-32b', 'qwen-2.5-72b'];
     case 'openrouter':
-      return ['openrouter-default', 'anthropic/claude-3-opus', 'google/gemini-pro', 'meta-llama/llama-3-70b-instruct', 'openai/gpt-4', 'openai/gpt-4-turbo'];
+      return ['openrouter-default', 'anthropic/claude-3-opus', 'anthropic/claude-3-5-sonnet', 'google/gemini-pro', 'google/gemini-1.5-pro', 'meta-llama/llama-3-70b-instruct', 'openai/gpt-4', 'openai/gpt-4-turbo', 'openai/gpt-4o', 'x-ai/grok-beta', 'x-ai/grok-vision-beta', 'x-ai/grok-4-fast-free'];
     case 'cerebras':
       return ['cerebras-gemma-2b', 'cerebras-llama3-8b', 'cerebras-llama-3.1-8b', 'cerebras-llama-3.1-70b'];
     case 'xAI':
@@ -1805,7 +1805,21 @@ const getDefaultModelForProvider = (provider: string): string => {
     case 'lmstudio': return 'lmstudio-llama3.1';
     default: return 'mistral-small';
   }
-}; 
+};
+
+// Validate if a model exists for a given provider
+export function validateModelForProvider(provider: string, model: string): boolean {
+  const availableModels = getDefaultModelsForProvider(provider);
+  return availableModels.includes(model as AIModel);
+}
+
+// Get a valid model for a provider, falling back to default if invalid
+export function getValidModelForProvider(provider: string, requestedModel?: string): AIModel {
+  if (requestedModel && validateModelForProvider(provider, requestedModel)) {
+    return requestedModel as AIModel;
+  }
+  return getDefaultModelForProvider(provider) as AIModel;
+} 
 
 // Chat with Cerebras AI
 async function chatWithCerebrasAI(

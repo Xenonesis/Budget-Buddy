@@ -122,7 +122,8 @@ export async function getUserFinancialProfile(userId: string): Promise<UserFinan
         amount,
         description,
         date,
-        categories (name)
+        category_id,
+        categories!category_id (name)
       `)
       .eq('user_id', userId)
       .gte('date', threeMonthsAgo.toISOString().split('T')[0])
@@ -150,7 +151,8 @@ export async function getUserFinancialProfile(userId: string): Promise<UserFinan
         description,
         frequency,
         start_date,
-        categories (name)
+        category_id,
+        categories!category_id (name)
       `)
       .eq('user_id', userId)
       .eq('active', true);
