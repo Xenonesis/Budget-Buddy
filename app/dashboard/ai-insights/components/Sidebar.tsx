@@ -147,53 +147,56 @@ export function Sidebar({
                 const isActive = conversation.id === activeConversationId;
                 
                 return (
-                  <button
+                  <div
                     key={conversation.id}
                     className={`
-                      group relative rounded-lg p-3 cursor-pointer transition-all duration-200 w-full text-left
+                      group relative rounded-lg transition-all duration-200 w-full
                       ${isActive 
                         ? 'bg-muted/70 shadow-sm' 
                         : 'hover:bg-muted/40'
                       }
                     `}
-                    onClick={() => onLoadConversation(conversation.id)}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium truncate ${
-                          isActive ? 'text-primary' : 'text-foreground'
-                        }`}>
-                          {conversation.title || `Chat ${conversation.id.slice(0, 8)}`}
-                        </p>
-                        
-                        <div className="flex items-center gap-1 mt-1">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <p className="text-xs text-muted-foreground">
-                            {formatConversationDate(conversation.updated_at || conversation.last_updated || conversation.created_at)}
+                    <button
+                      className="w-full p-3 text-left cursor-pointer"
+                      onClick={() => onLoadConversation(conversation.id)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${
+                            isActive ? 'text-primary' : 'text-foreground'
+                          }`}>
+                            {conversation.title || `Chat ${conversation.id.slice(0, 8)}`}
                           </p>
+                          
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground">
+                              {formatConversationDate(conversation.updated_at || conversation.last_updated || conversation.created_at)}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteConversation(conversation.id);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                    </button>
+                    
+                    {/* Action buttons - separate from main button */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteConversation(conversation.id);
+                        }}
+                        className="h-6 w-6 p-0 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors flex items-center justify-center"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     </div>
                     
                     {/* Active indicator */}
                     {isActive && (
                       <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>

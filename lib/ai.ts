@@ -6,27 +6,16 @@ import {
   getQuotaStatus,
   formatTimeUntilReset 
 } from './quota-manager';
-import { 
-  getUserFinancialProfile, 
-  buildFinancialSystemMessage, 
-  buildQuickFinancialSummary,
-  type UserFinancialProfile 
-} from './ai-financial-context';
 import {
   validateAIResponse,
   addFinancialDisclaimers,
   detectFinancialTopicType,
-  checkRateLimit,
-  logAIInteraction,
-  anonymizeFinancialData
+  logAIInteraction
 } from './ai-privacy-security';
 import {
-  buildUserPersonalityProfile,
   personalizeAIResponse,
-  generatePredictiveInsights,
   createContextualMemory
 } from './ai-intelligence-engine';
-import { financeNewsService } from './finance-news-service';
 
 // Types for AI interactions
 export interface AIMessage {
@@ -127,7 +116,7 @@ export async function getUserAISettings(userId: string): Promise<AISettings | nu
     }
     
     // If ai_settings is null or undefined, return default
-    if (!data || !data.ai_settings) {
+    if (!data?.ai_settings) {
       return getDefaultAISettings();
     }
     
@@ -202,7 +191,7 @@ function getDefaultAISettings(): AISettings {
 // Check if AI is enabled and keys are valid
 export async function isAIEnabled(userId: string): Promise<boolean> {
   const settings = await getUserAISettings(userId);
-  if (!settings || !settings.enabled) return false;
+  if (!settings?.enabled) return false;
   
   // Check if at least one API key is available
   return !!(
@@ -521,11 +510,7 @@ export async function generateGoogleAIInsights(
       const result = await response.json();
       
       // Check if result has the expected structure
-      if (result && result.candidates && result.candidates.length > 0 && 
-          result.candidates[0].content && result.candidates[0].content.parts && 
-          result.candidates[0].content.parts.length > 0) {
-        
-        try {
+      if (result?.candidates?.[0]?.content?.parts?.length > 0) {        try {
           const textResponse = result.candidates[0].content.parts[0].text;
           
           // Extract JSON carefully - look for array start/end markers
@@ -655,7 +640,7 @@ async function enhanceMessagesWithFinancialContext(
 
     // Check if the last user message is finance-related and add news context
     const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-    if (lastUserMessage?.content) {
+    if (lastUserMessage?.content && typeof window === 'undefined') {
       try {
         const { financeNewsService } = await import('./finance-news-service');
         const newsContext = await financeNewsService.getFinanceNewsContext(lastUserMessage.content);
@@ -769,14 +754,9 @@ When users ask about their financial information, you should provide specific de
 export async function chatWithAI(
   userId: string,
   messages: AIMessage[],
-  modelConfig?: ModelConfig
+  modelConfig?: ModelConfig | AIModelConfig
 ): Promise<string | null> {
   try {
-    // Check rate limiting
-    if (!checkRateLimit(userId)) {
-      return "You've reached the maximum number of AI requests for this hour. Please try again later.";
-    }
-
     const settings = await getUserAISettings(userId);
     if (!settings?.enabled) {
       return "AI features are not enabled. Please configure your API keys in settings.";
@@ -784,33 +764,21 @@ export async function chatWithAI(
     
     // Use provided model config or default from settings
     const config = modelConfig || settings.defaultModel;
-
-    // Check for enhanced financial commands first (for direct data queries)
-    const lastUserMessage = messages[messages.length - 1];
-    if (lastUserMessage && lastUserMessage.role === 'user') {
-      const { clientEnhancedAICommands } = await import('./client-enhanced-ai-commands');
-      
-      // Check for help/commands requests
-      const lowerContent = lastUserMessage.content.toLowerCase();
-      if (lowerContent.includes('what can you') || lowerContent.includes('help') && lowerContent.includes('topic') || 
-          lowerContent.includes('what financial') || lowerContent.includes('commands') || lowerContent.includes('what do you do')) {
-        const { getAvailableFinancialCommands } = await import('./ai-financial-commands');
-        return getAvailableFinancialCommands();
-      }
-      
-      // Try enhanced commands first (for balance, spending, etc.)
-      const enhancedResponse = await clientEnhancedAICommands.processQuery(userId, lastUserMessage.content);
-      if (enhancedResponse) {
-        return enhancedResponse;
-      }
-      
-      // Fall back to specialized financial commands for complex analysis
-      const { handleFinancialCommand } = await import('./ai-financial-commands');
-      const commandResponse = await handleFinancialCommand(userId, lastUserMessage.content);
-      if (commandResponse) {
-        return commandResponse;
-      }
+    
+    console.log("AI chatWithAI - modelConfig passed:", modelConfig);
+    console.log("AI chatWithAI - settings.defaultModel:", settings.defaultModel);
+    console.log("AI chatWithAI - final config used:", config);
+    
+    // Check provider-specific quota before making request
+    if (!canMakeRequest(config.provider, config.model, userId)) {
+      const quotaStatus = getQuotaStatus(config.provider, config.model, userId);
+      return `You've reached your daily quota for ${config.provider.toUpperCase()} AI (${quotaStatus.usage} requests). Your quota will reset in ${quotaStatus.timeUntilReset}. Consider upgrading your plan or trying a different AI provider.`;
     }
+
+    // Skip all command processing - go directly to AI
+    
+    // Extract last user message for validation and logging
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop();
 
     // Enhance messages with financial context
     const enhancedMessages = await enhanceMessagesWithFinancialContext(userId, messages);
@@ -818,6 +786,8 @@ export async function chatWithAI(
     // Get AI response and validate it
     let rawResponse: string | null = null;
     let apiKey = '';
+    
+    console.log("AI chatWithAI - About to call provider:", config.provider, "with model:", config.model);
     
     switch (config.provider) {
       case 'mistral':
@@ -916,6 +886,9 @@ export async function chatWithAI(
     // Log the interaction for audit purposes
     logAIInteraction(userId, lastUserMessage?.content || '', finalResponse, validation);
 
+    // Increment quota usage after successful response
+    incrementQuotaUsage(config.provider, config.model, userId);
+
     // Show warnings to console if any
     if (validation.warnings.length > 0) {
       console.warn('AI response warnings:', validation.warnings);
@@ -972,7 +945,7 @@ async function chatWithMistralAI(
           };
         }
         return {
-          role: msg.role as 'user' | 'assistant',
+          role: msg.role,
           content: msg.content.trim()
         };
       })
@@ -1058,7 +1031,7 @@ async function chatWithMistralAI(
       }
     }
     
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    if (!data.choices?.[0]?.message) {
       console.error('Unexpected response format from Mistral API:', data);
       return "Received an unexpected response from Mistral AI. Please try again later.";
     }
@@ -1331,7 +1304,7 @@ async function chatWithGeminiAI(
     }
     
     // Check if using newer Gemini 1.5 models
-    const isGemini15 = model.includes('1.5');
+    // Check if model supports enhanced features
     
     // Convert messages to Google's format - Gemini has specific requirements
     const formattedMessages = messages
@@ -1497,7 +1470,7 @@ async function chatWithGeminiAI(
       return "Gemini AI did not return a valid response. This could be due to content filtering or an internal error.";
     }
     
-    if (data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+    if (data.candidates?.[0]?.content?.parts?.length > 0) {
       return data.candidates[0].content.parts[0].text;
     } else {
       console.error('Gemini API response format unexpected:', data.candidates[0]);

@@ -236,20 +236,14 @@ export default function AIInsightsPage() {
         }
       }
 
-      const isInsightRequest = /\b(insight|analysis|analyze|spending|budget|financial|recommend|advice)\b/i.test(message);
-
+      // Get AI response
       let response: string;
-
-      if (isInsightRequest) {
-        response = "For detailed financial insights, please visit the dedicated Financial Insights page in your dashboard. You'll find comprehensive analysis of your spending patterns, budget alerts, and personalized recommendations there.";
-      } else {
-        try {
-          const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
-          response = aiResponse || "I'm sorry, I couldn't process your request right now. Please check your AI configuration or try again later.";
-        } catch (aiError) {
-          console.error("AI Service Error:", aiError);
-          response = "I'm having trouble connecting to the AI service. Please check your settings or try again in a moment.";
-        }
+      try {
+        const aiResponse = await chatWithAI(userId, newMessages, currentModelConfig);
+        response = aiResponse || "I'm sorry, I couldn't process your request right now. Please check your AI configuration or try again later.";
+      } catch (aiError) {
+        console.error("AI Service Error:", aiError);
+        response = "I'm having trouble connecting to the AI service. Please check your settings or try again in a moment.";
       }
       
       if (response) {
@@ -293,8 +287,7 @@ export default function AIInsightsPage() {
       const { error: updateError } = await supabase
         .from("ai_conversations")
         .update({ 
-          messages: JSON.stringify(messages),
-          last_updated: new Date().toISOString() 
+          messages: JSON.stringify(messages)
         })
         .eq("id", conversationId);
 

@@ -260,28 +260,9 @@ export function logAIInteraction(userId: string, query: string, response: string
 }
 
 /**
- * Rate limiting for AI requests to prevent abuse
+ * Rate limiting is now handled by the quota manager system
+ * This provides more accurate, provider-specific daily quotas
  */
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-export function checkRateLimit(userId: string, maxRequests = 50, windowMinutes = 60): boolean {
-  const now = Date.now();
-  const windowMs = windowMinutes * 60 * 1000;
-  const userLimit = rateLimitMap.get(userId);
-  
-  if (!userLimit || now > userLimit.resetTime) {
-    // Reset or create new limit
-    rateLimitMap.set(userId, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-  
-  if (userLimit.count >= maxRequests) {
-    return false; // Rate limit exceeded
-  }
-  
-  userLimit.count += 1;
-  return true;
-}
 
 /**
  * Cleans up old conversation history based on retention policy

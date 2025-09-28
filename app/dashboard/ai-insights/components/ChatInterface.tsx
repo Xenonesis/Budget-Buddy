@@ -28,6 +28,7 @@ interface ChatInterfaceProps {
   readonly availableModels: Record<string, any[]>;
   readonly loadingModels: Record<string, boolean>;
   readonly insights?: FinancialInsight[];
+  readonly quotaStatus?: any;
   readonly onSendMessage: (message: string) => Promise<string | null> | void;
   readonly onModelConfigChange: (provider: AIProvider, model: string) => void;
   readonly onToggleSidebar: () => void;
@@ -42,6 +43,7 @@ export function ChatInterface({
   availableModels,
   loadingModels,
   insights = [],
+  quotaStatus,
   onSendMessage, 
   onModelConfigChange,
   onToggleSidebar,
@@ -151,17 +153,32 @@ export function ChatInterface({
             <div>
               <h1 className="font-semibold text-sm">Financial Assistant</h1>
               <p className="text-xs text-muted-foreground">
-                Powered by {currentModelConfig.provider}
+                {currentModelConfig.provider.toUpperCase()} • {currentModelConfig.model}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Model Selector */}
+        {/* Model Selector & Quota Status */}
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></div>
-            {currentModelConfig.model}
+          {quotaStatus?.status && (
+            <Badge 
+              variant="outline" 
+              className={`text-xs ${
+                quotaStatus.status.canMakeRequest 
+                  ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full mr-1 ${
+                quotaStatus.status.canMakeRequest ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+              }`}></div>
+              {quotaStatus.status.usage}
+            </Badge>
+          )}
+          <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <div className="w-2 h-2 bg-blue-500 rounded-full mr-1 animate-pulse"></div>
+            Active
           </Badge>
           
           <AIProviderModelSelector
@@ -188,13 +205,27 @@ export function ChatInterface({
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
                 <Bot className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">
-                Hello there! How can I help you today?
-              </h3>
-              <p className="text-muted-foreground max-w-md mb-8">
-                I'm your AI financial assistant. Ask me anything about your finances, budgets, spending patterns, 
-                or get personalized advice.
-              </p>
+              {availableProviders.length === 0 ? (
+                <>
+                  <h3 className="text-xl font-semibold mb-3 text-orange-600 dark:text-orange-400">
+                    AI Assistant Setup Required
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mb-8">
+                    To use the AI financial assistant, you need to configure at least one AI provider in your settings. 
+                    Add your API keys for services like OpenAI, Anthropic, or Gemini to get started.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold mb-3">
+                    Hello there! How can I help you today?
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mb-8">
+                    I'm your AI financial assistant. Ask me anything about your finances, budgets, spending patterns, 
+                    or get personalized advice.
+                  </p>
+                </>
+              )}
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 <Button
