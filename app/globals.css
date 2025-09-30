@@ -1943,7 +1943,7 @@ html {
 
 /* Enhanced month label visibility for both modes */
 .recharts-cartesian-axis-tick-value {
-  fill: currentColor !important;
+  fill: hsl(var(--foreground)) !important;
   font-weight: 600 !important;
   font-size: 12px !important;
 }
@@ -1964,18 +1964,39 @@ html {
 
 /* Enhanced tooltip styling for better visibility */
 .recharts-default-tooltip {
-  background-color: white !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  color: #000000 !important;
+  color: hsl(var(--card-foreground)) !important;
   font-weight: 500 !important;
+  border-radius: 8px !important;
 }
 
 .dark .recharts-default-tooltip {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
-  color: #ffffff !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix for any remaining hardcoded dark elements */
+.force-theme-colors {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.force-theme-colors-inverted {
+  background-color: hsl(var(--foreground)) !important;
+  color: hsl(var(--background)) !important;
+}
+
+/* Ensure all text is visible in both modes */
+.text-force-visible {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Circle elements that need proper theming */
+.circle-theme-aware {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
 }
 
 /* Financial Data Flow Animation Styles */

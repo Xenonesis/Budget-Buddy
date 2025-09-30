@@ -84,7 +84,7 @@ function ThemePreviewComponent() {
           <span className="text-xs mt-1">Light</span>
         </div>
         <div className="flex flex-col items-center">
-          <div className="h-8 w-8 rounded-full bg-zinc-900 text-white flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full bg-foreground text-background flex items-center justify-center">
             <Moon className="h-4 w-4" />
           </div>
           <span className="text-xs mt-1">Dark</span>

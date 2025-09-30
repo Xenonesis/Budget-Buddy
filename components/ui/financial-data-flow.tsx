@@ -240,24 +240,24 @@ const FinancialDataFlow = ({
         {/* bottom shadow */}
         <div className="absolute -bottom-4 h-[100px] w-[62%] rounded-lg bg-accent/30" />
         {/* box title */}
-        <div className="absolute -top-3 z-20 flex items-center justify-center rounded-lg border bg-[#101112] px-2 py-1 sm:-top-4 sm:py-1.5">
+        <div className="absolute -top-3 z-20 flex items-center justify-center rounded-lg border bg-card text-card-foreground px-2 py-1 sm:-top-4 sm:py-1.5 shadow-sm">
           <TrendingUp className="size-3" />
           <span className="ml-2 text-[10px]">
             {title ? title : "Smart Financial Management & AI-Powered Insights"}
           </span>
         </div>
         {/* box outer circle */}
-        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t bg-[#141516] font-semibold text-xs">
+        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t bg-card text-card-foreground font-semibold text-xs shadow-md">
           {circleText ? circleText : "AI"}
         </div>
         {/* box content */}
         <div className="relative z-10 flex h-[150px] w-full items-center justify-center overflow-hidden rounded-lg border bg-background shadow-md">
           {/* Financial Badges */}
-          <div className="absolute bottom-8 left-12 z-10 h-7 rounded-full bg-[#101112] px-3 text-xs border flex items-center gap-2 ">
+          <div className="absolute bottom-8 left-12 z-10 h-7 rounded-full bg-card text-card-foreground px-3 text-xs border flex items-center gap-2 shadow-sm">
             <DollarSign className="size-4 text-green-500" />
             <span>{buttonTexts?.first || "Budget Buddy"}</span>
           </div>
-          <div className="absolute right-16 z-10 hidden h-7 rounded-full bg-[#101112] px-3 text-xs sm:flex border items-center gap-2">
+          <div className="absolute right-16 z-10 hidden h-7 rounded-full bg-card text-card-foreground px-3 text-xs sm:flex border items-center gap-2 shadow-sm">
             <BarChart3 className="size-4 text-blue-500" />
             <span>{buttonTexts?.second || "Smart Analytics"}</span>
           </div>
