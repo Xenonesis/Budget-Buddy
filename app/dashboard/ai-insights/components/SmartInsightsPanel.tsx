@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { generateProactiveAlerts, acknowledgeAlert, type SmartAlert } from '@/lib/ai-smart-alerts';
 import { generatePredictiveInsights } from '@/lib/ai-intelligence-engine';
-import { useUserPreferences } from '@/lib/store';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { toast } from 'sonner';
 
 interface SmartInsightsPanelProps {

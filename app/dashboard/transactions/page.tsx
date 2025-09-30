@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect, mem
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, formatDateWithTimezone, calculateNextRecurringDate, getUserTimezone } from "@/lib/utils";
 import { Currency } from "@/components/ui/currency";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { Button } from "@/components/ui/button";
 import { 
   PlusCircle, 

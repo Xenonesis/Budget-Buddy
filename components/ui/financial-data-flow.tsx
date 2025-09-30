@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, PieChart, BarChart3 } from "lucide-react";
+import { DollarSign, TrendingUp, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SafeMotionDiv } from "./safe-motion";
 
 interface FinancialDataFlowProps {
   className?: string;
@@ -22,7 +22,7 @@ interface FinancialDataFlowProps {
   lightColor?: string;
 }
 
-const FinancialDataFlow = ({
+const FinancialDataFlow = React.memo(({
   className,
   circleText,
   badgeTexts,
@@ -30,6 +30,11 @@ const FinancialDataFlow = ({
   title,
   lightColor,
 }: FinancialDataFlowProps) => {
+  // Early return if critical dependencies are missing
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   return (
     <div
       className={cn(
@@ -125,7 +130,7 @@ const FinancialDataFlow = ({
               fontSize="4.5"
               fontWeight="500"
             >
-              {badgeTexts?.first || "INCOME"}
+              {badgeTexts?.first ?? "INCOME"}
             </text>
           </g>
           {/* Budget Planning */}
@@ -147,7 +152,7 @@ const FinancialDataFlow = ({
               fontSize="4.5"
               fontWeight="500"
             >
-              {badgeTexts?.second || "BUDGET"}
+              {badgeTexts?.second ?? "BUDGET"}
             </text>
           </g>
           {/* Analytics */}
@@ -169,7 +174,7 @@ const FinancialDataFlow = ({
               fontSize="4"
               fontWeight="500"
             >
-              {badgeTexts?.third || "ANALYTICS"}
+              {badgeTexts?.third ?? "ANALYTICS"}
             </text>
           </g>
           {/* Insights */}
@@ -191,7 +196,7 @@ const FinancialDataFlow = ({
               fontSize="4"
               fontWeight="500"
             >
-              {badgeTexts?.fourth || "INSIGHTS"}
+              {badgeTexts?.fourth ?? "INSIGHTS"}
             </text>
           </g>
         </g>
@@ -230,7 +235,7 @@ const FinancialDataFlow = ({
           </mask>
           {/* Green Gradient for financial success */}
           <radialGradient id="financial-green-grad" fx="1">
-            <stop offset="0%" stopColor={lightColor || "#22c55e"} />
+            <stop offset="0%" stopColor={lightColor ?? "#22c55e"} />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
@@ -243,58 +248,76 @@ const FinancialDataFlow = ({
         <div className="absolute -top-3 z-20 flex items-center justify-center rounded-lg border bg-card text-card-foreground px-2 py-1 sm:-top-4 sm:py-1.5 shadow-sm">
           <TrendingUp className="size-3" />
           <span className="ml-2 text-[10px]">
-            {title ? title : "Smart Financial Management & AI-Powered Insights"}
+            {title ?? "Smart Financial Management & AI-Powered Insights"}
           </span>
         </div>
         {/* box outer circle */}
         <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t bg-card text-card-foreground font-semibold text-xs shadow-md">
-          {circleText ? circleText : "AI"}
+          {circleText ?? "AI"}
         </div>
         {/* box content */}
         <div className="relative z-10 flex h-[150px] w-full items-center justify-center overflow-hidden rounded-lg border bg-background shadow-md">
           {/* Financial Badges */}
           <div className="absolute bottom-8 left-12 z-10 h-7 rounded-full bg-card text-card-foreground px-3 text-xs border flex items-center gap-2 shadow-sm">
             <DollarSign className="size-4 text-green-500" />
-            <span>{buttonTexts?.first || "Budget Buddy"}</span>
+            <span>{buttonTexts?.first ?? "Budget Buddy"}</span>
           </div>
           <div className="absolute right-16 z-10 hidden h-7 rounded-full bg-card text-card-foreground px-3 text-xs sm:flex border items-center gap-2 shadow-sm">
             <BarChart3 className="size-4 text-blue-500" />
-            <span>{buttonTexts?.second || "Smart Analytics"}</span>
+            <span>{buttonTexts?.second ?? "Smart Analytics"}</span>
           </div>
           {/* Animated Financial Circles */}
-          <motion.div
+          <SafeMotionDiv
             className="absolute -bottom-14 h-[100px] w-[100px] rounded-full border-t bg-green-500/10"
-            animate={{
-              scale: [0.98, 1.02, 0.98, 1, 1, 1, 1, 1, 1],
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1.02 }}
+            transition={{ 
+              duration: 2, 
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
             }}
-            transition={{ duration: 2, repeat: Infinity }}
           />
-          <motion.div
+          <SafeMotionDiv
             className="absolute -bottom-20 h-[145px] w-[145px] rounded-full border-t bg-blue-500/10"
-            animate={{
-              scale: [1, 1, 1, 0.98, 1.02, 0.98, 1, 1, 1],
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1.02 }}
+            transition={{ 
+              duration: 2.5, 
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
             }}
-            transition={{ duration: 2, repeat: Infinity }}
           />
-          <motion.div
+          <SafeMotionDiv
             className="absolute -bottom-[100px] h-[190px] w-[190px] rounded-full border-t bg-purple-500/10"
-            animate={{
-              scale: [1, 1, 1, 1, 1, 0.98, 1.02, 0.98, 1, 1],
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1.02 }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
             }}
-            transition={{ duration: 2, repeat: Infinity }}
           />
-          <motion.div
+          <SafeMotionDiv
             className="absolute -bottom-[120px] h-[235px] w-[235px] rounded-full border-t bg-red-500/10"
-            animate={{
-              scale: [1, 1, 1, 1, 1, 1, 0.98, 1.02, 0.98, 1],
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1.02 }}
+            transition={{ 
+              duration: 3.5, 
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
             }}
-            transition={{ duration: 2, repeat: Infinity }}
           />
         </div>
       </div>
     </div>
   );
-};
+});
+
+FinancialDataFlow.displayName = "FinancialDataFlow";
 
 export default FinancialDataFlow;
 

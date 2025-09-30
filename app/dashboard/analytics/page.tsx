@@ -35,7 +35,7 @@ import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spen
 import { YearOverYearComparison } from "@/components/dashboard/charts/year-over-year-comparison";
 import { supabase } from "@/lib/supabase";
 import { getRandomColor } from "@/lib/colors";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { Currency } from "@/components/ui/currency";
 
 // Custom styles for enhanced chart interactions

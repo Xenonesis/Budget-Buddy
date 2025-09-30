@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { supabase } from "@/lib/supabase";
 import { 
   isAIEnabled, 

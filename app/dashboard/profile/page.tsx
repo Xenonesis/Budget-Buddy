@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { getUserTimezone, ensureUserProfile } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";

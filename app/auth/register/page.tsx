@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, UserPlus, ChevronLeft, AlertCircle, Info, CheckCircle, Shield, Lock, Users, Star, Mail, Phone, CreditCard } from "lucide-react";
 import { Logo } from "@/components/ui/logo";

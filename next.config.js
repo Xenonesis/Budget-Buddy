@@ -24,6 +24,9 @@ const nextConfig = {
     domains: ['localhost', '127.0.0.1', '192.168.180.1'],
   },
   reactStrictMode: true,
+  experimental: {
+    // Enable React 19 compatibility
+  },
   webpack: (config, { isServer }) => {
     // Handle Node.js modules that don't work in the browser
     if (!isServer) {
@@ -49,6 +52,13 @@ const nextConfig = {
     if (!isServer) {
       config.externals.push('puppeteer');
     }
+    
+    // Add resolve alias for React 19 compatibility
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'react': 'react',
+      'react-dom': 'react-dom',
+    };
     
     return config;
   },

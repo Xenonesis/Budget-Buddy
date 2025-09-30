@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, getUserTimezone } from "@/lib/utils";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { Button } from "@/components/ui/button";
 import { IntelligentOCRUpload } from "@/components/ui/intelligent-ocr-upload";
 import { LLMEnhancedResult } from "@/lib/llm-enhanced-ocr";

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { WidgetSystem } from '@/components/ui/widget-system';
 import { WidgetLayout } from '@/lib/store';
-import { useUserPreferences } from '@/lib/store';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { AVAILABLE_WIDGETS, getDefaultLayout } from '@/lib/widget-config';
 import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from '@/lib/simple-widget-config';
 import { supabase } from '@/lib/supabase';

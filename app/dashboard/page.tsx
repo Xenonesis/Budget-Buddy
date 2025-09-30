@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { MonthlyBudgetOverview } from "@/components/ui/monthly-budget-overview";
 import { WidgetSystem } from "@/components/ui/widget-system";
 import { WidgetLayout } from "@/lib/store";
-import { useUserPreferences, TimeRange, DateRange } from "@/lib/store";
+import { useUserPreferences, TimeRange, DateRange } from "@/hooks/use-user-preferences";
 import { AVAILABLE_WIDGETS, getDefaultLayout } from "@/lib/widget-config";
 import { SIMPLE_WIDGET_CONFIG, getSimpleDefaultLayout } from "@/lib/simple-widget-config";
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, Settings } from "lucide-react";

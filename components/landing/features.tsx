@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import FinancialDataFlow from "@/components/ui/financial-data-flow";
 import { FinancialSpotlightCards } from "./financial-spotlight-cards";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 
 export function FeaturesSection() {
@@ -195,22 +196,30 @@ function AdvancedAnalyticsSection() {
           viewport={{ once: true, amount: 0.4 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <FinancialDataFlow
-            title="Smart Financial Data Processing & AI Insights"
-            circleText="AI"
-            badgeTexts={{
-              first: "INCOME",
-              second: "BUDGET", 
-              third: "ANALYTICS",
-              fourth: "INSIGHTS"
-            }}
-            buttonTexts={{
-              first: "Budget Buddy",
-              second: "Smart Analytics"
-            }}
-            lightColor="#22c55e"
-            className="scale-75 sm:scale-90 md:scale-100"
-          />
+          <ErrorBoundary
+            fallback={
+              <div className="flex items-center justify-center h-64 bg-muted/20 rounded-lg">
+                <p className="text-muted-foreground">Financial visualization temporarily unavailable</p>
+              </div>
+            }
+          >
+            <FinancialDataFlow
+              title="Smart Financial Data Processing & AI Insights"
+              circleText="AI"
+              badgeTexts={{
+                first: "INCOME",
+                second: "BUDGET", 
+                third: "ANALYTICS",
+                fourth: "INSIGHTS"
+              }}
+              buttonTexts={{
+                first: "Budget Buddy",
+                second: "Smart Analytics"
+              }}
+              lightColor="#22c55e"
+              className="scale-75 sm:scale-90 md:scale-100"
+            />
+          </ErrorBoundary>
         </motion.div>
       </div>
     </motion.div>

@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ensureUserProfile } from "@/lib/utils";
 import { BottomNavigation } from "@/components/ui/bottom-navigation";
-import { useUserPreferences } from "@/lib/store";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/ui/logo";
 import { NotificationCenter } from "@/components/ui/notification-center";
