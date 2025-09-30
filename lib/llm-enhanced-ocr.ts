@@ -1357,7 +1357,7 @@ Focus on accuracy and provide reasoning for each extraction.
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.js`;
       
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -1387,7 +1387,7 @@ Focus on accuracy and provide reasoning for each extraction.
       const pdfjsLib = await import('pdfjs-dist');
       
       // Set worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.js`;
       
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const page = await pdf.getPage(1); // Get first page
@@ -1405,7 +1405,8 @@ Focus on accuracy and provide reasoning for each extraction.
       
       const renderContext = {
         canvasContext: ctx,
-        viewport: viewport
+        viewport: viewport,
+        canvas: canvas
       };
       
       await page.render(renderContext).promise;
