@@ -16,6 +16,7 @@ import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, Settings } from "lucide-rea
 import { cn } from "@/lib/utils";
 import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-expense-pie-chart";
 import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
+
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
 import { EnhancedDashboardLayout } from "@/components/dashboard/enhanced-dashboard-layout";
@@ -1157,38 +1158,62 @@ export default function DashboardPage() {
       {/* Enhanced Charts with Real Data and Interactive Features */}
       {sectionVisibility.find(s => s.id === 'charts')?.visible && (
         <section className="mb-8 md:mb-10 space-y-6 md:space-y-8" role="region" aria-label="Financial Charts and Analytics">
-          {/* Chart Section Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl md:text-2xl font-bold text-foreground">Financial Analytics</h2>
-              <p className="text-sm text-muted-foreground mt-1">Visual breakdown of your spending patterns</p>
+          {/* Enhanced Header with Action Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold text-foreground">Financial Analytics</h2>
+              </div>
+              <p className="text-sm text-muted-foreground ml-11">Visual insights into your spending patterns and financial trends</p>
             </div>
+            
             {stats.categoryData.length > 0 && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span>Live Data</span>
+              <div className="flex items-center gap-3 ml-11 sm:ml-0">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-200 dark:border-green-800">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="font-medium">Live Data</span>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/dashboard/analytics">
+                    <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M7 7h10v10" />
+                    </svg>
+                    Advanced Analytics
+                  </Link>
+                </Button>
               </div>
             )}
           </div>
 
-          {/* Drill-down breadcrumb with enhanced styling */}
+          {/* Enhanced Drill-down Filter */}
           {drillDownData && (
-            <div className="rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 border-blue-200 dark:border-blue-800">
+            <div className="rounded-xl border bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 p-4 border-blue-200 dark:border-blue-800 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-                  <span className="text-muted-foreground font-medium">Filtering by:</span>
-                  <span className="font-semibold text-blue-700 dark:text-blue-300 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                    {drillDownData.type === 'category' && `${drillDownData.data.name} Category`}
-                    {drillDownData.type === 'month' && `${drillDownData.data.month} ${drillDownData.data.year}`}
-                    {drillDownData.type === 'year' && `Year ${drillDownData.data.year}`}
-                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                    <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground font-medium">Active Filter</span>
+                    <span className="font-semibold text-blue-700 dark:text-blue-300">
+                      {drillDownData.type === 'category' && `${drillDownData.data.name} Category`}
+                      {drillDownData.type === 'month' && `${drillDownData.data.month} ${drillDownData.data.year}`}
+                      {drillDownData.type === 'year' && `Year ${drillDownData.data.year}`}
+                    </span>
+                  </div>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setDrillDownData(null)}
-                  className="hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-blue-700 dark:text-blue-300"
+                  className="hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-200 text-blue-700 dark:text-blue-300"
                 >
                   <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1199,47 +1224,165 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Main Charts Container */}
+          {/* Enhanced Charts Grid with Multiple Visualizations */}
           {stats.categoryData.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:gap-8">
-              {/* Enhanced Expense Pie Chart */}
-              <div className="bg-card border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">Spending by Category</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {stats.categoryData.length} categories
+            <div className="space-y-6">
+              {/* Chart Metrics Summary */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Categories</p>
+                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.categoryData.length}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="h-96">
-                  <EnhancedExpensePieChart
-                    categoryData={enhancedChartData.categoryData}
-                    onCategoryClick={handleCategoryClick}
-                  />
+                
+                <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-4 border border-green-200 dark:border-green-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Avg/Month</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                        ${(stats.totalExpense / Math.max(1, new Date().getMonth() + 1)).toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Top Category</p>
+                      <p className="text-lg font-bold text-purple-600 dark:text-purple-400 truncate">
+                        {stats.categoryData[0]?.name || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl p-4 border border-orange-200 dark:border-orange-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center">
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium">Transactions</p>
+                      <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{stats.recentTransactions.length}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Main Charts Container with Enhanced Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Enhanced Expense Pie Chart */}
+                <div className="bg-card border rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                        <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Spending by Category</h3>
+                        <p className="text-xs text-muted-foreground">Click segments to drill down</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      {stats.categoryData.length} categories
+                    </div>
+                  </div>
+                  <div className="h-80 lg:h-96">
+                    <EnhancedExpensePieChart
+                      categoryData={enhancedChartData.categoryData}
+                      onCategoryClick={handleCategoryClick}
+                    />
+                  </div>
+                </div>
+
+                {/* Monthly Spending Trend */}
+                <div className="bg-card border rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                        <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Monthly Trend</h3>
+                        <p className="text-xs text-muted-foreground">Spending patterns over time</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href="/dashboard/analytics">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M7 7h10v10" />
+                        </svg>
+                      </Link>
+                    </Button>
+                  </div>
+                  <div className="h-80 lg:h-96">
+                    <MonthlySpendingTrend 
+                      data={enhancedChartData.monthlyTrendData}
+                      onMonthClick={(month, year) => setDrillDownData({ type: 'month', data: { month, year } })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+
             </div>
           ) : (
             <div className="bg-card border rounded-xl p-8 text-center">
-              <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                  <svg className="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 flex items-center justify-center">
+                  <svg className="h-10 w-10 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">No Expense Data</h3>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    Start adding transactions to see detailed analytics and spending patterns.
+                <div className="space-y-3 max-w-md">
+                  <h3 className="text-xl font-semibold text-foreground">No Financial Data Yet</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Start tracking your finances by adding transactions. You'll see beautiful charts and insights about your spending patterns, trends, and categories.
                   </p>
                 </div>
-                <Button asChild className="mt-4">
-                  <Link href="/dashboard/transactions/new">
-                    <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Transaction
-                  </Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Link href="/dashboard/transactions/new">
+                      <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Your First Transaction
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/dashboard/analytics">
+                      <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Learn More
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           )}

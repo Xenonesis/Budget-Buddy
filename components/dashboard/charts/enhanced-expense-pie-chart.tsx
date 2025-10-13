@@ -272,14 +272,14 @@ function EnhancedExpensePieChartComponent({ categoryData, onCategoryClick }: Enh
         </div>
 
         {/* Summary stats */}
-        <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Total Amount:</span>
-            <div className="font-semibold">{formatCurrency(displayTotal)}</div>
+        <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4 text-sm items-start">
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground leading-none">Total Amount:</span>
+            <div className="font-semibold leading-none">{formatCurrency(displayTotal)}</div>
           </div>
-          <div>
-            <span className="text-muted-foreground">Categories:</span>
-            <div className="font-semibold">{displayData.length}</div>
+          <div className="flex flex-col gap-1">
+            <span className="text-muted-foreground leading-none">Categories:</span>
+            <div className="font-semibold leading-none">{displayData.length}</div>
           </div>
         </div>
       </CardContent>

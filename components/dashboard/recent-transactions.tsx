@@ -1,9 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { 
+  ArrowUpIcon, 
+  ArrowDownIcon, 
+  Calendar, 
+  Filter, 
+  Eye, 
+  TrendingUp, 
+  TrendingDown, 
+  Search,
+  MoreHorizontal,
+  Plus,
+  Download
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Transaction {
   id: string;

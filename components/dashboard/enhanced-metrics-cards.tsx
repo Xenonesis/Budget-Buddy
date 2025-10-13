@@ -161,32 +161,32 @@ interface EnhancedMetricsCardsProps {
   className?: string;
 }
 
+const formatDay = (day: string) => {
+  if (!day || day === 'N/A') return 'N/A';
+  // Convert full day names to short forms
+  const dayMap: Record<string, string> = {
+    'Monday': 'Mon',
+    'Tuesday': 'Tue', 
+    'Wednesday': 'Wed',
+    'Thursday': 'Thu',
+    'Friday': 'Fri',
+    'Saturday': 'Sat',
+    'Sunday': 'Sun'
+  };
+  return dayMap[day] || day;
+};
+
+const formatCategory = (category: string) => {
+  if (!category || category === 'N/A') return 'N/A';
+  return category.length > 10 ? category.substring(0, 10) + '...' : category;
+};
+
 export function EnhancedMetricsCards({ metrics, className }: EnhancedMetricsCardsProps) {
   const formatValue = (value: number | string) => {
     if (typeof value === 'number') {
       return value.toLocaleString();
     }
     return value;
-  };
-
-  const formatCategory = (category: string) => {
-    if (!category || category === 'N/A') return 'N/A';
-    return category.length > 10 ? category.substring(0, 10) + '...' : category;
-  };
-
-  const formatDay = (day: string) => {
-    if (!day || day === 'N/A') return 'N/A';
-    // Convert full day names to short forms
-    const dayMap: Record<string, string> = {
-      'Monday': 'Mon',
-      'Tuesday': 'Tue', 
-      'Wednesday': 'Wed',
-      'Thursday': 'Thu',
-      'Friday': 'Fri',
-      'Saturday': 'Sat',
-      'Sunday': 'Sun'
-    };
-    return dayMap[day] || day;
   };
 
   return (
