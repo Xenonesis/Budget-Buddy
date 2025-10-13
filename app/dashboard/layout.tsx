@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback, memo, useRef, KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useState, useEffect, useCallback, memo, useRef, useMemo, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ensureUserProfile } from "@/lib/utils";
@@ -70,6 +70,88 @@ export default function DashboardLayout({
   const firstNavItemRef = useRef<HTMLAnchorElement>(null);
   const lastNavItemRef = useRef<HTMLAnchorElement>(null);
   const appVersion = getAppVersion();
+
+  // Organize navigation items into groups - memoized for performance
+  const navGroups: NavGroup[] = useMemo(() => [
+    {
+      title: "Main Navigation",
+      items: [
+        {
+          title: "Dashboard",
+          href: "/dashboard",
+          icon: <LayoutGrid className="h-5 w-5" />,
+          label: "Dashboard",
+          shortcutKey: 'Alt+1'
+        },
+        {
+          title: "Transactions",
+          href: "/dashboard/transactions",
+          icon: <ArrowRightLeft className="h-5 w-5" />,
+          label: "Transactions",
+          shortcutKey: 'Alt+4'
+        },
+        {
+          title: "Budget",
+          href: "/dashboard/budget",
+          icon: <GanttChartSquare className="h-5 w-5" />,
+          label: "Budget",
+          shortcutKey: 'Alt+3'
+        },
+        {
+          title: "Analytics",
+          href: "/dashboard/analytics",
+          icon: <BarChart3 className="h-5 w-5" />,
+          label: "Analytics",
+          shortcutKey: 'Alt+2'
+        },
+        {
+          title: "Financial Insights",
+          href: "/dashboard/financial-insights",
+          icon: <TrendingUp className="h-5 w-5" />,
+          label: "Financial Insights",
+          shortcutKey: 'Alt+5'
+        },
+        {
+          title: "AI Insights",
+          href: "/dashboard/ai-insights",
+          icon: <Lightbulb className="h-5 w-5" />,
+          label: "AI Insights",
+          shortcutKey: 'Alt+6'
+        },
+        {
+          title: "Notifications",
+          href: "/dashboard/notifications",
+          icon: <Bell className="h-5 w-5" />,
+          label: "Notifications",
+          shortcutKey: 'Alt+7'
+        },
+      ],
+    },
+    {
+      title: "System",
+      items: [
+        {
+          title: "Settings",
+          href: "/dashboard/settings",
+          icon: <Settings className="h-5 w-5" />,
+          label: "Settings",
+          shortcutKey: 'Alt+,'
+        },
+        {
+          title: "About",
+          href: "/dashboard/about",
+          icon: <LifeBuoy className="h-5 w-5" />,
+          label: "About"
+        },
+        {
+          title: "Nitrolite",
+          href: "https://nitrolite.vercel.app",
+          icon: <Globe className="h-5 w-5" />,
+          label: "Nitrolite"
+        },
+      ],
+    },
+  ], []);
 
   // Define all useCallback hooks at component level, not conditionally
   const handleSignOut = useCallback(async () => {
@@ -485,95 +567,7 @@ export default function DashboardLayout({
     );
   }
 
-  // Mobile sidebar toggle handler with window width check
-  // Remove this duplicate function since we already have a useCallback version
-  // const handleSidebarToggleForMobile = () => {
-  //   if (typeof window !== 'undefined' && window.innerWidth < 768) {
-  //     closeSidebar();
-  //   }
-  // };
 
-  // Organize navigation items into groups
-  const navGroups: NavGroup[] = [
-    {
-      title: "Main Navigation",
-      items: [
-        {
-          title: "Dashboard",
-          href: "/dashboard",
-          icon: <LayoutGrid className="h-5 w-5" />,
-          label: "Dashboard",
-          shortcutKey: 'Alt+1'
-        },
-        {
-          title: "Transactions",
-          href: "/dashboard/transactions",
-          icon: <ArrowRightLeft className="h-5 w-5" />,
-          label: "Transactions",
-          shortcutKey: 'Alt+4'
-        },
-        {
-          title: "Budget",
-          href: "/dashboard/budget",
-          icon: <GanttChartSquare className="h-5 w-5" />,
-          label: "Budget",
-          shortcutKey: 'Alt+3'
-        },
-        {
-          title: "Analytics",
-          href: "/dashboard/analytics",
-          icon: <BarChart3 className="h-5 w-5" />,
-          label: "Analytics",
-          shortcutKey: 'Alt+2'
-        },
-        {
-          title: "Financial Insights",
-          href: "/dashboard/financial-insights",
-          icon: <TrendingUp className="h-5 w-5" />,
-          label: "Financial Insights",
-          shortcutKey: 'Alt+5'
-        },
-        {
-          title: "AI Insights",
-          href: "/dashboard/ai-insights",
-          icon: <Lightbulb className="h-5 w-5" />,
-          label: "AI Insights",
-          shortcutKey: 'Alt+6'
-        },
-        {
-          title: "Notifications",
-          href: "/dashboard/notifications",
-          icon: <Bell className="h-5 w-5" />,
-          label: "Notifications",
-          shortcutKey: 'Alt+7'
-        },
-      ],
-    },
-    {
-      title: "System",
-      items: [
-        {
-          title: "Settings",
-          href: "/dashboard/settings",
-          icon: <Settings className="h-5 w-5" />,
-          label: "Settings",
-          shortcutKey: 'Alt+,'
-        },
-        {
-          title: "About",
-          href: "/dashboard/about",
-          icon: <LifeBuoy className="h-5 w-5" />,
-          label: "About"
-        },
-        {
-          title: "Nitrolite",
-          href: "https://nitrolite.vercel.app",
-          icon: <Globe className="h-5 w-5" />,
-          label: "Nitrolite"
-        },
-      ],
-    },
-  ];
 
   return (
     <div className="relative min-h-screen">
@@ -596,7 +590,7 @@ export default function DashboardLayout({
             className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
             onClick={toggleSidebar}
             aria-label="Toggle menu"
-            aria-expanded="false"
+            aria-expanded={isMobileSidebarOpen}
             aria-controls="mobile-sidebar"
           >
             <Menu className="h-6 w-6" />
@@ -622,12 +616,12 @@ export default function DashboardLayout({
           "transition-transform duration-300 ease-in-out transform",
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        aria-hidden="true"
+        aria-hidden={!isMobileSidebarOpen}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
       >
-        <div className="flex flex-col h-full w-72 pt-5 pb-4 px-4 overflow-y-auto">
+        <div className="flex flex-col h-full w-72 pt-5 pb-4 px-4 overflow-y-auto overflow-x-hidden">
           <div className="flex items-center justify-between mb-6 px-3">
             <div className="flex flex-col items-center">
               <Logo size="md" className="transition-transform duration-300 hover:scale-105" animated />
@@ -714,20 +708,22 @@ export default function DashboardLayout({
         </div>
       </div>
 
+
+
       {/* Desktop sidebar */}
       <div 
         className={cn(
           "hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col border-r z-30 bg-background/95 backdrop-blur-sm shadow-sm",
           "transition-all duration-300 ease-in-out",
-          collapsed ? "w-[70px]" : "w-64"
+          collapsed ? "w-[90px]" : "w-64"
         )}
         role="navigation"
         aria-label="Main navigation"
       >
-        <div className="relative flex-1 flex flex-col min-h-0 overflow-y-auto scrollbar-thin">
+        <div className="relative flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin">
           {/* Sidebar header with toggle */}
           <div className={cn(
-            "flex items-center h-16 flex-shrink-0 px-4",
+            "flex items-center h-16 flex-shrink-0 px-4 relative",
             collapsed ? "justify-center" : "justify-between"
           )}>
             {!collapsed && (
@@ -742,36 +738,40 @@ export default function DashboardLayout({
                 <span className="text-[8px] text-muted-foreground mt-0.5 tracking-wide opacity-70">SMM</span>
               </div>
             )}
+            
+            {/* Toggle button - always visible */}
             <button
-              className="hidden md:flex h-10 w-10 items-center justify-center rounded-md bg-accent/30 hover:bg-accent/60 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 group relative sidebar-toggle-indicator overflow-hidden"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-md bg-accent/30 hover:bg-accent/60 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 group relative sidebar-toggle-enhanced overflow-visible",
+                collapsed ? "sidebar-collapsed-toggle bg-background hover:bg-accent/50" : ""
+              )}
               onClick={toggleCollapsed}
               aria-label="Toggle sidebar"
-              aria-expanded="false"
+              aria-expanded={!collapsed}
               title={collapsed ? "Expand sidebar (Alt+S)" : "Collapse sidebar (Alt+S)"}
             >
               {/* Background highlight effect */}
               <span className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></span>
               
               <div className="relative z-10">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-transform duration-300"
-                  style={{ transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                >
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full opacity-70 group-hover:animate-ping"></span>
+                <ChevronLeft
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+                    collapsed ? "rotate-180" : "rotate-0"
+                  )}
+                />
+                {collapsed && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full opacity-70 group-hover:animate-ping"></span>
+                )}
               </div>
-              <div className="absolute left-full ml-2 px-2 py-1 bg-card/90 backdrop-blur-sm rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap border">
-                {collapsed ? "Expand sidebar" : "Collapse sidebar"} <kbd className="bg-muted/50 px-1.5 ml-1 rounded text-[10px]">Alt+S</kbd>
+              
+              {/* Tooltip */}
+              <div className={cn(
+                "absolute px-3 py-2 bg-card/95 backdrop-blur-sm rounded-md text-sm opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg whitespace-nowrap border border-border/50 z-50",
+                collapsed ? "left-full ml-3 top-1/2 -translate-y-1/2" : "left-full ml-3"
+              )}>
+                {collapsed ? "Expand sidebar" : "Collapse sidebar"} 
+                <kbd className="bg-muted/70 px-2 py-0.5 ml-2 rounded text-xs font-mono">Alt+S</kbd>
               </div>
             </button>
           </div>

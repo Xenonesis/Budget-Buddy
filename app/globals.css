@@ -2128,4 +2128,111 @@ html {
   100% {
     offset-distance: 100%;
   }
+}/
+* Floating sidebar toggle button styles */
+.floating-sidebar-toggle {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+}
+
+.floating-sidebar-toggle:hover {
+  box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.4);
+  transform: translateY(-1px);
+}
+
+/* Enhanced sidebar toggle animations */
+.sidebar-toggle-enhanced {
+  position: relative;
+  overflow: visible;
+}
+
+.sidebar-toggle-enhanced::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, transparent, rgba(var(--primary-rgb), 0.1), transparent);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.sidebar-toggle-enhanced:hover::before {
+  opacity: 1;
+}
+
+/* Improved positioning for collapsed sidebar toggle */
+.sidebar-collapsed-toggle {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  background: hsl(var(--background));
+  border: 2px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .sidebar-collapsed-toggle {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}/*
+ Smooth sidebar transitions */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+
+/* Enhanced floating button animations */
+@keyframes gentlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.floating-sidebar-toggle.animate-pulse {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* Improved tooltip positioning and styling */
+.sidebar-tooltip {
+  position: absolute;
+  z-index: 60;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-tooltip::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-right-color: hsl(var(--border));
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .floating-sidebar-toggle {
+    animation: none !important;
+  }
+  
+  .sidebar-transition {
+    transition: none !important;
+  }
+}
+
+/* Focus visible improvements */
+.floating-sidebar-toggle:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
 }
