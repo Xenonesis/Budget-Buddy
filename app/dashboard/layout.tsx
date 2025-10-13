@@ -892,7 +892,7 @@ export default function DashboardLayout({
       </div>
 
       {/* Main content */}
-      <main className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${collapsed ? 'md:ml-[70px]' : 'md:ml-64'}`}>
+      <main className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${collapsed ? 'md:ml-[90px]' : 'md:ml-64'}`}>
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>

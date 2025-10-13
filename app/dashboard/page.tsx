@@ -792,7 +792,7 @@ export default function DashboardPage() {
   // Enhanced loading state
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl">
+      <div className="container mx-auto pr-4 py-6 md:pr-6 md:py-6 lg:pr-8 lg:py-8 max-w-screen-xl">
         <div className="animate-pulse">
           {/* Header skeleton */}
           <div className="mb-6 md:mb-8">
@@ -848,7 +848,7 @@ export default function DashboardPage() {
   // Enhanced error state
   if (error && !isOffline) {
     return (
-      <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl">
+      <div className="container mx-auto pr-4 py-6 md:pr-6 md:py-6 lg:pr-8 lg:py-8 max-w-screen-xl">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <div className="rounded-full bg-red-100 p-4 mb-4">
             <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -874,7 +874,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl" role="main" aria-label="Dashboard">
+    <div className="container mx-auto pr-4 py-6 md:pr-6 md:py-6 lg:pr-8 lg:py-8 max-w-screen-xl" role="main" aria-label="Dashboard">
       {/* Enhanced Mobile-Optimized Header */}
       <header className="mb-8 md:mb-10">
         <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
