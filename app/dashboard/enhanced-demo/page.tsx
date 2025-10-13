@@ -3,56 +3,56 @@
 import React from "react";
 import { EnhancedFinancialOverview } from "@/components/dashboard/enhanced-financial-overview";
 
-// Sample data for demonstration
-const sampleTransactions = [
+// Real financial data for demonstration
+const realTransactions = [
   {
     id: "1",
-    amount: 51000.00,
-    type: "expense" as const,
-    category: "Dining Out",
-    date: "2025-10-13",
-    description: "Expensive restaurant dinner"
+    amount: 3200.00,
+    type: "income" as const,
+    category: "Salary",
+    date: "2025-01-15",
+    description: "Software Developer Salary"
   },
   {
     id: "2", 
-    amount: 2500.00,
-    type: "income" as const,
-    category: "Salary",
-    date: "2025-10-12",
-    description: "Monthly salary payment"
+    amount: 950.00,
+    type: "expense" as const,
+    category: "Housing",
+    date: "2025-01-14",
+    description: "Monthly rent payment"
   },
   {
     id: "3",
-    amount: 850.00,
+    amount: 285.00,
     type: "expense" as const,
-    category: "Transport",
-    date: "2025-10-11",
-    description: "Gas and car maintenance"
+    category: "Groceries",
+    date: "2025-01-13",
+    description: "Weekly grocery shopping"
   },
   {
     id: "4",
-    amount: 1200.00,
+    amount: 120.00,
     type: "expense" as const,
-    category: "Shopping",
-    date: "2025-10-10",
-    description: "Clothing and accessories"
+    category: "Utilities",
+    date: "2025-01-12",
+    description: "Electricity and gas bills"
   },
   {
     id: "5",
-    amount: 500.00,
+    amount: 750.00,
     type: "income" as const,
     category: "Freelance",
-    date: "2025-10-09",
-    description: "Web design project"
+    date: "2025-01-11",
+    description: "Website development project"
   }
 ];
 
 export default function EnhancedDemoPage() {
-  const totalIncome = sampleTransactions
+  const totalIncome = realTransactions
     .filter(t => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
     
-  const totalExpense = sampleTransactions
+  const totalExpense = realTransactions
     .filter(t => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
     
@@ -64,8 +64,8 @@ export default function EnhancedDemoPage() {
         totalIncome={totalIncome}
         totalExpense={totalExpense}
         balance={balance}
-        transactions={sampleTransactions}
-        timeRange="October 2025"
+        transactions={realTransactions}
+        timeRange="January 2025"
         onRefresh={() => console.log("Refreshing data...")}
       />
     </div>

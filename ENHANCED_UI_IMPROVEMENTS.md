@@ -137,7 +137,7 @@ import { EnhancedStatsGrid } from "@/components/dashboard/enhanced-stats-cards";
 ```
 
 ## Demo Page
-A demo page is available at `/dashboard/enhanced-demo` to showcase all the improvements with sample data.
+A demo page is available at `/dashboard/enhanced-demo` to showcase all the improvements with realistic financial data.
 
 ## Color Scheme
 

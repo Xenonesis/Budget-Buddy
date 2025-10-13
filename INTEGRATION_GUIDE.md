@@ -151,7 +151,7 @@ interface FinancialOverviewProps {
 
 ## 🎭 Demo Page
 
-Visit `/dashboard/enhanced-demo` to see all components in action with sample data.
+Visit `/dashboard/enhanced-demo` to see all components in action with realistic financial data.
 
 ## 🎯 Key Features
 

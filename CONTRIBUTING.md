@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Contributing Banner](https://via.placeholder.com/800x200/3b82f6/ffffff?text=Welcome+Contributors!)
+![Contributing Banner](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=200&fit=crop&crop=center)
 
 **Help us build the future of financial management!**
 
@@ -346,26 +346,27 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { TransactionCard } from './TransactionCard'
 
 describe('TransactionCard', () => {
-  const mockTransaction = {
-    id: '1',
-    amount: 50.00,
+  const sampleTransaction = {
+    id: 'tx_001',
+    amount: 45.75,
     type: 'expense' as const,
-    category: 'Food',
-    date: new Date()
+    category: 'Groceries',
+    date: new Date(),
+    description: 'Weekly grocery shopping'
   }
 
   it('displays transaction information', () => {
-    render(<TransactionCard transaction={mockTransaction} />)
+    render(<TransactionCard transaction={sampleTransaction} />)
     
-    expect(screen.getByText('$50.00')).toBeInTheDocument()
-    expect(screen.getByText('Food')).toBeInTheDocument()
+    expect(screen.getByText('$45.75')).toBeInTheDocument()
+    expect(screen.getByText('Groceries')).toBeInTheDocument()
   })
 
   it('calls onEdit when edit button is clicked', () => {
     const onEdit = jest.fn()
     render(
       <TransactionCard 
-        transaction={mockTransaction} 
+        transaction={sampleTransaction} 
         onEdit={onEdit} 
       />
     )

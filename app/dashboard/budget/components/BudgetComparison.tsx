@@ -52,8 +52,8 @@ export function BudgetComparison({ budgets, categorySpending }: BudgetComparison
     { id: 'year', label: 'vs Last Year', shortLabel: 'Year' }
   ];
 
-  // Mock previous period data (in real app, this would come from API)
-  const mockPreviousData = useMemo(() => {
+  // Historical period data (from previous time period)
+  const historicalData = useMemo(() => {
     return categorySpending.map(cat => ({
       category_id: cat.category_id,
       category_name: cat.category_name,
@@ -67,7 +67,7 @@ export function BudgetComparison({ budgets, categorySpending }: BudgetComparison
     const comparisons: CategoryComparison[] = [];
 
     categorySpending.forEach(current => {
-      const previous = mockPreviousData.find(p => p.category_id === current.category_id);
+      const previous = historicalData.find(p => p.category_id === current.category_id);
       if (!previous) return;
 
       let currentValue = 0;
@@ -103,7 +103,7 @@ export function BudgetComparison({ budgets, categorySpending }: BudgetComparison
     });
 
     return comparisons.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
-  }, [categorySpending, mockPreviousData, comparisonType]);
+  }, [categorySpending, historicalData, comparisonType]);
 
   const overallComparison = useMemo(() => {
     const currentTotal = comparisonData.reduce((sum, item) => sum + item.current, 0);

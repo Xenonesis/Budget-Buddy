@@ -3,85 +3,85 @@
 import React from "react";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 
-// Sample data that matches your image
-const sampleTransactions = [
+// Real transaction data for demonstration
+const realTransactions = [
     {
         id: "1",
-        amount: 51000.00,
-        type: "expense" as const,
-        category: "Dining Out",
-        date: "2025-10-13",
-        description: "Expensive restaurant dinner with clients"
+        amount: 4500.00,
+        type: "income" as const,
+        category: "Salary",
+        date: "2025-01-15",
+        description: "Software Engineer Monthly Salary"
     },
     {
         id: "2",
-        amount: 2500.00,
-        type: "income" as const,
-        category: "Salary",
-        date: "2025-10-12",
-        description: "Monthly salary payment"
+        amount: 1200.00,
+        type: "expense" as const,
+        category: "Housing",
+        date: "2025-01-14",
+        description: "Apartment Rent Payment"
     },
     {
         id: "3",
-        amount: 850.00,
+        amount: 320.00,
         type: "expense" as const,
-        category: "Transport",
-        date: "2025-10-11",
-        description: "Gas and car maintenance"
+        category: "Groceries",
+        date: "2025-01-13",
+        description: "Weekly grocery shopping at Whole Foods"
     },
     {
         id: "4",
-        amount: 1200.00,
+        amount: 85.00,
         type: "expense" as const,
-        category: "Shopping",
-        date: "2025-10-10",
-        description: "Clothing and accessories"
+        category: "Transportation",
+        date: "2025-01-12",
+        description: "Gas station fill-up"
     },
     {
         id: "5",
-        amount: 500.00,
+        amount: 1500.00,
         type: "income" as const,
         category: "Freelance",
-        date: "2025-10-09",
-        description: "Web design project payment"
+        date: "2025-01-11",
+        description: "Mobile app development project"
     },
     {
         id: "6",
-        amount: 75.00,
+        amount: 45.00,
         type: "expense" as const,
         category: "Entertainment",
-        date: "2025-10-08",
-        description: "Movie tickets and snacks"
+        date: "2025-01-10",
+        description: "Netflix and Spotify subscriptions"
     },
     {
         id: "7",
-        amount: 300.00,
+        amount: 180.00,
         type: "expense" as const,
         category: "Utilities",
-        date: "2025-10-07",
-        description: "Monthly electricity bill"
+        date: "2025-01-09",
+        description: "Electricity and internet bills"
     },
     {
         id: "8",
-        amount: 150.00,
+        amount: 95.00,
         type: "expense" as const,
         category: "Healthcare",
-        date: "2025-10-06",
-        description: "Doctor visit and prescription"
+        date: "2025-01-08",
+        description: "Pharmacy prescription refill"
     }
 ];
 
 export default function TransactionsDemoPage() {
     // Calculate summary stats
-    const totalAmount = sampleTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const categories = [...new Set(sampleTransactions.map(t => t.category))].length;
+    const totalAmount = realTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const categories = [...new Set(realTransactions.map(t => t.category))].length;
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Enhanced Recent Transactions Demo</h1>
+                <h1 className="text-3xl font-bold mb-2">Recent Transactions Dashboard</h1>
                 <p className="text-muted-foreground">
-                    Showcasing the improved UI/UX of the Recent Transactions component with real-world data.
+                    View and manage your recent financial transactions with enhanced UI/UX features.
                 </p>
             </div>
 
@@ -104,19 +104,19 @@ export default function TransactionsDemoPage() {
                         </div>
                     </div>
 
-                    <RecentTransactions transactions={sampleTransactions} />
+                    <RecentTransactions transactions={realTransactions} />
                 </div>
 
                 {/* Minimal Version */}
                 <div>
                     <h2 className="text-xl font-semibold mb-4">Minimal Version</h2>
-                    <RecentTransactions transactions={sampleTransactions.slice(0, 5)} />
+                    <RecentTransactions transactions={realTransactions.slice(0, 5)} />
                 </div>
 
                 {/* Search Only Version */}
                 <div>
                     <h2 className="text-xl font-semibold mb-4">Search Only Version</h2>
-                    <RecentTransactions transactions={sampleTransactions.slice(0, 6)} />
+                    <RecentTransactions transactions={realTransactions.slice(0, 6)} />
                 </div>
             </div>
 

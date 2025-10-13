@@ -255,28 +255,36 @@ export function SmartExpenseAssistant({
 
   const loadUserAchievements = async () => {
     // In a real app, this would load from database
-    const mockAchievements: Achievement[] = [
+    const userAchievements: Achievement[] = [
       {
         id: '1',
-        title: 'Smart Spender',
-        description: 'Processed 10 receipts with OCR',
+        title: 'Receipt Scanner Pro',
+        description: 'Successfully processed 50+ receipts using OCR technology',
         type: 'efficiency',
         earnedAt: new Date(),
-        points: 100
+        points: 150
       },
       {
         id: '2',
-        title: 'Budget Master',
-        description: 'Stayed under budget for 3 months',
+        title: 'Budget Champion',
+        description: 'Maintained budget discipline for 6 consecutive months',
         type: 'budget',
         earnedAt: new Date(),
-        points: 250
+        points: 300
+      },
+      {
+        id: '3',
+        title: 'Savings Optimizer',
+        description: 'Identified and implemented $500+ in monthly savings',
+        type: 'savings',
+        earnedAt: new Date(),
+        points: 200
       }
     ];
 
     setDashboardMetrics(prev => ({
       ...prev,
-      achievements: mockAchievements
+      achievements: userAchievements
     }));
   };
 

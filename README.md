@@ -1943,7 +1943,7 @@ Authenticate a user and receive a JWT token.
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
+  "email": "alex.johnson@budgetbuddy.com",
   "password": "secure_password",
   "remember_me": true
 }
@@ -1956,8 +1956,8 @@ Authenticate a user and receive a JWT token.
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "user-uuid",
-    "email": "user@example.com",
-    "name": "John Doe",
+    "email": "alex.johnson@budgetbuddy.com",
+    "name": "Alex Johnson",
     "created_at": "2024-01-01T00:00:00Z"
   },
   "expires_in": 86400
@@ -1982,7 +1982,7 @@ Register a new user account.
 **Request Body:**
 ```json
 {
-  "email": "newuser@example.com",
+  "email": "sarah.chen@budgetbuddy.com",
   "password": "secure_password",
   "name": "New User",
   "currency": "USD",
@@ -1996,7 +1996,7 @@ Register a new user account.
   "success": true,
   "user": {
     "id": "user-uuid",
-    "email": "newuser@example.com",
+    "email": "sarah.chen@budgetbuddy.com",
     "name": "New User",
     "currency": "USD",
     "timezone": "America/New_York",
