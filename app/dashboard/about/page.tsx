@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { TechLogo } from "@/components/ui/tech-logo";
 import TeamSection from "@/components/ui/team";
+import { getAppVersion } from "@/lib/utils";
 import { 
   BarChart4, 
   Code, 
@@ -136,6 +137,9 @@ const ScrollProgressBar = () => {
 export default function AboutPage() {
   // Add state for active section
   const [activeSection, setActiveSection] = React.useState("mission");
+  
+  // Get dynamic app version
+  const appVersion = getAppVersion();
 
   // Function to handle smooth scrolling to sections
   const scrollToSection = (id: string) => {
@@ -474,7 +478,7 @@ export default function AboutPage() {
                     <Logo size="lg" withText animated={false} className="relative z-10" />
                   </div>
                   <div className="flex items-center gap-2 ml-2">
-                    <p className="text-sm text-muted-foreground">Version 15.50.00</p>
+                    <p className="text-sm text-muted-foreground">Version {appVersion}</p>
                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-sm">Latest</Badge>
                   </div>
                 </div>
@@ -496,7 +500,7 @@ export default function AboutPage() {
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium flex items-center gap-2 text-primary">
                       <GitBranch className="w-4 h-4" />
-                      Version 15.50.00 key update:
+                      Version {appVersion} key update:
                     </h3>
                     <p className="text-xs text-muted-foreground mb-2">Released on August 22, 2025</p>
                     <ul className="space-y-2.5 text-sm">

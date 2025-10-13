@@ -1,4 +1,4 @@
-# 🚀 Budget Buddy v23 Deployment Guide
+# 🚀 Budget Buddy v25.00 Deployment Guide
 
 ## Vercel Deployment Troubleshooting
 

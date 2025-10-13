@@ -1,5 +1,5 @@
 # Budget Buddy Deployment Script for Vercel (PowerShell)
-Write-Host "🚀 Starting Budget Buddy v15.50.00 deployment..." -ForegroundColor Green
+Write-Host "🚀 Starting Budget Buddy v25.00 deployment..." -ForegroundColor Green
 
 # Clean previous builds
 Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Yellow

@@ -4,8 +4,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit2, Trash, PlusCircle } from 'lucide-react';
 import { Currency } from '@/components/ui/currency';
 import { formatDate } from '@/lib/utils';
-import { FixedSizeList as VirtualizedList } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
+// Temporarily disable virtualization to fix build
+// import { FixedSizeList as VirtualizedList } from 'react-window';
+// import AutoSizer from 'react-virtualized-auto-sizer';
 
 interface Transaction {
   id: string;
@@ -182,20 +183,17 @@ export const TransactionCardView: React.FC<TransactionCardViewProps> = ({
   }
 
   return (
-    <div style={{ height: '75vh', width: '100%' }}>
-      <AutoSizer>
-        {({ height, width }) => (
-          <VirtualizedList
-            height={height || 500}
-            width={width || window.innerWidth}
-            itemCount={transactions.length}
-            itemSize={180}
-            overscanCount={5}
-          >
-            {CardRenderer}
-          </VirtualizedList>
-        )}
-      </AutoSizer>
+    <div style={{ height: '75vh', width: '100%' }} className="overflow-y-auto">
+      {/* Temporarily disabled virtualization */}
+      <div className="space-y-2 p-4">
+        {transactions.map((transaction, index) => (
+          <CardRenderer
+            key={transaction.id}
+            index={index}
+            style={{}}
+          />
+        ))}
+      </div>
     </div>
   );
 };

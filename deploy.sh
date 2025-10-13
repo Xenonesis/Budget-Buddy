@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Budget Buddy Deployment Script for Vercel
-echo "🚀 Starting Budget Buddy v15.50.00 deployment..."
+echo "🚀 Starting Budget Buddy v25.00 deployment..."
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."

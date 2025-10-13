@@ -438,18 +438,9 @@ export function getRandomColor(text: string): string {
  * Get the current application version
  * @returns The current app version as a string
  */
+// Import from version module for better reliability
+import { getAppVersion as getVersion } from './version';
+
 export function getAppVersion(): string {
-  // Try to get version from environment variable first
-  if (process.env.NEXT_PUBLIC_APP_VERSION) {
-    return process.env.NEXT_PUBLIC_APP_VERSION;
-  }
-  
-  // Fallback to package.json version
-  try {
-    const packageJson = require('../package.json');
-    return packageJson.version;
-  } catch (error) {
-    console.warn('Could not read version from package.json:', error);
-    return '8.0.0'; // Ultimate fallback
-  }
+  return getVersion();
 } 
