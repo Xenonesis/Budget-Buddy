@@ -2,6 +2,7 @@
 @import "./tailwind-theme.css";
 @import "./globals-chat-fixes.css";
 @import "./mobile-sidebar-fixes.css";
+@import "./enhanced-dashboard.css";
  
 @layer base {
   :root {

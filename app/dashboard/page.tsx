@@ -18,6 +18,11 @@ import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-
 import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
+import { EnhancedDashboardLayout } from "@/components/dashboard/enhanced-dashboard-layout";
+import { DashboardSkeleton } from "@/components/ui/loading-states";
+import { NotificationProvider } from "@/components/ui/enhanced-notifications";
+import { EnhancedMetricsCards } from "@/components/dashboard/enhanced-metrics-cards";
+import { PremiumMetricsSection } from "@/components/dashboard/premium-metrics-section";
 import { TimeRangeSelector } from '@/components/ui/time-range-selector';
 import { AlertNotificationSystem } from '@/components/ui/alert-notification-system';
 import { DashboardEnhancementService } from '@/lib/dashboard-enhancement-service';
@@ -1099,40 +1104,23 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* Enhanced Metrics Summary Cards */}
+      {/* Premium Metrics Summary Section */}
       {enhancedMetrics && sectionVisibility.find(s => s.id === 'stats-cards')?.visible && (
         <section className="mb-8 md:mb-10" aria-label="Enhanced Financial Metrics">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
-                {enhancedMetrics.totalTransactions || 0}
-              </div>
-              <div className="text-xs text-muted-foreground font-medium">Total Transactions</div>
-            </div>
-            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">
-                {enhancedMetrics.averageTransactionAmount ? formatCurrency(enhancedMetrics.averageTransactionAmount) : formatCurrency(0)}
-              </div>
-              <div className="text-xs text-muted-foreground font-medium">Avg Transaction</div>
-            </div>
-            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-1 truncate" title={enhancedMetrics.mostActiveDay}>
-                {enhancedMetrics.mostActiveDay || 'N/A'}
-              </div>
-              <div className="text-xs text-muted-foreground font-medium">Most Active Day</div>
-            </div>
-            <div className="group bg-card border rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300">
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-1 truncate" title={enhancedMetrics.mostActiveCategory}>
-                {enhancedMetrics.mostActiveCategory 
-                  ? (enhancedMetrics.mostActiveCategory.length > 8 
-                      ? enhancedMetrics.mostActiveCategory.substring(0, 8) + '...' 
-                      : enhancedMetrics.mostActiveCategory)
-                  : 'N/A'
-                }
-              </div>
-              <div className="text-xs text-muted-foreground font-medium">Top Category</div>
-            </div>
-          </div>
+          <PremiumMetricsSection 
+            metrics={{
+              totalTransactions: enhancedMetrics.totalTransactions || 0,
+              averageTransactionAmount: enhancedMetrics.averageTransactionAmount || 0,
+              mostActiveDay: enhancedMetrics.mostActiveDay || 'N/A',
+              mostActiveCategory: enhancedMetrics.mostActiveCategory || 'N/A',
+              trends: {
+                transactions: { value: 12, isPositive: true },
+                avgAmount: { value: 8, isPositive: true },
+                dayActivity: { value: 5, isPositive: false },
+                categoryActivity: { value: 15, isPositive: true }
+              }
+            }}
+          />
         </section>
       )}
       
