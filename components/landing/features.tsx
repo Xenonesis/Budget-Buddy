@@ -17,6 +17,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 export function FeaturesSection() {
   return (
     <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-32 relative overflow-hidden">
+      {/* Enhanced background with better visual depth */}
       <div className="absolute inset-0 bg-dot-pattern opacity-5"></div>
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-20"
@@ -30,10 +31,39 @@ export function FeaturesSection() {
           repeatType: "reverse"
         }}
       />
+      
+      {/* Floating orbs for visual interest */}
+      <motion.div
+        className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-xl"
+        animate={{
+          y: [0, -20, 0],
+          x: [0, 10, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-24 h-24 bg-violet-500/10 rounded-full blur-xl"
+        animate={{
+          y: [0, 15, 0],
+          x: [0, -15, 0],
+          scale: [1, 0.9, 1],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+      />
 
       <div className="container mx-auto px-4 relative">
         <motion.div
-          className="max-w-xl mx-auto text-center mb-8 sm:mb-12 md:mb-16"
+          className="max-w-4xl mx-auto text-center mb-8 sm:mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -45,8 +75,21 @@ export function FeaturesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
+            {/* Enhanced badge */}
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">AI-Powered Features</span>
+            </motion.div>
+
             <motion.h2
-              className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl mb-3 sm:mb-4 relative px-2 sm:px-0"
+              className="text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl mb-4 sm:mb-6 relative px-2 sm:px-0"
               animate={{
                 textShadow: ["0px 0px 0px rgba(0,0,0,0)", "0px 0px 8px rgba(var(--primary-rgb), 0.3)", "0px 0px 0px rgba(0,0,0,0)"]
               }}
@@ -56,12 +99,13 @@ export function FeaturesSection() {
                 repeatType: "reverse"
               }}
             >
-              Everything you need to <span className="text-gradient-primary relative inline-block">
+              Everything you need to{" "}
+              <span className="text-gradient-primary relative inline-block">
                 <span className="block sm:inline">manage your money</span>
                 <motion.div
-                  className="absolute -bottom-1 left-0 right-0 h-[2px] bg-primary/30 rounded-full"
-                  initial={{ width: 0 }}
-                  whileInView={{ width: "100%" }}
+                  className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-violet-500 to-primary rounded-full"
+                  initial={{ width: 0, opacity: 0 }}
+                  whileInView={{ width: "100%", opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3, duration: 0.8 }}
                 />
@@ -69,13 +113,14 @@ export function FeaturesSection() {
             </motion.h2>
           </motion.div>
           <motion.p
-            className="text-base sm:text-lg text-muted-foreground px-2 sm:px-0"
+            className="text-lg sm:text-xl text-muted-foreground px-2 sm:px-0 max-w-3xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Powerful tools to help you take control of your finances and achieve your financial goals.
+            Powerful tools and intelligent insights to help you take control of your finances, 
+            track spending patterns, and achieve your financial goals with confidence.
           </motion.p>
         </motion.div>
 

@@ -106,43 +106,66 @@ export function FinancialSpotlightCards() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ delay: index * 0.1, duration: 0.5 }}
-          className="w-full"
+          className="w-full group"
+          whileHover={{ y: -8 }}
         >
           <CardSpotlight
-            className="h-full bg-background/95 border-border/50 backdrop-blur-sm hover:bg-background/98 transition-all duration-300 p-4 sm:p-6"
+            className="h-full bg-background/95 border-border/50 backdrop-blur-sm hover:bg-background/98 transition-all duration-500 p-4 sm:p-6 hover:shadow-2xl hover:shadow-primary/10 group-hover:border-primary/30"
             color={feature.color}
             radius={300}
           >
-            {/* Highlight Badge */}
+            {/* Enhanced Highlight Badge */}
             <motion.div
-              className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg z-10"
-              initial={{ opacity: 0, scale: 0 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-10"
+              initial={{ opacity: 0, scale: 0, rotate: -10 }}
+              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
-              whileHover={{ scale: 1.05 }}
+              transition={{ delay: index * 0.1 + 0.3, duration: 0.4, type: "spring" }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
             >
-              {feature.highlight}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-violet-500 rounded-full blur-sm opacity-70"></div>
+                <div className="relative bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg border border-white/20">
+                  {feature.highlight}
+                </div>
+              </div>
             </motion.div>
 
-            {/* Icon */}
+            {/* Enhanced Icon with Glow Effect */}
             <motion.div
-              className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl mb-4 sm:mb-6 relative overflow-hidden"
+              className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl mb-4 sm:mb-6 relative overflow-hidden group-hover:shadow-lg"
               style={{ backgroundColor: `${feature.color}15` }}
-              whileHover={{ scale: 1.1 }}
-              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.15, rotate: 5 }}
+              transition={{ duration: 0.3, type: "spring" }}
             >
+              {/* Glow effect */}
               <motion.div
-                className="absolute inset-0"
+                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ 
+                  backgroundColor: feature.color,
+                  filter: "blur(8px)",
+                  transform: "scale(1.2)"
+                }}
+              />
+              
+              {/* Background fill animation */}
+              <motion.div
+                className="absolute inset-0 rounded-xl"
                 style={{ backgroundColor: feature.color }}
-                initial={{ y: "100%" }}
-                whileHover={{ y: 0 }}
+                initial={{ scale: 0, opacity: 0 }}
+                whileHover={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
               />
+              
+              {/* Icon */}
               <motion.div
-                className="relative z-10 transition-colors duration-300 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6"
+                className="relative z-10 transition-all duration-300 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6"
                 style={{ color: feature.color }}
-                whileHover={{ color: "white" }}
+                whileHover={{ 
+                  color: "white",
+                  scale: 1.1,
+                  filter: "drop-shadow(0 0 8px rgba(255,255,255,0.5))"
+                }}
               >
                 {feature.icon}
               </motion.div>
