@@ -571,10 +571,15 @@ export class ExpenseReportGenerator {
     // Top spending insights
     if (categoryBreakdown.length > 0) {
       const topCategory = categoryBreakdown[0];
+      // Ensure category is not undefined or empty
+      const categoryName = topCategory.category && topCategory.category.trim() !== '' 
+        ? topCategory.category 
+        : 'Uncategorized';
+      
       insights.push({
         type: 'spending_pattern',
-        title: `Highest Spending Category: ${topCategory.category}`,
-        description: `${topCategory.category} accounts for ${topCategory.percentage.toFixed(1)}% of total expenses (₹${topCategory.amount.toLocaleString()})`,
+        title: `Highest Spending Category: ${categoryName}`,
+        description: `${categoryName} accounts for ${topCategory.percentage.toFixed(1)}% of total expenses (₹${topCategory.amount.toLocaleString()})`,
         impact: 'high',
         actionable: true,
         confidence: 0.95

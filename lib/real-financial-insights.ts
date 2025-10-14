@@ -204,27 +204,33 @@ export function generateRealFinancialInsights(
   }
 
   // 5. Top Spending Category
-  const topCategory = Object.entries(categorySpending).reduce((max, [category, amount]) => 
-    amount > max.amount ? { category, amount } : max, { category: '', amount: 0 }
+  const categoryEntries = Object.entries(categorySpending).filter(([category, amount]) => 
+    category && category.trim() !== '' && amount > 0
   );
+  
+  if (categoryEntries.length > 0) {
+    const topCategory = categoryEntries.reduce((max, [category, amount]) => 
+      amount > max.amount ? { category, amount } : max, { category: '', amount: 0 }
+    );
 
-  if (topCategory.amount > 0) {
-    const percentageOfTotal = (topCategory.amount / totalExpenses) * 100;
-    insights.push({
-      type: 'trend',
-      title: `Top Spending: ${topCategory.category}`,
-      description: `${topCategory.category} is your largest expense category, representing ${percentageOfTotal.toFixed(1)}% of your total spending this month.`,
-      confidence: 0.95,
-      relevantCategories: [topCategory.category],
-      createdAt: new Date().toISOString(),
-      amount: topCategory.amount,
-      category: topCategory.category,
-      rawData: {
+    if (topCategory.amount > 0 && topCategory.category && topCategory.category.trim() !== '') {
+      const percentageOfTotal = (topCategory.amount / totalExpenses) * 100;
+      insights.push({
+        type: 'trend',
+        title: `Top Spending: ${topCategory.category}`,
+        description: `${topCategory.category} is your largest expense category, representing ${percentageOfTotal.toFixed(1)}% of your total spending this month.`,
+        confidence: 0.95,
+        relevantCategories: [topCategory.category],
+        createdAt: new Date().toISOString(),
         amount: topCategory.amount,
-        percentage: percentageOfTotal,
-        comparison: 'category-vs-total'
-      }
-    });
+        category: topCategory.category,
+        rawData: {
+          amount: topCategory.amount,
+          percentage: percentageOfTotal,
+          comparison: 'category-vs-total'
+        }
+      });
+    }
   }
 
   // 6. Subscription Detection
@@ -254,9 +260,10 @@ export function generateRealFinancialInsights(
 // Helper function to calculate spending by category
 function getCategorySpending(transactions: Transaction[]): Record<string, number> {
   return transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'expense' && t.category && t.category.trim() !== '')
     .reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+      const category = t.category.trim();
+      acc[category] = (acc[category] || 0) + Math.abs(t.amount);
       return acc;
     }, {} as Record<string, number>);
 }

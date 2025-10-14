@@ -12,8 +12,13 @@ import {
   type Budget
 } from "@/lib/real-financial-insights";
 import { EnhancedFinancialInsightsPanel } from "./components/EnhancedFinancialInsightsPanel";
+import { FinancialGoalsPanel } from "./components/FinancialGoalsPanel";
+import { InsightsSettings } from "./components/InsightsSettings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   RefreshCw, 
   TrendingUp, 
@@ -27,7 +32,20 @@ import {
   PieChart,
   Calendar,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Download,
+  Share2,
+  Settings,
+  Bell,
+  Filter,
+  Clock,
+  Zap,
+  TrendingDown as TrendingDownIcon,
+  Users,
+  BookOpen,
+  Calculator,
+  LineChart,
+  Activity
 } from "lucide-react";
 
 export default function FinancialInsightsPage() {
@@ -40,6 +58,47 @@ export default function FinancialInsightsPage() {
   const [insightLoading, setInsightLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  
+  // New enhanced state
+  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [timeRange, setTimeRange] = useState<string>("30d");
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<boolean>(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [insightHistory, setInsightHistory] = useState<RealFinancialInsight[]>([]);
+  const [financialGoals, setFinancialGoals] = useState<any[]>([]);
+  const [spendingTrends, setSpendingTrends] = useState<any[]>([]);
+  const [insightsSettings, setInsightsSettings] = useState({
+    autoRefresh: false,
+    notifications: true,
+    refreshInterval: 30,
+    insightTypes: ['spending_pattern', 'budget_warning', 'saving_suggestion', 'trend'],
+    priorityFilter: 'all',
+    exportFormat: 'json'
+  });
+
+  // Financial Goals Management
+  const handleAddGoal = (goalData: any) => {
+    const newGoal = {
+      ...goalData,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString()
+    };
+    setFinancialGoals(prev => [...prev, newGoal]);
+    toast.success("Financial goal created successfully!");
+  };
+
+  const handleUpdateGoal = (id: string, updates: any) => {
+    setFinancialGoals(prev => 
+      prev.map(goal => goal.id === id ? { ...goal, ...updates } : goal)
+    );
+    toast.success("Goal updated successfully!");
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    setFinancialGoals(prev => prev.filter(goal => goal.id !== id));
+    toast.success("Goal deleted successfully!");
+  };
 
   // Initialize data
   useEffect(() => {
@@ -150,6 +209,171 @@ export default function FinancialInsightsPage() {
   const savingsRate = financialMetrics.totalIncome > 0 
     ? ((netIncome / financialMetrics.totalIncome) * 100).toFixed(1)
     : '0';
+
+  // Enhanced financial calculations
+  const calculateSpendingTrends = () => {
+    const currentDate = new Date();
+    const last30Days = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      const daysDiff = (currentDate.getTime() - transactionDate.getTime()) / (1000 * 3600 * 24);
+      return daysDiff <= 30 && t.type === 'expense';
+    });
+
+    const categorySpending = last30Days.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + t.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(categorySpending)
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5);
+  };
+
+  const calculateFinancialHealth = () => {
+    const totalIncome = financialMetrics.totalIncome;
+    const totalExpenses = financialMetrics.totalExpenses;
+    const savingsRateNum = parseFloat(savingsRate);
+    
+    let score = 0;
+    let factors = [];
+
+    // Savings rate scoring (40% of total score)
+    if (savingsRateNum >= 20) {
+      score += 40;
+      factors.push({ name: "Excellent Savings Rate", impact: "positive", value: `${savingsRate}%` });
+    } else if (savingsRateNum >= 10) {
+      score += 25;
+      factors.push({ name: "Good Savings Rate", impact: "neutral", value: `${savingsRate}%` });
+    } else if (savingsRateNum >= 0) {
+      score += 10;
+      factors.push({ name: "Low Savings Rate", impact: "negative", value: `${savingsRate}%` });
+    } else {
+      factors.push({ name: "Negative Savings", impact: "negative", value: `${savingsRate}%` });
+    }
+
+    // Budget adherence (30% of total score)
+    const budgetAdherence = budgets.length > 0 ? 
+      budgets.filter(b => {
+        const categorySpending = transactions
+          .filter(t => t.category === b.category && t.type === 'expense')
+          .reduce((sum, t) => sum + t.amount, 0);
+        return categorySpending <= b.amount;
+      }).length / budgets.length : 0;
+
+    score += budgetAdherence * 30;
+    factors.push({ 
+      name: "Budget Adherence", 
+      impact: budgetAdherence > 0.8 ? "positive" : budgetAdherence > 0.5 ? "neutral" : "negative",
+      value: `${(budgetAdherence * 100).toFixed(0)}%`
+    });
+
+    // Expense diversity (20% of total score)
+    const categories = [...new Set(transactions.filter(t => t.type === 'expense').map(t => t.category))];
+    const diversityScore = Math.min(categories.length / 8, 1) * 20;
+    score += diversityScore;
+    factors.push({ 
+      name: "Expense Diversity", 
+      impact: categories.length >= 6 ? "positive" : categories.length >= 3 ? "neutral" : "negative",
+      value: `${categories.length} categories`
+    });
+
+    // Income stability (10% of total score)
+    const incomeTransactions = transactions.filter(t => t.type === 'income');
+    const hasRegularIncome = incomeTransactions.length > 0;
+    if (hasRegularIncome) {
+      score += 10;
+      factors.push({ name: "Regular Income", impact: "positive", value: "Active" });
+    } else {
+      factors.push({ name: "No Income Recorded", impact: "negative", value: "Inactive" });
+    }
+
+    return {
+      score: Math.round(score),
+      grade: score >= 80 ? 'A' : score >= 60 ? 'B' : score >= 40 ? 'C' : 'D',
+      factors
+    };
+  };
+
+  const generateRecommendations = () => {
+    const recommendations = [];
+    const healthScore = calculateFinancialHealth();
+    
+    if (parseFloat(savingsRate) < 10) {
+      recommendations.push({
+        title: "Increase Your Savings Rate",
+        description: "Aim to save at least 10-20% of your income for better financial security.",
+        priority: "high",
+        action: "Review expenses and identify areas to cut back",
+        category: "savings"
+      });
+    }
+
+    if (budgets.length === 0) {
+      recommendations.push({
+        title: "Set Up Budget Categories",
+        description: "Create budgets for your main expense categories to better control spending.",
+        priority: "medium",
+        action: "Go to Budget page and create your first budget",
+        category: "budgeting"
+      });
+    }
+
+    const topSpendingCategories = calculateSpendingTrends();
+    if (topSpendingCategories.length > 0) {
+      const topCategory = topSpendingCategories[0];
+      recommendations.push({
+        title: `Monitor ${topCategory.category} Spending`,
+        description: `${topCategory.category} is your largest expense category at $${topCategory.amount.toLocaleString()}.`,
+        priority: "medium",
+        action: "Consider setting a budget for this category",
+        category: "spending"
+      });
+    }
+
+    return recommendations;
+  };
+
+  const exportInsights = () => {
+    const data = {
+      generatedAt: new Date().toISOString(),
+      financialHealth: calculateFinancialHealth(),
+      insights: insights,
+      recommendations: generateRecommendations(),
+      metrics: financialMetrics
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `financial-insights-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast.success("Financial insights exported successfully!");
+  };
+
+  const shareInsights = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'My Financial Insights',
+          text: `I have ${insights.length} financial insights with a ${calculateFinancialHealth().grade} financial health score!`,
+          url: window.location.href
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // Fallback to clipboard
+      const shareText = `Check out my financial insights: ${insights.length} insights generated with a ${calculateFinancialHealth().grade} financial health score!`;
+      navigator.clipboard.writeText(shareText);
+      toast.success("Insights summary copied to clipboard!");
+    }
+  };
 
   if (loading) {
     return (
@@ -372,14 +596,324 @@ export default function FinancialInsightsPage() {
           </Card>
         )}
 
-        {/* Enhanced Financial Insights Panel */}
-        <EnhancedFinancialInsightsPanel
-          insights={insights}
-          loading={insightLoading}
-          onRefresh={handleRefreshInsights}
-          transactions={transactions}
-          budgets={budgets}
-        />
+        {/* Enhanced Tabbed Interface */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <TabsList className="grid w-full lg:w-auto grid-cols-5 lg:grid-cols-5">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Overview</span>
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline">Insights</span>
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="flex items-center gap-2">
+                <LineChart className="h-4 w-4" />
+                <span className="hidden sm:inline">Trends</span>
+              </TabsTrigger>
+              <TabsTrigger value="goals" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span className="hidden sm:inline">Goals</span>
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={exportInsights}
+                variant="outline"
+                size="sm"
+                className="shadow-sm"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button
+                onClick={shareInsights}
+                variant="outline"
+                size="sm"
+                className="shadow-sm"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Financial Health Score */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Financial Health Score
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-4">
+                      <div className="text-4xl font-bold text-primary">
+                        {calculateFinancialHealth().score}
+                      </div>
+                      <div className="space-y-1">
+                        <Badge 
+                          variant={calculateFinancialHealth().grade === 'A' ? 'default' : 
+                                  calculateFinancialHealth().grade === 'B' ? 'secondary' : 'destructive'}
+                          className="text-lg px-3 py-1"
+                        >
+                          Grade {calculateFinancialHealth().grade}
+                        </Badge>
+                        <p className="text-sm text-muted-foreground">Out of 100</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Progress 
+                      value={calculateFinancialHealth().score} 
+                      className="w-32 h-3"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {calculateFinancialHealth().factors.map((factor, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          factor.impact === 'positive' ? 'bg-green-500' :
+                          factor.impact === 'neutral' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`} />
+                        <span className="text-sm font-medium">{factor.name}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{factor.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recommendations */}
+            <Card className="border-0 shadow-lg bg-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Personalized Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {generateRecommendations().map((rec, index) => (
+                    <div key={index} className="p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-foreground">{rec.title}</h4>
+                        <Badge 
+                          variant={rec.priority === 'high' ? 'destructive' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {rec.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{rec.description}</p>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          {rec.action}
+                        </Button>
+                        <Badge variant="outline" className="text-xs">
+                          {rec.category}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top Spending Categories */}
+            <Card className="border-0 shadow-lg bg-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="h-5 w-5 text-primary" />
+                  Top Spending Categories (Last 30 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {calculateSpendingTrends().length > 0 ? (
+                    calculateSpendingTrends().map((category, index) => {
+                      const percentage = financialMetrics.totalExpenses > 0 
+                        ? (category.amount / financialMetrics.totalExpenses * 100).toFixed(1)
+                        : 0;
+                      
+                      return (
+                        <div key={index} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <p className="font-medium">{category.category}</p>
+                              <p className="text-sm text-muted-foreground">{percentage}% of total expenses</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">${category.amount.toLocaleString()}</p>
+                            <Progress value={parseFloat(percentage)} className="w-20 h-2 mt-1" />
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8">
+                      <PieChart className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No spending data available for the last 30 days</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Insights Summary */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Quick Insights Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-medium">Savings Rate</span>
+                    </div>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {savingsRate}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {parseFloat(savingsRate) >= 20 ? 'Excellent!' : 
+                       parseFloat(savingsRate) >= 10 ? 'Good progress' : 'Needs improvement'}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">Active Goals</span>
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {financialGoals.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {financialGoals.length === 0 ? 'Set your first goal' : 
+                       `${financialGoals.filter(g => (g.currentAmount / g.targetAmount) >= 1).length} completed`}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      <span className="text-sm font-medium">Alerts</span>
+                    </div>
+                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      {financialMetrics.highPriorityInsights}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {financialMetrics.highPriorityInsights === 0 ? 'All clear!' : 'Need attention'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="insights" className="space-y-6">
+            <EnhancedFinancialInsightsPanel
+              insights={insights}
+              loading={insightLoading}
+              onRefresh={handleRefreshInsights}
+              transactions={transactions}
+              budgets={budgets}
+            />
+          </TabsContent>
+
+          <TabsContent value="trends" className="space-y-6">
+            {/* Spending Trends Analysis */}
+            <Card className="border-0 shadow-lg bg-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Spending Trends Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Average Daily Spending</p>
+                    <p className="text-2xl font-bold">
+                      ${(financialMetrics.totalExpenses / 30).toFixed(0)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Last 30 days</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Largest Single Expense</p>
+                    <p className="text-2xl font-bold">
+                      ${Math.max(...transactions.filter(t => t.type === 'expense').map(t => t.amount), 0).toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">This period</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Transaction Frequency</p>
+                    <p className="text-2xl font-bold">
+                      {transactions.filter(t => t.type === 'expense').length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Total transactions</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Comparison */}
+            <Card className="border-0 shadow-lg bg-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  Monthly Comparison
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+                  <p className="text-muted-foreground">
+                    Monthly trend analysis will be available once you have more transaction history.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="goals" className="space-y-6">
+            <FinancialGoalsPanel
+              goals={financialGoals}
+              onAddGoal={handleAddGoal}
+              onUpdateGoal={handleUpdateGoal}
+              onDeleteGoal={handleDeleteGoal}
+            />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <InsightsSettings
+              settings={insightsSettings}
+              onSettingsChange={setInsightsSettings}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Footer Actions */}
         <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-center">
