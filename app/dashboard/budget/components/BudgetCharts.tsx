@@ -133,15 +133,13 @@ export function BudgetCharts({ budgets, categorySpending }: BudgetChartsProps) {
     .slice(0, 6); // Show top 6 for better visibility
   }, [spendingVsBudgetData]);
 
-  // Monthly trends using real current period data
+  // Current period trends data
   const monthlyTrendData = useMemo(() => {
     const currentMonth = new Date().toLocaleString('default', { month: 'short' });
     
-    // Calculate totals from real budget and spending data
     const totalBudget = budgets.reduce((acc, budget) => acc + Number(budget.amount || 0), 0);
     const totalSpent = categorySpending.reduce((acc, category) => acc + Number(category.spent || 0), 0);
     
-    // Return current period actual data
     return [{
       name: currentMonth,
       budget: totalBudget,

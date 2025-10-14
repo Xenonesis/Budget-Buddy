@@ -1,28 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
-import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ValidatedInput } from "@/components/ui/validated-input";
 import { validateAmount } from "@/lib/validation";
-import { Plus, Pencil, Trash2, AlertTriangle, CheckCircle, X, DollarSign, Calendar, ChevronUp, ChevronDown, BarChart3, Info, Copy, Settings, Activity, Target, TrendingUp } from "lucide-react";
+import { Plus, AlertTriangle, CheckCircle, X, DollarSign, Calendar, ChevronDown, BarChart3, Info } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { BudgetCharts } from './components/BudgetCharts';
 import { SortableBudgetList } from './components/SortableBudgetList';
-import { AnnualBudgetSummary } from './components/AnnualBudgetSummary';
-import { BudgetInsights } from './components/BudgetInsights';
 import { BudgetFilters } from './components/BudgetFilters';
-import { BudgetGoals } from './components/BudgetGoals';
-import { BudgetAnalytics } from './components/BudgetAnalytics';
-import { BudgetComparison } from './components/BudgetComparison';
-import { HistoricalTrends } from './components/HistoricalTrends';
-import { BudgetManagementTools } from './components/BudgetManagementTools';
 import { Budget, CategorySpending, Category, BudgetFilter } from './types';
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { Logo } from "@/components/ui/logo";
 
 export default function BudgetPage() {
@@ -31,7 +20,6 @@ export default function BudgetPage() {
   const [categorySpending, setCategorySpending] = useState<CategorySpending[]>([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
-  const [copyLoading, setCopyLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     category_id: "",
@@ -41,36 +29,26 @@ export default function BudgetPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     title: string;
     message: string;
     action: () => Promise<void>;
   } | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [existingBudgetToUpdate, setExistingBudgetToUpdate] = useState<Budget | null>(null);
-  const [swipeStart, setSwipeStart] = useState<number | null>(null);
-  const [swipeCategoryId, setSwipeCategoryId] = useState<string | null>(null);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [expandedFab, setExpandedFab] = useState(false);
-  const [showBudgetSelector, setShowBudgetSelector] = useState(false);
-  const [budgetOptions, setBudgetOptions] = useState<Budget[]>([]);
   
-  // New enhanced state for filtering and sorting
+  // Filtering and sorting state
   const [searchTerm, setSearchTerm] = useState('');
   const [budgetFilter, setBudgetFilter] = useState<BudgetFilter>('all');
   const [sortBy, setSortBy] = useState<'name' | 'amount' | 'spent' | 'percentage'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [periodFilter, setPeriodFilter] = useState<'all' | 'monthly' | 'weekly' | 'yearly'>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [activeView, setActiveView] = useState<'overview' | 'analytics' | 'trends' | 'tools' | 'goals' | 'comparison'>('overview');
 
   // Computed values
   const hasExpenseCategories = categories.some(c => c.type !== "income");
   
-  // Enhanced filtering and sorting logic
+  // Filtering and sorting logic
   const filteredAndSortedData = useMemo(() => {
     let filteredBudgets = budgets;
     let filteredSpending = categorySpending;
@@ -498,8 +476,6 @@ export default function BudgetPage() {
   };
 
   const handleDelete = async (id: string) => {
-    // Show confirmation modal instead of confirm
-    setDeleteId(id);
     const budgetToDelete = budgets.find(b => b.id === id);
     setConfirmAction({
       title: "Delete Budget",
@@ -535,13 +511,7 @@ export default function BudgetPage() {
     setShowConfirmModal(true);
   };
 
-  const toggleCategoryExpansion = (categoryId: string) => {
-    if (expandedCategory === categoryId) {
-      setExpandedCategory(null);
-    } else {
-      setExpandedCategory(categoryId);
-    }
-  };
+
 
   const getBudgetStatusMessage = () => {
     const overBudgetCount = categorySpending.filter(cat => cat.percentage > 100).length;
@@ -554,161 +524,25 @@ export default function BudgetPage() {
     }
   };
 
-  // Add scroll indicator when first budget is added
-  useEffect(() => {
-    if (budgets.length > 0 && !showScrollIndicator) {
-      setShowScrollIndicator(true);
-      setTimeout(() => {
-        setShowScrollIndicator(false);
-      }, 3000);
-    }
-  }, [budgets.length]);
-
-  // Add swipe gesture detection for mobile
-  const handleTouchStart = (e: React.TouchEvent, categoryId: string) => {
-    const touchX = e.touches[0].clientX;
-    setSwipeStart(touchX);
-    setSwipeCategoryId(categoryId);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Prevent default to avoid unwanted scrolling during swipe
-    e.preventDefault();
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (swipeStart === null || swipeCategoryId === null) return;
-    
-    const touchEnd = e.changedTouches[0].clientX;
-    const diff = swipeStart - touchEnd;
-    
-    // If swipe is significant (more than 100px)
-    if (diff > 100) {
-      // Swiped left - delete
-      const budget = budgets.find(b => b.category_id === swipeCategoryId);
-      if (budget) handleDelete(budget.id);
-    } else if (diff < -100) {
-      // Swiped right - edit
-      const budget = budgets.find(b => b.category_id === swipeCategoryId);
-      if (budget) handleEdit(budget);
-    }
-    
-    setSwipeStart(null);
-    setSwipeCategoryId(null);
-  };
-
-  // Scroll to top when form is opened
-  useEffect(() => {
-    if (showForm) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [showForm]);
-
-  const copyFromLastPeriod = async () => {
-    setCopyLoading(true);
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        toast.error("Authentication error", {
-          description: "You must be logged in to copy budgets",
-          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-        });
-        setCopyLoading(false);
-        return;
-      }
-
-      // Fetch existing budgets to populate the form
-      const { data: previousBudgets, error: budgetError } = await supabase
-        .from("budgets")
-        .select("*, categories(name)")
-        .eq("user_id", userData.user.id);
-      
-      if (budgetError) throw budgetError;
-      
-      if (!previousBudgets || previousBudgets.length === 0) {
-        toast.error("No previous budgets found", {
-          description: "There are no existing budgets to copy from",
-          icon: <Info className="h-5 w-5 text-blue-500" />,
-        });
-        setCopyLoading(false);
-        return;
-      }
-      
-      // Map budgets to include category name
-      const mappedBudgets = previousBudgets.map(budget => ({
-        id: budget.id,
-        user_id: budget.user_id,
-        category_id: budget.category_id,
-        category_name: budget.categories?.name || 'Uncategorized',
-        amount: budget.amount,
-        period: budget.period,
-        created_at: budget.created_at
-      }));
-      
-      // Set budget options
-      setBudgetOptions(mappedBudgets);
-      
-      // Show budget selector
-      setShowBudgetSelector(true);
-      setCopyLoading(false);
-    } catch (error: any) {
-      console.error("Error fetching budgets:", error);
-      toast.error("Failed to fetch budgets", {
-        description: error?.message || "An unexpected error occurred",
-        icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-      });
-      setCopyLoading(false);
-    }
-  };
-  
-  const handleBudgetSelection = (budget: Budget) => {
-    // Pre-populate the form with the selected budget data
-    setFormData({
-      category_id: budget.category_id,
-      amount: budget.amount.toString(),
-      period: budget.period,
-    });
-    
-    // Make sure we're creating a new budget, not editing
-    setIsEditing(false);
-    setEditId(null);
-    
-    // Open the form for editing
-    setShowForm(true);
-    setShowBudgetSelector(false);
-    
-    // Show a helpful message
-    toast.info("Budget copied to form", {
-      description: `Review and save to create a new budget for ${budget.category_name}`,
-      icon: <Info className="h-5 w-5 text-blue-500" />
-    });
-  };
-
   const handleReorderBudgets = async (reorderedBudgets: Budget[]) => {
     try {
-      // Update local state immediately for responsiveness
       setBudgets(reorderedBudgets);
       
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
       
-      // Prepare updates with new order values
       const updates = reorderedBudgets.map((budget, index) => ({
         id: budget.id,
         order: index,
       }));
       
-      // Update order in database
       const { error } = await supabase
         .from("budgets")
         .upsert(updates, { onConflict: 'id' });
       
       if (error) {
         console.error("Error updating budget order:", error);
-        toast.error("Failed to save order", {
-          description: "Your changes may not persist after refresh",
-          icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
-        });
+        toast.error("Failed to save order");
       }
     } catch (error) {
       console.error("Error handling budget reorder:", error);
@@ -727,122 +561,51 @@ export default function BudgetPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl relative" ref={scrollRef}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-10 gap-4 md:gap-6 pb-6 border-b border-border/70">
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 pb-6 border-b">
         <div className="flex items-center gap-4">
           <Logo size="lg" />
           <div>
-            <motion.h1 
-              className="text-2xl md:text-3xl font-bold text-foreground tracking-tight"
-              initial={{ x: -10, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
+            <h1 className="text-2xl md:text-3xl font-bold">
               Budget Planner
-            </motion.h1>
-            <motion.p 
-              className="text-muted-foreground text-sm md:text-base mt-1"
-              initial={{ x: -10, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
+            </h1>
+            <p className="text-muted-foreground mt-1">
               Set budgets and track your spending by category
-            </motion.p>
+            </p>
           </div>
         </div>
         
         {/* Mobile Add Budget Button */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          className="md:hidden"
-        >
+        <div className="md:hidden">
           <Button
             onClick={() => {
               resetForm();
               setShowForm(true);
             }}
             size="lg"
-            className="w-full h-14 gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300"
+            className="w-full h-12 gap-2"
           >
-            <Plus className="h-6 w-6" />
-            <span className="font-medium text-base">Add New Budget</span>
+            <Plus className="h-5 w-5" />
+            Add New Budget
           </Button>
-        </motion.div>
+        </div>
         
-        {/* Desktop buttons with enhanced styling */}
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="hidden md:flex space-x-3"
-        >
-          <Button
-            onClick={() => copyFromLastPeriod()}
-            variant="outline"
-            className="h-12 px-5 text-base border-border hover:bg-accent hover:text-accent-foreground transition-all duration-300 flex items-center gap-2"
-            disabled={copyLoading}
-          >
-            {copyLoading ? (
-              <>
-                <div className="h-4 w-4 border-2 border-t-transparent border-primary rounded-full animate-spin"></div>
-                Loading...
-              </>
-            ) : (
-              <>
-                <Copy size={18} />
-                Copy From Last Period
-              </>
-            )}
-          </Button>
-          
+        {/* Desktop button */}
+        <div className="hidden md:block">
           <Button 
             onClick={() => {
               resetForm();
               setShowForm(!showForm);
             }}
-            className="h-12 px-6 text-base bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+            className="flex items-center gap-2"
           >
-            {showForm ? <X size={18} /> : <Plus size={18} />}
+            {showForm ? <X size={16} /> : <Plus size={16} />}
             {showForm ? "Cancel" : "New Budget"}
           </Button>
-        </motion.div>
-      </div>
-
-      {/* Enhanced Navigation Tabs */}
-      <div className="container mx-auto px-3 sm:px-4 max-w-7xl">
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-border/30 pb-4">
-          {[
-            { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'analytics', label: 'Analytics', icon: Activity },
-            { id: 'trends', label: 'Trends', icon: TrendingUp },
-            { id: 'tools', label: 'Tools', icon: Settings },
-            { id: 'goals', label: 'Goals', icon: Target },
-            { id: 'comparison', label: 'Comparison', icon: Calendar }
-          ].map((view) => {
-            const Icon = view.icon;
-            return (
-              <Button
-                key={view.id}
-                variant={activeView === view.id ? 'default' : 'ghost'}
-                size="sm"
-                className={`h-10 px-4 transition-all duration-200 ${
-                  activeView === view.id 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
-                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => setActiveView(view.id as any)}
-              >
-                <Icon className="h-4 w-4 mr-2" />
-                {view.label}
-              </Button>
-            );
-          })}
         </div>
       </div>
+
+
 
       {/* Show form errors in a more visible way */}
       <AnimatePresence>
@@ -879,366 +642,241 @@ export default function BudgetPage() {
         )}
       </AnimatePresence>
 
-      {/* Enhanced Budget Overview Cards with improved visual design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8">
+      {/* Budget Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {/* Total Budget Card */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          whileHover={{ y: -5 }}
-          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start relative z-10">
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
+          <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Budget</h3>
-              <p className="text-2xl sm:text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <p className="text-2xl font-bold text-primary">
                 {formatCurrency(budgets.reduce((sum, budget) => sum + budget.amount, 0))}
               </p>
-              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+              <div className="mt-2 text-xs text-muted-foreground">
                 {budgets.length} budget{budgets.length !== 1 ? 's' : ''} set
               </div>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center backdrop-blur-sm">
-              <DollarSign className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-primary" />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Total Spent Card */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          whileHover={{ y: -5 }}
-          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
-          <div className="flex justify-between items-start relative z-10">
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
+          <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Spent</h3>
-              <p className="text-2xl sm:text-3xl font-bold mt-1 text-red-500">
+              <p className="text-2xl font-bold text-red-500">
                 {formatCurrency(categorySpending.reduce((sum, cat) => sum + cat.spent, 0))}
               </p>
-              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
+              <div className="mt-2 text-xs text-muted-foreground">
                 Across {categorySpending.length} categor{categorySpending.length !== 1 ? 'ies' : 'y'}
               </div>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center backdrop-blur-sm">
-              <BarChart3 className="h-6 w-6 text-red-500" />
+            <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-red-500" />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Budget Status Card */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          whileHover={{ y: -5 }}
-          className="rounded-2xl border bg-card p-5 sm:p-6 shadow-sm transition-all duration-300 hover:shadow-lg relative overflow-hidden group"
-        >
-          <div className={`absolute top-0 right-0 w-32 h-32 ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500/5' : 'bg-emerald-500/5'} rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500`}></div>
-          <div className="flex justify-between items-start relative z-10">
+        <div className="rounded-lg border bg-card p-4 shadow-sm">
+          <div className="flex justify-between items-start">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-1">Status</h3>
-              <p className={`text-2xl sm:text-3xl font-bold mt-1 ${
+              <p className={`text-lg font-bold ${
                 categorySpending.some(cat => cat.percentage > 100) 
                   ? 'text-red-500' 
-                  : 'bg-gradient-to-r from-emerald-500 to-green-500 bg-clip-text text-transparent'
+                  : 'text-emerald-500'
               }`}>
                 {getBudgetStatusMessage()}
               </p>
-              <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-                <div className={`h-1.5 w-1.5 rounded-full ${categorySpending.some(cat => cat.percentage > 100) ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
+              <div className="mt-2 text-xs text-muted-foreground">
                 {categorySpending.some(cat => cat.percentage > 90 && cat.percentage <= 100) 
                   ? `${categorySpending.filter(cat => cat.percentage > 90 && cat.percentage <= 100).length} approaching limit` 
                   : 'Your budgets are healthy'}
               </div>
             </div>
-            <div className={`h-12 w-12 rounded-xl ${
+            <div className={`h-10 w-10 rounded-lg ${
               categorySpending.some(cat => cat.percentage > 100) 
                 ? 'bg-red-500/10' 
                 : 'bg-emerald-500/10'
-            } flex items-center justify-center backdrop-blur-sm`}>
+            } flex items-center justify-center`}>
               {categorySpending.some(cat => cat.percentage > 100) ? (
-                <AlertTriangle className="h-6 w-6 text-red-500" />
+                <AlertTriangle className="h-5 w-5 text-red-500" />
               ) : (
-                <CheckCircle className="h-6 w-6 text-emerald-500" />
+                <CheckCircle className="h-5 w-5 text-emerald-500" />
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Enhanced Content Based on Active View */}
-      <AnimatePresence mode="wait">
-        {activeView === 'overview' && (
-          <motion.div
-            key="overview"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Budget Filters */}
-            {budgets.length > 0 && (
-              <div className="mb-6">
-                <BudgetFilters
-                  searchTerm={searchTerm}
-                  onSearchChange={setSearchTerm}
-                  filter={budgetFilter}
-                  onFilterChange={setBudgetFilter}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  sortOrder={sortOrder}
-                  onSortOrderChange={setSortOrder}
-                  periodFilter={periodFilter}
-                  onPeriodFilterChange={setPeriodFilter}
-                  showFilters={showFilters}
-                  onToggleFilters={() => setShowFilters(!showFilters)}
-                  totalBudgets={budgets.length}
-                  filteredCount={filteredAndSortedData.budgets.length}
-                />
-              </div>
-            )}
-
-            {/* Annual Budget Summary */}
-            {budgets.length > 0 && <AnnualBudgetSummary budgets={budgets} categorySpending={categorySpending} />}
-            
-            {/* Budget Charts */}
-            {budgets.length > 0 && <BudgetCharts budgets={budgets} categorySpending={categorySpending} />}
-
-            {/* Budget Insights */}
-            {budgets.length > 0 && <BudgetInsights budgets={budgets} categorySpending={categorySpending} />}
-          </motion.div>
-        )}
-
-        {activeView === 'analytics' && (
-          <motion.div
-            key="analytics"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <BudgetAnalytics budgets={budgets} categorySpending={categorySpending} />
-          </motion.div>
-        )}
-
-        {activeView === 'trends' && (
-          <motion.div
-            key="trends"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <HistoricalTrends />
-          </motion.div>
-        )}
-
-        {activeView === 'tools' && (
-          <motion.div
-            key="tools"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <BudgetManagementTools 
-              budgets={budgets} 
-              categorySpending={categorySpending}
-              onBudgetsUpdate={fetchBudgets}
-            />
-          </motion.div>
-        )}
-
-        {activeView === 'goals' && (
-          <motion.div
-            key="goals"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <BudgetGoals budgets={budgets} categorySpending={categorySpending} />
-          </motion.div>
-        )}
-
-        {activeView === 'comparison' && (
-          <motion.div
-            key="comparison"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <BudgetComparison budgets={budgets} categorySpending={categorySpending} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Budget Filters */}
+      {budgets.length > 0 && (
+        <div className="mb-6">
+          <BudgetFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filter={budgetFilter}
+            onFilterChange={setBudgetFilter}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
+            periodFilter={periodFilter}
+            onPeriodFilterChange={setPeriodFilter}
+            showFilters={showFilters}
+            onToggleFilters={() => setShowFilters(!showFilters)}
+            totalBudgets={budgets.length}
+            filteredCount={filteredAndSortedData.budgets.length}
+          />
+        </div>
+      )}
 
       {/* Budget form */}
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden mb-6"
-          >
-            <form onSubmit={handleSubmit} className="rounded-2xl border bg-card p-5 sm:p-7 shadow-lg">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                    {isEditing ? "Edit Budget" : "Create New Budget"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {isEditing ? "Update your budget settings" : "Set a new budget for a category"}
-                  </p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                </div>
+      {showForm && (
+        <div className="mb-6">
+          <form onSubmit={handleSubmit} className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold">
+                  {isEditing ? "Edit Budget" : "Create New Budget"}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isEditing ? "Update your budget settings" : "Set a new budget for a category"}
+                </p>
               </div>
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+            </div>
               
-              <div className="grid grid-cols-1 gap-5 sm:gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="category_id" className="block text-sm font-medium text-foreground">
-                    Category
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="category_id"
-                      name="category_id"
-                      value={formData.category_id}
-                      onChange={handleInputChange}
-                      className="w-full rounded-lg border border-input bg-background px-4 py-3.5 text-base md:py-2.5 touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[48px]"
-                      disabled={formLoading || !hasExpenseCategories}
-                    >
-                      <option value="">Select a category</option>
-                      {categories
-                        .filter(c => c.type !== "income")
-                        .map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                  {!hasExpenseCategories && (
-                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      No expense categories available. Please create a category first.
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">
-                    Budget Amount
-                  </label>
-                  <ValidatedInput
-                    id="amount"
-                    name="amount"
-                    type="text"
-                    value={formData.amount}
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="category_id" className="block text-sm font-medium">
+                  Category
+                </label>
+                <div className="relative">
+                  <select
+                    id="category_id"
+                    name="category_id"
+                    value={formData.category_id}
                     onChange={handleInputChange}
-                    placeholder="0.00"
-                    prefix="$"
-                    disabled={formLoading}
-                    validationFn={validateAmount}
-                    className="rounded-lg border border-input bg-background px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-                  />
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    disabled={formLoading || !hasExpenseCategories}
+                  >
+                    <option value="">Select a category</option>
+                    {categories
+                      .filter(c => c.type !== "income")
+                      .map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="period" className="block text-sm font-medium text-foreground">
-                    Budget Period
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="period"
-                      name="period"
-                      value={formData.period}
-                      onChange={handleInputChange}
-                      className="w-full rounded-lg border border-input bg-background px-4 py-3.5 text-base md:py-2.5 appearance-none touch-manipulation focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[48px]"
-                      disabled={formLoading}
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="yearly">Yearly</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                {!hasExpenseCategories && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    No expense categories available. Please create a category first.
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">
+                  Budget Amount
+                </label>
+                <ValidatedInput
+                  id="amount"
+                  name="amount"
+                  type="text"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  prefix="$"
+                  disabled={formLoading}
+                  validationFn={validateAmount}
+                  className="rounded-lg border border-input bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="period" className="block text-sm font-medium">
+                  Budget Period
+                </label>
+                <div className="relative">
+                  <select
+                    id="period"
+                    name="period"
+                    value={formData.period}
+                    onChange={handleInputChange}
+                    className="w-full rounded-lg border border-input bg-background px-3 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    disabled={formLoading}
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
               </div>
+            </div>
               
-              <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-8 pt-6 border-t border-border/50">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowForm(false);
-                    resetForm();
-                  }}
-                  disabled={formLoading}
-                  className="w-full mt-3 sm:mt-0 sm:w-auto min-h-[46px] h-12 px-6 text-base rounded-lg transition-all duration-300 hover:shadow-md"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={formLoading}
-                  className="w-full sm:w-auto min-h-[46px] h-12 px-6 text-base rounded-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-                >
-                  {formLoading ? (
-                    <>
-                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
-                      {isEditing ? "Updating..." : "Saving..."}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {isEditing ? "Update Budget" : "Save Budget"}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-6 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowForm(false);
+                  resetForm();
+                }}
+                disabled={formLoading}
+                className="w-full mt-3 sm:mt-0 sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={formLoading}
+                className="w-full sm:w-auto flex items-center justify-center"
+              >
+                {formLoading ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
+                    {isEditing ? "Updating..." : "Saving..."}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {isEditing ? "Update Budget" : "Save Budget"}
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
-      {/* Enhanced Budget Progress Visualization */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-2xl border bg-card shadow-lg overflow-hidden mb-8"
-      >
-        <div className="border-b p-6 bg-gradient-to-r from-card to-card/80">
+      {/* Budget Progress */}
+      <div className="rounded-lg border bg-card shadow-sm overflow-hidden mb-8">
+        <div className="border-b p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Budget Progress
-              </h2>
-              <p className="text-muted-foreground mt-1">
+              <h2 className="text-xl font-bold">Budget Progress</h2>
+              <p className="text-muted-foreground text-sm mt-1">
                 Track your spending against category budgets
               </p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-primary" />
             </div>
           </div>
         </div>
@@ -1252,270 +890,96 @@ export default function BudgetPage() {
             onDelete={handleDelete}
           />
         ) : budgets.length > 0 ? (
-          <div className="p-10 text-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="rounded-full bg-muted h-16 w-16 flex items-center justify-center mx-auto mb-5"
-            >
-              <DollarSign className="h-8 w-8 text-muted-foreground" />
-            </motion.div>
-            <motion.h3 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="text-xl font-bold mb-2"
-            >
-              No budgets match your filters
-            </motion.h3>
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
-              className="text-muted-foreground mb-6 max-w-md mx-auto"
-            >
+          <div className="p-8 text-center">
+            <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-4">
+              <DollarSign className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No budgets match your filters</h3>
+            <p className="text-muted-foreground mb-4">
               Try adjusting your search terms or filters to see more results
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
+            </p>
+            <Button 
+              onClick={() => {
+                setSearchTerm('');
+                setBudgetFilter('all');
+                setPeriodFilter('all');
+              }} 
+              variant="outline"
             >
-              <Button 
-                onClick={() => {
-                  setSearchTerm('');
-                  setBudgetFilter('all');
-                  setPeriodFilter('all');
-                }} 
-                variant="outline"
-                className="min-h-[48px] h-12 px-6 text-base"
-              >
-                Clear Filters
-              </Button>
-            </motion.div>
+              Clear Filters
+            </Button>
           </div>
         ) : (
-          <div className="p-10 text-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="rounded-full bg-muted h-16 w-16 flex items-center justify-center mx-auto mb-5"
-            >
-              <DollarSign className="h-8 w-8 text-muted-foreground" />
-            </motion.div>
-            <motion.h3 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="text-xl font-bold mb-2"
-            >
-              No budgets set yet
-            </motion.h3>
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
-              className="text-muted-foreground mb-6 max-w-md mx-auto"
-            >
-              Start by creating your first budget to track your spending and gain insights into your financial habits
-            </motion.p>
+          <div className="p-8 text-center">
+            <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-4">
+              <DollarSign className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No budgets set yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Start by creating your first budget to track your spending
+            </p>
             {!showForm && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
-                className="space-y-5"
+              <Button 
+                onClick={() => setShowForm(true)} 
+                className="flex items-center gap-2"
               >
-                <Button 
-                  onClick={() => setShowForm(true)} 
-                  size="lg"
-                  className="min-h-[48px] h-12 px-6 text-base bg-gradient-to-r from-primary to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
-                >
-                  <Plus className="mr-2 h-5 w-5" /> Add Your First Budget
-                </Button>
-                <div className="text-sm text-muted-foreground">
-                  <p>You can also use the "New Budget" button at the top of the page</p>
-                </div>
-              </motion.div>
+                <Plus className="h-4 w-4" /> Add Your First Budget
+              </Button>
             )}
           </div>
         )}
-      </motion.div>
+      </div>
 
-      
-
-      {/* Add a confirmation modal */}
-      <AnimatePresence>
-        {showConfirmModal && confirmAction && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowConfirmModal(false)}
+      {/* Confirmation modal */}
+      {showConfirmModal && confirmAction && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowConfirmModal(false)}
+        >
+          <div
+            className="bg-card rounded-lg shadow-lg max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              className="bg-card rounded-lg shadow-lg max-w-md w-full p-6"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-start mb-4">
-                <div className="bg-primary/10 rounded-full p-2 mr-3">
-                  <Info className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-1">{confirmAction.title}</h3>
-                  <p className="text-muted-foreground">{confirmAction.message}</p>
-                </div>
+            <div className="flex items-start mb-4">
+              <div className="bg-primary/10 rounded-full p-2 mr-3">
+                <Info className="h-6 w-6 text-primary" />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowConfirmModal(false)}
-                  className="min-w-[80px] min-h-[44px]"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => confirmAction.action()}
-                  className="min-w-[80px] min-h-[44px]"
-                >
-                  Confirm
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Scroll indicator for mobile */}
-      <AnimatePresence>
-        {showScrollIndicator && (
-          <motion.div 
-            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-primary/90 text-white rounded-full px-4 py-2 shadow-lg z-40 text-sm md:hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            <div className="flex items-center gap-2">
-              <span>Swipe cards to edit or delete</span>
-              <div className="flex gap-1">
-                <motion.div 
-                  animate={{ x: [0, -3, 0] }} 
-                  transition={{ repeat: Infinity, duration: 1 }}
-                >
-                  ←
-                </motion.div>
-                <motion.div 
-                  animate={{ x: [0, 3, 0] }} 
-                  transition={{ repeat: Infinity, duration: 1 }}
-                >
-                  →
-                </motion.div>
+              <div>
+                <h3 className="text-lg font-medium mb-1">{confirmAction.title}</h3>
+                <p className="text-muted-foreground">{confirmAction.message}</p>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Budget Selector Modal */}
-      <AnimatePresence>
-        {showBudgetSelector && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowBudgetSelector(false)}
-          >
-            <motion.div
-              className="bg-card rounded-lg shadow-lg max-w-md w-full p-6 max-h-[80vh] overflow-auto"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-medium mb-1">Select Budget to Copy</h3>
-                  <p className="text-muted-foreground">Choose a budget to copy to the form:</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 rounded-full"
-                  onClick={() => setShowBudgetSelector(false)}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
-              </div>
-              
-              <div className="space-y-3 mt-4">
-                {budgetOptions.map((budget) => (
-                  <div 
-                    key={budget.id}
-                    className="border rounded-lg p-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => handleBudgetSelection(budget)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{budget.category_name}</div>
-                        <div className="text-sm text-muted-foreground capitalize">{budget.period} budget</div>
-                      </div>
-                      <div className="text-lg font-bold">{formatCurrency(budget.amount)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 flex justify-end">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowBudgetSelector(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Enhanced Mobile Sticky Add Budget Button */}
-      {!showForm && (
-        <div className="fixed bottom-6 left-0 right-0 px-4 z-30 md:hidden pointer-events-none">
-          <div className="pointer-events-auto mx-auto max-w-md">
-            <motion.div
-              initial={{ y: 80, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: "spring", delay: 0.5, stiffness: 300, damping: 20 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <div className="flex justify-end gap-3 mt-6">
               <Button
-                onClick={() => {
-                  resetForm();
-                  setShowForm(true);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                size="lg"
-                className="w-full py-6 shadow-xl rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary hover:shadow-2xl transition-all duration-300 font-semibold text-base"
+                variant="outline"
+                onClick={() => setShowConfirmModal(false)}
               >
-                <div className="flex items-center justify-center gap-3">
-                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center">
-                    <Plus className="h-4 w-4 text-white" />
-                  </div>
-                  <span>Create Budget</span>
-                </div>
+                Cancel
               </Button>
-            </motion.div>
+              <Button 
+                onClick={() => confirmAction.action()}
+              >
+                Confirm
+              </Button>
+            </div>
           </div>
+        </div>
+      )}
+
+
+      {/* Mobile sticky add button */}
+      {!showForm && (
+        <div className="fixed bottom-6 right-6 md:hidden">
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            size="lg"
+            className="h-14 w-14 rounded-full shadow-lg"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         </div>
       )}
     </div>

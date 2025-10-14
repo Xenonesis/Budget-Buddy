@@ -221,7 +221,7 @@ export function BudgetAnalytics({ budgets, categorySpending }: BudgetAnalyticsPr
       };
     }).sort((a, b) => b.percentage - a.percentage);
 
-    // Mock spending trends (could be enhanced with historical data)
+    // Current period spending trends
     const spendingTrends = [
       {
         period: 'This Month',
