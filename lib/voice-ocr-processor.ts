@@ -257,7 +257,7 @@ export class VoiceOCRProcessor {
     
     // In a real implementation, this would use a more sophisticated transcription service
     // For now, we'll simulate transcription
-    const transcript = await this.simulateAudioTranscription(audioBlob);
+    const transcript = await this.transcribeAudio(audioBlob);
     
     URL.revokeObjectURL(audioUrl);
     
@@ -591,12 +591,44 @@ export class VoiceOCRProcessor {
   }
 
   /**
-   * Simulate audio transcription (placeholder)
+   * Transcribe audio using Web Speech API or external service
    */
-  private async simulateAudioTranscription(audioBlob: Blob): Promise<string> {
-    // In a real implementation, this would use a transcription service
-    // For now, return a placeholder
-    return "Simulated transcription - integrate with real service";
+  private async transcribeAudio(audioBlob: Blob): Promise<string> {
+    try {
+      // Try to use Web Speech API if available
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        return new Promise((resolve, reject) => {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          const recognition = new SpeechRecognition();
+          
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          recognition.lang = 'en-US';
+          
+          recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            resolve(transcript);
+          };
+          
+          recognition.onerror = (event) => {
+            reject(new Error(`Speech recognition error: ${event.error}`));
+          };
+          
+          // Convert blob to audio URL and play for recognition
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          audio.play();
+          recognition.start();
+        });
+      }
+      
+      // Fallback: Return empty string if no transcription service available
+      console.warn('No speech recognition service available');
+      return '';
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      return '';
+    }
   }
 
   /**
@@ -612,8 +644,43 @@ export class VoiceOCRProcessor {
    * Parse date from regex match
    */
   private parseDateFromMatch(match: RegExpMatchArray): string | undefined {
-    // Implement date parsing logic based on match
-    return new Date().toISOString().split('T')[0]; // Placeholder
+    try {
+      const dateStr = match[0];
+      
+      // Handle various date formats
+      const datePatterns = [
+        /today/i,
+        /yesterday/i,
+        /(\d{1,2})\/(\d{1,2})\/(\d{4})/,  // MM/DD/YYYY
+        /(\d{1,2})-(\d{1,2})-(\d{4})/,   // MM-DD-YYYY
+        /(\d{4})-(\d{1,2})-(\d{1,2})/,   // YYYY-MM-DD
+        /(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})/i
+      ];
+      
+      const now = new Date();
+      
+      if (/today/i.test(dateStr)) {
+        return now.toISOString().split('T')[0];
+      }
+      
+      if (/yesterday/i.test(dateStr)) {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        return yesterday.toISOString().split('T')[0];
+      }
+      
+      // Try to parse other date formats
+      const parsedDate = new Date(dateStr);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.toISOString().split('T')[0];
+      }
+      
+      // Default to today if parsing fails
+      return now.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error parsing date:', error);
+      return new Date().toISOString().split('T')[0];
+    }
   }
 
   /**

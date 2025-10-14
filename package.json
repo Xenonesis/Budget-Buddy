@@ -1,6 +1,6 @@
 {
   "name": "budget-buddy",
-  "version": "26.00",
+  "version": "26.01",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,14 @@
     "lint": "next lint",
     "clean": "rm -rf .next out",
     "deploy": "npm run clean && npm run build",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run build",
+    "production-build": "cross-env NODE_ENV=production npm run clean && npm run build",
+    "analyze": "ANALYZE=true npm run build",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests specified' && exit 0",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "postbuild": "echo 'Build completed successfully'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -74,6 +81,7 @@
     "@types/react-window": "^1.8.8",
     "@types/three": "^0.180.0",
     "autoprefixer": "^10.4.16",
+    "cross-env": "^10.1.0",
     "eslint": "^9.37.0",
     "eslint-config-next": "^15.5.5",
     "postcss": "^8.5.6",

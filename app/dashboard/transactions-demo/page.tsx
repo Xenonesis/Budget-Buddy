@@ -3,78 +3,106 @@
 import React from "react";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 
-// Real transaction data for demonstration
-const realTransactions = [
-    {
-        id: "1",
-        amount: 4500.00,
-        type: "income" as const,
-        category: "Salary",
-        date: "2025-01-15",
-        description: "Software Engineer Monthly Salary"
-    },
-    {
-        id: "2",
-        amount: 1200.00,
-        type: "expense" as const,
-        category: "Housing",
-        date: "2025-01-14",
-        description: "Apartment Rent Payment"
-    },
-    {
-        id: "3",
-        amount: 320.00,
-        type: "expense" as const,
-        category: "Groceries",
-        date: "2025-01-13",
-        description: "Weekly grocery shopping at Whole Foods"
-    },
-    {
-        id: "4",
-        amount: 85.00,
-        type: "expense" as const,
-        category: "Transportation",
-        date: "2025-01-12",
-        description: "Gas station fill-up"
-    },
-    {
-        id: "5",
-        amount: 1500.00,
-        type: "income" as const,
-        category: "Freelance",
-        date: "2025-01-11",
-        description: "Mobile app development project"
-    },
-    {
-        id: "6",
-        amount: 45.00,
-        type: "expense" as const,
-        category: "Entertainment",
-        date: "2025-01-10",
-        description: "Netflix and Spotify subscriptions"
-    },
-    {
-        id: "7",
-        amount: 180.00,
-        type: "expense" as const,
-        category: "Utilities",
-        date: "2025-01-09",
-        description: "Electricity and internet bills"
-    },
-    {
-        id: "8",
-        amount: 95.00,
-        type: "expense" as const,
-        category: "Healthcare",
-        date: "2025-01-08",
-        description: "Pharmacy prescription refill"
-    }
-];
+// This demo page now fetches real user data instead of using hardcoded samples
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+
+interface Transaction {
+    id: string;
+    amount: number;
+    type: "income" | "expense";
+    category: string;
+    date: string;
+    description: string;
+}
+
+const [realTransactions, setRealTransactions] = useState<Transaction[]>([]);
+const [loading, setLoading] = useState(true);
+
+// Fetch real user transactions
+useEffect(() => {
+    const fetchRealTransactions = async () => {
+        try {
+            const { data: userData } = await supabase.auth.getUser();
+            if (!userData.user) return;
+
+            const { data: transactions, error } = await supabase
+                .from('transactions')
+                .select(`
+                    id,
+                    amount,
+                    type,
+                    description,
+                    date,
+                    categories!inner(name)
+                `)
+                .eq('user_id', userData.user.id)
+                .order('date', { ascending: false })
+                .limit(20);
+
+            if (error) throw error;
+
+            const formattedTransactions = transactions?.map(t => ({
+                id: t.id,
+                amount: t.amount,
+                type: t.type as "income" | "expense",
+                category: (t.categories as any)?.name || 'Uncategorized',
+                date: t.date,
+                description: t.description || ''
+            })) || [];
+
+            setRealTransactions(formattedTransactions);
+        } catch (error) {
+            console.error('Error fetching real transactions:', error);
+            // Fallback to empty array instead of mock data
+            setRealTransactions([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchRealTransactions();
+}, []);
 
 export default function TransactionsDemoPage() {
-    // Calculate summary stats
+    // Calculate summary stats from real data
     const totalAmount = realTransactions.reduce((sum, t) => sum + t.amount, 0);
     const categories = [...new Set(realTransactions.map(t => t.category))].length;
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <div className="animate-pulse">
+                    <div className="h-8 w-64 bg-muted rounded mb-4"></div>
+                    <div className="h-4 w-96 bg-muted rounded mb-8"></div>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="h-20 bg-muted rounded"></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (realTransactions.length === 0) {
+        return (
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <div className="text-center py-12">
+                    <h1 className="text-3xl font-bold mb-4">Recent Transactions Dashboard</h1>
+                    <p className="text-muted-foreground mb-8">
+                        No transactions found. Add some transactions to see the enhanced UI/UX features.
+                    </p>
+                    <a 
+                        href="/dashboard/transactions/new" 
+                        className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                    >
+                        Add Your First Transaction
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">

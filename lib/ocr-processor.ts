@@ -65,9 +65,22 @@ export class OCRProcessor {
       const reader = new FileReader();
       reader.onload = async () => {
         try {
-          // This is a placeholder - you'd need proper PDF parsing
-          const text = reader.result as string;
-          resolve(text);
+          // Use PDF.js to extract text from PDF
+          const pdfjsLib = await import('pdfjs-dist');
+          const typedArray = new Uint8Array(reader.result as ArrayBuffer);
+          const pdf = await pdfjsLib.getDocument(typedArray).promise;
+          let fullText = '';
+          
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items
+              .map((item: any) => item.str)
+              .join(' ');
+            fullText += pageText + '\n';
+          }
+          
+          resolve(fullText);
         } catch (error) {
           reject(error);
         }

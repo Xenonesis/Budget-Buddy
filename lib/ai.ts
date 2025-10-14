@@ -558,48 +558,56 @@ export async function generateGoogleAIInsights(
   }
 }
 
-// Provide realistic financial insights when API call fails or returns unexpected format
-function getExampleInsights(): FinancialInsight[] {
+// Generate realistic insights based on general financial best practices when AI fails
+async function getExampleInsights(): Promise<FinancialInsight[]> {
+  try {
+    // Try to get real user data for fallback insights
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      const { generateRealFinancialInsights } = await import('./real-financial-insights');
+      
+      // Get recent transactions and budgets
+      const [transactionsResult, budgetsResult] = await Promise.all([
+        supabase.from('transactions').select('*').eq('user_id', userData.user.id).order('date', { ascending: false }).limit(50),
+        supabase.from('budgets').select('*').eq('user_id', userData.user.id)
+      ]);
+      
+      if (transactionsResult.data && budgetsResult.data) {
+        const realInsights = generateRealFinancialInsights(transactionsResult.data, budgetsResult.data);
+        if (realInsights.length > 0) {
+          return realInsights;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error generating real fallback insights:', error);
+  }
+
+  // Final fallback to general financial advice
   return [
     {
-      type: "trend",
-      title: "Transportation Costs Rising",
-      description: "Your transportation expenses have increased by 12% this month. Consider carpooling, public transit, or fuel-efficient driving habits to reduce costs.",
-      confidence: 0.89,
-      relevantCategories: ["Transportation", "Gas", "Public Transit"],
-      createdAt: new Date().toISOString(),
-      amount: 285.75,
-      category: "Transportation"
-    },
-    {
-      type: "warning",
-      title: "Housing Budget Approaching Limit",
-      description: "You've used 85% of your housing budget with 8 days remaining this month. Monitor upcoming rent or mortgage payments.",
-      confidence: 0.92,
-      relevantCategories: ["Housing", "Rent", "Utilities"],
-      createdAt: new Date().toISOString(),
-      amount: 1275.00,
-      category: "Housing"
-    },
-    {
-      type: "success",
-      title: "Smart Grocery Shopping Habits",
-      description: "You've consistently stayed within your grocery budget for 3 months. Your meal planning and bulk buying strategies are working well.",
+      type: "saving_suggestion",
+      title: "Track Your Spending Patterns",
+      description: "Start by categorizing your expenses to identify areas where you can optimize your spending. Small changes in daily habits can lead to significant savings.",
       confidence: 0.85,
-      relevantCategories: ["Groceries", "Food"],
-      createdAt: new Date().toISOString(),
-      amount: 425.50,
-      category: "Groceries"
+      relevantCategories: ["General"],
+      createdAt: new Date().toISOString()
+    },
+    {
+      type: "budget_warning",
+      title: "Set Up Monthly Budgets",
+      description: "Create budgets for your main expense categories to better control your spending and achieve your financial goals.",
+      confidence: 0.90,
+      relevantCategories: ["Budgeting"],
+      createdAt: new Date().toISOString()
     },
     {
       type: "investment_tip",
-      title: "Emergency Fund Opportunity",
-      description: "Based on your spending patterns, you could save an additional $200 monthly by optimizing your discretionary expenses for your emergency fund.",
-      confidence: 0.78,
+      title: "Build an Emergency Fund",
+      description: "Aim to save 3-6 months of expenses in an emergency fund. Start with small, consistent contributions to build this financial safety net.",
+      confidence: 0.88,
       relevantCategories: ["Savings", "Emergency Fund"],
-      createdAt: new Date().toISOString(),
-      amount: 200.00,
-      category: "Savings"
+      createdAt: new Date().toISOString()
     }
   ];
 }

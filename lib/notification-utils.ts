@@ -17,35 +17,60 @@ export async function checkAndCreateBudgetWarnings() {
   }
 }
 
-export async function createSampleNotifications() {
+export async function createRealTimeNotifications(userId: string) {
   try {
-    // Create sample notifications for demonstration
-    await NotificationService.createBillReminder(
-      'Netflix Subscription',
-      15.99,
-      new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days from now
-    );
+    // Create real-time notifications based on user's actual data
+    const { supabase } = await import('./supabase');
+    const { RealBudgetService } = await import('./real-budget-service');
+    
+    // Check budget usage and create warnings if needed
+    const budgetUsage = await RealBudgetService.calculateBudgetUsage(userId);
+    
+    for (const usage of budgetUsage) {
+      if (usage.percentageUsed > 80) {
+        await NotificationService.createBudgetWarning(
+          usage.category,
+          usage.budgetAmount,
+          usage.spentAmount
+        );
+      }
+    }
 
-    await NotificationService.createBudgetWarning(
-      'sample-category-id',
-      500,
-      425
-    );
+    // Check for upcoming recurring transactions
+    const { data: recurringTransactions } = await supabase
+      .from('recurring_transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .lte('next_occurrence', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());
 
-    await NotificationService.createGoalAchievement(
-      'Emergency Fund',
-      1000
-    );
+    for (const recurring of recurringTransactions || []) {
+      await NotificationService.createBillReminder(
+        recurring.description || 'Recurring Transaction',
+        recurring.amount,
+        new Date(recurring.next_occurrence).toISOString()
+      );
+    }
 
-    await NotificationService.createSystemUpdate(
-      'New Feature: AI Insights',
-      'We\'ve added AI-powered financial insights to help you make better decisions. Check out the new AI Insights page!',
-      '/dashboard/ai-insights'
-    );
+    // Check for financial goals achievements
+    const { data: goals } = await supabase
+      .from('financial_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true);
 
-    console.log('Sample notifications created');
+    for (const goal of goals || []) {
+      if (goal.current_amount >= goal.target_amount) {
+        await NotificationService.createGoalAchievement(
+          goal.name,
+          goal.target_amount
+        );
+      }
+    }
+
+    console.log('Real-time notifications created based on user data');
   } catch (error) {
-    console.error('Error creating sample notifications:', error);
+    console.error('Error creating real-time notifications:', error);
   }
 }
 
