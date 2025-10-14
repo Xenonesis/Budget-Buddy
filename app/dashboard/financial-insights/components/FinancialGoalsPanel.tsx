@@ -46,14 +46,22 @@ export function FinancialGoalsPanel({
 }: FinancialGoalsPanelProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    targetAmount: string;
+    currentAmount: string;
+    targetDate: string;
+    category: 'savings' | 'debt' | 'investment' | 'purchase' | 'emergency';
+    priority: 'high' | 'medium' | 'low';
+  }>({
     title: '',
     description: '',
     targetAmount: '',
     currentAmount: '',
     targetDate: '',
-    category: 'savings' as const,
-    priority: 'medium' as const
+    category: 'savings',
+    priority: 'medium'
   });
 
   const getCategoryIcon = (category: string) => {

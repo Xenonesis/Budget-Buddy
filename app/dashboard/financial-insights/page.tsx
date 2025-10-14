@@ -11,6 +11,7 @@ import {
   type Transaction,
   type Budget
 } from "@/lib/real-financial-insights";
+import { YearOverYearService, type YearlyComparisonData, type YearOverYearMetrics } from "@/lib/year-over-year-service";
 import { EnhancedFinancialInsightsPanel } from "./components/EnhancedFinancialInsightsPanel";
 import { FinancialGoalsPanel } from "./components/FinancialGoalsPanel";
 import { InsightsSettings } from "./components/InsightsSettings";
@@ -68,6 +69,9 @@ export default function FinancialInsightsPage() {
   const [insightHistory, setInsightHistory] = useState<RealFinancialInsight[]>([]);
   const [financialGoals, setFinancialGoals] = useState<any[]>([]);
   const [spendingTrends, setSpendingTrends] = useState<any[]>([]);
+  const [yearOverYearData, setYearOverYearData] = useState<YearlyComparisonData[]>([]);
+  const [yoyMetrics, setYoyMetrics] = useState<YearOverYearMetrics | null>(null);
+  const [yoyLoading, setYoyLoading] = useState<boolean>(false);
   const [insightsSettings, setInsightsSettings] = useState({
     autoRefresh: false,
     notifications: true,
@@ -112,7 +116,8 @@ export default function FinancialInsightsPage() {
     try {
       await Promise.all([
         fetchTransactions(),
-        fetchBudgets()
+        fetchBudgets(),
+        fetchYearOverYearData()
       ]);
     } catch (error) {
       console.error("Error initializing financial insights data:", error);
@@ -158,6 +163,33 @@ export default function FinancialInsightsPage() {
     }
   };
 
+  const fetchYearOverYearData = async () => {
+    if (!userId) return;
+
+    setYoyLoading(true);
+    try {
+      const currentYear = new Date().getFullYear();
+      const years = [currentYear, currentYear - 1, currentYear - 2];
+      
+      const yearlyData = await YearOverYearService.fetchYearOverYearData(userId, years);
+      setYearOverYearData(yearlyData);
+
+      // Calculate year-over-year metrics if we have at least 2 years of data
+      if (yearlyData.length >= 2) {
+        const metrics = YearOverYearService.calculateYearOverYearMetrics(
+          yearlyData[0], // Current year
+          yearlyData[1]  // Previous year
+        );
+        setYoyMetrics(metrics);
+      }
+    } catch (error) {
+      console.error("Error fetching year-over-year data:", error);
+      toast.error("Failed to load year-over-year data");
+    } finally {
+      setYoyLoading(false);
+    }
+  };
+
   const handleRefreshInsights = async () => {
     if (!userId) return;
 
@@ -166,7 +198,8 @@ export default function FinancialInsightsPage() {
       // Refresh data first
       await Promise.all([
         fetchTransactions(),
-        fetchBudgets()
+        fetchBudgets(),
+        fetchYearOverYearData()
       ]);
 
       // Generate fresh insights
@@ -747,7 +780,7 @@ export default function FinancialInsightsPage() {
                     calculateSpendingTrends().map((category, index) => {
                       const percentage = financialMetrics.totalExpenses > 0 
                         ? (category.amount / financialMetrics.totalExpenses * 100).toFixed(1)
-                        : 0;
+                        : '0.0';
                       
                       return (
                         <div key={index} className="flex items-center justify-between">
@@ -884,16 +917,131 @@ export default function FinancialInsightsPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
                   Monthly Comparison
+                  {yoyLoading && <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                  <p className="text-muted-foreground">
-                    Monthly trend analysis will be available once you have more transaction history.
-                  </p>
-                </div>
+                {yoyLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary/20 border-t-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading monthly comparison data...</p>
+                  </div>
+                ) : yoyMetrics && yoyMetrics.monthlyComparison.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Year-over-Year Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-foreground">
+                          {yoyMetrics.spendingGrowth > 0 ? '+' : ''}{yoyMetrics.spendingGrowth.toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">Spending Growth</div>
+                        <div className={`text-xs ${yoyMetrics.spendingGrowth > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          vs. Previous Year
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-foreground">
+                          {yoyMetrics.incomeGrowth > 0 ? '+' : ''}{yoyMetrics.incomeGrowth.toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">Income Growth</div>
+                        <div className={`text-xs ${yoyMetrics.incomeGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          vs. Previous Year
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-foreground">
+                          {yoyMetrics.savingsRateChange > 0 ? '+' : ''}{yoyMetrics.savingsRateChange.toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">Savings Rate Change</div>
+                        <div className={`text-xs ${yoyMetrics.savingsRateChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          Percentage Points
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Monthly Breakdown */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-foreground mb-3">Month-by-Month Comparison</h4>
+                      <div className="grid gap-3">
+                        {yoyMetrics.monthlyComparison.map((monthData, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 text-sm font-medium text-muted-foreground">
+                                {monthData.month}
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">
+                                    ${monthData.currentYear.spending.toLocaleString()}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    vs ${monthData.previousYear.spending.toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {monthData.currentYear.transactions} transactions
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`flex items-center gap-1 text-sm font-medium ${
+                                monthData.growth.spendingGrowth > 0 ? 'text-red-600' : 
+                                monthData.growth.spendingGrowth < 0 ? 'text-green-600' : 'text-muted-foreground'
+                              }`}>
+                                {monthData.growth.spendingGrowth > 0 ? (
+                                  <ArrowUpRight className="h-3 w-3" />
+                                ) : monthData.growth.spendingGrowth < 0 ? (
+                                  <ArrowDownRight className="h-3 w-3" />
+                                ) : null}
+                                {monthData.growth.spendingGrowth > 0 ? '+' : ''}{monthData.growth.spendingGrowth.toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {monthData.growth.spendingGrowth > 0 ? 'Higher' : 
+                                 monthData.growth.spendingGrowth < 0 ? 'Lower' : 'Same'}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Top Insights */}
+                    {yearOverYearData.length >= 2 && (
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-foreground mb-3">Key Insights</h4>
+                        <div className="space-y-2">
+                          {(() => {
+                            const insights = YearOverYearService.getSpendingInsights(yearOverYearData);
+                            const allInsights = [...insights.trends, ...insights.recommendations, ...insights.alerts];
+                            return allInsights.slice(0, 3).map((insight, index) => (
+                              <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-muted/30">
+                                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                                <p className="text-sm text-foreground">{insight}</p>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Comparison Data</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Monthly comparison requires at least 2 years of transaction history.
+                    </p>
+                    <Button
+                      onClick={fetchYearOverYearData}
+                      variant="outline"
+                      size="sm"
+                      disabled={yoyLoading}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${yoyLoading ? 'animate-spin' : ''}`} />
+                      Refresh Data
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
