@@ -7,9 +7,9 @@
 }
 
 .transactionRow:hover {
-  background: linear-gradient(135deg, hsl(var(--muted)) / 0.3, hsl(var(--muted)) / 0.1);
+  background: linear-gradient(135deg, hsla(var(--muted), 0.3), hsla(var(--muted), 0.1));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px -2px hsl(var(--muted-foreground)) / 0.1;
+  box-shadow: 0 4px 12px -2px hsla(var(--muted-foreground), 0.1);
 }
 
 .transactionsTable {

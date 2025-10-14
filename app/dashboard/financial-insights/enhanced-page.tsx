@@ -30,7 +30,68 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-export default function FinancialInsightsPage() {
+interface QuickStatCardProps {
+  title: string;
+  value: string;
+  change?: string;
+  changeType?: 'positive' | 'negative' | 'neutral';
+  icon: React.ReactNode;
+  description?: string;
+  className?: string;
+}
+
+function QuickStatCard({ 
+  title, 
+  value, 
+  change, 
+  changeType = 'neutral', 
+  icon, 
+  description,
+  className = "" 
+}: QuickStatCardProps) {
+  const changeColor = {
+    positive: 'text-green-600 dark:text-green-400',
+    negative: 'text-red-600 dark:text-red-400',
+    neutral: 'text-muted-foreground'
+  }[changeType];
+
+  const changeIcon = changeType === 'positive' ? (
+    <ArrowUpRight className="h-3 w-3" />
+  ) : changeType === 'negative' ? (
+    <ArrowDownRight className="h-3 w-3" />
+  ) : null;
+
+  return (
+    <Card className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80 ${className}`}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                {icon}
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-foreground">{value}</p>
+              {change && (
+                <div className={`flex items-center gap-1 text-sm ${changeColor}`}>
+                  {changeIcon}
+                  <span>{change}</span>
+                </div>
+              )}
+              {description && (
+                <p className="text-xs text-muted-foreground">{description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function EnhancedFinancialInsightsPage() {
   const router = useRouter();
   const { userId } = useUserPreferences();
 
@@ -222,111 +283,49 @@ export default function FinancialInsightsPage() {
 
         {/* Enhanced Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                      <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Income</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
-                      ${financialMetrics.totalIncome.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">All income sources</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                      <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
-                      ${financialMetrics.totalExpenses.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">All spending categories</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                      <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">Net Income</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
-                      ${netIncome.toLocaleString()}
-                    </p>
-                    <div className={`flex items-center gap-1 text-sm ${netIncome > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {netIncome > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      <span>{savingsRate}% savings rate</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-                      <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">Active Budgets</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">{financialMetrics.activeBudgets}</p>
-                    <p className="text-xs text-muted-foreground">Budget categories set</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80 lg:col-span-1 xl:col-span-1">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                      <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">AI Insights</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">{financialMetrics.insightsGenerated}</p>
-                    <div className={`flex items-center gap-1 text-sm ${financialMetrics.highPriorityInsights > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                      <span>{financialMetrics.highPriorityInsights > 0 ? `${financialMetrics.highPriorityInsights} high priority` : 'All clear'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <QuickStatCard
+            title="Total Income"
+            value={`$${financialMetrics.totalIncome.toLocaleString()}`}
+            change="+12.5% from last month"
+            changeType="positive"
+            icon={<DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />}
+            description="All income sources"
+          />
+          
+          <QuickStatCard
+            title="Total Expenses"
+            value={`$${financialMetrics.totalExpenses.toLocaleString()}`}
+            change="-5.2% from last month"
+            changeType="positive"
+            icon={<TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />}
+            description="All spending categories"
+          />
+          
+          <QuickStatCard
+            title="Net Income"
+            value={`$${netIncome.toLocaleString()}`}
+            change={`${savingsRate}% savings rate`}
+            changeType={netIncome > 0 ? 'positive' : 'negative'}
+            icon={<BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
+            description="Income minus expenses"
+          />
+          
+          <QuickStatCard
+            title="Active Budgets"
+            value={financialMetrics.activeBudgets.toString()}
+            description="Budget categories set"
+            icon={<Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+          />
+          
+          <QuickStatCard
+            title="AI Insights"
+            value={financialMetrics.insightsGenerated.toString()}
+            change={financialMetrics.highPriorityInsights > 0 ? `${financialMetrics.highPriorityInsights} high priority` : 'All clear'}
+            changeType={financialMetrics.highPriorityInsights > 0 ? 'negative' : 'positive'}
+            icon={<Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
+            description="Generated insights"
+            className="lg:col-span-1 xl:col-span-1"
+          />
         </div>
 
         {/* Financial Health Alert */}
