@@ -43,8 +43,6 @@ export async function ensureUserProfile(
       currency = userData?.user?.user_metadata?.preferred_currency || 'USD';
     }
     
-    console.log("Checking profile for user:", userId);
-    
     // Check if profile exists first
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')

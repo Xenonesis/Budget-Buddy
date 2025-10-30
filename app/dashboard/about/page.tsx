@@ -917,7 +917,7 @@ export default function AboutPage() {
                   <div>
                     <h3 className="font-semibold mb-2 text-foreground">Still have questions?</h3>
                     <p className="text-muted-foreground mb-4 text-sm">
-                      Can't find what you're looking for? Our support team is here to help!
+                      Can&apos;t find what you&apos;re looking for? Our support team is here to help!
                     </p>
                     <div className="flex gap-3 flex-wrap">
                       <Button variant="outline" size="sm" className="h-8" asChild>

@@ -11,14 +11,6 @@ import {
   EnhancedBudgetWidget
 } from '@/components/ui/dashboard-widgets';
 
-// Debug: Check if components are properly imported
-console.log('Widget components:', {
-  QuickStatsWidget,
-  BudgetProgressWidget,
-  RecentTransactionsWidget,
-  MonthlySummaryWidget,
-  CategoryBreakdownWidget
-});
 import React from 'react';
 import { 
   DollarSign, 

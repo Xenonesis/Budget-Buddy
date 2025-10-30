@@ -83,8 +83,6 @@ export async function resetDashboardLayout(userId: string): Promise<WidgetLayout
 
     if (error) {
       console.error('Error resetting dashboard layout:', error);
-    } else {
-      console.log('Dashboard layout reset successfully');
     }
   } catch (err) {
     console.error('Failed to reset dashboard layout:', err);
@@ -98,9 +96,8 @@ export async function resetDashboardLayout(userId: string): Promise<WidgetLayout
  */
 export function clearLocalStorageWidgets() {
   try {
-    localStorage.removeItem('widget-layout');
-    localStorage.removeItem('dashboard-layout');
-    console.log('Local storage widget data cleared');
+    localStorage.removeItem('budgetBuddyDashboard');
+    localStorage.removeItem('dashboardLayout');
   } catch (err) {
     console.error('Failed to clear local storage:', err);
   }

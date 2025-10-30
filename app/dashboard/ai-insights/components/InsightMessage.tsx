@@ -97,7 +97,7 @@ export function InsightMessage({ insights, onActionClick }: InsightMessageProps)
             <div>
               <h3 className="font-semibold mb-2">No Insights Available</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                I don't have any financial insights ready right now. Would you like me to analyze your recent financial activity and generate some fresh insights?
+                I don&apos;t have any financial insights ready right now. Would you like me to analyze your recent financial activity and generate some fresh insights?
               </p>
               <Button 
                 size="sm" 

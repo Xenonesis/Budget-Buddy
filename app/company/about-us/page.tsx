@@ -25,13 +25,13 @@ export default function AboutUsPage() {
             <h2 className="text-3xl font-semibold mb-6">Our Story</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Budget Buddy was born from a simple observation: managing personal finances shouldn't be complicated. Founded by Aditya Kumar Tiwari in 2024, our platform emerged from the belief that everyone deserves access to powerful yet simple financial tools.
+                Budget Buddy was born from a simple observation: managing personal finances shouldn&apos;t be complicated. Founded by Aditya Kumar Tiwari in 2024, our platform emerged from the belief that everyone deserves access to powerful yet simple financial tools.
               </p>
               <p>
                 What started as a personal project to solve his own budgeting challenges quickly evolved into a comprehensive platform serving thousands of users worldwide. Today, Budget Buddy continues to grow with a focus on intuitive design, powerful analytics, and world-class security.
               </p>
               <p>
-                Our vision is to create a world where financial stress is eliminated through better planning, tracking, and insights. We're committed to continuous improvement, listening to our users, and evolving our platform to meet your changing needs.
+                Our vision is to create a world where financial stress is eliminated through better planning, tracking, and insights. We&apos;re committed to continuous improvement, listening to our users, and evolving our platform to meet your changing needs.
               </p>
             </div>
           </div>
@@ -190,7 +190,7 @@ export default function AboutUsPage() {
         <div className="bg-muted/30 rounded-2xl p-10 text-center max-w-4xl mx-auto">
           <h2 className="text-2xl font-semibold mb-4">Join Us on Our Mission</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            We're just getting started on our journey to revolutionize personal finance management. 
+            We&apos;re just getting started on our journey to revolutionize personal finance management. 
             Join thousands of users who are already taking control of their financial future with Budget Buddy.
           </p>
           

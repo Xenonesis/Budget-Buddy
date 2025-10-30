@@ -166,11 +166,11 @@ export function AnnualBudgetSummary({ budgets, categorySpending }: AnnualBudgetS
             <div className="mt-3 text-xs">
               {yearlyTotals.projectedSavingsOrOverage >= 0 ? (
                 <p className="text-emerald-600">
-                  You're projected to stay under budget for the year! Keep up the good work.
+                  You&apos;re projected to stay under budget for the year! Keep up the good work.
                 </p>
               ) : (
                 <p className="text-red-600">
-                  Based on your current spending, you're projected to go over budget this year.
+                  Based on your current spending, you&apos;re projected to go over budget this year.
                 </p>
               )}
             </div>

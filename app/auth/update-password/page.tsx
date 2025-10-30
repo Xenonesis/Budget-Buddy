@@ -389,7 +389,7 @@ export default function UpdatePasswordPage() {
                           className="text-xs text-red-600 flex items-center gap-1"
                         >
                           <AlertCircle size={12} />
-                          Passwords don't match
+                          Passwords don&apos;t match
                         </motion.p>
                       )}
                     </motion.div>
