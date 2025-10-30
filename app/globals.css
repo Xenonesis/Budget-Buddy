@@ -1449,14 +1449,14 @@ html {
 }
 
 /* Safari fix for gradient text */
-@supports (-webkit-background-clip: text) and not (background-clip: text) {
+@supports (-webkit-background-clip: text) {
   .brand-text {
     color: transparent;
   }
 }
 
 /* Firefox fix for gradient text */
-@supports (background-clip: text) and not (-webkit-background-clip: text) {
+@supports (background-clip: text) {
   .brand-text {
     color: transparent;
   }
@@ -2129,8 +2129,9 @@ html {
   100% {
     offset-distance: 100%;
   }
-}/
-* Floating sidebar toggle button styles */
+}
+
+/* Floating sidebar toggle button styles */
 .floating-sidebar-toggle {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);

@@ -908,7 +908,7 @@ export default function AddTransactionForm({
               )}
               
               <p className="mt-1 mb-2 text-sm text-blue-600 font-medium">
-                To delete categories, select "+ Add new category" option
+                To delete categories, select &quot;+ Add new category&quot; option
               </p>
 
               {/* Show custom category form when "custom" is selected */}
@@ -1074,7 +1074,7 @@ export default function AddTransactionForm({
             <div className="bg-card rounded-lg p-6 max-w-md w-full shadow-lg">
               <h3 className="text-lg font-bold mb-2">Delete Category</h3>
               <p className="mb-4">
-                Are you sure you want to delete the category "{categoryToDelete.name}"?
+                Are you sure you want to delete the category &quot;{categoryToDelete.name}&quot;?
               </p>
               <div className="flex justify-end space-x-2">
                 <Button

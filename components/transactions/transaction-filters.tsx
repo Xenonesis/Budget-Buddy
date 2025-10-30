@@ -367,7 +367,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                     )}
                     {searchTerm && (
                       <Badge variant="secondary" className="h-7 px-3 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        🔍 "{searchTerm.substring(0, 15)}{searchTerm.length > 15 ? '...' : ''}"
+                        🔍 &quot;{searchTerm.substring(0, 15)}{searchTerm.length > 15 ? '...' : ''}&quot;
                         <Button
                           variant="ghost"
                           size="sm"

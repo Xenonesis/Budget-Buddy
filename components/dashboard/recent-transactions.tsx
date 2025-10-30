@@ -19,7 +19,7 @@ import {
   Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { FastTransactionSkeleton } from "@/components/ui/fast-skeleton";
 
 interface Transaction {
   id: string;
@@ -31,9 +31,14 @@ interface Transaction {
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
+  loading?: boolean;
 }
 
-export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export function RecentTransactions({ transactions, loading = false }: RecentTransactionsProps) {
+  if (loading) {
+    return <FastTransactionSkeleton />;
+  }
+
   return (
     <div className="rounded-xl border bg-card p-5 md:p-6 shadow-md" role="region" aria-labelledby="recent-transactions-title">
       <div className="flex items-center justify-between mb-4 md:mb-6">

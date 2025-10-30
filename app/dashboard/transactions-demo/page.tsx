@@ -1,10 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
-
-// This demo page now fetches real user data instead of using hardcoded samples
-import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface Transaction {
@@ -16,55 +13,54 @@ interface Transaction {
     description: string;
 }
 
-const [realTransactions, setRealTransactions] = useState<Transaction[]>([]);
-const [loading, setLoading] = useState(true);
-
-// Fetch real user transactions
-useEffect(() => {
-    const fetchRealTransactions = async () => {
-        try {
-            const { data: userData } = await supabase.auth.getUser();
-            if (!userData.user) return;
-
-            const { data: transactions, error } = await supabase
-                .from('transactions')
-                .select(`
-                    id,
-                    amount,
-                    type,
-                    description,
-                    date,
-                    categories!inner(name)
-                `)
-                .eq('user_id', userData.user.id)
-                .order('date', { ascending: false })
-                .limit(20);
-
-            if (error) throw error;
-
-            const formattedTransactions = transactions?.map(t => ({
-                id: t.id,
-                amount: t.amount,
-                type: t.type as "income" | "expense",
-                category: (t.categories as any)?.name || 'Uncategorized',
-                date: t.date,
-                description: t.description || ''
-            })) || [];
-
-            setRealTransactions(formattedTransactions);
-        } catch (error) {
-            console.error('Error fetching real transactions:', error);
-            // Fallback to empty array instead of mock data
-            setRealTransactions([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchRealTransactions();
-}, []);
-
 export default function TransactionsDemoPage() {
+    const [realTransactions, setRealTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch real user transactions
+    useEffect(() => {
+        const fetchRealTransactions = async () => {
+            try {
+                const { data: userData } = await supabase.auth.getUser();
+                if (!userData.user) return;
+
+                const { data: transactions, error } = await supabase
+                    .from('transactions')
+                    .select(`
+                        id,
+                        amount,
+                        type,
+                        description,
+                        date,
+                        categories!inner(name)
+                    `)
+                    .eq('user_id', userData.user.id)
+                    .order('date', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+
+                const formattedTransactions = transactions?.map(t => ({
+                    id: t.id,
+                    amount: t.amount,
+                    type: t.type as "income" | "expense",
+                    category: (t.categories as any)?.name || 'Uncategorized',
+                    date: t.date,
+                    description: t.description || ''
+                })) || [];
+
+                setRealTransactions(formattedTransactions);
+            } catch (error) {
+                console.error('Error fetching real transactions:', error);
+                setRealTransactions([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRealTransactions();
+    }, []);
+
     // Calculate summary stats from real data
     const totalAmount = realTransactions.reduce((sum, t) => sum + t.amount, 0);
     const categories = [...new Set(realTransactions.map(t => t.category))].length;
@@ -72,14 +68,12 @@ export default function TransactionsDemoPage() {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <div className="animate-pulse">
-                    <div className="h-8 w-64 bg-muted rounded mb-4"></div>
-                    <div className="h-4 w-96 bg-muted rounded mb-8"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="h-20 bg-muted rounded"></div>
-                        ))}
-                    </div>
+                <div className="space-y-4">
+                    <div className="h-8 w-64 bg-muted rounded"></div>
+                    <div className="h-4 w-96 bg-muted rounded"></div>
+                    <div className="h-20 bg-muted rounded"></div>
+                    <div className="h-20 bg-muted rounded"></div>
+                    <div className="h-20 bg-muted rounded"></div>
                 </div>
             </div>
         );

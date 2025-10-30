@@ -14,7 +14,7 @@ export default function ContactUsPage() {
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl text-muted-foreground">
-            Have questions or need help? We're here for you.
+            Have questions or need help? We&apos;re here for you.
           </p>
         </div>
         
@@ -108,7 +108,7 @@ export default function ContactUsPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium">How do I reset my password?</h3>
-                  <p className="text-sm text-muted-foreground">Visit the login page and click on "Forgot Password" to receive reset instructions.</p>
+                  <p className="text-sm text-muted-foreground">Visit the login page and click on &quot;Forgot Password&quot; to receive reset instructions.</p>
                 </div>
                 
                 <div>

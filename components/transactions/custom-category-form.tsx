@@ -194,7 +194,7 @@ export const CustomCategoryForm: React.FC<CustomCategoryFormProps> = ({
           <div className="bg-card rounded-lg p-6 max-w-md w-full shadow-lg">
             <h3 className="text-lg font-bold mb-2">Delete Category</h3>
             <p className="mb-4">
-              Are you sure you want to delete the category "{categoryToDelete.name}"?
+              Are you sure you want to delete the category &quot;{categoryToDelete.name}&quot;?
             </p>
             <div className="flex justify-end space-x-2">
               <Button

@@ -85,7 +85,7 @@ export function CTASection() {
                   viewport={{ once: true }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  "
+                  &quot;
                 </motion.span>
                 Ready to take control of your{" "}
                 <motion.span
@@ -122,7 +122,7 @@ export function CTASection() {
                   transition={{ delay: 0.4, duration: 0.6 }}
                 />
                 Start your journey to financial freedom today. Our powerful tools make
-                budgeting simple, intuitive, and even enjoyable. Join thousands who've
+                budgeting simple, intuitive, and even enjoyable. Join thousands who&apos;ve
                 already transformed their financial future.
               </motion.p>
 
@@ -317,7 +317,7 @@ export function CTASection() {
                   viewport={{ once: true }}
                   transition={{ delay: 0.7, duration: 0.4 }}
                 >
-                  "Budget Buddy helped me save for my dream vacation in just 6 months. The visual insights made all the difference!"
+                  &quot;Budget Buddy helped me save for my dream vacation in just 6 months. The visual insights made all the difference!&quot;
                 </motion.blockquote>
 
                 <motion.div

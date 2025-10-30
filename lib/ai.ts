@@ -632,7 +632,7 @@ async function enhanceMessagesWithFinancialContext(
     const budgets = budgetsResult.data || [];
 
     // Find existing system message or create one
-    let systemMessage = messages.find(msg => msg.role === 'system');
+    const systemMessage = messages.find(msg => msg.role === 'system');
     const otherMessages = messages.filter(msg => msg.role !== 'system');
 
     // Create enhanced system message with actual financial context

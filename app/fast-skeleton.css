@@ -1,0 +1,33 @@
+/* Fast skeleton animations - optimized for performance */
+.fast-skeleton {
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted-foreground) / 0.1) 50%, 
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: fast-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes fast-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Disable animations on reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .fast-skeleton {
+    animation: none;
+    background: hsl(var(--muted));
+  }
+}
+
+/* GPU acceleration for better performance */
+.fast-skeleton {
+  will-change: background-position;
+  transform: translateZ(0);
+}

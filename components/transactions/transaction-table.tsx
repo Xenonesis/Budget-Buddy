@@ -126,7 +126,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           <h3 className="text-2xl font-bold text-foreground mb-3">No transactions yet</h3>
           <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
             Start tracking your finances by adding your first transaction. 
-            Whether it's income or an expense, every journey begins with a single step! 💰
+            Whether it&apos;s income or an expense, every journey begins with a single step! 💰
           </p>
           
           <Button

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ArrowUpIcon, ArrowDownIcon, Calendar, Filter, Eye, TrendingUp, TrendingDown, MoreHorizontal, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { FastTransactionSkeleton } from "@/components/ui/fast-skeleton";
 
 interface Transaction {
   id: string;
@@ -23,6 +23,7 @@ interface EnhancedRecentTransactionsProps {
   transactions: Transaction[];
   showFilters?: boolean;
   maxItems?: number;
+  loading?: boolean;
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
@@ -84,12 +85,7 @@ function TransactionItem({ transaction, index }: { transaction: Transaction; ind
   const categoryStyle = CATEGORY_COLORS[categoryKey] || CATEGORY_COLORS.default;
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.3 }}
-      className="group relative overflow-hidden"
-    >
+    <div className="group relative overflow-hidden">
       <div className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:border-border hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm hover:bg-card">
         <div className="flex items-center gap-4">
           {/* Enhanced category icon with emoji */}
@@ -160,14 +156,15 @@ function TransactionItem({ transaction, index }: { transaction: Transaction; ind
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function EnhancedRecentTransactions({ 
   transactions, 
   showFilters = true, 
-  maxItems = 5 
+  maxItems = 5,
+  loading = false
 }: EnhancedRecentTransactionsProps) {
   const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -189,6 +186,10 @@ export function EnhancedRecentTransactions({
       return sum + (t.type === "income" ? t.amount : -t.amount);
     }, 0);
   }, [filteredTransactions]);
+
+  if (loading) {
+    return <FastTransactionSkeleton />;
+  }
 
   const filterButtons = [
     { key: "all" as const, label: "All", count: transactions.length },
@@ -273,31 +274,18 @@ export function EnhancedRecentTransactions({
       </CardHeader>
       
       <CardContent className="pt-6">
-        <AnimatePresence mode="wait">
-          {filteredTransactions.length > 0 ? (
-            <motion.div
-              key="transactions"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              {filteredTransactions.map((transaction, index) => (
-                <TransactionItem 
-                  key={transaction.id} 
-                  transaction={transaction} 
-                  index={index}
-                />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-col items-center justify-center py-16 text-center"
-            >
+        {filteredTransactions.length > 0 ? (
+          <div className="space-y-3">
+            {filteredTransactions.map((transaction, index) => (
+              <TransactionItem 
+                key={transaction.id} 
+                transaction={transaction} 
+                index={index}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-6">
                 {searchTerm ? (
                   <Search className="h-10 w-10 text-muted-foreground" />
@@ -327,9 +315,8 @@ export function EnhancedRecentTransactions({
                   </Link>
                 </Button>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </CardContent>
     </Card>
   );

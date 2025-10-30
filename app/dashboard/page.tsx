@@ -18,15 +18,16 @@ import { EnhancedExpensePieChart } from "@/components/dashboard/charts/enhanced-
 import { MonthlySpendingTrend } from "@/components/dashboard/charts/monthly-spending-trend";
 
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { FastDashboardSkeleton } from "@/components/ui/fast-skeleton";
 import { CategoryInsights } from "@/components/dashboard/category-insights";
 import { EnhancedDashboardLayout } from "@/components/dashboard/enhanced-dashboard-layout";
-import { DashboardSkeleton } from "@/components/ui/loading-states";
+// Removed complex DashboardSkeleton import - using FastDashboardSkeleton instead
 import { NotificationProvider } from "@/components/ui/enhanced-notifications";
 import { EnhancedMetricsCards } from "@/components/dashboard/enhanced-metrics-cards";
 import { PremiumMetricsSection } from "@/components/dashboard/premium-metrics-section";
 import { TimeRangeSelector } from '@/components/ui/time-range-selector';
 import { AlertNotificationSystem } from '@/components/ui/alert-notification-system';
-import { DashboardEnhancementService } from '@/lib/dashboard-enhancement-service';
+import { FastDashboardService } from '@/lib/fast-dashboard-service';
 
 // Validation function to clean up duplicate widgets
 function validateAndCleanLayout(layout: WidgetLayout): WidgetLayout {
@@ -422,237 +423,48 @@ export default function DashboardPage() {
     }
   };
 
-  // Fetch data with offline support and better error handling
+  // Fast data fetching with minimal database calls
   const fetchData = async () => {
     setLoading(true);
     
     try {
-      // Try to load from localStorage first for immediate display
+      // Quick cache check
       const cachedStats = getFromLocalStorage<DashboardStats>(STORAGE_KEYS.TRANSACTIONS);
-      const lastSync = getFromLocalStorage<number>(STORAGE_KEYS.LAST_SYNC);
-      
-      if (cachedStats) {
+      if (cachedStats && !isOnline()) {
         setStats(cachedStats);
-        if (lastSync) {
-          const date = new Date(lastSync);
-          setLastSynced(date.toLocaleString());
-        }
-      }
-      
-      // If offline, don't try to fetch from server
-      if (!isOnline()) {
         setIsOffline(true);
         setLoading(false);
         return;
       }
       
-      // Fetch from server if online
+      // Get user
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData.user) {
-        console.error('Auth error:', userError);
         setLoading(false);
         return;
       }
 
-      // Calculate date range based on selected time range
-      const now = new Date();
-      let startDate: Date;
-      let endDate: Date = new Date(now);
-
-      switch (timeRange) {
-        case 'today':
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          break;
-        case 'yesterday':
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
-          break;
-        case 'this-week':
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - now.getDay());
-          startDate = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
-          break;
-        case 'last-week':
-          const lastWeekStart = new Date(now);
-          lastWeekStart.setDate(now.getDate() - now.getDay() - 7);
-          const lastWeekEnd = new Date(now);
-          lastWeekEnd.setDate(now.getDate() - now.getDay() - 1);
-          startDate = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
-          endDate = new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate(), 23, 59, 59);
-          break;
-        case 'this-month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case 'last-month':
-          startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-          endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-          break;
-        case 'this-year':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-        case 'last-year':
-          startDate = new Date(now.getFullYear() - 1, 0, 1);
-          endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
-          break;
-        case 'custom':
-          if (customDateRange) {
-            startDate = customDateRange.from;
-            endDate = customDateRange.to;
-          } else {
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          }
-          break;
-        default:
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      }
-
-      // Fetch transactions with date filtering and better error handling
-      const { data: transactions, error: transactionsError } = await supabase
-        .from("transactions")
-        .select(`
-          *,
-          categories:category_id (
-            name,
-            type
-          )
-        `)
-        .eq("user_id", userData.user.id)
-        .gte("date", startDate.toISOString().split('T')[0])
-        .lte("date", endDate.toISOString().split('T')[0])
-        .order("date", { ascending: false });
-
-      if (transactionsError) {
-        console.error('Error fetching transactions:', transactionsError);
-        setLoading(false);
-        return;
-      }
-
-      if (!transactions) {
-        console.warn('No transactions found');
-        // Set empty stats instead of returning
-        setStats({
-          totalIncome: 0,
-          totalExpense: 0,
-          balance: 0,
-          recentTransactions: [],
-          monthlyData: [],
-          categoryData: [],
-          topCategories: [],
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Pre-process transactions once to avoid multiple loops
-      const processedTransactions = transactions.map(t => ({
-        ...t,
-        category: t.categories?.name || 'Uncategorized'
-      }));
-
-      // Calculate all stats at once in a single pass
-      let totalIncome = 0;
-      let totalExpense = 0;
+      // Use fast dashboard service
+      const fastStats = await FastDashboardService.getFastDashboardData(userData.user.id, timeRange);
       
-      processedTransactions.forEach(t => {
-        if (t.type === 'income') {
-          totalIncome += t.amount;
-        } else {
-          totalExpense += t.amount;
-        }
-      });
-
-      // Get enhanced metrics using the new service
-      const enhancedMetricsData = await DashboardEnhancementService.getDashboardMetrics(
-        userData.user.id, 
-        startDate, 
-        endDate
-      );
-      setEnhancedMetrics(enhancedMetricsData);
-
-      // Get enhanced monthly data with real calculations
-      const enhancedMonthlyData = await DashboardEnhancementService.getEnhancedMonthlyData(
-        userData.user.id,
-        startDate,
-        endDate
-      );
-
-      // Create the new stats object with enhanced data
+      // Convert to expected format
       const newStats: DashboardStats = {
-        totalIncome,
-        totalExpense,
-        balance: totalIncome - totalExpense,
-        recentTransactions: processedTransactions.slice(0, 5),
-        monthlyData: enhancedMonthlyData.length > 0 ? enhancedMonthlyData : getMonthlyData(processedTransactions),
-        categoryData: getCategoryData(processedTransactions),
-        topCategories: getTopCategories(processedTransactions),
+        totalIncome: fastStats.totalIncome,
+        totalExpense: fastStats.totalExpense,
+        balance: fastStats.balance,
+        recentTransactions: fastStats.recentTransactions,
+        monthlyData: fastStats.monthlyData,
+        categoryData: fastStats.categoryData,
+        topCategories: fastStats.topCategories,
       };
 
-      // Fetch previous year data for year-over-year comparison
-      try {
-        const previousYearStart = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate());
-        const previousYearEnd = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate());
-        
-        const { data: previousYearTransactions } = await supabase
-          .from("transactions")
-          .select(`
-            *,
-            categories:category_id (
-              name,
-              type
-            )
-          `)
-          .eq("user_id", userData.user.id)
-          .gte("date", previousYearStart.toISOString().split('T')[0])
-          .lte("date", previousYearEnd.toISOString().split('T')[0])
-          .order("date", { ascending: false });
-
-        if (previousYearTransactions && previousYearTransactions.length > 0) {
-          const processedPreviousYear = previousYearTransactions.map(t => ({
-            ...t,
-            category: t.categories?.name || 'Uncategorized'
-          }));
-
-          const previousYearExpense = processedPreviousYear
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0);
-
-          const previousYearMonthlyData = getMonthlyData(processedPreviousYear);
-
-          newStats.previousYearData = {
-            year: startDate.getFullYear() - 1,
-            monthlyData: previousYearMonthlyData.map(month => ({
-              month: month.name,
-              year: startDate.getFullYear() - 1,
-              totalSpending: month.expense,
-              categoryBreakdown: getCategoryData(processedPreviousYear.filter(t => 
-                t.date.substring(5, 7) === previousYearMonthlyData.find(m => m.name === month.name)?.name
-              )).reduce((acc, cat) => {
-                acc[cat.name] = cat.value;
-                return acc;
-              }, {} as { [key: string]: number }),
-              transactionCount: month.transactionCount || 0
-            })),
-            totalSpending: previousYearExpense,
-            averageMonthlySpending: previousYearExpense / Math.max(previousYearMonthlyData.length, 1)
-          };
-        }
-      } catch (previousYearError) {
-        console.error("Error fetching previous year data:", previousYearError);
-        // Continue without previous year data
-      }
-
-      // Save the fetched data to localStorage for offline use
-      saveToLocalStorage(STORAGE_KEYS.TRANSACTIONS, newStats, 60); // Cache for 60 minutes
-      saveToLocalStorage(STORAGE_KEYS.LAST_SYNC, Date.now());
-      setLastSynced(new Date().toLocaleString());
-      
-      // Batch state updates to prevent multiple renders
+      // Cache and update state
+      saveToLocalStorage(STORAGE_KEYS.TRANSACTIONS, newStats, 30); // Cache for 30 minutes
       setStats(newStats);
       setIsOffline(false);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       setError(error instanceof Error ? error.message : 'Failed to load dashboard data');
-      setIsOffline(!isOnline());
     } finally {
       setLoading(false);
     }
@@ -795,60 +607,9 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Enhanced loading state
+  // Fast loading state
   if (loading) {
-    return (
-      <div className="container mx-auto pr-4 py-6 md:pr-6 md:py-6 lg:pr-8 lg:py-8 max-w-screen-xl">
-        <div className="animate-pulse">
-          {/* Header skeleton */}
-          <div className="mb-6 md:mb-8">
-            <div className="flex items-center justify-between">
-              <div className="h-8 w-48 bg-muted rounded-md"></div>
-              <div className="h-9 w-24 bg-muted rounded-md"></div>
-            </div>
-            <div className="mt-2 h-4 w-96 bg-muted rounded-md"></div>
-          </div>
-          
-          {/* Stats cards skeleton */}
-          <div className="mb-8 md:mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl border bg-card p-5 md:p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-muted"></div>
-                  <div className="h-4 w-24 bg-muted rounded"></div>
-                </div>
-                <div className="h-8 w-32 bg-muted rounded mb-2"></div>
-                <div className="h-3 w-20 bg-muted rounded"></div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Charts skeleton */}
-          <div className="mb-8 md:mb-10 space-y-6">
-            <div className="h-96 bg-muted rounded-xl"></div>
-          </div>
-          
-          {/* Recent transactions skeleton */}
-          <div className="rounded-xl border bg-card p-5 md:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-6 w-48 bg-muted rounded"></div>
-              <div className="h-8 w-20 bg-muted rounded"></div>
-            </div>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-3 border rounded">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-4 w-16 bg-muted rounded"></div>
-                    <div className="h-4 w-24 bg-muted rounded"></div>
-                  </div>
-                  <div className="h-4 w-16 bg-muted rounded"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <FastDashboardSkeleton />;
   }
 
   // Enhanced error state
@@ -952,7 +713,7 @@ export default function DashboardPage() {
                 <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>You're viewing cached data. Connect to sync latest information.</span>
+                <span>You&apos;re viewing cached data. Connect to sync latest information.</span>
               </div>
               <Button 
                 onClick={syncData} 
@@ -1362,7 +1123,7 @@ export default function DashboardPage() {
                 <div className="space-y-3 max-w-md">
                   <h3 className="text-xl font-semibold text-foreground">No Financial Data Yet</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Start tracking your finances by adding transactions. You'll see beautiful charts and insights about your spending patterns, trends, and categories.
+                    Start tracking your finances by adding transactions. You&apos;ll see beautiful charts and insights about your spending patterns, trends, and categories.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">

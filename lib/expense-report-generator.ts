@@ -794,7 +794,7 @@ class TaxCalculator {
     let gstTotal = 0;
     let cgst = 0;
     let sgst = 0;
-    let igst = 0;
+    const igst = 0;
     const taxDocuments: TaxDocument[] = [];
     
     for (const transaction of transactions) {
