@@ -46,7 +46,8 @@ export function SafeImage({
     priority,
     quality,
     sizes,
-    unoptimized,
+    // SVG files should be unoptimized
+    unoptimized: unoptimized || src.endsWith('.svg'),
   });
 
   // Get the proper image source

@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SafeImage } from './safe-image';
@@ -20,6 +22,17 @@ export function Logo({
   className = '',
   animated = false
 }: LogoProps) {
+  const [mounted, setMounted] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Check user's motion preferences only on client side
+    if (typeof window !== 'undefined') {
+      setPrefersReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+  }, []);
+
   // Enhanced size mappings with more options and responsive classes
   const sizeMap = {
     xs: {
@@ -156,30 +169,53 @@ export function Logo({
     }
   };
 
-  // Check if window is defined (for SSR) and respect user's motion preferences
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
-    : false;
+  // Disable animations if reduced motion is preferred or not mounted yet
+  const shouldAnimate = mounted && animated && !prefersReducedMotion;
 
-  // Disable animations if reduced motion is preferred
-  const shouldAnimate = animated && !prefersReducedMotion;
+  // Prevent hydration mismatch - render simple version on server
+  if (!mounted && animated) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="relative">
+          <div className={`relative flex items-center justify-center ${sizeMap[size].container} transition-all duration-300`}>
+            <div className={`${sizeMap[size].logo} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 shadow-lg`}>
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg">BB</span>
+            </div>
+          </div>
+        </div>
+        {withText && (
+          <div className="relative">
+            <span className={`font-bold tracking-tight bg-gradient-to-r from-primary via-violet-400 to-indigo-400 bg-clip-text text-transparent ${sizeMap[size].text} ${textClassName}`}>
+              Budget Buddy
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Base component with responsive container
   const LogoContent = () => (
     <div className={`relative flex items-center justify-center ${sizeMap[size].container} transition-all duration-300`}>
-      <SafeImage 
-        src="/logo.svg" 
-        alt="Budget Buddy Logo" 
-        width={getImageDimension(sizeMap[size].logo)} 
-        height={getImageDimension(sizeMap[size].logo)} 
-        className={`${sizeMap[size].logo} transition-all duration-300`}
-        priority={size === 'lg' || size === 'xl' || size === '2xl'} 
-        fallback={
-          <div className={`${sizeMap[size].logo} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 shadow-lg`}>
-            <span className="text-xs sm:text-sm md:text-base lg:text-lg">BB</span>
-          </div>
-        }
-      />
+      {mounted ? (
+        <SafeImage 
+          src="/logo.svg" 
+          alt="Budget Buddy Logo" 
+          width={getImageDimension(sizeMap[size].logo)} 
+          height={getImageDimension(sizeMap[size].logo)} 
+          className={`${sizeMap[size].logo} transition-all duration-300`}
+          priority={size === 'lg' || size === 'xl' || size === '2xl'} 
+          fallback={
+            <div className={`${sizeMap[size].logo} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 shadow-lg`}>
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg">BB</span>
+            </div>
+          }
+        />
+      ) : (
+        <div className={`${sizeMap[size].logo} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold transition-all duration-300 shadow-lg`}>
+          <span className="text-xs sm:text-sm md:text-base lg:text-lg">BB</span>
+        </div>
+      )}
     </div>
   );
 
