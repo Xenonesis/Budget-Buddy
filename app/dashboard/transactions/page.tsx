@@ -206,26 +206,26 @@ const TransactionsTable = memo(({
   sortDirection: "asc" | "desc"
 }) => {
   return (
-    <div className={styles.tableContainer}>
-      <table className={styles.transactionsTable}>
+    <div className={`${styles.tableContainer} responsive-table-wrapper`}>
+      <table className={`${styles.transactionsTable} responsive-table`}>
         <thead>
           <tr>
-            <th onClick={() => onSort("date")} className={styles.sortableHeader}>
+            <th onClick={() => onSort("date")} className={`${styles.sortableHeader} whitespace-nowrap`}>
               Date {sortField === "date" && (sortDirection === "asc" ? "↑" : "↓")}
             </th>
-            <th onClick={() => onSort("type")} className={styles.sortableHeader}>
+            <th onClick={() => onSort("type")} className={`${styles.sortableHeader} whitespace-nowrap`}>
               Type {sortField === "type" && (sortDirection === "asc" ? "↑" : "↓")}
             </th>
-            <th onClick={() => onSort("category_name")} className={styles.sortableHeader}>
+            <th onClick={() => onSort("category_name")} className={`${styles.sortableHeader} whitespace-nowrap`}>
               Category {sortField === "category_name" && (sortDirection === "asc" ? "↑" : "↓")}
             </th>
-            <th onClick={() => onSort("description")} className={styles.sortableHeader}>
+            <th onClick={() => onSort("description")} className={`${styles.sortableHeader} whitespace-nowrap`}>
               Description {sortField === "description" && (sortDirection === "asc" ? "↑" : "↓")}
             </th>
-            <th onClick={() => onSort("amount")} className={styles.sortableHeader}>
+            <th onClick={() => onSort("amount")} className={`${styles.sortableHeader} whitespace-nowrap`}>
               Amount {sortField === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
             </th>
-            <th>Actions</th>
+            <th className="whitespace-nowrap">Actions</th>
           </tr>
         </thead>
         <tbody id="transactions-tbody">
@@ -2031,7 +2031,7 @@ export default function TransactionsPage() {
 
   if (loading && transactions.length === 0) {
     return (
-      <div className="container mx-auto p-4 md:p-6">
+      <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="skeleton-loader h-8 w-40"></div>
           <div className="flex gap-2">
@@ -2104,7 +2104,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
       <div ref={contentRef}>
         {/* Pull-to-refresh indicator */}
         {refreshing && (

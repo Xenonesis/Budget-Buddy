@@ -163,7 +163,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:p-6 lg:p-8 max-w-screen-xl">
+    <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-screen-xl">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold md:text-4xl bg-gradient-to-r from-primary to-violet-400 bg-clip-text text-transparent">

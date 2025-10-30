@@ -240,7 +240,7 @@ export default function RegisterPage() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden overflow-x-hidden">
       {/* Enhanced background gradient elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <motion.div 

@@ -2238,3 +2238,333 @@ html {
   outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
+
+/* ============================================================================
+   RESPONSIVE UTILITIES - Comprehensive Mobile/Tablet/Desktop Support
+   ============================================================================ */
+
+/* Responsive table wrapper for horizontal scrolling on mobile */
+.responsive-table-wrapper {
+  @apply w-full overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--primary-rgb), 0.3) transparent;
+}
+
+.responsive-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsive-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.responsive-table-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--primary-rgb), 0.3);
+  border-radius: 20px;
+}
+
+.responsive-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--primary-rgb), 0.5);
+}
+
+/* Responsive table */
+.responsive-table {
+  @apply min-w-full;
+}
+
+.responsive-table th,
+.responsive-table td {
+  @apply whitespace-nowrap;
+}
+
+/* Responsive card grid - automatically adjusts columns */
+.responsive-card-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+}
+
+/* Responsive stats grid */
+.responsive-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+/* Responsive text sizes */
+.text-responsive-xs {
+  @apply text-xs sm:text-sm;
+}
+
+.text-responsive-sm {
+  @apply text-sm sm:text-base;
+}
+
+.text-responsive-base {
+  @apply text-base sm:text-lg;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl md:text-2xl;
+}
+
+.text-responsive-xl {
+  @apply text-xl sm:text-2xl md:text-3xl;
+}
+
+.text-responsive-2xl {
+  @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+}
+
+.text-responsive-3xl {
+  @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl;
+}
+
+/* Responsive heading */
+.heading-responsive {
+  @apply text-2xl sm:text-3xl md:text-4xl font-bold;
+}
+
+.subheading-responsive {
+  @apply text-lg sm:text-xl md:text-2xl font-semibold;
+}
+
+/* Responsive container padding */
+.container-responsive-padding {
+  @apply px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 lg:px-12 lg:py-12;
+}
+
+/* Responsive spacing */
+.space-responsive-sm {
+  @apply space-y-2 sm:space-y-3 md:space-y-4;
+}
+
+.space-responsive-md {
+  @apply space-y-4 sm:space-y-6 md:space-y-8;
+}
+
+.space-responsive-lg {
+  @apply space-y-6 sm:space-y-8 md:space-y-10;
+}
+
+/* Mobile-first button sizing */
+.btn-responsive {
+  @apply px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base;
+}
+
+.btn-responsive-lg {
+  @apply px-4 py-2.5 text-base sm:px-6 sm:py-3 sm:text-lg;
+}
+
+/* Responsive flex direction */
+.flex-responsive {
+  @apply flex flex-col sm:flex-row;
+}
+
+.flex-responsive-reverse {
+  @apply flex flex-col-reverse sm:flex-row;
+}
+
+/* Responsive grid auto-fit (automatically fits as many columns as possible) */
+.grid-auto-fit-sm {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-auto-fit-md {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-auto-fit-lg {
+  @apply grid gap-4;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Responsive chart container */
+.chart-responsive {
+  @apply w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px];
+}
+
+.chart-responsive-tall {
+  @apply w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px];
+}
+
+/* Responsive image */
+.img-responsive {
+  @apply w-full h-auto;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+/* Hide on mobile/tablet/desktop */
+.hide-mobile {
+  @apply hidden sm:block;
+}
+
+.hide-tablet {
+  @apply block sm:hidden md:block;
+}
+
+.hide-desktop {
+  @apply block lg:hidden;
+}
+
+.show-mobile-only {
+  @apply block sm:hidden;
+}
+
+.show-tablet-only {
+  @apply hidden sm:block lg:hidden;
+}
+
+.show-desktop-only {
+  @apply hidden lg:block;
+}
+
+/* Responsive modal/dialog */
+.modal-responsive {
+  @apply w-[95vw] max-w-md sm:w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl;
+}
+
+/* Responsive form fields */
+.form-responsive {
+  @apply w-full;
+}
+
+.form-responsive input,
+.form-responsive select,
+.form-responsive textarea {
+  @apply text-base; /* Prevent zoom on iOS */
+  font-size: 16px !important; /* Force 16px to prevent mobile zoom */
+}
+
+/* Responsive nav */
+.nav-responsive {
+  @apply flex flex-col sm:flex-row gap-2 sm:gap-4;
+}
+
+/* Touch-friendly targets (minimum 44x44px per Apple/Google guidelines) */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Responsive aspect ratios */
+.aspect-responsive-video {
+  @apply aspect-video;
+}
+
+.aspect-responsive-square {
+  @apply aspect-square;
+}
+
+.aspect-responsive-portrait {
+  @apply aspect-[3/4];
+}
+
+/* Prevent text overflow */
+.text-responsive-ellipsis {
+  @apply truncate;
+}
+
+.text-responsive-wrap {
+  @apply break-words;
+}
+
+/* Responsive max widths for content */
+.content-max-width {
+  @apply max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-6xl mx-auto;
+}
+
+/* Responsive sidebar spacing (accounts for fixed sidebar on desktop) */
+.main-content-responsive {
+  @apply w-full md:ml-0;
+}
+
+/* Safe area insets for mobile devices (notches, home indicators) */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Responsive columns */
+.columns-responsive {
+  @apply columns-1 sm:columns-2 lg:columns-3;
+}
+
+/* Prevent horizontal scroll on small screens */
+.overflow-x-prevent {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Responsive line clamp */
+.line-clamp-responsive {
+  @apply line-clamp-3 sm:line-clamp-4 md:line-clamp-none;
+}
+
+/* Mobile menu animations */
+@media (max-width: 640px) {
+  .mobile-menu-enter {
+    animation: slideInRight 0.3s ease-out;
+  }
+  
+  .mobile-menu-exit {
+    animation: slideOutRight 0.3s ease-in;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+}
+
+/* High DPI / Retina display optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper rendering for high-DPI screens */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

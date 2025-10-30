@@ -1023,7 +1023,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="text-2xl font-bold md:text-3xl">Settings</h1>
         <div className="flex flex-wrap gap-2">

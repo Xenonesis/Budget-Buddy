@@ -411,7 +411,7 @@ export default function FinancialInsightsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-6">
               <div className="relative">
@@ -430,55 +430,58 @@ export default function FinancialInsightsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden">
+      <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
         {/* Enhanced Page Header */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
                 Financial Insights
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl">
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl">
                 Get intelligent insights about your spending patterns, budgets, and financial health with AI-powered analysis
               </p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button
                 onClick={() => router.push('/dashboard/transactions')}
                 variant="outline"
                 size="sm"
-                className="shadow-sm"
+                className="shadow-sm flex-1 sm:flex-none"
               >
-                <PieChart className="h-4 w-4 mr-2" />
-                View Transactions
+                <PieChart className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">View Transactions</span>
+                <span className="sm:hidden text-xs">Trans.</span>
               </Button>
               <Button
                 onClick={() => router.push('/dashboard/budget')}
                 variant="outline"
                 size="sm"
-                className="shadow-sm"
+                className="shadow-sm flex-1 sm:flex-none"
               >
-                <Target className="h-4 w-4 mr-2" />
-                Manage Budgets
+                <Target className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Manage Budgets</span>
+                <span className="sm:hidden text-xs">Budget</span>
               </Button>
               <Button
                 onClick={handleRefreshInsights}
                 disabled={insightLoading}
                 variant="default"
                 size="sm"
-                className="shadow-sm bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="shadow-sm bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 flex-1 sm:flex-none"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${insightLoading ? 'animate-spin' : ''}`} />
-                Refresh Insights
+                <RefreshCw className={`h-4 w-4 sm:mr-2 ${insightLoading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh Insights</span>
+                <span className="sm:hidden text-xs">Refresh</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Enhanced Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
@@ -632,47 +635,52 @@ export default function FinancialInsightsPage() {
         {/* Enhanced Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <TabsList className="grid w-full lg:w-auto grid-cols-5 lg:grid-cols-5">
+            <TabsList className="grid w-full lg:w-auto grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Overview</span>
+                <span className="sm:hidden text-xs">Over.</span>
               </TabsTrigger>
               <TabsTrigger value="insights" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 <span className="hidden sm:inline">Insights</span>
+                <span className="sm:hidden text-xs">Insig.</span>
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <LineChart className="h-4 w-4" />
                 <span className="hidden sm:inline">Trends</span>
+                <span className="sm:hidden text-xs">Trend</span>
               </TabsTrigger>
               <TabsTrigger value="goals" className="flex items-center gap-2">
                 <Target className="h-4 w-4" />
                 <span className="hidden sm:inline">Goals</span>
+                <span className="sm:hidden text-xs">Goal</span>
               </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Settings</span>
+                <span className="sm:hidden text-xs">Set.</span>
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 onClick={exportInsights}
                 variant="outline"
                 size="sm"
-                className="shadow-sm"
+                className="shadow-sm flex-1 sm:flex-none"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export
+                <Download className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Export</span>
               </Button>
               <Button
                 onClick={shareInsights}
                 variant="outline"
                 size="sm"
-                className="shadow-sm"
+                className="shadow-sm flex-1 sm:flex-none"
               >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
+                <Share2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
               </Button>
             </div>
           </div>
@@ -687,28 +695,28 @@ export default function FinancialInsightsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-2">
-                    <div className="flex items-center gap-4">
-                      <div className="text-4xl font-bold text-primary">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary">
                         {calculateFinancialHealth().score}
                       </div>
                       <div className="space-y-1">
                         <Badge 
                           variant={calculateFinancialHealth().grade === 'A' ? 'default' : 
                                   calculateFinancialHealth().grade === 'B' ? 'secondary' : 'destructive'}
-                          className="text-lg px-3 py-1"
+                          className="text-sm sm:text-base md:text-lg px-2 sm:px-3 py-0.5 sm:py-1"
                         >
                           Grade {calculateFinancialHealth().grade}
                         </Badge>
-                        <p className="text-sm text-muted-foreground">Out of 100</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Out of 100</p>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="w-full sm:w-auto sm:text-right">
                     <Progress 
                       value={calculateFinancialHealth().score} 
-                      className="w-32 h-3"
+                      className="w-full sm:w-32 h-3"
                     />
                   </div>
                 </div>

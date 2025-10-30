@@ -256,7 +256,7 @@ export default function ProfilePage() {
   }, []);
   
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container max-w-2xl px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
       <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
       
       {loading ? (

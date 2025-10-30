@@ -77,7 +77,7 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden overflow-x-hidden">
       <AnimatedBackground />
       
       {/* Enhanced background elements */}

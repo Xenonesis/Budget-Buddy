@@ -1,5 +1,35 @@
 "use client";
 
+/**
+ * Dashboard Layout Component
+ * 
+ * IMPORTANT: Page Content Spacing Standards
+ * ==========================================
+ * All dashboard pages should use consistent padding to maintain uniform spacing
+ * between the sidebar and page content across all pages.
+ * 
+ * Standard padding pattern:
+ * - className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-{size}"
+ * 
+ * Breakdown:
+ * - Mobile (default): px-4 (16px horizontal), py-6 (24px vertical)
+ * - Tablet (md): px-6 (24px horizontal), py-6 (24px vertical)
+ * - Desktop (lg): px-8 (32px horizontal), py-8 (32px vertical)
+ * 
+ * This ensures:
+ * 1. Consistent left margin from sidebar across all pages
+ * 2. Uniform vertical spacing from top
+ * 3. Responsive padding that scales appropriately
+ * 4. Professional, cohesive user experience
+ * 
+ * ⚠️ Do NOT use:
+ * - `p-4 md:p-6` (doesn't scale properly on large screens)
+ * - `pr-4` or `pl-4` only (creates inconsistent horizontal spacing)
+ * - `px-3 sm:px-4` (non-standard breakpoints)
+ * 
+ * ✅ Use the standard pattern above for all new dashboard pages
+ */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, memo, useRef, useMemo, KeyboardEvent as ReactKeyboardEvent } from "react";

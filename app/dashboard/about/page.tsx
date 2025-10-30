@@ -158,7 +158,7 @@ export default function AboutPage() {
         <div className="absolute -bottom-10 right-0 w-40 h-40 bg-violet-500/10 rounded-full blur-[80px]"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full" style={gridPatternStyle}></div>
         
-        <div className="container max-w-5xl px-4 py-10 sm:py-14 relative z-10">
+        <div className="container max-w-5xl px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 relative z-10">
           <div className="relative">
             <div className="absolute -top-1 -left-1 w-20 h-20 bg-primary/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-4 -right-8 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl"></div>

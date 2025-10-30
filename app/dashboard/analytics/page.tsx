@@ -446,7 +446,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+    <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
       {/* Enhanced Page Header with Dashboard Information */}
       <header className={`mb-6 sm:mb-8 ${styles.fadeUp}`}>
         <div className="flex flex-col gap-4">
@@ -1102,7 +1102,7 @@ export default function AnalyticsPage() {
                       
                       <div className="p-4">
                         <div className="flex flex-col space-y-4">
-                          <div className="h-[280px]">
+                          <div className="h-[220px] sm:h-[280px]">
                             <ResponsiveContainer width="100%" height="100%">
                               <PieChart>
                                 <defs>
@@ -1185,15 +1185,16 @@ export default function AnalyticsPage() {
                       </div>
                       
                       <div className="p-4">
-                        <div className={`overflow-auto max-h-[350px] rounded-lg border ${styles.customScroll}`}>
-                          <table className="w-full">
-                            <thead className="border-b sticky top-0 bg-card z-10">
-                              <tr>
-                                <th className="py-2.5 px-4 text-left text-xs font-medium text-muted-foreground">Category</th>
-                                <th className="py-2.5 px-4 text-right text-xs font-medium text-muted-foreground">Amount</th>
-                                <th className="py-2.5 px-4 text-right text-xs font-medium text-muted-foreground">%</th>
-                              </tr>
-                            </thead>
+                        <div className="responsive-table-wrapper">
+                          <div className={`overflow-auto max-h-[350px] rounded-lg border ${styles.customScroll}`}>
+                            <table className="w-full responsive-table">
+                              <thead className="border-b sticky top-0 bg-card z-10">
+                                <tr>
+                                  <th className="py-2.5 px-3 sm:px-4 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">Category</th>
+                                  <th className="py-2.5 px-3 sm:px-4 text-right text-xs font-medium text-muted-foreground whitespace-nowrap">Amount</th>
+                                  <th className="py-2.5 px-3 sm:px-4 text-right text-xs font-medium text-muted-foreground whitespace-nowrap">%</th>
+                                </tr>
+                              </thead>
                             <tbody className="divide-y">
                               {expenseData.length > 0 ? (
                                 expenseData.map((category, index) => {
@@ -1243,6 +1244,7 @@ export default function AnalyticsPage() {
                             </tbody>
                           </table>
                         </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1258,7 +1260,7 @@ export default function AnalyticsPage() {
                     
                     <div className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="h-[250px]">
+                        <div className="h-[200px] sm:h-[250px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <defs>
@@ -1556,14 +1558,15 @@ export default function AnalyticsPage() {
                           </div>
                         </div>
                         
+                        <div className="responsive-table-wrapper">
                         <div className={`overflow-auto max-h-[350px] ${styles.customScroll}`}>
-                          <table className="w-full">
+                          <table className="w-full responsive-table">
                             <thead className="bg-muted/5 sticky top-0 z-10">
                               <tr>
-                                <th className="py-2.5 px-4 text-left text-xs font-medium text-muted-foreground">Description</th>
+                                <th className="py-2.5 px-3 sm:px-4 text-left text-xs font-medium text-muted-foreground">Description</th>
                                 <th className="py-2.5 px-3 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">Date</th>
                                 <th className="py-2.5 px-3 text-left text-xs font-medium text-muted-foreground">Category</th>
-                                <th className="py-2.5 px-4 text-right text-xs font-medium text-muted-foreground">Amount</th>
+                                <th className="py-2.5 px-3 sm:px-4 text-right text-xs font-medium text-muted-foreground">Amount</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
@@ -1602,6 +1605,7 @@ export default function AnalyticsPage() {
                               )}
                             </tbody>
                           </table>
+                        </div>
                         </div>
                       </div>
                     </div>
