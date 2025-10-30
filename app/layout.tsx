@@ -68,6 +68,9 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-icon.png', sizes: '180x180' },
     ]
+  },
+  other: {
+    'X-UA-Compatible': 'IE=edge',
   }
 }
 
@@ -78,28 +81,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="alternate icon" href="/favicon.ico" />
-        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
-
-        {/* Performance optimization meta tags */}
-        <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://vercel.live; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' data: https://unpkg.com https://tessdata.projectnaptha.com https://*.supabase.co https://cdnjs.cloudflare.com https://api.mistral.ai https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.cohere.ai https://generativelanguage.googleapis.com https://api.openai.com https://openrouter.ai https://api.cerebras.ai https://api.x.ai https://vercel.live; worker-src 'self' blob:; frame-src 'self';" />
-        <meta name="referrer" content="no-referrer-when-downgrade" />
-        <meta httpEquiv="Cache-Control" content="max-age=31536000, immutable" />
-        <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
-        <meta name="preload" content="true" />
-        <meta name="preconnect" content="true" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
           defaultTheme="dark"
