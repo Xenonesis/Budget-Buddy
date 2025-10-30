@@ -56,7 +56,9 @@ export const CardSpotlight = ({
           `,
         }}
       >
-        {isHovering && (
+        {/* Canvas effect disabled to prevent WebGL context errors */}
+        {/* Uncomment below to re-enable 3D canvas effect */}
+        {/* {isHovering && (
           <CanvasRevealEffect
             animationSpeed={5}
             containerClassName="bg-transparent absolute inset-0 pointer-events-none"
@@ -66,7 +68,7 @@ export const CardSpotlight = ({
             ]}
             dotSize={3}
           />
-        )}
+        )} */}
       </motion.div>
       {children}
     </div>

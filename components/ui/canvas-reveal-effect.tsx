@@ -301,8 +301,13 @@ const ShaderMaterial = ({
 
 const Shader: React.FC<ShaderProps> = ({ source, uniforms, maxFps = 60 }) => {
   const [hasError, setHasError] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (hasError) {
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || hasError) {
     return null;
   }
 
@@ -310,10 +315,24 @@ const Shader: React.FC<ShaderProps> = ({ source, uniforms, maxFps = 60 }) => {
     <Canvas 
       className="absolute inset-0 h-full w-full"
       onCreated={({ gl }) => {
-        gl.domElement.addEventListener('webglcontextlost', (event) => {
+        const canvas = gl.domElement;
+        
+        // Handle context lost gracefully
+        canvas.addEventListener('webglcontextlost', (event) => {
           event.preventDefault();
           setHasError(true);
-        });
+        }, false);
+
+        // Attempt to restore context
+        canvas.addEventListener('webglcontextrestored', () => {
+          setHasError(false);
+        }, false);
+      }}
+      gl={{
+        powerPreference: 'low-power',
+        antialias: false,
+        preserveDrawingBuffer: false,
+        failIfMajorPerformanceCaveat: true,
       }}
     >
       <ShaderMaterial source={source} uniforms={uniforms} maxFps={maxFps} />
