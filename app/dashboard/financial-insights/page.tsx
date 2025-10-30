@@ -431,15 +431,15 @@ export default function FinancialInsightsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 overflow-x-hidden">
-      <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
         {/* Enhanced Page Header */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
+            <div className="space-y-1 sm:space-y-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
                 Financial Insights
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground max-w-2xl">
                 Get intelligent insights about your spending patterns, budgets, and financial health with AI-powered analysis
               </p>
             </div>
@@ -481,19 +481,19 @@ export default function FinancialInsightsPage() {
         </div>
 
         {/* Enhanced Quick Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                       <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Income</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Income</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       ${financialMetrics.totalIncome.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground">All income sources</p>
@@ -504,17 +504,17 @@ export default function FinancialInsightsPage() {
           </Card>
 
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
                       <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Expenses</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Expenses</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       ${financialMetrics.totalExpenses.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground">All spending categories</p>
@@ -525,20 +525,20 @@ export default function FinancialInsightsPage() {
           </Card>
 
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                       <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Net Income</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Net Income</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
                       ${netIncome.toLocaleString()}
                     </p>
-                    <div className={`flex items-center gap-1 text-sm ${netIncome > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <div className={`flex items-center gap-1 text-xs sm:text-sm ${netIncome > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {netIncome > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                       <span>{savingsRate}% savings rate</span>
                     </div>
@@ -549,17 +549,17 @@ export default function FinancialInsightsPage() {
           </Card>
 
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Active Budgets</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Active Budgets</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">{financialMetrics.activeBudgets}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{financialMetrics.activeBudgets}</p>
                     <p className="text-xs text-muted-foreground">Budget categories set</p>
                   </div>
                 </div>
@@ -568,18 +568,18 @@ export default function FinancialInsightsPage() {
           </Card>
 
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-card to-card/80 lg:col-span-1 xl:col-span-1">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
                       <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">AI Insights</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Insights</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-bold text-foreground">{financialMetrics.insightsGenerated}</p>
-                    <div className={`flex items-center gap-1 text-sm ${financialMetrics.highPriorityInsights > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">{financialMetrics.insightsGenerated}</p>
+                    <div className={`flex items-center gap-1 text-xs sm:text-sm ${financialMetrics.highPriorityInsights > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                       <span>{financialMetrics.highPriorityInsights > 0 ? `${financialMetrics.highPriorityInsights} high priority` : 'All clear'}</span>
                     </div>
                   </div>
@@ -591,8 +591,8 @@ export default function FinancialInsightsPage() {
 
         {/* Financial Health Alert */}
         {financialMetrics.highPriorityInsights > 0 && (
-          <Card className="mb-8 border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20">
-            <CardContent className="p-6">
+          <Card className="mb-4 sm:mb-6 md:mb-8 border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20">
+            <CardContent className="p-4 sm:p-5 md:p-6">
               <div className="flex items-start gap-4">
                 <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
                   <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -685,18 +685,18 @@ export default function FinancialInsightsPage() {
             </div>
           </div>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
             {/* Financial Health Score */}
             <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Financial Health Score
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full sm:w-auto">
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary">
                         {calculateFinancialHealth().score}
@@ -721,7 +721,7 @@ export default function FinancialInsightsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {calculateFinancialHealth().factors.map((factor, index) => (
                     <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-2">
@@ -729,9 +729,9 @@ export default function FinancialInsightsPage() {
                           factor.impact === 'positive' ? 'bg-green-500' :
                           factor.impact === 'neutral' ? 'bg-yellow-500' : 'bg-red-500'
                         }`} />
-                        <span className="text-sm font-medium">{factor.name}</span>
+                        <span className="text-xs sm:text-sm font-medium">{factor.name}</span>
                       </div>
-                      <span className="text-sm text-muted-foreground">{factor.value}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap ml-2">{factor.value}</span>
                     </div>
                   ))}
                 </div>
@@ -740,27 +740,27 @@ export default function FinancialInsightsPage() {
 
             {/* Recommendations */}
             <Card className="border-0 shadow-lg bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Personalized Recommendations
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="space-y-3 sm:space-y-4">
                   {generateRecommendations().map((rec, index) => (
-                    <div key={index} className="p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-foreground">{rec.title}</h4>
+                    <div key={index} className="p-3 sm:p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <h4 className="font-semibold text-foreground text-sm sm:text-base">{rec.title}</h4>
                         <Badge 
                           variant={rec.priority === 'high' ? 'destructive' : 'secondary'}
-                          className="text-xs"
+                          className="text-xs shrink-0"
                         >
                           {rec.priority}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3">{rec.description}</p>
-                      <div className="flex items-center gap-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">{rec.description}</p>
+                      <div className="flex flex-wrap items-center gap-2">
                         <Button size="sm" variant="outline" className="text-xs">
                           {rec.action}
                         </Button>
@@ -776,14 +776,14 @@ export default function FinancialInsightsPage() {
 
             {/* Top Spending Categories */}
             <Card className="border-0 shadow-lg bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <PieChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Top Spending Categories (Last 30 Days)
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="space-y-3 sm:space-y-4">
                   {calculateSpendingTrends().length > 0 ? (
                     calculateSpendingTrends().map((category, index) => {
                       const percentage = financialMetrics.totalExpenses > 0 
@@ -791,19 +791,19 @@ export default function FinancialInsightsPage() {
                         : '0.0';
                       
                       return (
-                        <div key={index} className="flex items-center justify-between">
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs sm:text-sm font-medium shrink-0">
                               {index + 1}
                             </div>
-                            <div>
-                              <p className="font-medium">{category.category}</p>
-                              <p className="text-sm text-muted-foreground">{percentage}% of total expenses</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm sm:text-base truncate">{category.category}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground">{percentage}% of total expenses</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">${category.amount.toLocaleString()}</p>
-                            <Progress value={parseFloat(percentage)} className="w-20 h-2 mt-1" />
+                          <div className="text-left sm:text-right ml-10 sm:ml-0">
+                            <p className="font-semibold text-sm sm:text-base">${category.amount.toLocaleString()}</p>
+                            <Progress value={parseFloat(percentage)} className="w-full sm:w-20 h-2 mt-1" />
                           </div>
                         </div>
                       );
@@ -820,20 +820,20 @@ export default function FinancialInsightsPage() {
 
             {/* Quick Insights Summary */}
             <Card className="border-0 shadow-lg bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Quick Insights Summary
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="p-3 sm:p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
                     <div className="flex items-center gap-2 mb-2">
                       <TrendingUp className="h-4 w-4 text-green-500" />
-                      <span className="text-sm font-medium">Savings Rate</span>
+                      <span className="text-xs sm:text-sm font-medium">Savings Rate</span>
                     </div>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                       {savingsRate}%
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -842,12 +842,12 @@ export default function FinancialInsightsPage() {
                     </p>
                   </div>
                   
-                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+                  <div className="p-3 sm:p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm font-medium">Active Goals</span>
+                      <span className="text-xs sm:text-sm font-medium">Active Goals</span>
                     </div>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {financialGoals.length}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -856,12 +856,12 @@ export default function FinancialInsightsPage() {
                     </p>
                   </div>
                   
-                  <div className="p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
+                  <div className="p-3 sm:p-4 rounded-lg bg-background/60 dark:bg-background/40 border sm:col-span-2 lg:col-span-1">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-orange-500" />
-                      <span className="text-sm font-medium">Alerts</span>
+                      <span className="text-xs sm:text-sm font-medium">Alerts</span>
                     </div>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    <p className="text-xl sm:text-2xl font-bold text-orange-600 dark:text-orange-400">
                       {financialMetrics.highPriorityInsights}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -873,7 +873,7 @@ export default function FinancialInsightsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="insights" className="space-y-6">
+          <TabsContent value="insights" className="space-y-4 sm:space-y-6">
             <EnhancedFinancialInsightsPanel
               insights={insights}
               loading={insightLoading}
@@ -883,20 +883,20 @@ export default function FinancialInsightsPage() {
             />
           </TabsContent>
 
-          <TabsContent value="trends" className="space-y-6">
+          <TabsContent value="trends" className="space-y-4 sm:space-y-6">
             {/* Spending Trends Analysis */}
             <Card className="border-0 shadow-lg bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-5 md:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Spending Trends Analysis
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <CardContent className="p-4 sm:p-5 md:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Average Daily Spending</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Average Daily Spending</p>
+                    <p className="text-xl sm:text-2xl font-bold">
                       ${(financialMetrics.totalExpenses / 30).toFixed(0)}
                     </p>
                     <p className="text-xs text-muted-foreground">Last 30 days</p>
@@ -1072,12 +1072,12 @@ export default function FinancialInsightsPage() {
         </Tabs>
 
         {/* Footer Actions */}
-        <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-center">
+        <div className="mt-6 sm:mt-8 md:mt-12 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-center px-2 sm:px-0">
           <Button
             onClick={() => router.push('/dashboard/analytics')}
             variant="outline"
             size="lg"
-            className="shadow-sm"
+            className="shadow-sm w-full sm:w-auto"
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             View Detailed Analytics
@@ -1086,7 +1086,7 @@ export default function FinancialInsightsPage() {
             onClick={() => router.push('/dashboard/budget')}
             variant="outline"
             size="lg"
-            className="shadow-sm"
+            className="shadow-sm w-full sm:w-auto"
           >
             <Calendar className="h-4 w-4 mr-2" />
             Set Financial Goals
