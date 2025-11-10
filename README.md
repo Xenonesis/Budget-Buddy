@@ -6,12 +6,12 @@
 
 **The Ultimate AI-Powered Personal Finance Management Platform**
 
-[![Version](https://img.shields.io/badge/version-22.00-blue.svg)](https://github.com/Xenonesis/Budget-Tracker-)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black.svg)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
+[![Version](https://img.shields.io/badge/version-26.01-blue.svg)](https://github.com/Xenonesis/Budget-Tracker-)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black.svg)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2.0-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Latest-green.svg)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.12-38B2AC.svg)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.14-38B2AC.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [🚀 Live Demo](https://budget--buddy.vercel.app) • [📖 Documentation](docs/) • [🐛 Report Bug](https://github.com/Xenonesis/Budget-Tracker-/issues) • [💡 Request Feature](https://github.com/Xenonesis/Budget-Tracker-/issues)
@@ -350,7 +350,7 @@ Budget Buddy is built with a modern, scalable technology stack that ensures perf
 
 Our frontend is engineered for optimal performance and user experience:
 
-#### [Next.js 15](https://nextjs.org/)
+#### [Next.js 16](https://nextjs.org/)
 The foundation of our web application, leveraging cutting-edge features:
 - **App Router**: Advanced routing system with nested layouts and loading states
 - **Server Components**: Reduced bundle sizes and improved performance through server-side rendering
