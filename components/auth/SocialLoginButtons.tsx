@@ -37,19 +37,21 @@ export const SocialLoginButtons = ({ onError }: SocialLoginButtonsProps) => {
       provider: 'github' as const,
       icon: Github,
       label: 'GitHub',
-      className: 'bg-gray-900 hover:bg-gray-800 text-white'
+      variant: 'outline' as const,
+      className: 'bg-gray-900 hover:bg-gray-800 text-white border border-gray-800'
     },
     {
       provider: 'google' as const,
       icon: Mail,
       label: 'Google',
-      className: 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+      variant: 'default' as const,
+      className: 'bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-900'
     }
   ];
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      {socialButtons.map(({ provider, icon: Icon, label, className }, index) => (
+      {socialButtons.map(({ provider, icon: Icon, label, className, variant }, index) => (
         <motion.div
           key={provider}
           initial={{ opacity: 0, y: 10 }}
@@ -67,8 +69,9 @@ export const SocialLoginButtons = ({ onError }: SocialLoginButtonsProps) => {
           >
             <Button
               type="button"
-              variant="outline"
-              className={`relative w-full h-12 overflow-hidden border-2 border-muted/30 hover:border-muted/50 backdrop-blur-sm bg-background/50 hover:bg-background/80 transition-all duration-300 ${className}`}
+              variant={variant}
+              className={`relative w-full h-12 overflow-hidden transition-all duration-300 ${className}`}
+
               onClick={() => handleSocialLogin(provider)}
               disabled={loadingProvider !== null}
             >

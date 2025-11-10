@@ -1,7 +1,7 @@
 import './globals.css'
 import './fast-skeleton.css'
 import type { Metadata, Viewport } from 'next'
-import { ThemeProvider } from '@/components/theme-provider'
+import ThemeProviderShell from '@/components/ThemeProviderShell'
 import { Inter } from 'next/font/google'
 
 // Optimize font loading with display swap
@@ -82,14 +82,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          storageKey="budget-theme"
-        >
+        <ThemeProviderShell>
           {children}
-        </ThemeProvider>
+        </ThemeProviderShell>
       </body>
     </html>
   )

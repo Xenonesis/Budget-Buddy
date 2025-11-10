@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, UserPlus, ChevronLeft, AlertCircle, Info, CheckCircle, Shield, Lock, Users, Star, Mail, Phone, CreditCard } from "lucide-react";
+import { Eye, EyeOff, UserPlus, ChevronLeft, AlertCircle, Info, CheckCircle, Mail, Phone, CreditCard } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 
 // Custom Auth Logo component to ensure proper styling
@@ -230,12 +230,6 @@ export default function RegisterPage() {
       { label: "Contains special character", met: /[^A-Za-z0-9]/.test(password) },
     ];
   };
-
-  // Trust indicators
-  const trustIndicators = [
-    { icon: Shield, label: "Bank-level Security" },
-    { icon: Lock, label: "End-to-end Encryption" }
-  ];
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden overflow-x-hidden">
@@ -717,49 +711,6 @@ export default function RegisterPage() {
           </motion.div>
         </div>
 
-        {/* Trust indicators */}
-        <motion.div
-          className="mt-6 space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.4 }}
-        >
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground font-medium mb-3">
-              Trusted by professionals worldwide
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {trustIndicators.map(({ icon: Icon, label }, index) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.3 + (index * 0.1), duration: 0.3 }}
-                className="flex items-center justify-center gap-2 p-3 rounded-lg bg-card/50 backdrop-blur-sm border border-white/5 hover:bg-card/70 transition-colors duration-300"
-              >
-                <Icon className="w-4 h-4 text-primary" />
-                <span className="text-xs text-muted-foreground font-medium">{label}</span>
-              </motion.div>
-            ))}
-          </div>
-          
-          {/* SSL Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.7, duration: 0.3 }}
-            className="text-center pt-2"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-green-700 dark:text-green-300 font-medium">
-                256-bit SSL Encryption
-              </span>
-            </div>
-          </motion.div>
-        </motion.div>
       </motion.div>
     </div>
   );

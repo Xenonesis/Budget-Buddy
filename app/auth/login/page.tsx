@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, Eye, CheckCircle2, Sparkles, AlertCircle, Mail } from "lucide-react";
+import { CheckCircle2, Sparkles, Mail } from "lucide-react";
 import { 
   AuthLogo, 
   AuthCard, 
@@ -61,13 +61,6 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
   };
-
-  // Enhanced trust indicators with animations
-  const trustIndicators = [
-    { icon: Shield, label: "Bank-level Security", color: "bg-emerald-500", delay: 0.1 },
-    { icon: Lock, label: "256-bit Encryption", color: "bg-blue-500", delay: 0.2 },
-    { icon: Eye, label: "Privacy Protected", color: "bg-purple-500", delay: 0.3 },
-  ];
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden overflow-x-hidden">
@@ -204,51 +197,6 @@ export default function LoginPage() {
 
         <SignUpPrompt />
 
-        {/* Enhanced trust indicators */}
-        <motion.div
-          className="space-y-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.4 }}
-        >
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground font-medium mb-3">
-              Trusted by thousands of users worldwide
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-2">
-            {trustIndicators.map(({ icon: Icon, label, color, delay }, index) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: delay + 0.9, duration: 0.3 }}
-                className="flex items-center justify-center gap-3 p-3 rounded-xl bg-card/50 backdrop-blur-sm border border-white/5 hover:bg-card/70 transition-colors duration-300"
-              >
-                <div className={`w-2 h-2 ${color} rounded-full animate-pulse`} />
-                <Icon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium">{label}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          
-          {/* Additional security badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.6, duration: 0.3 }}
-            className="text-center pt-2"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-muted-foreground font-medium">
-                SSL Secured Connection
-              </span>
-            </div>
-          </motion.div>
-        </motion.div>
       </motion.div>
     </div>
   );
