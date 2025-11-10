@@ -63,7 +63,7 @@ export function Header() {
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 md:h-20">
           
           {/* Logo with enhanced animation */}
           <motion.div
@@ -157,7 +157,7 @@ export function Header() {
           <div className="md:hidden">
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="relative p-3 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50 hover:bg-muted/70 transition-all duration-300"
+              className="relative p-2.5 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50 hover:bg-muted/70 transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

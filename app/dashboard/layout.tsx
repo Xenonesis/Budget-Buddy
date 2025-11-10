@@ -606,7 +606,7 @@ export default function DashboardLayout({
       </a>
       
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
+      <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <div className="flex flex-col items-center">
             <Logo size="sm" className="transition-transform duration-300 hover:scale-105" animated />

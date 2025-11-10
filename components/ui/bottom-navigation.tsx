@@ -14,7 +14,7 @@ interface NavItem {
 const NavItemButton = memo(({ item }: { item: NavItem }) => (
   <Link
     href={item.href}
-    className={`flex h-16 min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-1 p-1 text-xs transition-all duration-200 relative ${
+    className={`flex h-12 min-w-[3.75rem] flex-1 flex-col items-center justify-center gap-0.5 p-1 text-[11px] transition-all duration-200 relative ${
       item.active
         ? "text-primary"
         : "text-muted-foreground hover:text-foreground"
@@ -22,7 +22,7 @@ const NavItemButton = memo(({ item }: { item: NavItem }) => (
     aria-label={item.label}
     aria-current={item.active ? "page" : undefined}
   >
-    <div className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
+    <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
       item.active ? "bg-primary/15 scale-105" : "hover:bg-background/80"
     }`}>
       {item.icon}
@@ -42,31 +42,31 @@ function BottomNavigationComponent() {
   const navItems = useMemo(() => [
     {
       href: "/dashboard",
-      icon: <Home size={22} className="transform transition-transform group-hover:scale-110" />,
+      icon: <Home size={18} className="transform transition-transform group-hover:scale-110" />,
       label: "Home",
       active: pathname === "/dashboard",
     },
     {
       href: "/dashboard/ai-insights",
-      icon: <Sparkles size={22} className="transform transition-transform group-hover:scale-110" />,
+      icon: <Sparkles size={18} className="transform transition-transform group-hover:scale-110" />,
       label: "AI Insights",
       active: pathname.startsWith("/dashboard/ai-insights"),
     },
     {
       href: "/dashboard/transactions",
-      icon: <FileText size={22} className="transform transition-transform group-hover:scale-110" />,
+      icon: <FileText size={18} className="transform transition-transform group-hover:scale-110" />,
       label: "Transactions",
       active: pathname.startsWith("/dashboard/transactions"),
     },
     {
       href: "/dashboard/budget",
-      icon: <BarChart2 size={22} className="transform transition-transform group-hover:scale-110" />,
+      icon: <BarChart2 size={18} className="transform transition-transform group-hover:scale-110" />,
       label: "Budget",
       active: pathname.startsWith("/dashboard/budget"),
     },
     {
       href: "/dashboard/settings",
-      icon: <User size={22} className="transform transition-transform group-hover:scale-110" />,
+      icon: <User size={18} className="transform transition-transform group-hover:scale-110" />,
       label: "Profile",
       active: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/profile"),
     },
@@ -75,7 +75,7 @@ function BottomNavigationComponent() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background backdrop-blur-xl shadow-lg md:hidden" aria-label="Mobile navigation">
-      <div className="flex items-center justify-around">
+      <div className="flex items-center justify-around py-1">
         {navItems.map((item) => (
           <NavItemButton key={item.href} item={item} />
         ))}
