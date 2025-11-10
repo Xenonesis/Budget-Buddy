@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, Eye, CheckCircle2, Sparkles, AlertCircle, Mail, Users, Star } from "lucide-react";
+import { Shield, Lock, Eye, CheckCircle2, Sparkles, AlertCircle, Mail } from "lucide-react";
 import { 
   AuthLogo, 
   AuthCard, 
@@ -67,13 +67,6 @@ export default function LoginPage() {
     { icon: Shield, label: "Bank-level Security", color: "bg-emerald-500", delay: 0.1 },
     { icon: Lock, label: "256-bit Encryption", color: "bg-blue-500", delay: 0.2 },
     { icon: Eye, label: "Privacy Protected", color: "bg-purple-500", delay: 0.3 },
-  ];
-
-  // Social proof indicators
-  const socialProofItems = [
-    { icon: Users, label: "50,000+ Active Users", delay: 0.4 },
-    { icon: Star, label: "4.9/5 Average Rating", delay: 0.5 },
-    { icon: Shield, label: "SOC 2 Compliant", delay: 0.6 },
   ];
 
   return (
@@ -240,34 +233,6 @@ export default function LoginPage() {
             ))}
           </div>
 
-          {/* Social proof section */}
-          <motion.div
-            className="space-y-2 mt-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.4 }}
-          >
-            <div className="text-center mb-2">
-              <p className="text-xs text-muted-foreground font-medium">
-                Join our community
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-2">
-              {socialProofItems.map(({ icon: Icon, label, delay }, index) => (
-                <motion.div
-                  key={label}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: delay + 1.3, duration: 0.3 }}
-                  className="flex items-center justify-center gap-3 p-2 rounded-lg bg-primary/5 border border-primary/10"
-                >
-                  <Icon className="w-3 h-3 text-primary" />
-                  <span className="text-xs text-muted-foreground font-medium">{label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
           
           {/* Additional security badge */}
           <motion.div

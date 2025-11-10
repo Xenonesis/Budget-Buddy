@@ -234,9 +234,7 @@ export default function RegisterPage() {
   // Trust indicators
   const trustIndicators = [
     { icon: Shield, label: "Bank-level Security" },
-    { icon: Lock, label: "End-to-end Encryption" },
-    { icon: Users, label: "50,000+ Happy Users" },
-    { icon: Star, label: "4.9★ Rating" },
+    { icon: Lock, label: "End-to-end Encryption" }
   ];
 
   return (
