@@ -118,3 +118,24 @@ export const AboutSectionWrapper = () => (
     <AboutSection />
   </SectionWrapper>
 );
+
+// Centralized list of landing section components to keep ordering in one place
+export const LANDING_SECTION_COMPONENTS = [
+  { Component: HeroSectionWrapper, key: 'hero' },
+  { Component: FeaturesSectionWrapper, key: 'features' },
+  { Component: TestimonialsSectionWrapper, key: 'testimonials' },
+  { Component: PricingSectionWrapper, key: 'pricing' },
+  { Component: CTASectionWrapper, key: 'cta' },
+  { Component: AboutSectionWrapper, key: 'about' },
+] as const;
+
+// Render all landing sections
+export function LandingSections() {
+  return (
+    <>
+      {LANDING_SECTION_COMPONENTS.map(({ Component, key }) => (
+        <Component key={key} />
+      ))}
+    </>
+  );
+}

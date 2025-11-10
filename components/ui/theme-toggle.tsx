@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, memo, useMemo } from "react";
+import { useTheme as useNextTheme } from "next-themes";
 import { Moon, Sun, Laptop } from "lucide-react";
 import { useUserPreferences } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,17 @@ function ThemeToggleComponent({
   align = "end",
   side = "bottom",
 }: ThemeToggleProps) {
-  const { theme, setTheme } = useUserPreferences();
+  const { theme: storedTheme, setTheme: setStoredTheme } = useUserPreferences();
+  const { theme: nextTheme, setTheme: setNextTheme, resolvedTheme } = useNextTheme();
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(storedTheme || (nextTheme as 'light' | 'dark' | 'system') || 'system');
+
+  // keep local state in sync with store and next-themes
+  useEffect(() => {
+    if (storedTheme) setTheme(storedTheme);
+  }, [storedTheme]);
+  useEffect(() => {
+    if (nextTheme) setTheme(nextTheme as 'light' | 'dark' | 'system');
+  }, [nextTheme]);
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -102,9 +113,12 @@ function ThemeToggleComponent({
 
   // Memoize the theme change handler
   const handleThemeChange = useCallback((newTheme: string) => {
-    setTheme(newTheme as 'light' | 'dark' | 'system');
+    const t = newTheme as 'light' | 'dark' | 'system';
+    setTheme(t);
+    setStoredTheme(t);
+    setNextTheme(t);
     setOpen(false);
-  }, [setTheme]);
+  }, [setStoredTheme, setNextTheme]);
 
   // Add keyboard shortcuts 
   useEffect(() => {

@@ -83,8 +83,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
-          defaultTheme="dark"
-          storageKey="budget-buddy-theme"
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          storageKey="budget-theme"
         >
           {children}
         </ThemeProvider>

@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps, useTheme } from "next-themes"
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react"
+import { useUserPreferences } from "@/lib/store"
 
 export type ColorScheme = 'default' | 'blue' | 'green' | 'purple' | 'orange' | 'rose'
 export type ContrastMode = 'normal' | 'high'
@@ -65,7 +66,8 @@ function getSystemTheme(): 'light' | 'dark' {
 }
 
 function ThemeProviderInner({ children, ...props }: Readonly<ThemeProviderProps>) {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { theme: storedTheme } = useUserPreferences()
   const [colorScheme, setColorScheme] = useState<ColorScheme>('default')
   const [contrastMode, setContrastMode] = useState<ContrastMode>('normal')
   const [themeMode, setThemeMode] = useState<ThemeMode>('system')
@@ -108,6 +110,13 @@ function ThemeProviderInner({ children, ...props }: Readonly<ThemeProviderProps>
       return [...filtered, { time, theme }].sort((a, b) => a.time.localeCompare(b.time))
     })
   }, [])
+
+  // Keep next-themes in sync with stored preference
+  useEffect(() => {
+    if (!storedTheme) return;
+    setTheme(storedTheme as 'light' | 'dark' | 'system');
+    setThemeMode((storedTheme as ThemeMode) || 'system');
+  }, [storedTheme, setTheme]);
 
   // Intelligent auto theme switching
   useEffect(() => {
@@ -288,9 +297,19 @@ function ThemeProviderInner({ children, ...props }: Readonly<ThemeProviderProps>
 }
 
 export function ThemeProvider({ children, ...props }: Readonly<ThemeProviderProps>) {
+  // Enforce class attribute for Tailwind dark mode and enable system
+  const providerProps: ThemeProviderProps = {
+    attribute: 'class',
+    defaultTheme: 'system',
+    enableSystem: true,
+    enableColorScheme: true,
+    storageKey: 'budget-theme',
+    ...props,
+  }
+
   return (
-    <NextThemesProvider {...props}>
-      <ThemeProviderInner {...props}>
+    <NextThemesProvider {...providerProps}>
+      <ThemeProviderInner {...providerProps}>
         {children}
       </ThemeProviderInner>
     </NextThemesProvider>

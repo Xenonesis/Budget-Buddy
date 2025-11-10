@@ -352,19 +352,10 @@ export const useUserPreferences = create<UserPreferences>()(
   )
 );
 
-// Initialize theme based on stored preference - CLIENT SIDE ONLY
+// Initialize theme and keep in sync via next-themes. We still persist to localStorage for user prefs.
 if (typeof window !== 'undefined') {
-  const storedTheme = localStorage.getItem('budget-theme') || 
-                      useUserPreferences.getState().theme || 
-                      'system';
-                      
-  if (storedTheme === 'dark' || 
-      (storedTheme === 'system' && 
-       window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
+  const storedTheme = localStorage.getItem('budget-theme') || useUserPreferences.getState().theme || 'system';
+  localStorage.setItem('budget-theme', storedTheme);
 }
 
 // Update currency and theme in user profile when they change - CLIENT SIDE ONLY
@@ -375,19 +366,7 @@ if (typeof window !== 'undefined') {
     }
     if (state.theme) {
       localStorage.setItem('budget-theme', state.theme);
-      
-      if (state.theme === 'system') {
-        const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (isDarkMode) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      } else if (state.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      // Do not manually toggle the 'dark' class here; next-themes controls it
     }
   });
 }
