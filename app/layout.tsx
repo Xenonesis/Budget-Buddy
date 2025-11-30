@@ -1,5 +1,4 @@
 import './globals.css'
-import './fast-skeleton.css'
 import type { Metadata, Viewport } from 'next'
 import ThemeProviderShell from '@/components/ThemeProviderShell'
 import { Inter } from 'next/font/google'
