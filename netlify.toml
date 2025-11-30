@@ -1,26 +1,35 @@
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
   NETLIFY = "true"
-  NEXT_PUBLIC_SUPABASE_URL = "https://afxdmhqjbdqsuepojobb.supabase.co"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmeGRtaHFqYmRxc3VlcG9qb2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5ODUwNTIsImV4cCI6MjA1ODU2MTA1Mn0.URWvuvRkfsltiOJhJ9zhYmeTBnfENOnXqHKOcm4LzBk"
+  # IMPORTANT: Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+  # in Netlify's Environment Variables UI, NOT here in the config file.
+  # Go to: Site Settings > Build & deploy > Environment > Environment variables
 
-# Security headers including CSP for AI providers
+# Production security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' data: https://unpkg.com https://tessdata.projectnaptha.com https://*.supabase.co https://cdnjs.cloudflare.com https://api.mistral.ai https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.cohere.ai https://generativelanguage.googleapis.com https://api.openai.com https://openrouter.ai https://api.cerebras.ai https://api.x.ai; worker-src 'self' blob:; frame-src 'self';"
-    X-Frame-Options = "DENY"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com; connect-src 'self' data: https://unpkg.com https://tessdata.projectnaptha.com https://*.supabase.co https://cdnjs.cloudflare.com https://api.mistral.ai https://api.anthropic.com https://api.groq.com https://api.deepseek.com https://api.cohere.ai https://generativelanguage.googleapis.com https://api.openai.com https://openrouter.ai https://api.cerebras.ai https://api.x.ai; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;"
+    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
 
-# Static file handling for images
+# Cache static assets aggressively
 [[headers]]
-  for = "/public/*"
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
@@ -44,11 +53,22 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Redirect handling for SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Don't cache API responses
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
+
+# Netlify Next.js plugin
 [[plugins]]
-  package = "@netlify/plugin-nextjs" 
+  package = "@netlify/plugin-nextjs"
