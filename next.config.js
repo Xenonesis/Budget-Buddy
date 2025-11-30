@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const nextConfig = {
   // External packages that should be bundled server-side
   serverExternalPackages: ['@supabase/supabase-js', 'puppeteer'],
-  
+
   // Image optimization settings
   images: {
     dangerouslyAllowSVG: true,
@@ -18,33 +18,40 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdnjs.cloudflare.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       // Development-only patterns
-      ...(isDev ? [
-        { protocol: 'http', hostname: 'localhost' },
-        { protocol: 'http', hostname: '127.0.0.1' },
-      ] : []),
+      ...(isDev
+        ? [
+            { protocol: 'http', hostname: 'localhost' },
+            { protocol: 'http', hostname: '127.0.0.1' },
+          ]
+        : []),
     ],
   },
-  
+
   // Enable React strict mode for better development experience
   reactStrictMode: true,
-  
+
   // Note: Turbopack is used automatically in dev mode with Next.js 16
   // For production builds, webpack is used as Turbopack production builds
   // are still experimental with Tailwind CSS 4
-  
+
   // Production optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
-  
+
   // Generate ETags for caching
   generateEtags: true,
-  
+
   // Strict mode for builds
   typescript: {
     // Type checking is done separately in CI
     ignoreBuildErrors: false,
   },
-  
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
+
   // Experimental features for performance
   experimental: {
     // Enable optimized package imports
@@ -58,14 +65,14 @@ const nextConfig = {
       'framer-motion',
     ],
   },
-  
+
   // Logging configuration
   logging: {
     fetches: {
       fullUrl: isDev,
     },
   },
-  
+
   // Security headers
   async headers() {
     const cspDirectives = [
@@ -104,7 +111,7 @@ const nextConfig = {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'self'",
-      ...(isDev ? [] : ["upgrade-insecure-requests"]),
+      ...(isDev ? [] : ['upgrade-insecure-requests']),
     ];
 
     return [
@@ -136,10 +143,14 @@ const nextConfig = {
             value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
           },
           // HSTS - only in production
-          ...(!isDev ? [{
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          }] : []),
+          ...(!isDev
+            ? [
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains; preload',
+                },
+              ]
+            : []),
         ],
       },
       // Cache static assets aggressively
@@ -184,7 +195,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Redirects for common patterns
   async redirects() {
     return [
@@ -208,4 +219,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

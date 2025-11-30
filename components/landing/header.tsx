@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import { Menu, X, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { useState } from 'react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { Menu, X, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/ui/logo';
+import { cn } from '@/lib/utils';
 
 interface NavItem {
   name: string;
@@ -14,10 +14,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: "Features", href: "#features" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "Testimonials", href: "#testimonials" },
-  { name: "About", href: "#about" },
+  { name: 'Features', href: '#features' },
+  { name: 'Pricing', href: '#pricing' },
+  { name: 'Testimonials', href: '#testimonials' },
+  { name: 'About', href: '#about' },
 ];
 
 export function Header() {
@@ -26,7 +26,7 @@ export function Header() {
   const { scrollY } = useScroll();
 
   // Handle scroll effect for background changes only
-  useMotionValueEvent(scrollY, "change", (latest) => {
+  useMotionValueEvent(scrollY, 'change', (latest) => {
     setScrolled(latest > 100);
   });
 
@@ -41,7 +41,7 @@ export function Header() {
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: 'smooth',
       });
     }
   };
@@ -49,35 +49,34 @@ export function Header() {
   return (
     <motion.header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
         // Force solid background on mobile, conditional on desktop
-        "bg-background md:bg-transparent",
-        scrolled 
-          ? "md:bg-background/80 md:backdrop-blur-xl border-b border-border/50 shadow-lg" 
-          : "md:bg-gradient-to-r md:from-background/20 md:via-background/10 md:to-background/20 md:backdrop-blur-sm",
+        'bg-background md:bg-transparent',
+        scrolled
+          ? 'md:bg-background/80 md:backdrop-blur-xl border-b border-border/50 shadow-lg'
+          : 'md:bg-gradient-to-r md:from-background/20 md:via-background/10 md:to-background/20 md:backdrop-blur-sm',
         // Always solid on mobile when menu is open
-        mobileMenuOpen ? "bg-background shadow-lg border-b" : ""
+        mobileMenuOpen ? 'bg-background shadow-lg border-b' : ''
       )}
       initial={{ y: -100 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          
           {/* Logo with enhanced animation */}
           <motion.div
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 relative z-50"
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
             whileHover={{ scale: 1.05 }}
           >
             <Link href="/" className="flex items-center gap-3 group">
               <motion.div
                 className="relative"
                 whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
               >
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-violet-500/20 blur-md group-hover:blur-lg transition-all duration-300" />
                 <Logo size="sm" />
@@ -122,15 +121,15 @@ export function Header() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button 
-                variant="ghost" 
-                asChild 
+              <Button
+                variant="ghost"
+                asChild
                 className="relative border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
               >
                 <Link href="/auth/login">Sign in</Link>
               </Button>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -138,11 +137,14 @@ export function Header() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button asChild className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 shadow-lg shadow-primary/25"
+              >
                 <Link href="/auth/register" className="flex items-center gap-2">
                   <motion.div
                     animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                   >
                     <Sparkles className="w-4 h-4" />
                   </motion.div>
@@ -184,10 +186,10 @@ export function Header() {
           >
             <motion.div
               className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-50 flex flex-col shadow-2xl"
-              initial={{ x: "100%" }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               style={{ backgroundColor: 'hsl(var(--background))' }} // Force solid background
             >
@@ -202,7 +204,7 @@ export function Header() {
                 </motion.button>
               </div>
               <div className="flex flex-col p-4 space-y-4">
-                {["Features", "Pricing", "Testimonials", "About", "Contact"].map((item, i) => (
+                {['Features', 'Pricing', 'Testimonials', 'About', 'Contact'].map((item, i) => (
                   <motion.a
                     key={item}
                     href={`#${item.toLowerCase()}`}
@@ -211,7 +213,7 @@ export function Header() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1, duration: 0.3 }}
-                    whileHover={{ x: 5, color: "var(--primary)" }}
+                    whileHover={{ x: 5, color: 'var(--primary)' }}
                   >
                     <ChevronRight size={16} className="text-primary" /> {item}
                   </motion.a>
@@ -220,20 +222,14 @@ export function Header() {
               <div className="mt-auto p-4 space-y-3">
                 <Button variant="outline" className="w-full justify-start" asChild>
                   <Link href="/auth/login">
-                    <motion.span
-                      className="flex items-center gap-2"
-                      whileHover={{ x: 5 }}
-                    >
+                    <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
                       Sign in
                     </motion.span>
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" asChild>
                   <Link href="/auth/register">
-                    <motion.span
-                      className="flex items-center gap-2"
-                      whileHover={{ x: 5 }}
-                    >
+                    <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
                       Get started
                     </motion.span>
                   </Link>

@@ -1,53 +1,45 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Sparkles, Mail } from "lucide-react";
-import { 
-  AuthLogo, 
-  AuthCard, 
-  LoginForm, 
-  ForgotPasswordLink, 
-  SignUpPrompt, 
-  AnimatedBackground
-} from "@/components/auth";
-import { BackToHomeLink } from "@/components/auth";
+import { useState, useEffect, Suspense, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, Sparkles, Mail } from 'lucide-react';
+import {
+  AuthLogo,
+  AuthCard,
+  LoginForm,
+  ForgotPasswordLink,
+  SignUpPrompt,
+  AnimatedBackground,
+} from '@/components/auth';
+import { BackToHomeLink } from '@/components/auth';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
-  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Initialize searchParams only on client side
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSearchParams(new URLSearchParams(window.location.search));
-    }
-  }, []);
+  // Get initial message from URL params
+  const initialMessage = useMemo(() => searchParams.get('message'), [searchParams]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(initialMessage);
 
-  // Check for messages from URL params (like email verification)
+  // Clear the message after 5 seconds
   useEffect(() => {
-    if (searchParams) {
-      const message = searchParams.get('message');
-      if (message) {
-        setSuccessMessage(message);
-        // Clear the message after 5 seconds
-        setTimeout(() => setSuccessMessage(null), 5000);
-      }
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 5000);
+      return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [successMessage]);
 
   const handleLoginSuccess = () => {
     setShowSuccessAnimation(true);
     setIsLoading(true);
-    
+
     // Add a slight delay for the success animation
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push('/dashboard');
       router.refresh();
     }, 1500);
   };
@@ -65,7 +57,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden overflow-x-hidden">
       <AnimatedBackground />
-      
+
       {/* Enhanced background elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
@@ -106,14 +98,14 @@ export default function LoginPage() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="bg-card/90 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-primary/20"
             >
               <div className="text-center space-y-4">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
+                  transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
                   className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center"
                 >
                   <CheckCircle2 className="w-8 h-8 text-primary" />
@@ -124,7 +116,9 @@ export default function LoginPage() {
                   transition={{ delay: 0.6 }}
                 >
                   <h3 className="text-xl font-semibold text-gradient">Welcome back!</h3>
-                  <p className="text-muted-foreground text-sm mt-1">Redirecting to your dashboard...</p>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    Redirecting to your dashboard...
+                  </p>
                 </motion.div>
               </div>
             </motion.div>
@@ -132,10 +126,10 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
         className="w-full max-w-md space-y-8 relative z-10"
       >
         <BackToHomeLink />
@@ -149,14 +143,14 @@ export default function LoginPage() {
         >
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             className="absolute -top-4 -right-4 w-8 h-8 text-primary/20"
           >
             <Sparkles className="w-full h-full" />
           </motion.div>
-          
-          <AuthCard 
-            title="Welcome back" 
+
+          <AuthCard
+            title="Welcome back"
             subtitle="Sign in to your account to continue your financial journey"
             error={error}
           >
@@ -173,17 +167,17 @@ export default function LoginPage() {
         >
           {/* Glow effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
+
           <div className="relative bg-background/70 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8 overflow-hidden">
             {/* Subtle animated border */}
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-50" />
-            
-            <LoginForm 
+
+            <LoginForm
               onSuccess={handleLoginSuccess}
               onError={handleLoginError}
               onStart={handleLoginStart}
             />
-            
+
             <motion.div
               className="mt-6"
               initial={{ opacity: 0 }}
@@ -196,8 +190,21 @@ export default function LoginPage() {
         </motion.div>
 
         <SignUpPrompt />
-
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
