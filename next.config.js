@@ -3,8 +3,8 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
-  // External packages that should be bundled server-side
-  serverExternalPackages: ['@supabase/supabase-js', 'puppeteer', 'lightningcss'],
+  // External packages that should not be bundled
+  serverExternalPackages: ['puppeteer', 'lightningcss'],
 
   // Webpack configuration for handling native modules
   webpack: (config, { isServer }) => {
@@ -59,16 +59,35 @@ const nextConfig = {
 
   // Experimental features for performance
   experimental: {
-    // Enable optimized package imports
+    // Enable optimized package imports for better tree-shaking
     optimizePackageImports: [
       'lucide-react',
       'date-fns',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-select',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-label',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-slot',
       'recharts',
       'framer-motion',
+      '@supabase/supabase-js',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
+      'sonner',
+      'zustand',
+      'react-markdown',
+      'jspdf',
+      'exceljs',
     ],
+    // Optimize CSS loading
+    optimizeCss: true,
   },
 
   // Logging configuration
@@ -76,6 +95,12 @@ const nextConfig = {
     fetches: {
       fullUrl: isDev,
     },
+  },
+
+  // Enable aggressive prefetching
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000, // 1 minute
+    pagesBufferLength: 5,
   },
 
   // Security headers

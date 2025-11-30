@@ -112,7 +112,6 @@ export function Header() {
             </div>
           </nav>
 
-          {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
             <motion.div
               initial={{ opacity: 0, x: 30 }}
@@ -126,7 +125,9 @@ export function Header() {
                 asChild
                 className="relative border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
               >
-                <Link href="/auth/login">Sign in</Link>
+                <Link href="/auth/login" prefetch={true}>
+                  Sign in
+                </Link>
               </Button>
             </motion.div>
 
@@ -141,7 +142,7 @@ export function Header() {
                 asChild
                 className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 shadow-lg shadow-primary/25"
               >
-                <Link href="/auth/register" className="flex items-center gap-2">
+                <Link href="/auth/register" prefetch={true} className="flex items-center gap-2">
                   <motion.div
                     animate={{ rotate: [0, 360] }}
                     transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -221,14 +222,14 @@ export function Header() {
               </div>
               <div className="mt-auto p-4 space-y-3">
                 <Button variant="outline" className="w-full justify-start" asChild>
-                  <Link href="/auth/login">
+                  <Link href="/auth/login" prefetch={true}>
                     <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
                       Sign in
                     </motion.span>
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" asChild>
-                  <Link href="/auth/register">
+                  <Link href="/auth/register" prefetch={true}>
                     <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
                       Get started
                     </motion.span>

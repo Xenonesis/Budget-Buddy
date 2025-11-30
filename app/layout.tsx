@@ -3,11 +3,20 @@ import type { Metadata, Viewport } from 'next';
 import ThemeProviderShell from '@/components/ThemeProviderShell';
 import { Inter } from 'next/font/google';
 
-// Optimize font loading with display swap
+// Optimize font loading with display swap and preload
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  preload: true,
+  fallback: [
+    'system-ui',
+    '-apple-system',
+    'BlinkMacSystemFont',
+    'Segoe UI',
+    'Roboto',
+    'sans-serif',
+  ],
 });
 
 // Define viewport config separately
@@ -85,6 +94,18 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        {/* Preconnect to external domains for faster resource loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        {/* Preconnect to Supabase for faster API calls */}
+        <link rel="preconnect" href="https://supabase.co" />
+        <link rel="dns-prefetch" href="https://supabase.co" />
+        {/* Critical resource hints */}
+        <meta name="color-scheme" content="light dark" />
+      </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProviderShell>{children}</ThemeProviderShell>
       </body>

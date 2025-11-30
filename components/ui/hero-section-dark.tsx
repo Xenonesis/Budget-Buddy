@@ -1,50 +1,50 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { ChevronRight } from "lucide-react"
-import Image from "next/image"
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
-  title?: string
+  title?: string;
   subtitle?: {
-    regular: string
-    gradient: string
-  }
-  description?: string
-  ctaText?: string
-  ctaHref?: string
+    regular: string;
+    gradient: string;
+  };
+  description?: string;
+  ctaText?: string;
+  ctaHref?: string;
   bottomImage?: {
-    light: string
-    dark: string
-  }
+    light: string;
+    dark: string;
+  };
   gridOptions?: {
-    angle?: number
-    cellSize?: number
-    opacity?: number
-    lightLineColor?: string
-    darkLineColor?: string
-  }
+    angle?: number;
+    cellSize?: number;
+    opacity?: number;
+    lightLineColor?: string;
+    darkLineColor?: string;
+  };
 }
 
 const RetroGrid = ({
   angle = 65,
   cellSize = 60,
   opacity = 0.5,
-  lightLineColor = "gray",
-  darkLineColor = "gray",
+  lightLineColor = 'gray',
+  darkLineColor = 'gray',
 }) => {
   const gridStyles = {
-    "--grid-angle": `${angle}deg`,
-    "--cell-size": `${cellSize}px`,
-    "--opacity": opacity,
-    "--light-line": lightLineColor,
-    "--dark-line": darkLineColor,
-  } as React.CSSProperties
+    '--grid-angle': `${angle}deg`,
+    '--cell-size': `${cellSize}px`,
+    '--opacity': opacity,
+    '--light-line': lightLineColor,
+    '--dark-line': darkLineColor,
+  } as React.CSSProperties;
 
   return (
     <div
       className={cn(
-        "pointer-events-none absolute size-full overflow-hidden [perspective:200px]",
-        `opacity-[var(--opacity)]`,
+        'pointer-events-none absolute size-full overflow-hidden [perspective:200px]',
+        `opacity-[var(--opacity)]`
       )}
       style={gridStyles}
     >
@@ -53,39 +53,46 @@ const RetroGrid = ({
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-90% dark:from-black" />
     </div>
-  )
-}
+  );
+};
 
 const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
   (
     {
       className,
-      title = "Build products for everyone",
+      title = 'Build products for everyone',
       subtitle = {
-        regular: "Designing your projects faster with ",
-        gradient: "the largest figma UI kit.",
+        regular: 'Designing your projects faster with ',
+        gradient: 'the largest figma UI kit.',
       },
-      description = "Sed ut perspiciatis unde omnis iste natus voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.",
-      ctaText = "Browse courses",
-      ctaHref = "#",
+      description = 'Sed ut perspiciatis unde omnis iste natus voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.',
+      ctaText = 'Browse courses',
+      ctaHref = '#',
       bottomImage = {
-        light: "/dashboard.png",
-        dark: "/dashboard.png",
+        light: '/dashboard.png',
+        dark: '/dashboard.png',
       },
       gridOptions,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
-      <div className={cn("relative min-h-screen flex items-center overflow-x-hidden", className)} ref={ref} {...props}>
+      <div
+        className={cn('relative min-h-screen flex items-center overflow-x-hidden', className)}
+        ref={ref}
+        {...props}
+      >
         {/* Enhanced background with multiple layers */}
         <div className="absolute top-0 z-[0] h-screen w-screen bg-purple-950/10 dark:bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
-        
+
         {/* Floating orbs for visual interest */}
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-        
+        <div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: '2s' }}
+        />
+
         <section className="relative max-w-full mx-auto z-1 w-full">
           <RetroGrid {...gridOptions} />
           <div className="max-w-screen-xl z-10 mx-auto px-4 py-12 sm:py-16 md:py-28 gap-8 md:gap-12 md:px-8">
@@ -139,15 +146,27 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                   className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 group"
                 >
                   Watch Demo
-                  <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m6-10V7a3 3 0 11-6 0V4" />
+                  <svg
+                    className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m6-10V7a3 3 0 11-6 0V4"
+                    />
                   </svg>
                 </a>
               </div>
 
               {/* Trust indicators */}
               <div className="animate-fade-in-up stagger-4 pt-8">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Trusted by 50,000+ users worldwide</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Trusted by 50,000+ users worldwide
+                </p>
                 <div className="flex items-center justify-center gap-8 opacity-60 hover:opacity-100 transition-opacity duration-300">
                   <div className="text-xs font-medium">⭐ 4.9/5 Rating</div>
                   <div className="text-xs font-medium">🔒 Bank-Level Security</div>
@@ -162,7 +181,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                 <div className="relative group">
                   {/* Glow effect behind image */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-violet-500/20 to-primary/20 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   <div className="relative">
                     <Image
                       src={bottomImage.light}
@@ -171,6 +190,10 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                       width={1200}
                       height={600}
                       priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                      quality={85}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBEQCEAwEPwAB//9k="
                     />
                     <Image
                       src={bottomImage.dark}
@@ -179,8 +202,12 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                       width={1200}
                       height={600}
                       priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                      quality={85}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBEQCEAwEPwAB//9k="
                     />
-                    
+
                     {/* Floating UI elements for visual interest */}
                     <div className="absolute -top-4 -right-4 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-bounce">
                       ✓
@@ -195,9 +222,9 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
           </div>
         </section>
       </div>
-    )
-  },
-)
-HeroSection.displayName = "HeroSection"
+    );
+  }
+);
+HeroSection.displayName = 'HeroSection';
 
-export { HeroSection }
+export { HeroSection };
