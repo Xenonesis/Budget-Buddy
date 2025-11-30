@@ -30,9 +30,9 @@ const nextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
-  // Note: Turbopack is used automatically in dev mode with Next.js 16
-  // For production builds, webpack is used as Turbopack production builds
-  // are still experimental with Tailwind CSS 4
+  // Use webpack for production builds as Turbopack has compatibility issues
+  // with Tailwind CSS 4 in production
+  bundlePagesRouterDependencies: true,
 
   // Production optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
@@ -45,11 +45,6 @@ const nextConfig = {
   typescript: {
     // Type checking is done separately in CI
     ignoreBuildErrors: false,
-  },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
   },
 
   // Experimental features for performance
