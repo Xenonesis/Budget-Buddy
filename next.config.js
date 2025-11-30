@@ -4,7 +4,17 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
   // External packages that should be bundled server-side
-  serverExternalPackages: ['@supabase/supabase-js', 'puppeteer'],
+  serverExternalPackages: ['@supabase/supabase-js', 'puppeteer', 'lightningcss'],
+
+  // Webpack configuration for handling native modules
+  webpack: (config, { isServer }) => {
+    // Handle lightningcss native bindings
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push('lightningcss');
+    }
+    return config;
+  },
 
   // Image optimization settings
   images: {
