@@ -1,14 +1,14 @@
-import './globals.css'
-import type { Metadata, Viewport } from 'next'
-import ThemeProviderShell from '@/components/ThemeProviderShell'
-import { Inter } from 'next/font/google'
+import './globals.css';
+import type { Metadata, Viewport } from 'next';
+import ThemeProviderShell from '@/components/ThemeProviderShell';
+import { Inter } from 'next/font/google';
 
 // Optimize font loading with display swap
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'swap'
-})
+  display: 'swap',
+});
 
 // Define viewport config separately
 export const viewport: Viewport = {
@@ -20,18 +20,27 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#121212' }
+    { media: '(prefers-color-scheme: dark)', color: '#121212' },
   ],
-  colorScheme: 'light dark'
-}
+  colorScheme: 'light dark',
+};
 
 // Improve metadata for better SEO and performance
 export const metadata: Metadata = {
   title: 'Budget Buddy - Smart Money Management',
-  description: 'Take control of your finances with Budget Buddy, an intuitive financial management tool. Track expenses, set budgets, and achieve your financial goals.',
+  description:
+    'Take control of your finances with Budget Buddy, an intuitive financial management tool. Track expenses, set budgets, and achieve your financial goals.',
   applicationName: 'Budget Buddy',
   authors: [{ name: 'Budget Buddy Team' }],
-  keywords: ['budget tracking', 'personal finance', 'expense management', 'money management', 'savings goals', 'financial dashboard', 'budget buddy'],
+  keywords: [
+    'budget tracking',
+    'personal finance',
+    'expense management',
+    'money management',
+    'savings goals',
+    'financial dashboard',
+    'budget buddy',
+  ],
   robots: 'index, follow',
   appleWebApp: {
     capable: true,
@@ -50,13 +59,15 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://budget-buddy.com',
     title: 'Budget Buddy - Smart Money Management',
-    description: 'Take control of your finances with Budget Buddy, an intuitive financial management tool.',
+    description:
+      'Take control of your finances with Budget Buddy, an intuitive financial management tool.',
     siteName: 'Budget Buddy',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Budget Buddy - Smart Money Management',
-    description: 'Take control of your finances with Budget Buddy, an intuitive financial management tool.',
+    description:
+      'Take control of your finances with Budget Buddy, an intuitive financial management tool.',
     creator: '@budgetbuddy',
   },
   icons: {
@@ -64,27 +75,19 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
-    apple: [
-      { url: '/apple-icon.png', sizes: '180x180' },
-    ]
+    apple: [{ url: '/apple-icon.png', sizes: '180x180' }],
   },
   other: {
     'X-UA-Compatible': 'IE=edge',
-  }
-}
+  },
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <ThemeProviderShell>
-          {children}
-        </ThemeProviderShell>
+        <ThemeProviderShell>{children}</ThemeProviderShell>
       </body>
     </html>
-  )
+  );
 }

@@ -1,77 +1,76 @@
-"use client";
+'use client';
 
-import React from "react";
-import { EnhancedFinancialOverview } from "@/components/dashboard/enhanced-financial-overview";
-
-// Enhanced demo now uses real user data
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import React, { useState, useEffect } from 'react';
+import { EnhancedFinancialOverview } from '@/components/dashboard/enhanced-financial-overview';
+import { supabase } from '@/lib/supabase';
 
 interface Transaction {
   id: string;
   amount: number;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   category: string;
   date: string;
   description: string;
 }
 
-const [realTransactions, setRealTransactions] = useState<Transaction[]>([]);
-const [loading, setLoading] = useState(true);
-
-// Fetch real user transactions
-useEffect(() => {
-  const fetchRealTransactions = async () => {
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-
-      const { data: transactions, error } = await supabase
-        .from('transactions')
-        .select(`
-          id,
-          amount,
-          type,
-          description,
-          date,
-          categories!inner(name)
-        `)
-        .eq('user_id', userData.user.id)
-        .order('date', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-
-      const formattedTransactions = transactions?.map(t => ({
-        id: t.id,
-        amount: t.amount,
-        type: t.type as "income" | "expense",
-        category: (t.categories as any)?.name || 'Uncategorized',
-        date: t.date,
-        description: t.description || ''
-      })) || [];
-
-      setRealTransactions(formattedTransactions);
-    } catch (error) {
-      console.error('Error fetching real transactions:', error);
-      setRealTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchRealTransactions();
-}, []);
-
 export default function EnhancedDemoPage() {
+  const [realTransactions, setRealTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real user transactions
+  useEffect(() => {
+    const fetchRealTransactions = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const { data: transactions, error } = await supabase
+          .from('transactions')
+          .select(
+            `
+            id,
+            amount,
+            type,
+            description,
+            date,
+            categories!inner(name)
+          `
+          )
+          .eq('user_id', userData.user.id)
+          .order('date', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        const formattedTransactions =
+          transactions?.map((t) => ({
+            id: t.id,
+            amount: t.amount,
+            type: t.type as 'income' | 'expense',
+            category: (t.categories as any)?.name || 'Uncategorized',
+            date: t.date,
+            description: t.description || '',
+          })) || [];
+
+        setRealTransactions(formattedTransactions);
+      } catch (error) {
+        console.error('Error fetching real transactions:', error);
+        setRealTransactions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRealTransactions();
+  }, []);
   const totalIncome = realTransactions
-    .filter(t => t.type === "income")
+    .filter((t) => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
-    
+
   const totalExpense = realTransactions
-    .filter(t => t.type === "expense")
+    .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
-    
+
   const balance = totalIncome - totalExpense;
 
   if (loading) {
@@ -93,8 +92,8 @@ export default function EnhancedDemoPage() {
           <p className="text-muted-foreground mb-8">
             No transactions found. Add some transactions to see the enhanced financial overview.
           </p>
-          <a 
-            href="/dashboard/transactions/new" 
+          <a
+            href="/dashboard/transactions/new"
             className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
             Add Your First Transaction
@@ -112,7 +111,7 @@ export default function EnhancedDemoPage() {
         balance={balance}
         transactions={realTransactions}
         timeRange="January 2025"
-        onRefresh={() => console.log("Refreshing data...")}
+        onRefresh={() => console.log('Refreshing data...')}
       />
     </div>
   );
