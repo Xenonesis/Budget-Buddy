@@ -2,6 +2,13 @@
 
 All notable changes to the Budget Buddy application will be documented in this file.
 
+## [26.02] - 2025-12-01
+
+### Updated
+- Upgraded Next.js from 16.0.1 to 16.0.6 (latest stable release)
+- Updated eslint-config-next to 16.0.6 for compatibility
+- Includes browserslist version bump to silence CI warnings
+
 ## [22.00] - 2025-09-08
 
 ### Added
