@@ -107,7 +107,7 @@ const PricingCard = memo(function PricingCard({
             {plan.period && <span className="text-muted-foreground">/{plan.period}</span>}
           </div>
           <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
-          {plan.savings && (
+          {'savings' in plan && plan.savings && (
             <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
               <TrendingDown className="h-3 w-3" />
               {plan.savings}
