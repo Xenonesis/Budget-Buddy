@@ -1,7 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { memo, useCallback } from 'react';
 import { HeroSection } from '@/components/ui/hero-section-dark';
+import { LazySection } from '@/components/ui/lazy-components';
 
 // Lazy load below-the-fold sections for faster initial paint
 const FeaturesSection = dynamic(
@@ -29,27 +31,29 @@ const AboutSection = dynamic(
   { ssr: true, loading: () => <SectionSkeleton /> }
 );
 
-// Lightweight section skeleton for loading states
-const SectionSkeleton = () => (
-  <div className="py-16 px-4">
-    <div className="max-w-4xl mx-auto space-y-4">
-      <div className="h-8 w-48 mx-auto rounded fast-skeleton" />
-      <div className="h-4 w-96 mx-auto rounded fast-skeleton" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-48 rounded-xl fast-skeleton" />
-        ))}
+// Lightweight section skeleton for loading states - optimized with will-change
+const SectionSkeleton = memo(function SectionSkeleton() {
+  return (
+    <div className="py-16 px-4 will-change-auto">
+      <div className="max-w-4xl mx-auto space-y-4">
+        <div className="h-8 w-48 mx-auto rounded fast-skeleton" />
+        <div className="h-4 w-96 mx-auto rounded fast-skeleton" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-48 rounded-xl fast-skeleton" />
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+});
 
-// Loading placeholder for animations
-const BubblePlaceholder = () => (
-  <div className="absolute inset-0 bg-primary/5 opacity-30 rounded-full" />
-);
+// Loading placeholder for animations - memoized
+const BubblePlaceholder = memo(function BubblePlaceholder() {
+  return <div className="absolute inset-0 bg-primary/5 opacity-30 rounded-full" />;
+});
 
-// Optimized dynamic imports for animations
+// Optimized dynamic imports for animations - load only when visible
 const FeatureBubbles = dynamic(
   () => import('@/app/page-animations').then((mod) => mod.FeatureBubbles),
   { ssr: false, loading: () => <BubblePlaceholder /> }
@@ -89,8 +93,8 @@ const HERO_CONFIG = {
   },
 } as const;
 
-// Reusable section wrapper component
-const SectionWrapper = ({
+// Reusable section wrapper component with optimized rendering
+const SectionWrapper = memo(function SectionWrapper({
   children,
   className = '',
   AnimationComponent,
@@ -102,56 +106,80 @@ const SectionWrapper = ({
   AnimationComponent?: React.ComponentType;
   animationClassName?: string;
   animationOpacity?: number;
-}) => (
-  <div className={`relative ${className}`}>
-    {AnimationComponent && (
-      <div
-        className={`absolute inset-0 overflow-hidden pointer-events-none hidden sm:block ${animationClassName}`}
-        style={{ opacity: animationOpacity }}
-      >
-        <AnimationComponent />
-      </div>
-    )}
-    {children}
-  </div>
-);
+}) {
+  return (
+    <div className={`relative transform-gpu ${className}`}>
+      {AnimationComponent && (
+        <div
+          className={`absolute inset-0 overflow-hidden pointer-events-none hidden sm:block ${animationClassName}`}
+          style={{ opacity: animationOpacity, willChange: 'opacity' }}
+        >
+          <AnimationComponent />
+        </div>
+      )}
+      {children}
+    </div>
+  );
+});
 
-// Individual section components with preserved functionality
-export const HeroSectionWrapper = () => (
-  <SectionWrapper>
-    <HeroSection {...HERO_CONFIG} />
-  </SectionWrapper>
-);
+// Individual section components with preserved functionality - memoized
+export const HeroSectionWrapper = memo(function HeroSectionWrapper() {
+  return (
+    <SectionWrapper>
+      <HeroSection {...HERO_CONFIG} />
+    </SectionWrapper>
+  );
+});
 
-export const FeaturesSectionWrapper = () => (
-  <SectionWrapper AnimationComponent={FeatureBubbles}>
-    <FeaturesSection />
-  </SectionWrapper>
-);
+export const FeaturesSectionWrapper = memo(function FeaturesSectionWrapper() {
+  return (
+    <LazySection id="features" animateIn>
+      <SectionWrapper AnimationComponent={FeatureBubbles}>
+        <FeaturesSection />
+      </SectionWrapper>
+    </LazySection>
+  );
+});
 
-export const TestimonialsSectionWrapper = () => (
-  <SectionWrapper AnimationComponent={TestimonialBubbles} animationOpacity={0.6}>
-    <TestimonialsSection />
-  </SectionWrapper>
-);
+export const TestimonialsSectionWrapper = memo(function TestimonialsSectionWrapper() {
+  return (
+    <LazySection id="testimonials" animateIn>
+      <SectionWrapper AnimationComponent={TestimonialBubbles} animationOpacity={0.6}>
+        <TestimonialsSection />
+      </SectionWrapper>
+    </LazySection>
+  );
+});
 
-export const PricingSectionWrapper = () => (
-  <SectionWrapper>
-    <PricingSection />
-  </SectionWrapper>
-);
+export const PricingSectionWrapper = memo(function PricingSectionWrapper() {
+  return (
+    <LazySection id="pricing" animateIn>
+      <SectionWrapper>
+        <PricingSection />
+      </SectionWrapper>
+    </LazySection>
+  );
+});
 
-export const CTASectionWrapper = () => (
-  <SectionWrapper AnimationComponent={CTABubbles}>
-    <CTASection />
-  </SectionWrapper>
-);
+export const CTASectionWrapper = memo(function CTASectionWrapper() {
+  return (
+    <LazySection id="cta" animateIn>
+      <SectionWrapper AnimationComponent={CTABubbles}>
+        <CTASection />
+      </SectionWrapper>
+    </LazySection>
+  );
+});
 
-export const AboutSectionWrapper = () => (
-  <SectionWrapper>
-    <AboutSection />
-  </SectionWrapper>
-);
+export const AboutSectionWrapper = memo(function AboutSectionWrapper() {
+  return (
+    <LazySection id="about" animateIn>
+      <SectionWrapper>
+        <AboutSection />
+      </SectionWrapper>
+    </LazySection>
+  );
+});
 
 // Centralized list of landing section components to keep ordering in one place
 export const LANDING_SECTION_COMPONENTS = [
@@ -163,7 +191,7 @@ export const LANDING_SECTION_COMPONENTS = [
   { Component: AboutSectionWrapper, key: 'about' },
 ] as const;
 
-// Render all landing sections
+// Render all landing sections with optimized scroll performance
 export function LandingSections() {
   return (
     <>
