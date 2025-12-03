@@ -1,10 +1,23 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { Building, Mail, Award, Users, Zap, Target, Shield, DollarSign, TrendingDown, Plus, Minus, HelpCircle } from "lucide-react";
-import Link from "next/link";
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import {
+  Building,
+  Mail,
+  Award,
+  Users,
+  Zap,
+  Target,
+  Shield,
+  DollarSign,
+  TrendingDown,
+  Plus,
+  Minus,
+  HelpCircle,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export function AboutSection() {
   // Meet The Developer section commented out as requested
@@ -188,7 +201,7 @@ export function AboutSection() {
                   <div className="p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-background transition-colors duration-300">
                     <div className="font-medium">Mentor (Part-time)</div>
                     <div className="text-sm text-muted-foreground">JhaMobii Technologies Pvt. Ltd., Remote</div>
-                    <div className="text-xs text-primary mb-2">Aug 2024 - Present</div>
+                    <div className="text-xs text-primary mb-2">Aug 2025 - Present</div>
                     <ul className="text-sm space-y-1 text-muted-foreground">
                       <li>• Provided technical mentorship in cybersecurity</li>
                       <li>• Guided team members through vulnerability assessments</li>
@@ -198,7 +211,7 @@ export function AboutSection() {
                   <div className="p-4 rounded-lg border border-border/50 bg-background/50 hover:bg-background transition-colors duration-300">
                     <div className="font-medium">Cybersecurity Intern</div>
                     <div className="text-sm text-muted-foreground">Null, Remote</div>
-                    <div className="text-xs text-primary mb-2">Jun 2024 - Present</div>
+                    <div className="text-xs text-primary mb-2">Jun 2025 - Present</div>
                     <ul className="text-sm space-y-1 text-muted-foreground">
                       <li>• Conducted vulnerability assessments</li>
                       <li>• Monitored network traffic and responded to security incidents</li>
