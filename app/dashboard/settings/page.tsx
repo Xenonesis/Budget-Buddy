@@ -20,6 +20,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { AIProvider, AIModel } from '@/lib/ai';
 import { getAvailableModelsForProvider } from '@/lib/ai';
+import { SettingsPageSkeleton } from '@/components/ui/page-skeletons';
 
 interface Profile {
   id: string;
@@ -1175,9 +1176,7 @@ export default function SettingsPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-        </div>
+        <SettingsPageSkeleton />
       ) : (
         <div className="space-y-6">
           {/* Tab Navigation */}

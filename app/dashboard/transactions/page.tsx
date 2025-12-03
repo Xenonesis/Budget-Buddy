@@ -1,16 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect, memo } from "react";
-import { supabase } from "@/lib/supabase";
-import { formatCurrency, formatDate, formatDateWithTimezone, calculateNextRecurringDate, getUserTimezone } from "@/lib/utils";
-import { Currency } from "@/components/ui/currency";
-import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { Button } from "@/components/ui/button";
-import { 
-  PlusCircle, 
-  Calendar, 
-  Edit2, 
-  Trash, 
+import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect, memo } from 'react';
+import { supabase } from '@/lib/supabase';
+import {
+  formatCurrency,
+  formatDate,
+  formatDateWithTimezone,
+  calculateNextRecurringDate,
+  getUserTimezone,
+} from '@/lib/utils';
+import { Currency } from '@/components/ui/currency';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { Button } from '@/components/ui/button';
+import {
+  PlusCircle,
+  Calendar,
+  Edit2,
+  Trash,
   Download,
   RefreshCw,
   FileSpreadsheet,
@@ -28,69 +34,62 @@ import {
   Lightbulb,
   PiggyBank,
   Maximize2,
-  X
-} from "lucide-react";
-import { toast } from "sonner";
-import { AddTransactionButton } from "@/components/ui/bottom-navigation";
+  X,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { AddTransactionButton } from '@/components/ui/bottom-navigation';
 import dynamic from 'next/dynamic';
 
 // Comment out the regular import and use dynamic import instead
 // import AutoSizer from 'react-virtualized-auto-sizer';
-const AutoSizer = dynamic(
-  () => import('react-virtualized-auto-sizer').then(mod => mod.default),
-  { ssr: false }
-);
+const AutoSizer = dynamic(() => import('react-virtualized-auto-sizer').then((mod) => mod.default), {
+  ssr: false,
+});
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import styles from './transactions.module.css';
-import { 
-  validateAmount, 
-  validateDate, 
-  validateDescription, 
-  validateCategory, 
-  validateTransactionType, 
-  validateForm 
-} from "@/lib/validation";
-import AddTransactionForm from "./add-transaction-form";  // Import the new component
+import {
+  validateAmount,
+  validateDate,
+  validateDescription,
+  validateCategory,
+  validateTransactionType,
+  validateForm,
+} from '@/lib/validation';
+import AddTransactionForm from './add-transaction-form'; // Import the new component
 
 // Import extracted components
-import { TransactionSummaryCards } from "@/components/transactions/summary-cards";
-import { TransactionFilters } from "@/components/transactions/transaction-filters";
-import { TransactionTable } from "@/components/transactions/transaction-table";
-import { TransactionCardView } from "@/components/transactions/transaction-card-view";
-import { TransactionPagination } from "@/components/transactions/transaction-pagination";
-import { RecurringTransactions } from "@/components/transactions/recurring-transactions";
-import { CustomCategoryForm } from "@/components/transactions/custom-category-form";
-import { YearOverYearComparison } from "@/components/dashboard/charts/year-over-year-comparison";
-import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
+import { TransactionSummaryCards } from '@/components/transactions/summary-cards';
+import { TransactionFilters } from '@/components/transactions/transaction-filters';
+import { TransactionTable } from '@/components/transactions/transaction-table';
+import { TransactionCardView } from '@/components/transactions/transaction-card-view';
+import { TransactionPagination } from '@/components/transactions/transaction-pagination';
+import { RecurringTransactions } from '@/components/transactions/recurring-transactions';
+import { CustomCategoryForm } from '@/components/transactions/custom-category-form';
+import { YearOverYearComparison } from '@/components/dashboard/charts/year-over-year-comparison';
+import { IncomeExpenseChart } from '@/components/dashboard/charts/income-expense-chart';
 
-import { 
-  calculateTransactionSummary
-} from "@/lib/transaction-utils";
-import type { TransactionSummary as TransactionSummaryType } from "@/lib/transaction-utils";
+import { calculateTransactionSummary } from '@/lib/transaction-utils';
+import type { TransactionSummary as TransactionSummaryType } from '@/lib/transaction-utils';
+import { TransactionsPageSkeleton } from '@/components/ui/page-skeletons';
 
-import { 
+import {
   exportToCSV,
   exportToExcel,
   exportToPDF,
   scheduleExport,
-  calculateNextExportDate
-} from "@/lib/export-utils";
+  calculateNextExportDate,
+} from '@/lib/export-utils';
 
 interface Transaction {
   id: string;
   user_id: string;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   category_id: string;
   category_name?: string;
   amount: number;
@@ -112,11 +111,11 @@ interface ApiResponse<T> {
 interface RecurringTransaction {
   id: string;
   user_id: string;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   category_id: string;
   amount: number;
   description: string;
-  frequency: "daily" | "weekly" | "biweekly" | "monthly" | "quarterly" | "annually";
+  frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
   start_date: string;
   end_date?: string;
   last_generated?: string;
@@ -133,115 +132,135 @@ interface Category {
 }
 
 interface FormData {
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   category_id: string;
   amount: string;
   description: string;
   date: string;
   is_recurring: boolean;
-  recurring_frequency: "daily" | "weekly" | "biweekly" | "monthly" | "quarterly" | "annually";
+  recurring_frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
   recurring_end_date: string;
 }
 
 // 1. Implement event delegation for transaction list items
-const TransactionRow = memo(({ transaction, onEdit, onDelete }: { 
-  transaction: Transaction, 
-  onEdit: (t: Transaction) => void, 
-  onDelete: (id: string) => void 
-}) => {
-  const userPrefs = useUserPreferences();
-  
-  return (
-    <tr className={styles.transactionRow} data-id={transaction.id}>
-      <td className={styles.dateColumn}>
-        {formatDateWithTimezone(transaction.date, userPrefs.timezone)}
-      </td>
-      <td className={styles.typeColumn}>
-        {transaction.type === "income" ? (
-          <ArrowUpCircle className="w-4 h-4 text-green-500 mr-1" />
-        ) : (
-          <ArrowDownCircle className="w-4 h-4 text-red-500 mr-1" />
-        )}
-        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-      </td>
-      <td className={styles.categoryColumn}>
-        {transaction.category_name || "Uncategorized"}
-      </td>
-      <td className={styles.descriptionColumn}>{transaction.description}</td>
-      <td className={`${styles.amountColumn} ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-        <Currency
-          value={transaction.amount}
-          currency={userPrefs.currency}
-        />
-      </td>
-      <td className={styles.actionsColumn}>
-        <div className="flex space-x-2">
-          <button className="text-blue-500 hover:text-blue-700" aria-label="Edit">
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button className="text-red-500 hover:text-red-700" aria-label="Delete">
-            <Trash className="w-4 h-4" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-});
+const TransactionRow = memo(
+  ({
+    transaction,
+    onEdit,
+    onDelete,
+  }: {
+    transaction: Transaction;
+    onEdit: (t: Transaction) => void;
+    onDelete: (id: string) => void;
+  }) => {
+    const userPrefs = useUserPreferences();
+
+    return (
+      <tr className={styles.transactionRow} data-id={transaction.id}>
+        <td className={styles.dateColumn}>
+          {formatDateWithTimezone(transaction.date, userPrefs.timezone)}
+        </td>
+        <td className={styles.typeColumn}>
+          {transaction.type === 'income' ? (
+            <ArrowUpCircle className="w-4 h-4 text-green-500 mr-1" />
+          ) : (
+            <ArrowDownCircle className="w-4 h-4 text-red-500 mr-1" />
+          )}
+          {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+        </td>
+        <td className={styles.categoryColumn}>{transaction.category_name || 'Uncategorized'}</td>
+        <td className={styles.descriptionColumn}>{transaction.description}</td>
+        <td
+          className={`${styles.amountColumn} ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+        >
+          <Currency value={transaction.amount} currency={userPrefs.currency} />
+        </td>
+        <td className={styles.actionsColumn}>
+          <div className="flex space-x-2">
+            <button className="text-blue-500 hover:text-blue-700" aria-label="Edit">
+              <Edit2 className="w-4 h-4" />
+            </button>
+            <button className="text-red-500 hover:text-red-700" aria-label="Delete">
+              <Trash className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+);
 TransactionRow.displayName = 'TransactionRow';
 
 // 2. Replace the transactions table with a memoized component
-const TransactionsTable = memo(({ 
-  transactions, 
-  onEdit, 
-  onDelete, 
-  onSort, 
-  sortField, 
-  sortDirection 
-}: { 
-  transactions: Transaction[], 
-  onEdit: (t: Transaction) => void, 
-  onDelete: (id: string) => void,
-  onSort: (field: string) => void,
-  sortField: string,
-  sortDirection: "asc" | "desc"
-}) => {
-  return (
-    <div className={`${styles.tableContainer} responsive-table-wrapper`}>
-      <table className={`${styles.transactionsTable} responsive-table`}>
-        <thead>
-          <tr>
-            <th onClick={() => onSort("date")} className={`${styles.sortableHeader} whitespace-nowrap`}>
-              Date {sortField === "date" && (sortDirection === "asc" ? "↑" : "↓")}
-            </th>
-            <th onClick={() => onSort("type")} className={`${styles.sortableHeader} whitespace-nowrap`}>
-              Type {sortField === "type" && (sortDirection === "asc" ? "↑" : "↓")}
-            </th>
-            <th onClick={() => onSort("category_name")} className={`${styles.sortableHeader} whitespace-nowrap`}>
-              Category {sortField === "category_name" && (sortDirection === "asc" ? "↑" : "↓")}
-            </th>
-            <th onClick={() => onSort("description")} className={`${styles.sortableHeader} whitespace-nowrap`}>
-              Description {sortField === "description" && (sortDirection === "asc" ? "↑" : "↓")}
-            </th>
-            <th onClick={() => onSort("amount")} className={`${styles.sortableHeader} whitespace-nowrap`}>
-              Amount {sortField === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
-            </th>
-            <th className="whitespace-nowrap">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="transactions-tbody">
-          {transactions.map((transaction) => (
-            <TransactionRow 
-              key={transaction.id} 
-              transaction={transaction} 
-              onEdit={onEdit} 
-              onDelete={onDelete} 
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-});
+const TransactionsTable = memo(
+  ({
+    transactions,
+    onEdit,
+    onDelete,
+    onSort,
+    sortField,
+    sortDirection,
+  }: {
+    transactions: Transaction[];
+    onEdit: (t: Transaction) => void;
+    onDelete: (id: string) => void;
+    onSort: (field: string) => void;
+    sortField: string;
+    sortDirection: 'asc' | 'desc';
+  }) => {
+    return (
+      <div className={`${styles.tableContainer} responsive-table-wrapper`}>
+        <table className={`${styles.transactionsTable} responsive-table`}>
+          <thead>
+            <tr>
+              <th
+                onClick={() => onSort('date')}
+                className={`${styles.sortableHeader} whitespace-nowrap`}
+              >
+                Date {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                onClick={() => onSort('type')}
+                className={`${styles.sortableHeader} whitespace-nowrap`}
+              >
+                Type {sortField === 'type' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                onClick={() => onSort('category_name')}
+                className={`${styles.sortableHeader} whitespace-nowrap`}
+              >
+                Category {sortField === 'category_name' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                onClick={() => onSort('description')}
+                className={`${styles.sortableHeader} whitespace-nowrap`}
+              >
+                Description {sortField === 'description' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                onClick={() => onSort('amount')}
+                className={`${styles.sortableHeader} whitespace-nowrap`}
+              >
+                Amount {sortField === 'amount' && (sortDirection === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody">
+            {transactions.map((transaction) => (
+              <TransactionRow
+                key={transaction.id}
+                transaction={transaction}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+);
 TransactionsTable.displayName = 'TransactionsTable';
 
 export default function TransactionsPage() {
@@ -256,39 +275,41 @@ export default function TransactionsPage() {
   const [showRecurring, setShowRecurring] = useState(false);
   const [recurringTransactions, setRecurringTransactions] = useState<RecurringTransaction[]>([]);
   const [editingRecurring, setEditingRecurring] = useState<RecurringTransaction | null>(null);
-  const [upcomingRecurringTransactions, setUpcomingRecurringTransactions] = useState<{id: string, transactions: {date: string, amount: number, description: string}[]}[]>([]);
+  const [upcomingRecurringTransactions, setUpcomingRecurringTransactions] = useState<
+    { id: string; transactions: { date: string; amount: number; description: string }[] }[]
+  >([]);
   const [showUpcomingPreview, setShowUpcomingPreview] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    type: "expense",
-    category_id: "",
-    amount: "",
-    description: "",
-    date: new Date().toLocaleDateString('en-CA', { 
-      timeZone: userPreferences.timezone || getUserTimezone() 
+    type: 'expense',
+    category_id: '',
+    amount: '',
+    description: '',
+    date: new Date().toLocaleDateString('en-CA', {
+      timeZone: userPreferences.timezone || getUserTimezone(),
     }),
     is_recurring: false,
-    recurring_frequency: "monthly",
-    recurring_end_date: ""
+    recurring_frequency: 'monthly',
+    recurring_end_date: '',
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
   const [dateRange, setDateRange] = useState<{
     start: string;
     end: string;
   }>({
-    start: "",
-    end: "",
+    start: '',
+    end: '',
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [summary, setSummary] = useState<TransactionSummaryType>({
     totalIncome: 0,
     totalExpense: 0,
-    balance: 0
+    balance: 0,
   });
-  const [sortField, setSortField] = useState<string>("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [viewMode, setViewMode] = useState<"table" | "card">("table");
+  const [sortField, setSortField] = useState<string>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const pullStartY = useRef(0);
@@ -310,32 +331,38 @@ export default function TransactionsPage() {
     type: true,
     category: true,
     description: true,
-    amount: true
+    amount: true,
   });
-  const [scheduleExportFrequency, setScheduleExportFrequency] = useState<"none" | "weekly" | "monthly">("none");
+  const [scheduleExportFrequency, setScheduleExportFrequency] = useState<
+    'none' | 'weekly' | 'monthly'
+  >('none');
   const [scheduleExportDay, setScheduleExportDay] = useState<number>(1);
-  const [scheduleExportFormat, setScheduleExportFormat] = useState<"csv" | "excel" | "pdf">("csv");
+  const [scheduleExportFormat, setScheduleExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
   const [showDeleteCategoryConfirm, setShowDeleteCategoryConfirm] = useState(false);
-  
+
   // States for charts
   const [showCharts, setShowCharts] = useState(false);
   const [showFullscreenChart, setShowFullscreenChart] = useState(false);
-  const [monthlyData, setMonthlyData] = useState<{ name: string; income: number; expense: number; transactionCount?: number }[]>([]);
+  const [monthlyData, setMonthlyData] = useState<
+    { name: string; income: number; expense: number; transactionCount?: number }[]
+  >([]);
 
   // Add this useEffect to handle unwanted dropdowns globally
   useEffect(() => {
     // Function to remove unwanted dropdowns
     const removeUnwantedDropdowns = () => {
       // Target specifically the extra dropdown that shows up
-      const unwantedDropdowns = document.querySelectorAll('.flex-1.rounded-md.border.border-input.bg-transparent.px-3.py-2.text-sm.high-contrast-dropdown');
-      
+      const unwantedDropdowns = document.querySelectorAll(
+        '.flex-1.rounded-md.border.border-input.bg-transparent.px-3.py-2.text-sm.high-contrast-dropdown'
+      );
+
       if (unwantedDropdowns.length > 0) {
-        console.log("Found unwanted dropdowns:", unwantedDropdowns.length);
-        unwantedDropdowns.forEach(dropdown => {
+        console.log('Found unwanted dropdowns:', unwantedDropdowns.length);
+        unwantedDropdowns.forEach((dropdown) => {
           // Check if it's in the custom category form area
           const parent = dropdown.closest('.custom-category-form');
           if (parent) {
-            console.log("Removing unwanted dropdown");
+            console.log('Removing unwanted dropdown');
             (dropdown as HTMLElement).style.display = 'none';
           }
         });
@@ -344,17 +371,17 @@ export default function TransactionsPage() {
 
     // Run immediately
     removeUnwantedDropdowns();
-    
+
     // Also set up a MutationObserver to catch dynamically added elements
     const observer = new MutationObserver(() => {
       removeUnwantedDropdowns();
     });
-    
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true 
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
     });
-    
+
     return () => observer.disconnect();
   }, []);
 
@@ -363,12 +390,12 @@ export default function TransactionsPage() {
     const removeDuplicateDropdowns = () => {
       // Find all dropdowns within custom category form areas
       const customForms = document.querySelectorAll(`.${styles.customCategoryForm}`);
-      customForms.forEach(form => {
+      customForms.forEach((form) => {
         // Find all select elements inside each form
         const selects = form.querySelectorAll('select');
         // If there's more than one select, or if it has the specific class
         if (selects.length > 0) {
-          selects.forEach(select => {
+          selects.forEach((select) => {
             // Check if it's the unwanted select
             if (select.classList.contains('flex-1')) {
               select.remove();
@@ -380,11 +407,12 @@ export default function TransactionsPage() {
 
     // Setup MutationObserver to handle dynamic changes
     const observer = new MutationObserver((mutations) => {
-      mutations.forEach(mutation => {
+      mutations.forEach((mutation) => {
         if (mutation.type === 'childList' && mutation.addedNodes.length) {
           // Check if any added nodes contain selects
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === 1) { // Element node
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+              // Element node
               const element = node as Element;
               const selects = element.querySelectorAll('select.flex-1');
               if (selects.length && element.closest(`.${styles.customCategoryForm}`)) {
@@ -395,16 +423,16 @@ export default function TransactionsPage() {
         }
       });
     });
-    
+
     // Observe the whole document for DOM changes
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
-    
+
     // Initial cleanup
     setTimeout(removeDuplicateDropdowns, 100);
-    
+
     // Cleanup on unmount
     return () => {
       observer.disconnect();
@@ -425,7 +453,12 @@ export default function TransactionsPage() {
 
   const handleScheduleExport = () => {
     if (scheduleExportFrequency !== 'none') {
-      scheduleExport(scheduleExportFrequency, scheduleExportDay, scheduleExportFormat, exportColumns);
+      scheduleExport(
+        scheduleExportFrequency,
+        scheduleExportDay,
+        scheduleExportFormat,
+        exportColumns
+      );
     }
     setShowExportOptions(false);
   };
@@ -441,81 +474,82 @@ export default function TransactionsPage() {
   const handleExportColumnChange = (column: keyof typeof exportColumns) => {
     setExportColumns({
       ...exportColumns,
-      [column]: !exportColumns[column]
+      [column]: !exportColumns[column],
     });
   };
 
   async function fetchTransactions() {
     try {
       setLoading(true);
-      
+
       // Get user first
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Load user preferences
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
-        
+
       // If profile exists, update our preferences
       if (profileData) {
         if (profileData.currency) {
           setCurrency(profileData.currency);
         }
-        
+
         if (profileData.username) {
           setUsername(profileData.username);
         }
       }
-      
+
       // Log the fetch attempt
-      console.log("Fetching transactions for user:", user.id);
-      
+      console.log('Fetching transactions for user:', user.id);
+
       // Fetch initial transactions with pagination
       // Make sure we're not filtering by type unless explicitly requested
-      let query = supabase
-        .from('transactions')
-        .select('*, categories(*)')
-        .eq('user_id', user.id);
-      
+      let query = supabase.from('transactions').select('*, categories(*)').eq('user_id', user.id);
+
       // Only filter by type if a specific filter is set
       if (filterType !== 'all') {
         query = query.eq('type', filterType);
-        console.log("Filtering transactions by type:", filterType);
+        console.log('Filtering transactions by type:', filterType);
       } else {
-        console.log("Fetching all transaction types");
+        console.log('Fetching all transaction types');
       }
-      
-      const { data, error }: ApiResponse<(Transaction & { categories: Category | null })[]> = await query
-        .order('date', { ascending: false })
-        .limit(itemsPerPage);
+
+      const { data, error }: ApiResponse<(Transaction & { categories: Category | null })[]> =
+        await query.order('date', { ascending: false }).limit(itemsPerPage);
 
       if (error) {
-        console.error("Error fetching transactions:", error);
+        console.error('Error fetching transactions:', error);
         throw error;
       }
-      
+
       if (!data) {
-        console.log("No transaction data received");
-        throw new Error("No data received");
+        console.log('No transaction data received');
+        throw new Error('No data received');
       }
 
-      console.log(`Fetched ${data.length} transactions:`, data.map(t => ({ id: t.id, type: t.type, amount: t.amount })));
+      console.log(
+        `Fetched ${data.length} transactions:`,
+        data.map((t) => ({ id: t.id, type: t.type, amount: t.amount }))
+      );
 
-      const transactions = data.map(transaction => ({
+      const transactions = data.map((transaction) => ({
         ...transaction,
-        category_name: transaction.categories?.name || 'Uncategorized'
+        category_name: transaction.categories?.name || 'Uncategorized',
       }));
 
       setTransactions(transactions);
       setHasMore(data.length === itemsPerPage);
       calculateSummary(transactions);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
-      toast.error("Failed to load transactions");
+      console.error('Error fetching transactions:', error);
+      toast.error('Failed to load transactions');
     } finally {
       setLoading(false);
     }
@@ -524,20 +558,23 @@ export default function TransactionsPage() {
   const calculateSummary = (transactionsData: Transaction[]) => {
     const newSummary = calculateTransactionSummary(transactionsData);
     setSummary(newSummary);
-    
+
     // Calculate monthly data for charts
-    const monthlyDataMap = new Map<string, { income: number; expense: number; transactionCount: number }>();
-    
-    transactionsData.forEach(transaction => {
-      const monthKey = new Date(transaction.date).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short' 
+    const monthlyDataMap = new Map<
+      string,
+      { income: number; expense: number; transactionCount: number }
+    >();
+
+    transactionsData.forEach((transaction) => {
+      const monthKey = new Date(transaction.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
       });
-      
+
       if (!monthlyDataMap.has(monthKey)) {
         monthlyDataMap.set(monthKey, { income: 0, expense: 0, transactionCount: 0 });
       }
-      
+
       const monthData = monthlyDataMap.get(monthKey)!;
       if (transaction.type === 'income') {
         monthData.income += transaction.amount;
@@ -546,16 +583,16 @@ export default function TransactionsPage() {
       }
       monthData.transactionCount++;
     });
-    
+
     const chartMonthlyData = Array.from(monthlyDataMap.entries())
       .map(([name, data]) => ({
         name,
         income: data.income,
         expense: data.expense,
-        transactionCount: data.transactionCount
+        transactionCount: data.transactionCount,
       }))
       .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime());
-    
+
     setMonthlyData(chartMonthlyData);
   };
 
@@ -563,158 +600,158 @@ export default function TransactionsPage() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
-        console.error("No authenticated user found when fetching categories");
+        console.error('No authenticated user found when fetching categories');
         return;
       }
 
-      console.log("Fetching categories for user:", userData.user.id);
-      
+      console.log('Fetching categories for user:', userData.user.id);
+
       const { data, error } = await supabase
-        .from("categories")
-        .select("*")
+        .from('categories')
+        .select('*')
         .or(`user_id.is.null,user_id.eq.${userData.user.id}`)
         .eq('is_active', true)
-        .order("name");
+        .order('name');
 
       if (error) {
-        console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
         return;
       }
-      
-      console.log("Fetched categories:", data?.length, "items");
-      
+
+      console.log('Fetched categories:', data?.length, 'items');
+
       // Debug the categories to ensure they have proper types
       if (data && data.length > 0) {
-        console.log("Sample categories:", data.slice(0, 3));
-        console.log("Income categories:", data.filter(c => c.type === 'income').length);
-        console.log("Expense categories:", data.filter(c => c.type === 'expense').length);
-        console.log("Both type categories:", data.filter(c => c.type === 'both').length);
-        
+        console.log('Sample categories:', data.slice(0, 3));
+        console.log('Income categories:', data.filter((c) => c.type === 'income').length);
+        console.log('Expense categories:', data.filter((c) => c.type === 'expense').length);
+        console.log('Both type categories:', data.filter((c) => c.type === 'both').length);
+
         // Check for categories without proper type and fix them
-        const categoriesWithoutType = data.filter(c => !c.type || !['income', 'expense', 'both'].includes(c.type));
+        const categoriesWithoutType = data.filter(
+          (c) => !c.type || !['income', 'expense', 'both'].includes(c.type)
+        );
         if (categoriesWithoutType.length > 0) {
-          console.warn("Found categories without proper type:", categoriesWithoutType);
+          console.warn('Found categories without proper type:', categoriesWithoutType);
           // Fix them by guessing based on name or defaulting to 'expense'
           for (const category of categoriesWithoutType) {
             const nameInLowerCase = category.name.toLowerCase();
             let assumedType = 'expense';
-            
+
             // Guess type based on common income category names
-            if (['salary', 'income', 'freelance', 'investment', 'gift', 'refund'].some(term => 
-               nameInLowerCase.includes(term))) {
+            if (
+              ['salary', 'income', 'freelance', 'investment', 'gift', 'refund'].some((term) =>
+                nameInLowerCase.includes(term)
+              )
+            ) {
               assumedType = 'income';
             }
-            
+
             console.log(`Fixing category "${category.name}" by setting type to "${assumedType}"`);
-            
+
             // Update the category type
-            await supabase
-              .from("categories")
-              .update({ type: assumedType })
-              .eq("id", category.id);
-              
+            await supabase.from('categories').update({ type: assumedType }).eq('id', category.id);
+
             // Update in local data
             category.type = assumedType;
           }
         }
       }
-      
+
       if (!data || data.length === 0) {
-        console.log("No categories found, creating defaults");
+        console.log('No categories found, creating defaults');
         await createDefaultCategories(userData.user.id);
         // Fetch again after creating defaults, but only once
         const { data: newData, error: newError } = await supabase
-          .from("categories")
-          .select("*")
+          .from('categories')
+          .select('*')
           .or(`user_id.is.null,user_id.eq.${userData.user.id}`)
           .eq('is_active', true)
-          .order("name");
-        
+          .order('name');
+
         if (!newError && newData) {
           setCategories(newData);
         }
         return;
       }
-      
+
       setCategories(data || []);
 
       // Also update frequent categories based on transaction history
       loadFrequentCategories();
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      toast.error("Failed to load categories");
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
     }
   };
 
   const createDefaultCategories = async (userId: string) => {
     try {
-      console.log("Creating default categories for user:", userId);
-      
+      console.log('Creating default categories for user:', userId);
+
       // First, check what categories already exist for this user
       const { data: existingCategories, error: fetchError } = await supabase
-        .from("categories")
-        .select("name")
+        .from('categories')
+        .select('name')
         .or(`user_id.is.null,user_id.eq.${userId}`)
         .eq('is_active', true);
 
       if (fetchError) {
-        console.error("Error fetching existing categories:", fetchError);
+        console.error('Error fetching existing categories:', fetchError);
         return;
       }
 
-      const existingCategoryNames = new Set(existingCategories?.map(cat => cat.name) || []);
-      console.log("Existing categories:", Array.from(existingCategoryNames));
-      
+      const existingCategoryNames = new Set(existingCategories?.map((cat) => cat.name) || []);
+      console.log('Existing categories:', Array.from(existingCategoryNames));
+
       // Expanded list of categories
       const defaultCategories = [
         // Expense categories
-        { name: "Groceries", type: "expense", is_active: true, user_id: userId },
-        { name: "Dining Out", type: "expense", is_active: true, user_id: userId },
-        { name: "Transportation", type: "expense", is_active: true, user_id: userId },
-        { name: "Utilities", type: "expense", is_active: true, user_id: userId },
-        { name: "Housing", type: "expense", is_active: true, user_id: userId },
-        { name: "Entertainment", type: "expense", is_active: true, user_id: userId },
-        { name: "Healthcare", type: "expense", is_active: true, user_id: userId },
-        { name: "Shopping", type: "expense", is_active: true, user_id: userId },
-        { name: "Education", type: "expense", is_active: true, user_id: userId },
-        { name: "Other Expense", type: "expense", is_active: true, user_id: userId },
-        
+        { name: 'Groceries', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Dining Out', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Transportation', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Utilities', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Housing', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Entertainment', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Healthcare', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Shopping', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Education', type: 'expense', is_active: true, user_id: userId },
+        { name: 'Other Expense', type: 'expense', is_active: true, user_id: userId },
+
         // Income categories
-        { name: "Salary", type: "income", is_active: true, user_id: userId },
-        { name: "Freelance", type: "income", is_active: true, user_id: userId },
-        { name: "Investments", type: "income", is_active: true, user_id: userId },
-        { name: "Gifts", type: "income", is_active: true, user_id: userId },
-        { name: "Refunds", type: "income", is_active: true, user_id: userId },
-        { name: "Other Income", type: "income", is_active: true, user_id: userId },
+        { name: 'Salary', type: 'income', is_active: true, user_id: userId },
+        { name: 'Freelance', type: 'income', is_active: true, user_id: userId },
+        { name: 'Investments', type: 'income', is_active: true, user_id: userId },
+        { name: 'Gifts', type: 'income', is_active: true, user_id: userId },
+        { name: 'Refunds', type: 'income', is_active: true, user_id: userId },
+        { name: 'Other Income', type: 'income', is_active: true, user_id: userId },
       ];
 
       // Filter out categories that already exist
-      const categoriesToCreate = defaultCategories.filter(category => 
-        !existingCategoryNames.has(category.name)
+      const categoriesToCreate = defaultCategories.filter(
+        (category) => !existingCategoryNames.has(category.name)
       );
 
-      console.log("Categories to create:", categoriesToCreate.map(c => c.name));
-      
+      console.log(
+        'Categories to create:',
+        categoriesToCreate.map((c) => c.name)
+      );
+
       if (categoriesToCreate.length === 0) {
-        console.log("All default categories already exist");
+        console.log('All default categories already exist');
         return;
       }
 
       // Insert only the categories that don't exist
-      const { data, error } = await supabase
-        .from("categories")
-        .insert(categoriesToCreate)
-        .select();
+      const { data, error } = await supabase.from('categories').insert(categoriesToCreate).select();
 
       if (error) {
-        console.error("Error creating default categories:", error);
+        console.error('Error creating default categories:', error);
         // If batch insert fails, try one by one as fallback
-        console.log("Trying individual category creation as fallback...");
+        console.log('Trying individual category creation as fallback...');
         for (const category of categoriesToCreate) {
-          const { error: individualError } = await supabase
-            .from("categories")
-            .insert([category]);
+          const { error: individualError } = await supabase.from('categories').insert([category]);
           if (individualError) {
             console.error(`Error creating category ${category.name}:`, individualError);
           } else {
@@ -725,7 +762,7 @@ export default function TransactionsPage() {
         console.log(`Successfully created ${data?.length || 0} default categories`);
       }
     } catch (error) {
-      console.error("Error creating default categories:", error);
+      console.error('Error creating default categories:', error);
     }
   };
 
@@ -758,29 +795,32 @@ export default function TransactionsPage() {
 
   // Debug categories
   useEffect(() => {
-    console.log("All categories:", categories);
-    console.log("Filtered categories for type:", formData.type, categories.filter(category => 
-      category.type === formData.type || category.type === 'both'));
+    console.log('All categories:', categories);
+    console.log(
+      'Filtered categories for type:',
+      formData.type,
+      categories.filter((category) => category.type === formData.type || category.type === 'both')
+    );
   }, [categories, formData.type]);
 
   const resetForm = () => {
     // Get default category based on transaction type
-    const defaultCategory = categories
-      .filter(cat => cat.type === 'expense' || cat.type === 'both')
-      .sort((a, b) => a.name.localeCompare(b.name))
-      [0]?.id || "";
+    const defaultCategory =
+      categories
+        .filter((cat) => cat.type === 'expense' || cat.type === 'both')
+        .sort((a, b) => a.name.localeCompare(b.name))[0]?.id || '';
 
     setFormData({
-      type: "expense",
+      type: 'expense',
       category_id: defaultCategory, // Use the default category id instead of empty string
-      amount: "",
-      description: "",
-      date: new Date().toLocaleDateString('en-CA', { 
-        timeZone: userPreferences.timezone || getUserTimezone() 
+      amount: '',
+      description: '',
+      date: new Date().toLocaleDateString('en-CA', {
+        timeZone: userPreferences.timezone || getUserTimezone(),
       }),
       is_recurring: false,
-      recurring_frequency: "monthly",
-      recurring_end_date: ""
+      recurring_frequency: 'monthly',
+      recurring_end_date: '',
     });
     setIsEditing(false);
     setEditId(null);
@@ -793,69 +833,73 @@ export default function TransactionsPage() {
       setShowSuggestions(false);
       return;
     }
-    
+
     // Filter transactions to find similar descriptions
     const inputLower = input.toLowerCase();
-    
+
     // Get unique descriptions from previous transactions that match the input
     const matchingDescriptions = transactions
-      .filter(t => t.description && t.description.toLowerCase().includes(inputLower))
-      .map(t => t.description)
+      .filter((t) => t.description && t.description.toLowerCase().includes(inputLower))
+      .map((t) => t.description)
       .filter((desc, index, self) => self.indexOf(desc) === index)
       .slice(0, 5); // Limit to 5 suggestions
-    
+
     setDescriptionSuggestions(matchingDescriptions);
     setShowSuggestions(matchingDescriptions.length > 0);
   };
-  
+
   // Modify the handleInputChange function to generate suggestions for description field
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    
+
     // Special handling for category selection
-    if (name === "category_id" && value === "custom") {
-      console.log("Custom category selected, showing custom category form");
-      
+    if (name === 'category_id' && value === 'custom') {
+      console.log('Custom category selected, showing custom category form');
+
       // Schedule a cleanup after the form renders
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           // Use document.querySelector to find any unwanted select elements
-          document.querySelectorAll('select.flex-1.high-contrast-dropdown, select.categoryTypeDropdown').forEach(el => {
-            const parent = el.parentElement;
-            if (parent && parent.querySelector('input[type="hidden"][name="categoryType"]')) {
-              console.log('Found and removing unwanted dropdown');
-              el.remove();
-            }
-          });
+          document
+            .querySelectorAll('select.flex-1.high-contrast-dropdown, select.categoryTypeDropdown')
+            .forEach((el) => {
+              const parent = el.parentElement;
+              if (parent && parent.querySelector('input[type="hidden"][name="categoryType"]')) {
+                console.log('Found and removing unwanted dropdown');
+                el.remove();
+              }
+            });
         });
       });
-    } else if (name === "category_id" && value !== "custom") {
+    } else if (name === 'category_id' && value !== 'custom') {
       // Clear custom category form if not selecting custom
     }
 
     // Special handling for transaction type changes
-    if (name === "type") {
+    if (name === 'type') {
       console.log(`Transaction type changed to: ${value}, updating newCategory type`);
-      
+
       // Reset category selection when transaction type changes to ensure compatibility
-      const defaultCategory = categories
-        .filter(cat => cat.type === value || cat.type === 'both')
-        .sort((a, b) => a.name.localeCompare(b.name))
-        [0]?.id || "";
-        
+      const defaultCategory =
+        categories
+          .filter((cat) => cat.type === value || cat.type === 'both')
+          .sort((a, b) => a.name.localeCompare(b.name))[0]?.id || '';
+
       // Update form data with new default category based on type
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value as 'income' | 'expense',
-        category_id: defaultCategory
+        category_id: defaultCategory,
       }));
-      
+
       // We already set the form data above, so return early
       return;
     }
 
     // Generate suggestions for description field
-    if (name === "description") {
+    if (name === 'description') {
       generateSuggestions(value);
     }
 
@@ -863,29 +907,29 @@ export default function TransactionsPage() {
       ...formData,
       [name]: value,
     };
-    
+
     setFormData(updatedFormData);
 
     // Auto-save transaction draft
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
-    
+
     autoSaveTimeoutRef.current = setTimeout(() => {
       localStorage.setItem('transactionDraft', JSON.stringify(updatedFormData));
       console.log('Transaction draft auto-saved');
       setHasSavedDraft(true);
-      
+
       // Clear the saved status after 2 seconds
       setTimeout(() => {
         setHasSavedDraft(false);
       }, 2000);
     }, 1000);
   };
-  
+
   // Function to select a suggestion
   const selectSuggestion = (suggestion: string) => {
-    setFormData(prev => ({ ...prev, description: suggestion }));
+    setFormData((prev) => ({ ...prev, description: suggestion }));
     setShowSuggestions(false);
   };
 
@@ -898,8 +942,8 @@ export default function TransactionsPage() {
         description: transaction.description,
         date: transaction.date,
         is_recurring: !!transaction.recurring_id,
-        recurring_frequency: transaction.recurring_id ? "monthly" : "monthly",
-        recurring_end_date: transaction.recurring_id ? "" : ""
+        recurring_frequency: transaction.recurring_id ? 'monthly' : 'monthly',
+        recurring_end_date: transaction.recurring_id ? '' : '',
       });
       setIsEditing(true);
       setEditId(transaction.id);
@@ -908,22 +952,22 @@ export default function TransactionsPage() {
       setIsEditing(false);
       setEditId(null);
     }
-    
+
     setShowForm(true);
-    
+
     // Add a class to enable modal styling while preserving scrolling
-    document.documentElement.classList.add("form-drawer-open");
+    document.documentElement.classList.add('form-drawer-open');
   };
-  
+
   const closeTransactionForm = () => {
     setShowForm(false);
-    document.documentElement.classList.remove("form-drawer-open");
+    document.documentElement.classList.remove('form-drawer-open');
     resetForm();
     setIsEditing(false);
     setEditId(null);
     setEditingRecurring(null);
   };
-  
+
   const handleEdit = (transaction: Transaction) => {
     openTransactionForm(true, transaction);
   };
@@ -935,7 +979,7 @@ export default function TransactionsPage() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
-        toast.error("You must be logged in to add transactions");
+        toast.error('You must be logged in to add transactions');
         setFormLoading(false);
         return;
       }
@@ -946,45 +990,54 @@ export default function TransactionsPage() {
         validateCategory(formData.category_id),
         validateAmount(formData.amount),
         validateDate(formData.date),
-        validateDescription(formData.description, false, 500)
+        validateDescription(formData.description, false, 500),
       ];
 
       const validationResult = validateForm(validations);
       if (!validationResult.isValid) {
-        toast.error(validationResult.message || "Please correct the errors in the form.");
+        toast.error(validationResult.message || 'Please correct the errors in the form.');
         setFormLoading(false);
         return;
       }
 
       // If it's still "custom", that means they didn't click the "Add Category" button
-      if (formData.category_id === "custom") {
-        toast.error("Please create the custom category before saving the transaction.");
+      if (formData.category_id === 'custom') {
+        toast.error('Please create the custom category before saving the transaction.');
         setFormLoading(false);
         return;
       }
 
       // Additional check to ensure category_id is a valid UUID
-      if (formData.category_id && !formData.category_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        console.error("Invalid category_id format:", formData.category_id);
-        toast.error("Invalid category selection. Please choose or create a valid category.");
+      if (
+        formData.category_id &&
+        !formData.category_id.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        )
+      ) {
+        console.error('Invalid category_id format:', formData.category_id);
+        toast.error('Invalid category selection. Please choose or create a valid category.');
         setFormLoading(false);
         return;
       }
 
       const parsedAmount = parseFloat(formData.amount);
-      
+
       // Get selected category to verify it's compatible with transaction type
-      const selectedCategory = categories.find(cat => cat.id === formData.category_id);
-      
+      const selectedCategory = categories.find((cat) => cat.id === formData.category_id);
+
       // Verify the selected category is compatible with the transaction type
-      if (selectedCategory && selectedCategory.type !== 'both' && selectedCategory.type !== formData.type) {
+      if (
+        selectedCategory &&
+        selectedCategory.type !== 'both' &&
+        selectedCategory.type !== formData.type
+      ) {
         toast.error(`This category can only be used for ${selectedCategory.type} transactions.`);
         setFormLoading(false);
         return;
       }
 
       // Log the transaction data before submission for debugging
-      console.log("Submitting transaction:", {
+      console.log('Submitting transaction:', {
         type: formData.type,
         category_id: formData.category_id,
         category_name: selectedCategory?.name || 'Uncategorized',
@@ -993,7 +1046,7 @@ export default function TransactionsPage() {
         description: formData.description || '',
         date: formData.date,
       });
-      
+
       // Create a new transaction object - explicitly set type to ensure it matches expected values
       const newTransaction = {
         user_id: userData.user.id,
@@ -1004,15 +1057,15 @@ export default function TransactionsPage() {
         date: formData.date,
       };
 
-      console.log("Final transaction to be saved:", newTransaction);
+      console.log('Final transaction to be saved:', newTransaction);
 
       if (formData.is_recurring) {
         if (editingRecurring) {
           // Update an existing recurring transaction
           const { error } = await supabase
-            .from("recurring_transactions")
+            .from('recurring_transactions')
             .update({
-              type: newTransaction.type,  // Use validated type
+              type: newTransaction.type, // Use validated type
               category_id: formData.category_id,
               amount: parsedAmount,
               description: formData.description || '',
@@ -1021,111 +1074,111 @@ export default function TransactionsPage() {
               end_date: formData.recurring_end_date || null,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", editingRecurring.id);
+            .eq('id', editingRecurring.id);
 
           if (error) {
-            console.error("Error updating recurring transaction:", error);
+            console.error('Error updating recurring transaction:', error);
             toast.error(`Failed to update recurring transaction: ${error.message}`);
             setFormLoading(false);
             return;
           }
-          toast.success("Recurring transaction updated!");
+          toast.success('Recurring transaction updated!');
           setEditingRecurring(null);
         } else {
           // Create a new recurring transaction
           const { data: recurringData, error: recurringError } = await supabase
-            .from("recurring_transactions")
+            .from('recurring_transactions')
             .insert({
               user_id: userData.user.id,
-              type: newTransaction.type,  // Use validated type
+              type: newTransaction.type, // Use validated type
               category_id: formData.category_id,
               amount: parsedAmount,
               description: formData.description || '',
               frequency: formData.recurring_frequency,
               start_date: formData.date,
               end_date: formData.recurring_end_date || null,
-              active: true
+              active: true,
             })
             .select();
-            
+
           if (recurringError) {
-            console.error("Error creating recurring transaction:", recurringError);
+            console.error('Error creating recurring transaction:', recurringError);
             toast.error(`Failed to create recurring transaction: ${recurringError.message}`);
             setFormLoading(false);
             return;
           }
-          
+
           // Create the first instance of the transaction
-          const { error: transactionError } = await supabase
-            .from("transactions")
-            .insert({
-              user_id: userData.user.id,
-              type: newTransaction.type,  // Use validated type
-              category_id: formData.category_id,
-              amount: parsedAmount,
-              description: formData.description || '',
-              date: formData.date,
-              recurring_id: recurringData[0].id
-            });
-            
+          const { error: transactionError } = await supabase.from('transactions').insert({
+            user_id: userData.user.id,
+            type: newTransaction.type, // Use validated type
+            category_id: formData.category_id,
+            amount: parsedAmount,
+            description: formData.description || '',
+            date: formData.date,
+            recurring_id: recurringData[0].id,
+          });
+
           if (transactionError) {
-            console.error("Error creating initial transaction:", transactionError);
+            console.error('Error creating initial transaction:', transactionError);
             toast.error(`Failed to create initial transaction: ${transactionError.message}`);
             setFormLoading(false);
             return;
           }
-          
-          toast.success("Recurring transaction created");
+
+          toast.success('Recurring transaction created');
         }
       } else {
         // Handle regular transaction (non-recurring)
         if (isEditing && editId) {
           // Update existing transaction
           const { error } = await supabase
-            .from("transactions")
+            .from('transactions')
             .update({
-              type: newTransaction.type,  // Use validated type
+              type: newTransaction.type, // Use validated type
               category_id: formData.category_id,
               amount: parsedAmount,
               description: formData.description || '',
-              date: formData.date
+              date: formData.date,
             })
-            .eq("id", editId);
+            .eq('id', editId);
 
           if (error) {
-            console.error("Error updating transaction:", error);
+            console.error('Error updating transaction:', error);
             toast.error(`Failed to update transaction: ${error.message}`);
             setFormLoading(false);
             return;
           }
-          toast.success("Transaction updated!");
+          toast.success('Transaction updated!');
         } else {
           // Insert new transaction
-          console.log("Inserting new transaction of type:", newTransaction.type);
-          
+          console.log('Inserting new transaction of type:', newTransaction.type);
+
           // Force string type for income to ensure it's properly formatted
           const transactionTypeValue = newTransaction.type === 'income' ? 'income' : 'expense';
-          
+
           // Try with direct insert first
           const { data, error } = await supabase
-            .from("transactions")
-            .insert([{
-              user_id: userData.user.id,
-              type: transactionTypeValue,  // Use the forced string version
-              category_id: formData.category_id,
-              amount: parsedAmount,
-              description: formData.description || '',
-              date: formData.date
-            }])
+            .from('transactions')
+            .insert([
+              {
+                user_id: userData.user.id,
+                type: transactionTypeValue, // Use the forced string version
+                category_id: formData.category_id,
+                amount: parsedAmount,
+                description: formData.description || '',
+                date: formData.date,
+              },
+            ])
             .select();
 
           if (error) {
-            console.error("Error inserting transaction:", error);
-            
+            console.error('Error inserting transaction:', error);
+
             // Try with our reliable function
             try {
-              console.log("Trying improved SQL function for transaction insertion");
-              
+              console.log('Trying improved SQL function for transaction insertion');
+
               // Use our new reliable function
               const { data: reliableData, error: reliableError } = await supabase.rpc(
                 'insert_transaction_reliable',
@@ -1135,13 +1188,13 @@ export default function TransactionsPage() {
                   p_category_id: formData.category_id,
                   p_amount: parsedAmount,
                   p_description: formData.description || '',
-                  p_date: formData.date
+                  p_date: formData.date,
                 }
               );
-              
+
               if (reliableError) {
-                console.error("Reliable SQL approach failed:", reliableError);
-                
+                console.error('Reliable SQL approach failed:', reliableError);
+
                 // Emergency direct INSERT as a fallback
                 const { error: emergencyError } = await supabase.from('transactions').insert({
                   user_id: userData.user.id,
@@ -1151,31 +1204,37 @@ export default function TransactionsPage() {
                   description: formData.description || '',
                   date: formData.date,
                   created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
+                  updated_at: new Date().toISOString(),
                 });
-                
+
                 if (emergencyError) {
-                  console.error("ALL approaches failed:", emergencyError);
+                  console.error('ALL approaches failed:', emergencyError);
                   toast.error(`Failed to add transaction: ${emergencyError.message}`);
                   setFormLoading(false);
                   return;
                 } else {
-                  console.log("Transaction inserted with emergency approach");
-                  toast.success(`${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`);
+                  console.log('Transaction inserted with emergency approach');
+                  toast.success(
+                    `${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`
+                  );
                 }
               } else {
-                console.log("Transaction inserted successfully with reliable SQL approach");
-                toast.success(`${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`);
+                console.log('Transaction inserted successfully with reliable SQL approach');
+                toast.success(
+                  `${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`
+                );
               }
             } catch (sqlError) {
-              console.error("All approaches failed:", sqlError);
+              console.error('All approaches failed:', sqlError);
               toast.error(`Failed to add transaction: ${error.message}`);
               setFormLoading(false);
               return;
             }
           } else {
-            console.log("Transaction inserted successfully with normal approach:", data);
-            toast.success(`${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`);
+            console.log('Transaction inserted successfully with normal approach:', data);
+            toast.success(
+              `${transactionTypeValue === 'income' ? 'Income' : 'Expense'} transaction added!`
+            );
           }
         }
       }
@@ -1183,16 +1242,16 @@ export default function TransactionsPage() {
       // Clear form and refresh data
       closeTransactionForm();
       await fetchTransactions();
-      
+
       // If sorting is active, reapply it
       if (sortField) {
-        setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         setSortField(sortField);
         setSortDirection(sortDirection);
       }
     } catch (error: any) {
-      console.error("Error in transaction submission:", error);
-      toast.error(`An error occurred: ${error?.message || "Unknown error"}`);
+      console.error('Error in transaction submission:', error);
+      toast.error(`An error occurred: ${error?.message || 'Unknown error'}`);
     } finally {
       setFormLoading(false);
       // Clear draft after submission
@@ -1201,23 +1260,23 @@ export default function TransactionsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this transaction?")) return;
+    if (!confirm('Are you sure you want to delete this transaction?')) return;
 
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
 
       const { error } = await supabase
-        .from("transactions")
+        .from('transactions')
         .delete()
-        .eq("id", id)
-        .eq("user_id", userData.user.id);
+        .eq('id', id)
+        .eq('user_id', userData.user.id);
 
       if (error) throw error;
       await fetchTransactions();
     } catch (error) {
-      console.error("Error deleting transaction:", error);
-      alert("Failed to delete transaction");
+      console.error('Error deleting transaction:', error);
+      alert('Failed to delete transaction');
     }
   };
 
@@ -1233,7 +1292,7 @@ export default function TransactionsPage() {
   const sortTransactions = (transactions: Transaction[]) => {
     return [...transactions].sort((a, b) => {
       let compareA, compareB;
-      
+
       if (sortField === 'date') {
         compareA = new Date(a.date).getTime();
         compareB = new Date(b.date).getTime();
@@ -1247,7 +1306,7 @@ export default function TransactionsPage() {
         compareA = a.description.toLowerCase();
         compareB = b.description.toLowerCase();
       }
-      
+
       if (sortDirection === 'asc') {
         return compareA > compareB ? 1 : -1;
       } else {
@@ -1259,7 +1318,7 @@ export default function TransactionsPage() {
   // 3. Optimize the filtering and sorting operations
   const filteredAndSortedTransactions = useMemo(() => {
     let filtered = [...transactions];
-    
+
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(
@@ -1268,12 +1327,12 @@ export default function TransactionsPage() {
           (t.category_name && t.category_name.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    
+
     // Apply type filter
-    if (filterType !== "all") {
+    if (filterType !== 'all') {
       filtered = filtered.filter((t) => t.type === filterType);
     }
-    
+
     // Apply date filter
     if (dateRange.start && dateRange.end) {
       filtered = filtered.filter((t) => {
@@ -1281,11 +1340,11 @@ export default function TransactionsPage() {
         const startDate = new Date(dateRange.start);
         const endDate = new Date(dateRange.end);
         endDate.setHours(23, 59, 59, 999); // Include the entire end date
-        
+
         return transactionDate >= startDate && transactionDate <= endDate;
       });
     }
-    
+
     // Sort the transactions
     return sortTransactions(filtered);
   }, [transactions, searchTerm, filterType, dateRange, sortField, sortDirection]);
@@ -1305,17 +1364,17 @@ export default function TransactionsPage() {
   useEffect(() => {
     // Auto-switch to card view on small screens
     const checkScreenSize = () => {
-      if (window.innerWidth < 640 && viewMode === "table") {
-        setViewMode("card");
+      if (window.innerWidth < 640 && viewMode === 'table') {
+        setViewMode('card');
       }
     };
-    
+
     // Initial check
     checkScreenSize();
-    
+
     // Add resize listener
     window.addEventListener('resize', checkScreenSize);
-    
+
     // Cleanup
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [viewMode]);
@@ -1328,19 +1387,19 @@ export default function TransactionsPage() {
 
   const onTouchMove = useCallback((e: TouchEvent) => {
     if (!contentRef.current) return;
-    
+
     // Only enable pull-to-refresh when at the top of the page
     if (window.scrollY > 0) return;
-    
+
     const { screenY } = e.touches[0];
     pullMoveY.current = screenY;
-    
+
     const pullDistance = pullMoveY.current - pullStartY.current;
-    
+
     if (pullDistance > 0) {
       // Prevent default behavior when pulling down
       e.preventDefault();
-      
+
       // Create pull effect with CSS transform
       const pullFactor = Math.min(pullDistance * 0.3, refreshDistance);
       contentRef.current.style.transform = `translateY(${pullFactor}px)`;
@@ -1349,20 +1408,20 @@ export default function TransactionsPage() {
 
   const onTouchEnd = useCallback(async () => {
     if (!contentRef.current) return;
-    
+
     const pullDistance = pullMoveY.current - pullStartY.current;
-    
+
     // Reset transform
     contentRef.current.style.transform = 'translateY(0)';
-    
+
     // Trigger refresh if pulled enough
     if (pullDistance > refreshDistance) {
       try {
         setRefreshing(true);
         await fetchTransactions();
-        toast.success("Transactions refreshed");
+        toast.success('Transactions refreshed');
       } catch (error) {
-        toast.error("Failed to refresh transactions");
+        toast.error('Failed to refresh transactions');
       } finally {
         setRefreshing(false);
       }
@@ -1371,29 +1430,31 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     if (!contentRef.current) return;
-    
+
     const content = contentRef.current;
-    
+
     content.addEventListener('touchstart', onTouchStart, { passive: false });
     content.addEventListener('touchmove', onTouchMove, { passive: false });
     content.addEventListener('touchend', onTouchEnd);
-    
+
     return () => {
       content.removeEventListener('touchstart', onTouchStart);
       content.removeEventListener('touchmove', onTouchMove);
       content.removeEventListener('touchend', onTouchEnd);
     };
   }, [onTouchStart, onTouchMove, onTouchEnd]);
-  
+
   const loadMoreTransactions = async () => {
     if (loadingMore || !hasMore) return;
-    
+
     try {
       setLoadingMore(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-      
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Fetch more transactions with pagination
       const { data, error } = await supabase
         .from('transactions')
@@ -1405,20 +1466,20 @@ export default function TransactionsPage() {
       if (error) throw error;
 
       if (data.length > 0) {
-        const newTransactions = data.map(transaction => ({
+        const newTransactions = data.map((transaction) => ({
           ...transaction,
-          category_name: transaction.categories?.name || 'Uncategorized'
+          category_name: transaction.categories?.name || 'Uncategorized',
         }));
-        
-        setTransactions(prev => [...prev, ...newTransactions]);
+
+        setTransactions((prev) => [...prev, ...newTransactions]);
         setHasMore(data.length === itemsPerPage);
         calculateSummary([...transactions, ...newTransactions]);
       } else {
         setHasMore(false);
       }
     } catch (error) {
-      console.error("Error loading more transactions:", error);
-      toast.error("Failed to load more transactions");
+      console.error('Error loading more transactions:', error);
+      toast.error('Failed to load more transactions');
     } finally {
       setLoadingMore(false);
     }
@@ -1449,9 +1510,9 @@ export default function TransactionsPage() {
   }, [hasMore, loadingMore]);
 
   // Improved skeleton loader component
-  const TransactionSkeleton = ({ view = "table" }: { view?: "table" | "card" }) => {
+  const TransactionSkeleton = ({ view = 'table' }: { view?: 'table' | 'card' }) => {
     // Card view skeleton
-    if (view === "card") {
+    if (view === 'card') {
       return (
         <div className={styles.skeletonCardContainer}>
           {[...Array(3)].map((_, index) => (
@@ -1477,7 +1538,7 @@ export default function TransactionsPage() {
         </div>
       );
     }
-    
+
     // Table view skeleton - properly wrapped in a table
     return (
       <div className={styles.skeletonTableContainer}>
@@ -1533,7 +1594,8 @@ export default function TransactionsPage() {
       // Get categories used most frequently in recent transactions
       const { data: frequentCats } = await supabase
         .from('transactions')
-        .select(`
+        .select(
+          `
           category_id,
           categories!inner (
             id,
@@ -1541,14 +1603,15 @@ export default function TransactionsPage() {
             type,
             icon
           )
-        `)
+        `
+        )
         .eq('user_id', userData.user.id)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (frequentCats) {
         const categoryFreq = new Map<string, number>();
-        frequentCats.forEach(t => {
+        frequentCats.forEach((t) => {
           if (t.categories) {
             const count = categoryFreq.get(t.category_id) || 0;
             categoryFreq.set(t.category_id, count + 1);
@@ -1557,11 +1620,15 @@ export default function TransactionsPage() {
 
         const validCategories: Category[] = [];
         Array.from(categoryFreq.entries())
-          .sort(([,a], [,b]) => b - a)
+          .sort(([, a], [, b]) => b - a)
           .slice(0, 5)
           .forEach(([categoryId]) => {
-            const transaction = frequentCats.find(t => t.category_id === categoryId);
-            if (transaction?.categories && Array.isArray(transaction.categories) && transaction.categories.length > 0) {
+            const transaction = frequentCats.find((t) => t.category_id === categoryId);
+            if (
+              transaction?.categories &&
+              Array.isArray(transaction.categories) &&
+              transaction.categories.length > 0
+            ) {
               validCategories.push(transaction.categories[0] as Category);
             } else if (transaction?.categories && !Array.isArray(transaction.categories)) {
               validCategories.push(transaction.categories as Category);
@@ -1607,9 +1674,11 @@ export default function TransactionsPage() {
   // Load frequent categories implementation (continued)
   const loadFrequentCategoriesImpl = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
-      
+
       // Get the most frequently used categories by this user
       const { data, error } = await supabase
         .from('transactions')
@@ -1618,47 +1687,49 @@ export default function TransactionsPage() {
         .not('category_id', 'is', null)
         .order('created_at', { ascending: false })
         .limit(10);
-        
+
       if (error) throw error;
-      
+
       // Debug the structure of the data
-      console.log("First item from transactions data:", data[0]);
-      console.log("First item categories structure:", data[0]?.categories);
-      
+      console.log('First item from transactions data:', data[0]);
+      console.log('First item categories structure:', data[0]?.categories);
+
       // Count occurrences of each category
-      const categoryCounts: Record<string, {count: number, category: Category}> = {};
-      
-      data.forEach(item => {
+      const categoryCounts: Record<string, { count: number; category: Category }> = {};
+
+      data.forEach((item) => {
         if (item.categories) {
           const categoryId = item.category_id;
-          console.log("Processing category:", item.categories);
-          
+          console.log('Processing category:', item.categories);
+
           // Check if categories is an array or a single object
-          const categoryData = Array.isArray(item.categories) ? item.categories[0] : item.categories;
-          
+          const categoryData = Array.isArray(item.categories)
+            ? item.categories[0]
+            : item.categories;
+
           if (!categoryCounts[categoryId]) {
             categoryCounts[categoryId] = {
               count: 0,
               category: {
                 id: categoryData.id,
                 name: categoryData.name,
-                type: categoryData.type as 'income' | 'expense' | 'both'
-              }
+                type: categoryData.type as 'income' | 'expense' | 'both',
+              },
             };
           }
           categoryCounts[categoryId].count++;
         }
       });
-      
+
       // Sort by count and get top 5
       const sortedCategories = Object.values(categoryCounts)
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
-        .map(item => item.category);
-      
+        .map((item) => item.category);
+
       setFrequentCategories(sortedCategories);
     } catch (error) {
-      console.error("Error loading frequent categories:", error);
+      console.error('Error loading frequent categories:', error);
     }
   };
 
@@ -1672,17 +1743,17 @@ export default function TransactionsPage() {
         setHasSavedDraft(true);
       }
     } catch (error) {
-      console.error("Error loading draft transaction:", error);
+      console.error('Error loading draft transaction:', error);
     }
   };
-  
+
   // Save draft transaction to localStorage
   const saveDraftTransaction = (data: FormData) => {
     try {
       localStorage.setItem('transactionDraft', JSON.stringify(data));
       setHasSavedDraft(true);
     } catch (error) {
-      console.error("Error saving draft transaction:", error);
+      console.error('Error saving draft transaction:', error);
     }
   };
 
@@ -1692,53 +1763,61 @@ export default function TransactionsPage() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
 
-      const { data, error }: ApiResponse<(RecurringTransaction & { categories: Category | null })[]> = await supabase
-        .from("recurring_transactions")
-        .select(`
+      const {
+        data,
+        error,
+      }: ApiResponse<(RecurringTransaction & { categories: Category | null })[]> = await supabase
+        .from('recurring_transactions')
+        .select(
+          `
           *,
           categories:category_id (
             name,
             type
           )
-        `)
-        .eq("user_id", userData.user.id)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('user_id', userData.user.id)
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error("Error fetching recurring transactions:", error);
+        console.error('Error fetching recurring transactions:', error);
         return;
       }
-      
+
       if (!data) {
-        console.error("No data received from recurring transactions query");
+        console.error('No data received from recurring transactions query');
         return;
       }
 
       setRecurringTransactions(data || []);
-      
+
       // Generate upcoming recurring transactions preview
       if (data && data.length > 0) {
         generateUpcomingTransactions(data);
       }
     } catch (error) {
-      console.error("Error in fetchRecurringTransactions:", error);
+      console.error('Error in fetchRecurringTransactions:', error);
     }
   };
 
   const generateUpcomingTransactions = (recurringList: RecurringTransaction[]) => {
-    const upcoming: {id: string, transactions: {date: string, amount: number, description: string}[]}[] = [];
-    
-    recurringList.forEach(recurring => {
+    const upcoming: {
+      id: string;
+      transactions: { date: string; amount: number; description: string }[];
+    }[] = [];
+
+    recurringList.forEach((recurring) => {
       if (!recurring.active) return;
-      
-      const transactions: {date: string, amount: number, description: string}[] = [];
+
+      const transactions: { date: string; amount: number; description: string }[] = [];
       const today = new Date();
       let nextDate = new Date(recurring.last_generated || recurring.start_date);
-      
+
       // Generate next 5 upcoming transactions
       for (let i = 0; i < 5; i++) {
         nextDate = calculateNextRecurringDate(nextDate, recurring.frequency);
-        
+
         // Skip if end date is defined and we've passed it, or if date is in the past
         if (
           (recurring.end_date && new Date(nextDate) > new Date(recurring.end_date)) ||
@@ -1746,22 +1825,22 @@ export default function TransactionsPage() {
         ) {
           continue;
         }
-        
+
         transactions.push({
           date: nextDate.toISOString().split('T')[0],
           amount: recurring.amount,
-          description: recurring.description
+          description: recurring.description,
         });
       }
-      
+
       if (transactions.length > 0) {
         upcoming.push({
           id: recurring.id,
-          transactions
+          transactions,
         });
       }
     });
-    
+
     setUpcomingRecurringTransactions(upcoming);
   };
 
@@ -1779,7 +1858,7 @@ export default function TransactionsPage() {
       date: recurring.start_date,
       is_recurring: true,
       recurring_frequency: recurring.frequency,
-      recurring_end_date: recurring.end_date || ""
+      recurring_end_date: recurring.end_date || '',
     });
     setShowForm(true);
   };
@@ -1790,67 +1869,65 @@ export default function TransactionsPage() {
       const today = new Date();
       const processedCount = {
         created: 0,
-        skipped: 0
+        skipped: 0,
       };
-      
+
       for (const recurring of recurringList) {
         // Skip inactive recurring transactions
         if (!recurring.active) continue;
-        
+
         // Skip if end date is reached
         if (recurring.end_date && new Date(recurring.end_date) < today) continue;
-        
+
         // Calculate next due date
-        const lastGenerated = recurring.last_generated 
-          ? new Date(recurring.last_generated) 
+        const lastGenerated = recurring.last_generated
+          ? new Date(recurring.last_generated)
           : new Date(recurring.start_date);
-        
+
         const nextDueDate = calculateNextRecurringDate(lastGenerated, recurring.frequency);
-        
+
         // Skip if next due date is in the future
         if (nextDueDate > today) continue;
-        
+
         // Create transaction for the due date
-        const { error } = await supabase
-          .from("transactions")
-          .insert({
-            user_id: recurring.user_id,
-            type: recurring.type,
-            category_id: recurring.category_id,
-            amount: recurring.amount,
-            description: `${recurring.description} (Recurring)`,
-            date: nextDueDate.toISOString().split("T")[0],
-            recurring_id: recurring.id
-          });
-          
+        const { error } = await supabase.from('transactions').insert({
+          user_id: recurring.user_id,
+          type: recurring.type,
+          category_id: recurring.category_id,
+          amount: recurring.amount,
+          description: `${recurring.description} (Recurring)`,
+          date: nextDueDate.toISOString().split('T')[0],
+          recurring_id: recurring.id,
+        });
+
         if (error) {
-          console.error("Error creating recurring transaction:", error);
+          console.error('Error creating recurring transaction:', error);
           processedCount.skipped++;
           continue;
         }
-        
+
         // Update last_generated
         await supabase
-          .from("recurring_transactions")
+          .from('recurring_transactions')
           .update({ last_generated: nextDueDate.toISOString() })
-          .eq("id", recurring.id);
-          
+          .eq('id', recurring.id);
+
         processedCount.created++;
       }
-      
+
       if (processedCount.created > 0) {
         toast.success(`Created ${processedCount.created} recurring transactions`);
         fetchTransactions(); // Refresh transactions
       }
-      
+
       if (processedCount.skipped > 0) {
         toast.error(`Failed to process ${processedCount.skipped} recurring transactions`);
       }
     } catch (error) {
-      console.error("Error processing recurring transactions:", error);
+      console.error('Error processing recurring transactions:', error);
     }
   };
-  
+
   // Add useEffect to load recurring transactions
   useEffect(() => {
     if (!loading) {
@@ -1867,100 +1944,103 @@ export default function TransactionsPage() {
   const deactivateRecurring = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("recurring_transactions")
+        .from('recurring_transactions')
         .update({ active: false })
-        .eq("id", id);
-        
+        .eq('id', id);
+
       if (error) throw error;
-      
-      toast.success("Recurring transaction deactivated");
+
+      toast.success('Recurring transaction deactivated');
       fetchRecurringTransactions();
     } catch (error) {
-      console.error("Error deactivating recurring transaction:", error);
-      toast.error("Failed to deactivate recurring transaction");
+      console.error('Error deactivating recurring transaction:', error);
+      toast.error('Failed to deactivate recurring transaction');
     }
   };
 
-  const CardRenderer = useCallback(({ index, style }: { index: number, style: React.CSSProperties }) => {
-    const transaction = paginatedTransactions[index];
-    if (!transaction) return null;
-    
-    return (
-      <div style={style} className="px-4">
-        <div className="rounded-lg border bg-card p-4 shadow-sm mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
-              {formatDate(transaction.date)}
-            </span>
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                transaction.type === "income"
-                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-              }`}
-            >
-              {transaction.type}
-            </span>
-          </div>
-          
-          <div className="mb-1">
-            <div className="font-medium">{transaction.description}</div>
-            <div className="text-sm text-muted-foreground">
-              {transaction.category_name || "Uncategorized"}
+  const CardRenderer = useCallback(
+    ({ index, style }: { index: number; style: React.CSSProperties }) => {
+      const transaction = paginatedTransactions[index];
+      if (!transaction) return null;
+
+      return (
+        <div style={style} className="px-4">
+          <div className="rounded-lg border bg-card p-4 shadow-sm mb-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">{formatDate(transaction.date)}</span>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  transaction.type === 'income'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                }`}
+              >
+                {transaction.type}
+              </span>
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between mt-2">
-            <div
-              className={`text-lg font-bold ${
-                transaction.type === "income" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-              }`}
-            >
-              <Currency value={transaction.amount} />
+
+            <div className="mb-1">
+              <div className="font-medium">{transaction.description}</div>
+              <div className="text-sm text-muted-foreground">
+                {transaction.category_name || 'Uncategorized'}
+              </div>
             </div>
-            
-            <div className="flex space-x-1">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(transaction)}
-                      aria-label={`Edit transaction: ${transaction.description}`}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Edit transaction</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon" 
-                      onClick={() => handleDelete(transaction.id)}
-                      aria-label={`Delete transaction: ${transaction.description}`}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Delete transaction</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+
+            <div className="flex items-center justify-between mt-2">
+              <div
+                className={`text-lg font-bold ${
+                  transaction.type === 'income'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}
+              >
+                <Currency value={transaction.amount} />
+              </div>
+
+              <div className="flex space-x-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(transaction)}
+                        aria-label={`Edit transaction: ${transaction.description}`}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit transaction</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(transaction.id)}
+                        aria-label={`Delete transaction: ${transaction.description}`}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Delete transaction</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }, [paginatedTransactions, handleEdit, handleDelete]);
+      );
+    },
+    [paginatedTransactions, handleEdit, handleDelete]
+  );
 
   // 5. Implement event delegation for transaction list
   useEffect(() => {
@@ -1968,16 +2048,16 @@ export default function TransactionsPage() {
       // Find the closest parent transaction row
       const row = (e.target as HTMLElement).closest('tr[data-id]');
       if (!row) return;
-      
+
       const transactionId = row.getAttribute('data-id');
       if (!transactionId) return;
-      
+
       // Find which button was clicked
       const editButton = (e.target as HTMLElement).closest('button[aria-label="Edit"]');
       const deleteButton = (e.target as HTMLElement).closest('button[aria-label="Delete"]');
-      
+
       if (editButton) {
-        const transaction = transactions.find(t => t.id === transactionId);
+        const transaction = transactions.find((t) => t.id === transactionId);
         if (transaction) {
           handleEdit(transaction);
         }
@@ -1985,12 +2065,12 @@ export default function TransactionsPage() {
         handleDelete(transactionId);
       }
     };
-    
+
     const tbody = document.getElementById('transactions-tbody');
     if (tbody) {
       tbody.addEventListener('click', handleTableClick);
     }
-    
+
     return () => {
       if (tbody) {
         tbody.removeEventListener('click', handleTableClick);
@@ -2023,84 +2103,14 @@ export default function TransactionsPage() {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
   }, []);
 
   if (loading && transactions.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
-        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="skeleton-loader h-8 w-40"></div>
-          <div className="flex gap-2">
-            <div className="skeleton-loader h-10 w-24 rounded-md"></div>
-            <div className="skeleton-loader h-10 w-36 rounded-md"></div>
-          </div>
-        </div>
-        
-        {/* Skeleton Summary Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="skeleton-loader h-4 w-24 mb-2"></div>
-            <div className="skeleton-loader h-8 w-32"></div>
-          </div>
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="skeleton-loader h-4 w-24 mb-2"></div>
-            <div className="skeleton-loader h-8 w-32"></div>
-          </div>
-          <div className="rounded-lg border bg-card p-4 shadow-sm sm:col-span-2 md:col-span-1">
-            <div className="skeleton-loader h-4 w-24 mb-2"></div>
-            <div className="skeleton-loader h-8 w-32"></div>
-          </div>
-        </div>
-        
-        {/* Skeleton Filters */}
-        <div className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
-          <div className="skeleton-loader h-6 w-32 mb-4"></div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            <div className="skeleton-loader h-32 rounded-md"></div>
-            <div className="skeleton-loader h-32 rounded-md"></div>
-            <div className="skeleton-loader h-32 rounded-md sm:col-span-2 md:col-span-1"></div>
-          </div>
-        </div>
-        
-        {/* Skeleton Transaction List */}
-        <div className="rounded-lg border bg-card shadow-sm">
-          <div className="p-4 sm:hidden">
-            <TransactionSkeleton view="table" />
-          </div>
-          <div className="p-4 sm:hidden">
-            <TransactionSkeleton view="card" />
-          </div>
-          <div className="hidden sm:block">
-            <div className="border-b p-3 bg-muted/50">
-              <div className="flex justify-between">
-                <div className="skeleton-loader h-6 w-20"></div>
-                <div className="skeleton-loader h-6 w-20"></div>
-                <div className="skeleton-loader h-6 w-20"></div>
-                <div className="skeleton-loader h-6 w-20"></div>
-                <div className="skeleton-loader h-6 w-20"></div>
-              </div>
-            </div>
-            
-            {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="border-b p-3 flex justify-between items-center">
-                <div className="skeleton-loader h-5 w-24"></div>
-                <div className="skeleton-loader h-6 w-32 rounded-full"></div>
-                <div className="skeleton-loader h-5 w-40"></div>
-                <div className="skeleton-loader h-5 w-20"></div>
-                <div className="flex gap-2">
-                  <div className="skeleton-loader h-8 w-8 rounded-md"></div>
-                  <div className="skeleton-loader h-8 w-8 rounded-md"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <TransactionsPageSkeleton />;
   }
 
   return (
@@ -2109,9 +2119,25 @@ export default function TransactionsPage() {
         {/* Pull-to-refresh indicator */}
         {refreshing && (
           <div className="pull-indicator">
-            <svg className="pull-indicator-icon animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="pull-indicator-icon animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
           </div>
         )}
@@ -2148,7 +2174,7 @@ export default function TransactionsPage() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button 
+            <Button
               onClick={() => openTransactionForm()}
               className="flex items-center gap-1 min-h-[44px]"
             >
@@ -2182,8 +2208,8 @@ export default function TransactionsPage() {
                   {monthlyData.length} months analyzed
                 </span>
               </div>
-              <Button 
-                variant={showCharts ? "default" : "outline"}
+              <Button
+                variant={showCharts ? 'default' : 'outline'}
                 onClick={() => setShowCharts(!showCharts)}
                 className="text-sm font-medium transition-all duration-200 hover:scale-105"
                 size="sm"
@@ -2202,7 +2228,7 @@ export default function TransactionsPage() {
               </Button>
             </div>
           </div>
-          
+
           {showCharts && (
             <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
               {/* Quick Stats Overview */}
@@ -2213,49 +2239,73 @@ export default function TransactionsPage() {
                       <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">Monthly Avg Income</p>
+                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+                        Monthly Avg Income
+                      </p>
                       <p className="text-lg font-bold text-blue-800 dark:text-blue-200">
-                        {formatCurrency(monthlyData.reduce((sum, month) => sum + month.income, 0) / Math.max(monthlyData.length, 1))}
+                        {formatCurrency(
+                          monthlyData.reduce((sum, month) => sum + month.income, 0) /
+                            Math.max(monthlyData.length, 1)
+                        )}
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 rounded-2xl p-4 border border-red-200/50 dark:border-red-800/30">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-red-500/10 rounded-xl">
                       <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">Monthly Avg Expenses</p>
+                      <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">
+                        Monthly Avg Expenses
+                      </p>
                       <p className="text-lg font-bold text-red-800 dark:text-red-200">
-                        {formatCurrency(monthlyData.reduce((sum, month) => sum + month.expense, 0) / Math.max(monthlyData.length, 1))}
+                        {formatCurrency(
+                          monthlyData.reduce((sum, month) => sum + month.expense, 0) /
+                            Math.max(monthlyData.length, 1)
+                        )}
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 rounded-2xl p-4 border border-green-200/50 dark:border-green-800/30">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-green-500/10 rounded-xl">
                       <PiggyBank className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Savings Rate</p>
+                      <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">
+                        Savings Rate
+                      </p>
                       <p className="text-lg font-bold text-green-800 dark:text-green-200">
-                        {monthlyData.length > 0 ? (((monthlyData.reduce((sum, month) => sum + month.income - month.expense, 0) / monthlyData.reduce((sum, month) => sum + month.income, 0)) * 100) || 0).toFixed(1) : 0}%
+                        {monthlyData.length > 0
+                          ? (
+                              (monthlyData.reduce(
+                                (sum, month) => sum + month.income - month.expense,
+                                0
+                              ) /
+                                monthlyData.reduce((sum, month) => sum + month.income, 0)) *
+                                100 || 0
+                            ).toFixed(1)
+                          : 0}
+                        %
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 rounded-2xl p-4 border border-purple-200/50 dark:border-purple-800/30">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-500/10 rounded-xl">
                       <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Total Transactions</p>
+                      <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                        Total Transactions
+                      </p>
                       <p className="text-lg font-bold text-purple-800 dark:text-purple-200">
                         {transactions.length.toLocaleString()}
                       </p>
@@ -2276,7 +2326,9 @@ export default function TransactionsPage() {
                         </div>
                         <div>
                           <h3 className="text-lg font-bold text-foreground">Income vs. Expenses</h3>
-                          <p className="text-sm text-muted-foreground">Monthly cash flow analysis</p>
+                          <p className="text-sm text-muted-foreground">
+                            Monthly cash flow analysis
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
@@ -2300,8 +2352,8 @@ export default function TransactionsPage() {
                   </div>
                   <div className="p-6">
                     <div className="h-80">
-                      <IncomeExpenseChart 
-                        monthlyData={monthlyData.map(month => ({
+                      <IncomeExpenseChart
+                        monthlyData={monthlyData.map((month) => ({
                           ...month,
                           onClick: (monthData: any) => {
                             // Interactive month click - filter transactions for that month
@@ -2311,21 +2363,18 @@ export default function TransactionsPage() {
                               const monthNumber = new Date(`${monthName} 1, ${year}`).getMonth();
                               const startDate = new Date(parseInt(year), monthNumber, 1);
                               const endDate = new Date(parseInt(year), monthNumber + 1, 0);
-                              
+
                               setDateRange({
                                 start: startDate.toISOString().split('T')[0],
-                                end: endDate.toISOString().split('T')[0]
+                                end: endDate.toISOString().split('T')[0],
                               });
-                              
-                              toast.success(
-                                `📅 Filtered to ${monthName} ${year}`,
-                                {
-                                  description: `Income: ${formatCurrency(monthData.income)} • Expenses: ${formatCurrency(monthData.expense)}`,
-                                  duration: 4000
-                                }
-                              );
+
+                              toast.success(`📅 Filtered to ${monthName} ${year}`, {
+                                description: `Income: ${formatCurrency(monthData.income)} • Expenses: ${formatCurrency(monthData.expense)}`,
+                                duration: 4000,
+                              });
                             }
-                          }
+                          },
                         }))}
                       />
                     </div>
@@ -2341,8 +2390,12 @@ export default function TransactionsPage() {
                           <TrendingUp className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-foreground">Year-over-Year Analysis</h3>
-                          <p className="text-sm text-muted-foreground">Compare spending patterns across years</p>
+                          <h3 className="text-lg font-bold text-foreground">
+                            Year-over-Year Analysis
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Compare spending patterns across years
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 bg-muted/30 rounded-full px-3 py-1">
@@ -2353,31 +2406,31 @@ export default function TransactionsPage() {
                   </div>
                   <div className="p-6">
                     <div className="h-80">
-                      <YearOverYearComparison 
+                      <YearOverYearComparison
                         onYearClick={(year) => {
                           console.log('Year clicked:', year);
-                          
+
                           // Filter transactions by the selected year and show insights
-                          const yearTransactions = transactions.filter(t => 
-                            new Date(t.date).getFullYear() === year
+                          const yearTransactions = transactions.filter(
+                            (t) => new Date(t.date).getFullYear() === year
                           );
-                          
+
                           if (yearTransactions.length > 0) {
                             const totalSpent = yearTransactions
-                              .filter(t => t.type === 'expense')
+                              .filter((t) => t.type === 'expense')
                               .reduce((sum, t) => sum + t.amount, 0);
                             const totalIncome = yearTransactions
-                              .filter(t => t.type === 'income')
+                              .filter((t) => t.type === 'income')
                               .reduce((sum, t) => sum + t.amount, 0);
-                            
+
                             toast.success(
                               `📊 ${year} Analysis: ${formatCurrency(totalIncome)} income, ${formatCurrency(totalSpent)} expenses`,
-                              { 
+                              {
                                 duration: 5000,
-                                description: `Net: ${formatCurrency(totalIncome - totalSpent)} • ${yearTransactions.length} transactions`
+                                description: `Net: ${formatCurrency(totalIncome - totalSpent)} • ${yearTransactions.length} transactions`,
                               }
                             );
-                            
+
                             // Auto-filter to show that year's data
                             const startOfYear = new Date(year, 0, 1).toISOString().split('T')[0];
                             const endOfYear = new Date(year, 11, 31).toISOString().split('T')[0];
@@ -2406,43 +2459,60 @@ export default function TransactionsPage() {
                         <Info className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">Spending Pattern</p>
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
+                          Spending Pattern
+                        </p>
                         <p className="text-xs text-blue-700 dark:text-blue-300">
-                          {monthlyData.length > 0 && monthlyData[monthlyData.length - 1]?.expense > monthlyData[Math.max(0, monthlyData.length - 2)]?.expense 
-                            ? "Your expenses increased last month. Consider reviewing your budget." 
-                            : "Your spending is stable. Great job maintaining control!"}
+                          {monthlyData.length > 0 &&
+                          monthlyData[monthlyData.length - 1]?.expense >
+                            monthlyData[Math.max(0, monthlyData.length - 2)]?.expense
+                            ? 'Your expenses increased last month. Consider reviewing your budget.'
+                            : 'Your spending is stable. Great job maintaining control!'}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl p-4 border border-green-200/50">
                     <div className="flex items-start gap-3">
                       <div className="p-1 bg-green-500/10 rounded-lg">
                         <TrendingUp className="w-4 h-4 text-green-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">Income Trend</p>
+                        <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
+                          Income Trend
+                        </p>
                         <p className="text-xs text-green-700 dark:text-green-300">
-                          {monthlyData.length > 1 && monthlyData[monthlyData.length - 1]?.income > monthlyData[monthlyData.length - 2]?.income
-                            ? "Your income is growing! Keep up the good work."
-                            : "Consider exploring additional income streams."}
+                          {monthlyData.length > 1 &&
+                          monthlyData[monthlyData.length - 1]?.income >
+                            monthlyData[monthlyData.length - 2]?.income
+                            ? 'Your income is growing! Keep up the good work.'
+                            : 'Consider exploring additional income streams.'}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 rounded-xl p-4 border border-purple-200/50">
                     <div className="flex items-start gap-3">
                       <div className="p-1 bg-purple-500/10 rounded-lg">
                         <Target className="w-4 h-4 text-purple-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-1">Financial Goal</p>
+                        <p className="text-sm font-medium text-purple-800 dark:text-purple-200 mb-1">
+                          Financial Goal
+                        </p>
                         <p className="text-xs text-purple-700 dark:text-purple-300">
-                          {monthlyData.length > 0 && (monthlyData.reduce((sum, month) => sum + month.income - month.expense, 0) / monthlyData.reduce((sum, month) => sum + month.income, 0)) * 100 >= 20
+                          {monthlyData.length > 0 &&
+                          (monthlyData.reduce(
+                            (sum, month) => sum + month.income - month.expense,
+                            0
+                          ) /
+                            monthlyData.reduce((sum, month) => sum + month.income, 0)) *
+                            100 >=
+                            20
                             ? "Excellent! You're saving over 20% of your income."
-                            : "Try to save at least 20% of your monthly income."}
+                            : 'Try to save at least 20% of your monthly income.'}
                         </p>
                       </div>
                     </div>
@@ -2455,29 +2525,27 @@ export default function TransactionsPage() {
 
         {/* Add tab buttons for regular and recurring transactions */}
         <div className="mb-4 flex gap-2">
-          <Button 
-            variant={showRecurring ? "outline" : "default"} 
-            size="sm" 
+          <Button
+            variant={showRecurring ? 'outline' : 'default'}
+            size="sm"
             onClick={() => setShowRecurring(false)}
           >
             Regular
           </Button>
-          <Button 
-            variant={showRecurring ? "default" : "outline"} 
-            size="sm" 
+          <Button
+            variant={showRecurring ? 'default' : 'outline'}
+            size="sm"
             onClick={() => setShowRecurring(true)}
           >
-            <RefreshCw size={16} className={`${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw size={16} className={`${refreshing ? 'animate-spin' : ''}`} />
             <span className="ml-2">Refresh</span>
           </Button>
         </div>
-        
+
         {/* Conditionally show regular or recurring transactions */}
         {!showRecurring ? (
           /* Regular transactions view - existing JSX */
-          <div>
-            {/* ... Your existing transactions table/card display ... */}
-          </div>
+          <div>{/* ... Your existing transactions table/card display ... */}</div>
         ) : (
           /* Recurring transactions view */
           <RecurringTransactions
@@ -2491,7 +2559,7 @@ export default function TransactionsPage() {
 
         {/* Transaction Form Drawer */}
         {showForm && (
-          <AddTransactionForm 
+          <AddTransactionForm
             isOpen={showForm}
             onClose={closeTransactionForm}
             onTransactionAdded={() => {
@@ -2500,7 +2568,7 @@ export default function TransactionsPage() {
             }}
             categories={categories}
             isEditing={isEditing}
-            editTransaction={isEditing ? transactions.find(t => t.id === editId) : null}
+            editTransaction={isEditing ? transactions.find((t) => t.id === editId) : null}
           />
         )}
 
@@ -2519,7 +2587,7 @@ export default function TransactionsPage() {
         {/* Transactions List */}
         <div className="rounded-lg border bg-card shadow-sm">
           {/* Table View */}
-          {viewMode === "table" && (
+          {viewMode === 'table' && (
             <TransactionTable
               transactions={paginatedTransactions}
               onEdit={handleEdit}
@@ -2533,7 +2601,7 @@ export default function TransactionsPage() {
           )}
 
           {/* Mobile Card View */}
-          {viewMode === "card" && (
+          {viewMode === 'card' && (
             <TransactionCardView
               transactions={paginatedTransactions}
               onEdit={handleEdit}
@@ -2542,7 +2610,7 @@ export default function TransactionsPage() {
               onAddTransaction={openTransactionForm}
             />
           )}
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <TransactionPagination
@@ -2568,7 +2636,8 @@ export default function TransactionsPage() {
               <div>
                 <h2 className="text-2xl font-bold text-foreground">Income vs. Expenses Analysis</h2>
                 <p className="text-muted-foreground">
-                  Comprehensive monthly cash flow visualization • {monthlyData.length} months of data
+                  Comprehensive monthly cash flow visualization • {monthlyData.length} months of
+                  data
                 </p>
               </div>
             </div>
@@ -2592,31 +2661,37 @@ export default function TransactionsPage() {
                   <div className="flex items-center gap-3">
                     <TrendingUp className="w-6 h-6 text-emerald-600" />
                     <div>
-                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Total Income</p>
+                      <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                        Total Income
+                      </p>
                       <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
                         {formatCurrency(monthlyData.reduce((sum, month) => sum + month.income, 0))}
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 rounded-xl p-4 border border-red-200/50">
                   <div className="flex items-center gap-3">
                     <TrendingDown className="w-6 h-6 text-red-600" />
                     <div>
-                      <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
+                      <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                        Total Expenses
+                      </p>
                       <p className="text-xl font-bold text-red-800 dark:text-red-200">
                         {formatCurrency(monthlyData.reduce((sum, month) => sum + month.expense, 0))}
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 rounded-xl p-4 border border-purple-200/50">
                   <div className="flex items-center gap-3">
                     <PiggyBank className="w-6 h-6 text-purple-600" />
                     <div>
-                      <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Net Balance</p>
+                      <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                        Net Balance
+                      </p>
                       <p className="text-xl font-bold text-purple-800 dark:text-purple-200">
                         {formatCurrency(
                           monthlyData.reduce((sum, month) => sum + month.income - month.expense, 0)
@@ -2625,15 +2700,18 @@ export default function TransactionsPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl p-4 border border-blue-200/50">
                   <div className="flex items-center gap-3">
                     <BarChart3 className="w-6 h-6 text-blue-600" />
                     <div>
-                      <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Avg Monthly</p>
+                      <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        Avg Monthly
+                      </p>
                       <p className="text-xl font-bold text-blue-800 dark:text-blue-200">
                         {formatCurrency(
-                          monthlyData.reduce((sum, month) => sum + month.income, 0) / Math.max(monthlyData.length, 1)
+                          monthlyData.reduce((sum, month) => sum + month.income, 0) /
+                            Math.max(monthlyData.length, 1)
                         )}
                       </p>
                     </div>
@@ -2643,8 +2721,8 @@ export default function TransactionsPage() {
 
               {/* Fullscreen Chart */}
               <div className="h-[calc(100%-120px)] min-h-[500px] bg-gradient-to-br from-background/50 to-muted/10 rounded-xl p-4 border border-border/30">
-                <IncomeExpenseChart 
-                  monthlyData={monthlyData.map(month => ({
+                <IncomeExpenseChart
+                  monthlyData={monthlyData.map((month) => ({
                     ...month,
                     onClick: (monthData: any) => {
                       // Interactive month click - filter transactions for that month
@@ -2654,24 +2732,21 @@ export default function TransactionsPage() {
                         const monthNumber = new Date(`${monthName} 1, ${year}`).getMonth();
                         const startDate = new Date(parseInt(year), monthNumber, 1);
                         const endDate = new Date(parseInt(year), monthNumber + 1, 0);
-                        
+
                         setDateRange({
                           start: startDate.toISOString().split('T')[0],
-                          end: endDate.toISOString().split('T')[0]
+                          end: endDate.toISOString().split('T')[0],
                         });
-                        
+
                         // Close fullscreen and show filtered data
                         setShowFullscreenChart(false);
-                        
-                        toast.success(
-                          `📅 Filtered to ${monthName} ${year}`,
-                          {
-                            description: `Income: ${formatCurrency(monthData.income)} • Expenses: ${formatCurrency(monthData.expense)}`,
-                            duration: 4000
-                          }
-                        );
+
+                        toast.success(`📅 Filtered to ${monthName} ${year}`, {
+                          description: `Income: ${formatCurrency(monthData.income)} • Expenses: ${formatCurrency(monthData.expense)}`,
+                          duration: 4000,
+                        });
                       }
-                    }
+                    },
                   }))}
                 />
               </div>

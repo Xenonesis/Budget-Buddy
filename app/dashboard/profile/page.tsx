@@ -1,28 +1,29 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { getUserTimezone, ensureUserProfile } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Moon, Sun, Laptop } from "lucide-react";
-import { memo } from "react";
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { getUserTimezone, ensureUserProfile } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Moon, Sun, Laptop } from 'lucide-react';
+import { memo } from 'react';
+import { ProfilePageSkeleton } from '@/components/ui/page-skeletons';
 
 // Memoized form field component for better performance
-function FormFieldComponent({ 
-  label, 
-  id, 
-  name, 
-  value, 
-  onChange, 
-  disabled = false, 
-  placeholder = "", 
-  className = "",
-  as = "input",
-  children
+function FormFieldComponent({
+  label,
+  id,
+  name,
+  value,
+  onChange,
+  disabled = false,
+  placeholder = '',
+  className = '',
+  as = 'input',
+  children,
 }: {
   label: string;
   id: string;
@@ -32,7 +33,7 @@ function FormFieldComponent({
   disabled?: boolean;
   placeholder?: string;
   className?: string;
-  as?: "input" | "select";
+  as?: 'input' | 'select';
   children?: React.ReactNode;
 }) {
   return (
@@ -40,7 +41,7 @@ function FormFieldComponent({
       <label htmlFor={id} className="block text-sm font-medium mb-1">
         {label}
       </label>
-      {as === "input" ? (
+      {as === 'input' ? (
         <Input
           id={id}
           name={name}
@@ -69,7 +70,7 @@ function FormFieldComponent({
 }
 
 const FormField = memo(FormFieldComponent);
-FormField.displayName = "FormField";
+FormField.displayName = 'FormField';
 
 // Memoized theme preview component
 function ThemePreviewComponent() {
@@ -101,139 +102,148 @@ function ThemePreviewComponent() {
 }
 
 const ThemePreview = memo(ThemePreviewComponent);
-ThemePreview.displayName = "ThemePreview";
+ThemePreview.displayName = 'ThemePreview';
 
 export default function ProfilePage() {
   const userPreferences = useUserPreferences();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
-    name: "",
-    email: "",
-    currency: userPreferences.currency || "USD",
-    timezone: userPreferences.timezone || "UTC"
+    name: '',
+    email: '',
+    currency: userPreferences.currency || 'USD',
+    timezone: userPreferences.timezone || 'UTC',
   });
-  
+
   // Memoized fetch profile function
   const fetchProfile = useCallback(async () => {
     setLoading(true);
-    
+
     try {
       // Get current user
       const { data: userData, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError) throw userError;
-      
+
       if (!userData.user) {
-        toast.error("Please log in to view your profile");
+        toast.error('Please log in to view your profile');
         return;
       }
-      
+
       // Ensure profile exists
       await ensureUserProfile(userData.user.id, userData.user.email);
-      
+
       // Get profile data
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userData.user.id)
+        .from('profiles')
+        .select('*')
+        .eq('id', userData.user.id)
         .single();
-        
+
       if (error) throw error;
-      
+
       // Set profile data and update user preferences
       if (data) {
         setProfile({
-          name: data.name || "",
-          email: data.email || userData.user.email || "",
-          currency: data.currency || userPreferences.currency || "USD",
-          timezone: data.timezone || userPreferences.timezone || getUserTimezone()
+          name: data.name || '',
+          email: data.email || userData.user.email || '',
+          currency: data.currency || userPreferences.currency || 'USD',
+          timezone: data.timezone || userPreferences.timezone || getUserTimezone(),
         });
-        
+
         // Update store with profile values
-        userPreferences.setUsername(data.name || "");
-        userPreferences.setCurrency(data.currency || "USD");
+        userPreferences.setUsername(data.name || '');
+        userPreferences.setCurrency(data.currency || 'USD');
         userPreferences.setTimezone(data.timezone || getUserTimezone());
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
-      toast.error("Failed to load profile");
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
   }, [userPreferences]);
-  
+
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
-  
+
   // Detect and set user's timezone if not already set
   useEffect(() => {
     const userTimezone = getUserTimezone();
-    if (userTimezone && (!profile.timezone || profile.timezone === "UTC")) {
-      setProfile(prev => ({ ...prev, timezone: userTimezone }));
+    if (userTimezone && (!profile.timezone || profile.timezone === 'UTC')) {
+      setProfile((prev) => ({ ...prev, timezone: userTimezone }));
       userPreferences.setTimezone(userTimezone);
     }
   }, [profile.timezone, userPreferences]);
-  
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfile(prev => ({ ...prev, [name]: value }));
-  }, []);
-  
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      if (!userData.user) {
-        toast.error("Please log in to update your profile");
-        return;
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setProfile((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+
+        if (!userData.user) {
+          toast.error('Please log in to update your profile');
+          return;
+        }
+
+        // Update profile in database
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            name: profile.name,
+            currency: profile.currency,
+            timezone: profile.timezone,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', userData.user.id);
+
+        if (error) throw error;
+
+        // Update user preferences in store
+        userPreferences.setUsername(profile.name);
+        userPreferences.setCurrency(profile.currency);
+        userPreferences.setTimezone(profile.timezone);
+
+        toast.success('Profile updated successfully');
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        toast.error('Failed to update profile');
+      } finally {
+        setLoading(false);
       }
-      
-      // Update profile in database
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          name: profile.name,
-          currency: profile.currency,
-          timezone: profile.timezone,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", userData.user.id);
-        
-      if (error) throw error;
-      
-      // Update user preferences in store
-      userPreferences.setUsername(profile.name);
-      userPreferences.setCurrency(profile.currency);
-      userPreferences.setTimezone(profile.timezone);
-      
-      toast.success("Profile updated successfully");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
-  }, [profile, userPreferences]);
+    },
+    [profile, userPreferences]
+  );
 
   // Memoize the currency options to prevent re-renders
-  const currencyOptions = useMemo(() => (
-    <>
-      <option value="USD">USD - United States Dollar</option>
-      <option value="EUR">EUR - Euro</option>
-      <option value="GBP">GBP - British Pound</option>
-      <option value="JPY">JPY - Japanese Yen</option>
-      <option value="CAD">CAD - Canadian Dollar</option>
-      <option value="AUD">AUD - Australian Dollar</option>
-      <option value="INR">INR - Indian Rupee</option>
-      <option value="CNY">CNY - Chinese Yuan</option>
-      <option value="BRL">BRL - Brazilian Real</option>
-      <option value="MXN">MXN - Mexican Peso</option>
-    </>
-  ), []);
+  const currencyOptions = useMemo(
+    () => (
+      <>
+        <option value="USD">USD - United States Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="INR">INR - Indian Rupee</option>
+        <option value="CNY">CNY - Chinese Yuan</option>
+        <option value="BRL">BRL - Brazilian Real</option>
+        <option value="MXN">MXN - Mexican Peso</option>
+      </>
+    ),
+    []
+  );
 
   // Memoize the timezone options to prevent re-renders
   const timezoneOptions = useMemo(() => {
@@ -254,15 +264,13 @@ export default function ProfilePage() {
       </>
     );
   }, []);
-  
+
   return (
     <div className="container max-w-2xl px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8">
       <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
-      
+
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
+        <ProfilePageSkeleton />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <FormField
@@ -273,7 +281,7 @@ export default function ProfilePage() {
             onChange={handleInputChange}
             placeholder="Your name"
           />
-          
+
           <FormField
             label="Email (read-only)"
             id="email"
@@ -281,7 +289,7 @@ export default function ProfilePage() {
             value={profile.email}
             disabled={true}
           />
-          
+
           <FormField
             label="Preferred Currency"
             id="currency"
@@ -292,7 +300,7 @@ export default function ProfilePage() {
           >
             {currencyOptions}
           </FormField>
-          
+
           <FormField
             label="Timezone"
             id="timezone"
@@ -303,26 +311,31 @@ export default function ProfilePage() {
           >
             {timezoneOptions}
           </FormField>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-3">
-              Theme Preference
-            </label>
+            <label className="block text-sm font-medium mb-3">Theme Preference</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center p-4 border rounded-md bg-card">
                 <div className="mr-4">
-                  <ThemeToggle className="w-full" iconOnly={false} variant="outline" size="default" />
+                  <ThemeToggle
+                    className="w-full"
+                    iconOnly={false}
+                    variant="outline"
+                    size="default"
+                  />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Quick Toggle</p>
-                  <p className="text-xs text-muted-foreground">Switch between light, dark, or system theme</p>
+                  <p className="text-xs text-muted-foreground">
+                    Switch between light, dark, or system theme
+                  </p>
                 </div>
               </div>
-              
+
               <ThemePreview />
             </div>
           </div>
-          
+
           <div className="pt-4">
             <Button type="submit" size="lg" disabled={loading}>
               {loading ? (
@@ -331,7 +344,7 @@ export default function ProfilePage() {
                   Saving...
                 </>
               ) : (
-                "Save Changes"
+                'Save Changes'
               )}
             </Button>
           </div>
@@ -339,4 +352,4 @@ export default function ProfilePage() {
       )}
     </div>
   );
-} 
+}

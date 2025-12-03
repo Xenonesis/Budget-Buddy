@@ -1,32 +1,37 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { supabase } from "@/lib/supabase";
-import { 
-  generateRealFinancialInsights, 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { supabase } from '@/lib/supabase';
+import {
+  generateRealFinancialInsights,
   type RealFinancialInsight,
   type Transaction,
-  type Budget
-} from "@/lib/real-financial-insights";
-import { YearOverYearService, type YearlyComparisonData, type YearOverYearMetrics } from "@/lib/year-over-year-service";
-import { EnhancedFinancialInsightsPanel } from "./components/EnhancedFinancialInsightsPanel";
-import { FinancialGoalsPanel } from "./components/FinancialGoalsPanel";
-import { InsightsSettings } from "./components/InsightsSettings";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  RefreshCw, 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Target, 
-  BarChart3, 
+  type Budget,
+} from '@/lib/real-financial-insights';
+import {
+  YearOverYearService,
+  type YearlyComparisonData,
+  type YearOverYearMetrics,
+} from '@/lib/year-over-year-service';
+import { EnhancedFinancialInsightsPanel } from './components/EnhancedFinancialInsightsPanel';
+import { FinancialGoalsPanel } from './components/FinancialGoalsPanel';
+import { InsightsSettings } from './components/InsightsSettings';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FinancialInsightsPageSkeleton } from '@/components/ui/page-skeletons';
+import {
+  RefreshCw,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Target,
+  BarChart3,
   Sparkles,
   ArrowUpRight,
   ArrowDownRight,
@@ -46,8 +51,8 @@ import {
   BookOpen,
   Calculator,
   LineChart,
-  Activity
-} from "lucide-react";
+  Activity,
+} from 'lucide-react';
 
 export default function FinancialInsightsPage() {
   const router = useRouter();
@@ -59,10 +64,10 @@ export default function FinancialInsightsPage() {
   const [insightLoading, setInsightLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  
+
   // New enhanced state
-  const [activeTab, setActiveTab] = useState<string>("overview");
-  const [timeRange, setTimeRange] = useState<string>("30d");
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [timeRange, setTimeRange] = useState<string>('30d');
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<boolean>(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -78,7 +83,7 @@ export default function FinancialInsightsPage() {
     refreshInterval: 30,
     insightTypes: ['spending_pattern', 'budget_warning', 'saving_suggestion', 'trend'],
     priorityFilter: 'all',
-    exportFormat: 'json'
+    exportFormat: 'json',
   });
 
   // Financial Goals Management
@@ -86,22 +91,22 @@ export default function FinancialInsightsPage() {
     const newGoal = {
       ...goalData,
       id: crypto.randomUUID(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    setFinancialGoals(prev => [...prev, newGoal]);
-    toast.success("Financial goal created successfully!");
+    setFinancialGoals((prev) => [...prev, newGoal]);
+    toast.success('Financial goal created successfully!');
   };
 
   const handleUpdateGoal = (id: string, updates: any) => {
-    setFinancialGoals(prev => 
-      prev.map(goal => goal.id === id ? { ...goal, ...updates } : goal)
+    setFinancialGoals((prev) =>
+      prev.map((goal) => (goal.id === id ? { ...goal, ...updates } : goal))
     );
-    toast.success("Goal updated successfully!");
+    toast.success('Goal updated successfully!');
   };
 
   const handleDeleteGoal = (id: string) => {
-    setFinancialGoals(prev => prev.filter(goal => goal.id !== id));
-    toast.success("Goal deleted successfully!");
+    setFinancialGoals((prev) => prev.filter((goal) => goal.id !== id));
+    toast.success('Goal deleted successfully!');
   };
 
   // Initialize data
@@ -114,14 +119,10 @@ export default function FinancialInsightsPage() {
   const initializeData = async () => {
     setLoading(true);
     try {
-      await Promise.all([
-        fetchTransactions(),
-        fetchBudgets(),
-        fetchYearOverYearData()
-      ]);
+      await Promise.all([fetchTransactions(), fetchBudgets(), fetchYearOverYearData()]);
     } catch (error) {
-      console.error("Error initializing financial insights data:", error);
-      toast.error("Failed to load financial data");
+      console.error('Error initializing financial insights data:', error);
+      toast.error('Failed to load financial data');
     } finally {
       setLoading(false);
     }
@@ -141,8 +142,8 @@ export default function FinancialInsightsPage() {
       if (error) throw error;
       setTransactions(data || []);
     } catch (error) {
-      console.error("Error fetching transactions:", error);
-      toast.error("Failed to load transactions");
+      console.error('Error fetching transactions:', error);
+      toast.error('Failed to load transactions');
     }
   };
 
@@ -150,16 +151,13 @@ export default function FinancialInsightsPage() {
     if (!userId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('user_id', userId);
+      const { data, error } = await supabase.from('budgets').select('*').eq('user_id', userId);
 
       if (error) throw error;
       setBudgets(data || []);
     } catch (error) {
-      console.error("Error fetching budgets:", error);
-      toast.error("Failed to load budgets");
+      console.error('Error fetching budgets:', error);
+      toast.error('Failed to load budgets');
     }
   };
 
@@ -170,7 +168,7 @@ export default function FinancialInsightsPage() {
     try {
       const currentYear = new Date().getFullYear();
       const years = [currentYear, currentYear - 1, currentYear - 2];
-      
+
       const yearlyData = await YearOverYearService.fetchYearOverYearData(userId, years);
       setYearOverYearData(yearlyData);
 
@@ -178,13 +176,13 @@ export default function FinancialInsightsPage() {
       if (yearlyData.length >= 2) {
         const metrics = YearOverYearService.calculateYearOverYearMetrics(
           yearlyData[0], // Current year
-          yearlyData[1]  // Previous year
+          yearlyData[1] // Previous year
         );
         setYoyMetrics(metrics);
       }
     } catch (error) {
-      console.error("Error fetching year-over-year data:", error);
-      toast.error("Failed to load year-over-year data");
+      console.error('Error fetching year-over-year data:', error);
+      toast.error('Failed to load year-over-year data');
     } finally {
       setYoyLoading(false);
     }
@@ -196,20 +194,16 @@ export default function FinancialInsightsPage() {
     setInsightLoading(true);
     try {
       // Refresh data first
-      await Promise.all([
-        fetchTransactions(),
-        fetchBudgets(),
-        fetchYearOverYearData()
-      ]);
+      await Promise.all([fetchTransactions(), fetchBudgets(), fetchYearOverYearData()]);
 
       // Generate fresh insights
       const freshInsights = generateRealFinancialInsights(transactions, budgets);
       setInsights(freshInsights);
-      
-      toast.success("Financial insights refreshed successfully!");
+
+      toast.success('Financial insights refreshed successfully!');
     } catch (error) {
-      console.error("Error refreshing insights:", error);
-      toast.error("Failed to refresh insights");
+      console.error('Error refreshing insights:', error);
+      toast.error('Failed to refresh insights');
     } finally {
       setInsightLoading(false);
     }
@@ -226,36 +220,40 @@ export default function FinancialInsightsPage() {
   // Calculate financial metrics
   const financialMetrics = {
     totalIncome: transactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0),
     totalExpenses: transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0),
     activeBudgets: budgets.length,
     insightsGenerated: insights.length,
-    highPriorityInsights: insights.filter(i => 
-      i.type === 'budget_warning' || i.type === 'warning'
-    ).length
+    highPriorityInsights: insights.filter(
+      (i) => i.type === 'budget_warning' || i.type === 'warning'
+    ).length,
   };
 
   const netIncome = financialMetrics.totalIncome - financialMetrics.totalExpenses;
-  const savingsRate = financialMetrics.totalIncome > 0 
-    ? ((netIncome / financialMetrics.totalIncome) * 100).toFixed(1)
-    : '0';
+  const savingsRate =
+    financialMetrics.totalIncome > 0
+      ? ((netIncome / financialMetrics.totalIncome) * 100).toFixed(1)
+      : '0';
 
   // Enhanced financial calculations
   const calculateSpendingTrends = () => {
     const currentDate = new Date();
-    const last30Days = transactions.filter(t => {
+    const last30Days = transactions.filter((t) => {
       const transactionDate = new Date(t.date);
       const daysDiff = (currentDate.getTime() - transactionDate.getTime()) / (1000 * 3600 * 24);
       return daysDiff <= 30 && t.type === 'expense';
     });
 
-    const categorySpending = last30Days.reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + t.amount;
-      return acc;
-    }, {} as Record<string, number>);
+    const categorySpending = last30Days.reduce(
+      (acc, t) => {
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return Object.entries(categorySpending)
       .map(([category, amount]) => ({ category, amount }))
@@ -267,88 +265,96 @@ export default function FinancialInsightsPage() {
     const totalIncome = financialMetrics.totalIncome;
     const totalExpenses = financialMetrics.totalExpenses;
     const savingsRateNum = parseFloat(savingsRate);
-    
+
     let score = 0;
     let factors = [];
 
     // Savings rate scoring (40% of total score)
     if (savingsRateNum >= 20) {
       score += 40;
-      factors.push({ name: "Excellent Savings Rate", impact: "positive", value: `${savingsRate}%` });
+      factors.push({
+        name: 'Excellent Savings Rate',
+        impact: 'positive',
+        value: `${savingsRate}%`,
+      });
     } else if (savingsRateNum >= 10) {
       score += 25;
-      factors.push({ name: "Good Savings Rate", impact: "neutral", value: `${savingsRate}%` });
+      factors.push({ name: 'Good Savings Rate', impact: 'neutral', value: `${savingsRate}%` });
     } else if (savingsRateNum >= 0) {
       score += 10;
-      factors.push({ name: "Low Savings Rate", impact: "negative", value: `${savingsRate}%` });
+      factors.push({ name: 'Low Savings Rate', impact: 'negative', value: `${savingsRate}%` });
     } else {
-      factors.push({ name: "Negative Savings", impact: "negative", value: `${savingsRate}%` });
+      factors.push({ name: 'Negative Savings', impact: 'negative', value: `${savingsRate}%` });
     }
 
     // Budget adherence (30% of total score)
-    const budgetAdherence = budgets.length > 0 ? 
-      budgets.filter(b => {
-        const categorySpending = transactions
-          .filter(t => t.category === b.category && t.type === 'expense')
-          .reduce((sum, t) => sum + t.amount, 0);
-        return categorySpending <= b.amount;
-      }).length / budgets.length : 0;
+    const budgetAdherence =
+      budgets.length > 0
+        ? budgets.filter((b) => {
+            const categorySpending = transactions
+              .filter((t) => t.category === b.category && t.type === 'expense')
+              .reduce((sum, t) => sum + t.amount, 0);
+            return categorySpending <= b.amount;
+          }).length / budgets.length
+        : 0;
 
     score += budgetAdherence * 30;
-    factors.push({ 
-      name: "Budget Adherence", 
-      impact: budgetAdherence > 0.8 ? "positive" : budgetAdherence > 0.5 ? "neutral" : "negative",
-      value: `${(budgetAdherence * 100).toFixed(0)}%`
+    factors.push({
+      name: 'Budget Adherence',
+      impact: budgetAdherence > 0.8 ? 'positive' : budgetAdherence > 0.5 ? 'neutral' : 'negative',
+      value: `${(budgetAdherence * 100).toFixed(0)}%`,
     });
 
     // Expense diversity (20% of total score)
-    const categories = [...new Set(transactions.filter(t => t.type === 'expense').map(t => t.category))];
+    const categories = [
+      ...new Set(transactions.filter((t) => t.type === 'expense').map((t) => t.category)),
+    ];
     const diversityScore = Math.min(categories.length / 8, 1) * 20;
     score += diversityScore;
-    factors.push({ 
-      name: "Expense Diversity", 
-      impact: categories.length >= 6 ? "positive" : categories.length >= 3 ? "neutral" : "negative",
-      value: `${categories.length} categories`
+    factors.push({
+      name: 'Expense Diversity',
+      impact: categories.length >= 6 ? 'positive' : categories.length >= 3 ? 'neutral' : 'negative',
+      value: `${categories.length} categories`,
     });
 
     // Income stability (10% of total score)
-    const incomeTransactions = transactions.filter(t => t.type === 'income');
+    const incomeTransactions = transactions.filter((t) => t.type === 'income');
     const hasRegularIncome = incomeTransactions.length > 0;
     if (hasRegularIncome) {
       score += 10;
-      factors.push({ name: "Regular Income", impact: "positive", value: "Active" });
+      factors.push({ name: 'Regular Income', impact: 'positive', value: 'Active' });
     } else {
-      factors.push({ name: "No Income Recorded", impact: "negative", value: "Inactive" });
+      factors.push({ name: 'No Income Recorded', impact: 'negative', value: 'Inactive' });
     }
 
     return {
       score: Math.round(score),
       grade: score >= 80 ? 'A' : score >= 60 ? 'B' : score >= 40 ? 'C' : 'D',
-      factors
+      factors,
     };
   };
 
   const generateRecommendations = () => {
     const recommendations = [];
     const healthScore = calculateFinancialHealth();
-    
+
     if (parseFloat(savingsRate) < 10) {
       recommendations.push({
-        title: "Increase Your Savings Rate",
-        description: "Aim to save at least 10-20% of your income for better financial security.",
-        priority: "high",
-        action: "Review expenses and identify areas to cut back",
-        category: "savings"
+        title: 'Increase Your Savings Rate',
+        description: 'Aim to save at least 10-20% of your income for better financial security.',
+        priority: 'high',
+        action: 'Review expenses and identify areas to cut back',
+        category: 'savings',
       });
     }
 
     if (budgets.length === 0) {
       recommendations.push({
-        title: "Set Up Budget Categories",
-        description: "Create budgets for your main expense categories to better control spending.",
-        priority: "medium",
-        action: "Go to Budget page and create your first budget",
-        category: "budgeting"
+        title: 'Set Up Budget Categories',
+        description: 'Create budgets for your main expense categories to better control spending.',
+        priority: 'medium',
+        action: 'Go to Budget page and create your first budget',
+        category: 'budgeting',
       });
     }
 
@@ -358,9 +364,9 @@ export default function FinancialInsightsPage() {
       recommendations.push({
         title: `Monitor ${topCategory.category} Spending`,
         description: `${topCategory.category} is your largest expense category at $${topCategory.amount.toLocaleString()}.`,
-        priority: "medium",
-        action: "Consider setting a budget for this category",
-        category: "spending"
+        priority: 'medium',
+        action: 'Consider setting a budget for this category',
+        category: 'spending',
       });
     }
 
@@ -373,9 +379,9 @@ export default function FinancialInsightsPage() {
       financialHealth: calculateFinancialHealth(),
       insights: insights,
       recommendations: generateRecommendations(),
-      metrics: financialMetrics
+      metrics: financialMetrics,
     };
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -385,8 +391,8 @@ export default function FinancialInsightsPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    toast.success("Financial insights exported successfully!");
+
+    toast.success('Financial insights exported successfully!');
   };
 
   const shareInsights = async () => {
@@ -395,7 +401,7 @@ export default function FinancialInsightsPage() {
         await navigator.share({
           title: 'My Financial Insights',
           text: `I have ${insights.length} financial insights with a ${calculateFinancialHealth().grade} financial health score!`,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch (error) {
         console.log('Error sharing:', error);
@@ -404,29 +410,12 @@ export default function FinancialInsightsPage() {
       // Fallback to clipboard
       const shareText = `Check out my financial insights: ${insights.length} insights generated with a ${calculateFinancialHealth().grade} financial health score!`;
       navigator.clipboard.writeText(shareText);
-      toast.success("Insights summary copied to clipboard!");
+      toast.success('Insights summary copied to clipboard!');
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-4 py-6 md:px-6 md:py-6 lg:px-8 lg:py-8 max-w-7xl">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-6">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto"></div>
-                <div className="absolute inset-0 rounded-full bg-primary/10 animate-pulse"></div>
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-foreground">Loading Financial Insights</h2>
-                <p className="text-muted-foreground">Analyzing your financial data...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <FinancialInsightsPageSkeleton />;
   }
 
   return (
@@ -440,10 +429,11 @@ export default function FinancialInsightsPage() {
                 Financial Insights
               </h1>
               <p className="text-xs sm:text-sm md:text-base lg:text-lg text-muted-foreground max-w-2xl">
-                Get intelligent insights about your spending patterns, budgets, and financial health with AI-powered analysis
+                Get intelligent insights about your spending patterns, budgets, and financial health
+                with AI-powered analysis
               </p>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button
                 onClick={() => router.push('/dashboard/transactions')}
@@ -490,7 +480,9 @@ export default function FinancialInsightsPage() {
                     <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                       <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Income</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Total Income
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xl sm:text-2xl font-bold text-foreground">
@@ -511,7 +503,9 @@ export default function FinancialInsightsPage() {
                     <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
                       <TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Total Expenses</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Total Expenses
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xl sm:text-2xl font-bold text-foreground">
@@ -532,14 +526,22 @@ export default function FinancialInsightsPage() {
                     <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                       <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Net Income</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Net Income
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xl sm:text-2xl font-bold text-foreground">
                       ${netIncome.toLocaleString()}
                     </p>
-                    <div className={`flex items-center gap-1 text-xs sm:text-sm ${netIncome > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {netIncome > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                    <div
+                      className={`flex items-center gap-1 text-xs sm:text-sm ${netIncome > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                    >
+                      {netIncome > 0 ? (
+                        <ArrowUpRight className="h-3 w-3" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3" />
+                      )}
                       <span>{savingsRate}% savings rate</span>
                     </div>
                   </div>
@@ -556,10 +558,14 @@ export default function FinancialInsightsPage() {
                     <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                       <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Active Budgets</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Active Budgets
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">{financialMetrics.activeBudgets}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
+                      {financialMetrics.activeBudgets}
+                    </p>
                     <p className="text-xs text-muted-foreground">Budget categories set</p>
                   </div>
                 </div>
@@ -575,12 +581,22 @@ export default function FinancialInsightsPage() {
                     <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
                       <Sparkles className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">AI Insights</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      AI Insights
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xl sm:text-2xl font-bold text-foreground">{financialMetrics.insightsGenerated}</p>
-                    <div className={`flex items-center gap-1 text-xs sm:text-sm ${financialMetrics.highPriorityInsights > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                      <span>{financialMetrics.highPriorityInsights > 0 ? `${financialMetrics.highPriorityInsights} high priority` : 'All clear'}</span>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground">
+                      {financialMetrics.insightsGenerated}
+                    </p>
+                    <div
+                      className={`flex items-center gap-1 text-xs sm:text-sm ${financialMetrics.highPriorityInsights > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
+                    >
+                      <span>
+                        {financialMetrics.highPriorityInsights > 0
+                          ? `${financialMetrics.highPriorityInsights} high priority`
+                          : 'All clear'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -602,8 +618,9 @@ export default function FinancialInsightsPage() {
                     Action Required
                   </h3>
                   <p className="text-orange-700 dark:text-orange-200 text-sm">
-                    You have {financialMetrics.highPriorityInsights} high-priority financial insights that need your attention. 
-                    Review them below to improve your financial health.
+                    You have {financialMetrics.highPriorityInsights} high-priority financial
+                    insights that need your attention. Review them below to improve your financial
+                    health.
                   </p>
                 </div>
               </div>
@@ -624,7 +641,8 @@ export default function FinancialInsightsPage() {
                     Great Financial Health!
                   </h3>
                   <p className="text-green-700 dark:text-green-200 text-sm">
-                    Your finances are looking healthy. Keep up the good work! Check out the insights below for optimization opportunities.
+                    Your finances are looking healthy. Keep up the good work! Check out the insights
+                    below for optimization opportunities.
                   </p>
                 </div>
               </div>
@@ -702,9 +720,14 @@ export default function FinancialInsightsPage() {
                         {calculateFinancialHealth().score}
                       </div>
                       <div className="space-y-1">
-                        <Badge 
-                          variant={calculateFinancialHealth().grade === 'A' ? 'default' : 
-                                  calculateFinancialHealth().grade === 'B' ? 'secondary' : 'destructive'}
+                        <Badge
+                          variant={
+                            calculateFinancialHealth().grade === 'A'
+                              ? 'default'
+                              : calculateFinancialHealth().grade === 'B'
+                                ? 'secondary'
+                                : 'destructive'
+                          }
                           className="text-sm sm:text-base md:text-lg px-2 sm:px-3 py-0.5 sm:py-1"
                         >
                           Grade {calculateFinancialHealth().grade}
@@ -714,8 +737,8 @@ export default function FinancialInsightsPage() {
                     </div>
                   </div>
                   <div className="w-full sm:w-auto sm:text-right">
-                    <Progress 
-                      value={calculateFinancialHealth().score} 
+                    <Progress
+                      value={calculateFinancialHealth().score}
                       className="w-full sm:w-32 h-3"
                     />
                   </div>
@@ -723,15 +746,25 @@ export default function FinancialInsightsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {calculateFinancialHealth().factors.map((factor, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    >
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          factor.impact === 'positive' ? 'bg-green-500' :
-                          factor.impact === 'neutral' ? 'bg-yellow-500' : 'bg-red-500'
-                        }`} />
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            factor.impact === 'positive'
+                              ? 'bg-green-500'
+                              : factor.impact === 'neutral'
+                                ? 'bg-yellow-500'
+                                : 'bg-red-500'
+                          }`}
+                        />
                         <span className="text-xs sm:text-sm font-medium">{factor.name}</span>
                       </div>
-                      <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap ml-2">{factor.value}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap ml-2">
+                        {factor.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -749,17 +782,24 @@ export default function FinancialInsightsPage() {
               <CardContent className="p-4 sm:p-5 md:p-6">
                 <div className="space-y-3 sm:space-y-4">
                   {generateRecommendations().map((rec, index) => (
-                    <div key={index} className="p-3 sm:p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
+                    <div
+                      key={index}
+                      className="p-3 sm:p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors"
+                    >
                       <div className="flex items-start justify-between mb-2 gap-2">
-                        <h4 className="font-semibold text-foreground text-sm sm:text-base">{rec.title}</h4>
-                        <Badge 
+                        <h4 className="font-semibold text-foreground text-sm sm:text-base">
+                          {rec.title}
+                        </h4>
+                        <Badge
                           variant={rec.priority === 'high' ? 'destructive' : 'secondary'}
                           className="text-xs shrink-0"
                         >
                           {rec.priority}
                         </Badge>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">{rec.description}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                        {rec.description}
+                      </p>
                       <div className="flex flex-wrap items-center gap-2">
                         <Button size="sm" variant="outline" className="text-xs">
                           {rec.action}
@@ -786,24 +826,37 @@ export default function FinancialInsightsPage() {
                 <div className="space-y-3 sm:space-y-4">
                   {calculateSpendingTrends().length > 0 ? (
                     calculateSpendingTrends().map((category, index) => {
-                      const percentage = financialMetrics.totalExpenses > 0 
-                        ? (category.amount / financialMetrics.totalExpenses * 100).toFixed(1)
-                        : '0.0';
-                      
+                      const percentage =
+                        financialMetrics.totalExpenses > 0
+                          ? ((category.amount / financialMetrics.totalExpenses) * 100).toFixed(1)
+                          : '0.0';
+
                       return (
-                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs sm:text-sm font-medium shrink-0">
                               {index + 1}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm sm:text-base truncate">{category.category}</p>
-                              <p className="text-xs sm:text-sm text-muted-foreground">{percentage}% of total expenses</p>
+                              <p className="font-medium text-sm sm:text-base truncate">
+                                {category.category}
+                              </p>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
+                                {percentage}% of total expenses
+                              </p>
                             </div>
                           </div>
                           <div className="text-left sm:text-right ml-10 sm:ml-0">
-                            <p className="font-semibold text-sm sm:text-base">${category.amount.toLocaleString()}</p>
-                            <Progress value={parseFloat(percentage)} className="w-full sm:w-20 h-2 mt-1" />
+                            <p className="font-semibold text-sm sm:text-base">
+                              ${category.amount.toLocaleString()}
+                            </p>
+                            <Progress
+                              value={parseFloat(percentage)}
+                              className="w-full sm:w-20 h-2 mt-1"
+                            />
                           </div>
                         </div>
                       );
@@ -811,7 +864,9 @@ export default function FinancialInsightsPage() {
                   ) : (
                     <div className="text-center py-8">
                       <PieChart className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground">No spending data available for the last 30 days</p>
+                      <p className="text-muted-foreground">
+                        No spending data available for the last 30 days
+                      </p>
                     </div>
                   )}
                 </div>
@@ -837,11 +892,14 @@ export default function FinancialInsightsPage() {
                       {savingsRate}%
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {parseFloat(savingsRate) >= 20 ? 'Excellent!' : 
-                       parseFloat(savingsRate) >= 10 ? 'Good progress' : 'Needs improvement'}
+                      {parseFloat(savingsRate) >= 20
+                        ? 'Excellent!'
+                        : parseFloat(savingsRate) >= 10
+                          ? 'Good progress'
+                          : 'Needs improvement'}
                     </p>
                   </div>
-                  
+
                   <div className="p-3 sm:p-4 rounded-lg bg-background/60 dark:bg-background/40 border">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="h-4 w-4 text-blue-500" />
@@ -851,11 +909,12 @@ export default function FinancialInsightsPage() {
                       {financialGoals.length}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {financialGoals.length === 0 ? 'Set your first goal' : 
-                       `${financialGoals.filter(g => (g.currentAmount / g.targetAmount) >= 1).length} completed`}
+                      {financialGoals.length === 0
+                        ? 'Set your first goal'
+                        : `${financialGoals.filter((g) => g.currentAmount / g.targetAmount >= 1).length} completed`}
                     </p>
                   </div>
-                  
+
                   <div className="p-3 sm:p-4 rounded-lg bg-background/60 dark:bg-background/40 border sm:col-span-2 lg:col-span-1">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-orange-500" />
@@ -865,7 +924,9 @@ export default function FinancialInsightsPage() {
                       {financialMetrics.highPriorityInsights}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {financialMetrics.highPriorityInsights === 0 ? 'All clear!' : 'Need attention'}
+                      {financialMetrics.highPriorityInsights === 0
+                        ? 'All clear!'
+                        : 'Need attention'}
                     </p>
                   </div>
                 </div>
@@ -895,23 +956,33 @@ export default function FinancialInsightsPage() {
               <CardContent className="p-4 sm:p-5 md:p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Average Daily Spending</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Average Daily Spending
+                    </p>
                     <p className="text-xl sm:text-2xl font-bold">
                       ${(financialMetrics.totalExpenses / 30).toFixed(0)}
                     </p>
                     <p className="text-xs text-muted-foreground">Last 30 days</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Largest Single Expense</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Largest Single Expense
+                    </p>
                     <p className="text-2xl font-bold">
-                      ${Math.max(...transactions.filter(t => t.type === 'expense').map(t => t.amount), 0).toLocaleString()}
+                      $
+                      {Math.max(
+                        ...transactions.filter((t) => t.type === 'expense').map((t) => t.amount),
+                        0
+                      ).toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground">This period</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Transaction Frequency</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Transaction Frequency
+                    </p>
                     <p className="text-2xl font-bold">
-                      {transactions.filter(t => t.type === 'expense').length}
+                      {transactions.filter((t) => t.type === 'expense').length}
                     </p>
                     <p className="text-xs text-muted-foreground">Total transactions</p>
                   </div>
@@ -925,7 +996,9 @@ export default function FinancialInsightsPage() {
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
                   Monthly Comparison
-                  {yoyLoading && <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  {yoyLoading && (
+                    <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -940,28 +1013,37 @@ export default function FinancialInsightsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-foreground">
-                          {yoyMetrics.spendingGrowth > 0 ? '+' : ''}{yoyMetrics.spendingGrowth.toFixed(1)}%
+                          {yoyMetrics.spendingGrowth > 0 ? '+' : ''}
+                          {yoyMetrics.spendingGrowth.toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">Spending Growth</div>
-                        <div className={`text-xs ${yoyMetrics.spendingGrowth > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <div
+                          className={`text-xs ${yoyMetrics.spendingGrowth > 0 ? 'text-red-600' : 'text-green-600'}`}
+                        >
                           vs. Previous Year
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-foreground">
-                          {yoyMetrics.incomeGrowth > 0 ? '+' : ''}{yoyMetrics.incomeGrowth.toFixed(1)}%
+                          {yoyMetrics.incomeGrowth > 0 ? '+' : ''}
+                          {yoyMetrics.incomeGrowth.toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">Income Growth</div>
-                        <div className={`text-xs ${yoyMetrics.incomeGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div
+                          className={`text-xs ${yoyMetrics.incomeGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                           vs. Previous Year
                         </div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-foreground">
-                          {yoyMetrics.savingsRateChange > 0 ? '+' : ''}{yoyMetrics.savingsRateChange.toFixed(1)}%
+                          {yoyMetrics.savingsRateChange > 0 ? '+' : ''}
+                          {yoyMetrics.savingsRateChange.toFixed(1)}%
                         </div>
                         <div className="text-sm text-muted-foreground">Savings Rate Change</div>
-                        <div className={`text-xs ${yoyMetrics.savingsRateChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div
+                          className={`text-xs ${yoyMetrics.savingsRateChange > 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                           Percentage Points
                         </div>
                       </div>
@@ -969,10 +1051,15 @@ export default function FinancialInsightsPage() {
 
                     {/* Monthly Breakdown */}
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-foreground mb-3">Month-by-Month Comparison</h4>
+                      <h4 className="font-semibold text-foreground mb-3">
+                        Month-by-Month Comparison
+                      </h4>
                       <div className="grid gap-3">
                         {yoyMetrics.monthlyComparison.map((monthData, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors">
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors"
+                          >
                             <div className="flex items-center gap-3">
                               <div className="w-12 text-sm font-medium text-muted-foreground">
                                 {monthData.month}
@@ -992,20 +1079,29 @@ export default function FinancialInsightsPage() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className={`flex items-center gap-1 text-sm font-medium ${
-                                monthData.growth.spendingGrowth > 0 ? 'text-red-600' : 
-                                monthData.growth.spendingGrowth < 0 ? 'text-green-600' : 'text-muted-foreground'
-                              }`}>
+                              <div
+                                className={`flex items-center gap-1 text-sm font-medium ${
+                                  monthData.growth.spendingGrowth > 0
+                                    ? 'text-red-600'
+                                    : monthData.growth.spendingGrowth < 0
+                                      ? 'text-green-600'
+                                      : 'text-muted-foreground'
+                                }`}
+                              >
                                 {monthData.growth.spendingGrowth > 0 ? (
                                   <ArrowUpRight className="h-3 w-3" />
                                 ) : monthData.growth.spendingGrowth < 0 ? (
                                   <ArrowDownRight className="h-3 w-3" />
                                 ) : null}
-                                {monthData.growth.spendingGrowth > 0 ? '+' : ''}{monthData.growth.spendingGrowth.toFixed(1)}%
+                                {monthData.growth.spendingGrowth > 0 ? '+' : ''}
+                                {monthData.growth.spendingGrowth.toFixed(1)}%
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {monthData.growth.spendingGrowth > 0 ? 'Higher' : 
-                                 monthData.growth.spendingGrowth < 0 ? 'Lower' : 'Same'}
+                                {monthData.growth.spendingGrowth > 0
+                                  ? 'Higher'
+                                  : monthData.growth.spendingGrowth < 0
+                                    ? 'Lower'
+                                    : 'Same'}
                               </div>
                             </div>
                           </div>
@@ -1019,10 +1115,18 @@ export default function FinancialInsightsPage() {
                         <h4 className="font-semibold text-foreground mb-3">Key Insights</h4>
                         <div className="space-y-2">
                           {(() => {
-                            const insights = YearOverYearService.getSpendingInsights(yearOverYearData);
-                            const allInsights = [...insights.trends, ...insights.recommendations, ...insights.alerts];
+                            const insights =
+                              YearOverYearService.getSpendingInsights(yearOverYearData);
+                            const allInsights = [
+                              ...insights.trends,
+                              ...insights.recommendations,
+                              ...insights.alerts,
+                            ];
                             return allInsights.slice(0, 3).map((insight, index) => (
-                              <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-muted/30">
+                              <div
+                                key={index}
+                                className="flex items-start gap-2 p-3 rounded-lg bg-muted/30"
+                              >
                                 <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
                                 <p className="text-sm text-foreground">{insight}</p>
                               </div>
@@ -1064,10 +1168,7 @@ export default function FinancialInsightsPage() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <InsightsSettings
-              settings={insightsSettings}
-              onSettingsChange={setInsightsSettings}
-            />
+            <InsightsSettings settings={insightsSettings} onSettingsChange={setInsightsSettings} />
           </TabsContent>
         </Tabs>
 
