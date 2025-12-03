@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useUserPreferences } from "@/hooks/use-user-preferences";
-import { FileText, User, Palette, Bell, Bot, LogOut, LayoutGrid } from "lucide-react";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input, Textarea } from "@/components/ui/input";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { FileText, User, Palette, Bell, Bot, LogOut, LayoutGrid, Shield } from 'lucide-react';
+import { toast } from 'sonner';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input, Textarea } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import type { AIProvider, AIModel } from "@/lib/ai";
-import { getAvailableModelsForProvider } from "@/lib/ai";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import type { AIProvider, AIModel } from '@/lib/ai';
+import { getAvailableModelsForProvider } from '@/lib/ai';
 
 interface Profile {
   id: string;
@@ -40,30 +40,46 @@ interface Profile {
   gender?: string;
   timezone?: string;
   ai_settings: {
-      google_api_key: string;
-      mistral_api_key: string;
-      anthropic_api_key: string;
-      groq_api_key: string;
-      deepseek_api_key: string;
-      llama_api_key: string;
-      cohere_api_key: string;
-      gemini_api_key: string;
-      qwen_api_key: string;
-      openrouter_api_key: string;
-      cerebras_api_key: string;
-      xai_api_key: string;
-      unbound_api_key: string;
-      openai_api_key: string;
-      ollama_api_key: string;
-      lmstudio_api_key: string;
-      enabled: boolean;
-      mistral_model: string;
-      defaultModel: {
-        provider: 'mistral' | 'google' | 'anthropic' | 'groq' | 'deepseek' | 'llama' | 'cohere' | 'gemini' | 'qwen' | 'openrouter' | 'cerebras' | 'xAI' | 'unbound' | 'openai' | 'ollama' | 'lmstudio';
-        model: string;
-      };
-      enable_financial_insights: boolean;
+    google_api_key: string;
+    mistral_api_key: string;
+    anthropic_api_key: string;
+    groq_api_key: string;
+    deepseek_api_key: string;
+    llama_api_key: string;
+    cohere_api_key: string;
+    gemini_api_key: string;
+    qwen_api_key: string;
+    openrouter_api_key: string;
+    cerebras_api_key: string;
+    xai_api_key: string;
+    unbound_api_key: string;
+    openai_api_key: string;
+    ollama_api_key: string;
+    lmstudio_api_key: string;
+    enabled: boolean;
+    mistral_model: string;
+    defaultModel: {
+      provider:
+        | 'mistral'
+        | 'google'
+        | 'anthropic'
+        | 'groq'
+        | 'deepseek'
+        | 'llama'
+        | 'cohere'
+        | 'gemini'
+        | 'qwen'
+        | 'openrouter'
+        | 'cerebras'
+        | 'xAI'
+        | 'unbound'
+        | 'openai'
+        | 'ollama'
+        | 'lmstudio';
+      model: string;
     };
+    enable_financial_insights: boolean;
+  };
 }
 
 interface AuthUser {
@@ -87,12 +103,12 @@ export default function SettingsPage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { 
-    username, setCurrency, setUsername, theme, setTheme, 
-    syncWithDatabase, setUserId 
-  } = useUserPreferences();
-  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "notifications" | "ai" | "dashboard">("profile");
-  
+  const { username, setCurrency, setUsername, theme, setTheme, syncWithDatabase, setUserId } =
+    useUserPreferences();
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'preferences' | 'notifications' | 'ai' | 'dashboard'
+  >('profile');
+
   const [formData, setFormData] = useState<{
     name: string;
     email: string;
@@ -103,57 +119,57 @@ export default function SettingsPage() {
     profile_photo: string;
     gender: string;
     timezone: string;
-    notification_preferences: {
-      email: boolean;
-      push: boolean;
-      sms: boolean;
-    } | undefined;
+    notification_preferences:
+      | {
+          email: boolean;
+          push: boolean;
+          sms: boolean;
+        }
+      | undefined;
     ai_settings: Profile['ai_settings'];
   }>({
-    name: "",
-    email: "",
-    currency: "USD",
-    phone: "",
-    address: "",
-    preferred_language: "en",
-    profile_photo: "",
-    gender: "prefer-not-to-say",
+    name: '',
+    email: '',
+    currency: 'USD',
+    phone: '',
+    address: '',
+    preferred_language: 'en',
+    profile_photo: '',
+    gender: 'prefer-not-to-say',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     notification_preferences: {
       email: true,
       push: false,
-      sms: false
+      sms: false,
     },
     ai_settings: {
-      google_api_key: "",
-      mistral_api_key: "",
-      anthropic_api_key: "",
-      groq_api_key: "",
-      deepseek_api_key: "",
-      llama_api_key: "",
-      cohere_api_key: "",
-      gemini_api_key: "",
-      qwen_api_key: "",
-      openrouter_api_key: "",
-      cerebras_api_key: "",
-      xai_api_key: "",
-      unbound_api_key: "",
-      openai_api_key: "",
-      ollama_api_key: "",
-      lmstudio_api_key: "",
-      mistral_model: "mistral-small",
+      google_api_key: '',
+      mistral_api_key: '',
+      anthropic_api_key: '',
+      groq_api_key: '',
+      deepseek_api_key: '',
+      llama_api_key: '',
+      cohere_api_key: '',
+      gemini_api_key: '',
+      qwen_api_key: '',
+      openrouter_api_key: '',
+      cerebras_api_key: '',
+      xai_api_key: '',
+      unbound_api_key: '',
+      openai_api_key: '',
+      ollama_api_key: '',
+      lmstudio_api_key: '',
+      mistral_model: 'mistral-small',
       enabled: false,
       defaultModel: {
         provider: 'mistral' as AIProvider,
-        model: 'mistral-small' as AIModel
+        model: 'mistral-small' as AIModel,
       },
       enable_financial_insights: false,
-    }
+    },
   });
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
-    null
-  );
-  const [themeChoice, setThemeChoice] = useState<"light" | "dark" | "system">(theme || "system");
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [themeChoice, setThemeChoice] = useState<'light' | 'dark' | 'system'>(theme || 'system');
   const [availableModels, setAvailableModels] = useState<Record<string, AIModel[]>>({});
   const [loadingModels, setLoadingModels] = useState<Record<string, boolean>>({});
 
@@ -174,12 +190,12 @@ export default function SettingsPage() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
-        router.push("/auth/login");
+        router.push('/auth/login');
         return;
       }
 
-      console.log("Auth user data:", userData.user);
-      
+      console.log('Auth user data:', userData.user);
+
       // Map the Supabase User to AuthUser interface
       const mappedAuthUser: AuthUser = {
         id: userData.user.id,
@@ -188,28 +204,28 @@ export default function SettingsPage() {
         last_sign_in_at: userData.user.last_sign_in_at,
         email_confirmed_at: userData.user.email_confirmed_at,
         app_metadata: userData.user.app_metadata,
-        user_metadata: userData.user.user_metadata
+        user_metadata: userData.user.user_metadata,
       };
-      
+
       setAuthUser(mappedAuthUser);
-      
+
       // Set user ID in preferences store
       setUserId(userData.user.id);
 
       // Check if a profile exists for this user
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userData.user.id)
+        .from('profiles')
+        .select('*')
+        .eq('id', userData.user.id)
         .single();
 
       if (error) {
-        console.error("Error fetching profile:", error);
-        
+        console.error('Error fetching profile:', error);
+
         // If the profile doesn't exist, create one
         if (error.code === 'PGRST116') {
-          console.log("Profile not found, creating a new one...");
-          
+          console.log('Profile not found, creating a new one...');
+
           const newProfile = {
             id: userData.user.id,
             email: userData.user.email,
@@ -221,54 +237,54 @@ export default function SettingsPage() {
             notification_preferences: userData.user.user_metadata?.notification_preferences || {
               email: true,
               push: false,
-              sms: false
+              sms: false,
             },
             profile_photo: userData.user.user_metadata?.profile_photo || '',
             gender: userData.user.user_metadata?.gender || '',
-            timezone: userData.user.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezone:
+              userData.user.user_metadata?.timezone ||
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
             ai_settings: userData.user.user_metadata?.ai_settings || {
-              google_api_key: "",
-              mistral_api_key: "",
-              anthropic_api_key: "",
-              groq_api_key: "",
-              deepseek_api_key: "",
-              llama_api_key: "",
-              cohere_api_key: "",
-              gemini_api_key: "",
-              qwen_api_key: "",
-              openrouter_api_key: "",
-              cerebras_api_key: "",
-              xai_api_key: "",
-              unbound_api_key: "",
-              openai_api_key: "",
-              ollama_api_key: "",
-              lmstudio_api_key: "",
-              mistral_model: "mistral-small",
+              google_api_key: '',
+              mistral_api_key: '',
+              anthropic_api_key: '',
+              groq_api_key: '',
+              deepseek_api_key: '',
+              llama_api_key: '',
+              cohere_api_key: '',
+              gemini_api_key: '',
+              qwen_api_key: '',
+              openrouter_api_key: '',
+              cerebras_api_key: '',
+              xai_api_key: '',
+              unbound_api_key: '',
+              openai_api_key: '',
+              ollama_api_key: '',
+              lmstudio_api_key: '',
+              mistral_model: 'mistral-small',
               enabled: false,
               defaultModel: {
                 provider: 'mistral' as AIProvider,
-                model: 'mistral-small' as AIModel
+                model: 'mistral-small' as AIModel,
               },
               enable_financial_insights: false,
             },
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           };
-          
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert(newProfile);
-            
+
+          const { error: insertError } = await supabase.from('profiles').insert(newProfile);
+
           if (insertError) {
-            console.error("Error creating profile:", insertError);
+            console.error('Error creating profile:', insertError);
           } else {
-            console.log("New profile created successfully");
+            console.log('New profile created successfully');
             setProfile(newProfile as Profile);
-            
+
             // Update the global store
             setUsername(newProfile.name || '');
             setCurrency(newProfile.currency);
-            
+
             setFormData({
               name: newProfile.name || '',
               email: newProfile.email || '',
@@ -279,36 +295,38 @@ export default function SettingsPage() {
               profile_photo: newProfile.profile_photo || '',
               gender: newProfile.gender || 'prefer-not-to-say',
               timezone: newProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-              notification_preferences: newProfile.notification_preferences || {
-                email: true,
-                push: false,
-                sms: false
-              } as Profile['notification_preferences'],
+              notification_preferences:
+                newProfile.notification_preferences ||
+                ({
+                  email: true,
+                  push: false,
+                  sms: false,
+                } as Profile['notification_preferences']),
               ai_settings: {
-                google_api_key: "",
-                mistral_api_key: "",
-                anthropic_api_key: "",
-                groq_api_key: "",
-                deepseek_api_key: "",
-                llama_api_key: "",
-                cohere_api_key: "",
-                gemini_api_key: "",
-                qwen_api_key: "",
-                openrouter_api_key: "",
-                cerebras_api_key: "",
-                xai_api_key: "",
-                unbound_api_key: "",
-                openai_api_key: "",
-                ollama_api_key: "",
-                lmstudio_api_key: "",
-                mistral_model: "mistral-small",
+                google_api_key: '',
+                mistral_api_key: '',
+                anthropic_api_key: '',
+                groq_api_key: '',
+                deepseek_api_key: '',
+                llama_api_key: '',
+                cohere_api_key: '',
+                gemini_api_key: '',
+                qwen_api_key: '',
+                openrouter_api_key: '',
+                cerebras_api_key: '',
+                xai_api_key: '',
+                unbound_api_key: '',
+                openai_api_key: '',
+                ollama_api_key: '',
+                lmstudio_api_key: '',
+                mistral_model: 'mistral-small',
                 enabled: false,
                 defaultModel: {
                   provider: 'mistral' as AIProvider,
-                  model: 'mistral-small' as AIModel
+                  model: 'mistral-small' as AIModel,
                 },
                 enable_financial_insights: false,
-              }
+              },
             });
           }
         }
@@ -324,40 +342,42 @@ export default function SettingsPage() {
           profile_photo: data.profile_photo || '',
           gender: data.gender || 'prefer-not-to-say',
           timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          notification_preferences: data.notification_preferences || {
-            email: true,
-            push: false,
-            sms: false
-          } as Profile['notification_preferences'],
+          notification_preferences:
+            data.notification_preferences ||
+            ({
+              email: true,
+              push: false,
+              sms: false,
+            } as Profile['notification_preferences']),
           ai_settings: data.ai_settings || {
-            google_api_key: "",
-            mistral_api_key: "",
-            anthropic_api_key: "",
-            groq_api_key: "",
-            deepseek_api_key: "",
-            llama_api_key: "",
-            cohere_api_key: "",
-            gemini_api_key: "",
-            qwen_api_key: "",
-            openrouter_api_key: "",
-            cerebras_api_key: "",
-            xai_api_key: "",
-            unbound_api_key: "",
-            openai_api_key: "",
-            ollama_api_key: "",
-            lmstudio_api_key: "",
-            mistral_model: "mistral-small",
+            google_api_key: '',
+            mistral_api_key: '',
+            anthropic_api_key: '',
+            groq_api_key: '',
+            deepseek_api_key: '',
+            llama_api_key: '',
+            cohere_api_key: '',
+            gemini_api_key: '',
+            qwen_api_key: '',
+            openrouter_api_key: '',
+            cerebras_api_key: '',
+            xai_api_key: '',
+            unbound_api_key: '',
+            openai_api_key: '',
+            ollama_api_key: '',
+            lmstudio_api_key: '',
+            mistral_model: 'mistral-small',
             enabled: false,
             defaultModel: {
               provider: 'mistral' as AIProvider,
-              model: 'mistral-small' as AIModel
+              model: 'mistral-small' as AIModel,
             },
             enable_financial_insights: false,
-          }
-      });
+          },
+        });
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
     }
@@ -369,7 +389,7 @@ export default function SettingsPage() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
-        router.push("/auth/login");
+        router.push('/auth/login');
         return;
       }
 
@@ -387,24 +407,24 @@ export default function SettingsPage() {
         notification_preferences: formData.notification_preferences,
         ai_settings: formData.ai_settings,
         created_at: profile?.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       const { data: updatedUserData, error: updateError } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update(updatedProfile)
-        .eq("id", userData.user.id);
+        .eq('id', userData.user.id);
 
       if (updateError) {
-        console.error("Error updating profile:", updateError);
-        setMessage({ type: "error", text: "Failed to update profile. Please try again later." });
+        console.error('Error updating profile:', updateError);
+        setMessage({ type: 'error', text: 'Failed to update profile. Please try again later.' });
       } else {
-        console.log("Profile updated successfully");
+        console.log('Profile updated successfully');
         setProfile(updatedProfile);
-        
+
         // Notify other pages that AI settings have been updated
         localStorage.setItem('ai-settings-updated', Date.now().toString());
-        
+
         setFormData({
           name: updatedProfile.name || '',
           email: updatedProfile.email || '',
@@ -415,48 +435,52 @@ export default function SettingsPage() {
           profile_photo: updatedProfile.profile_photo || '',
           gender: updatedProfile.gender || 'prefer-not-to-say',
           timezone: updatedProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          notification_preferences: updatedProfile.notification_preferences || {
-            email: true,
-            push: false,
-            sms: false
-          } as Profile['notification_preferences'],
+          notification_preferences:
+            updatedProfile.notification_preferences ||
+            ({
+              email: true,
+              push: false,
+              sms: false,
+            } as Profile['notification_preferences']),
           ai_settings: updatedProfile.ai_settings || {
-            google_api_key: "",
-            mistral_api_key: "",
-            anthropic_api_key: "",
-            groq_api_key: "",
-            deepseek_api_key: "",
-            llama_api_key: "",
-            cohere_api_key: "",
-            gemini_api_key: "",
-            qwen_api_key: "",
-            openrouter_api_key: "",
-            cerebras_api_key: "",
-            xai_api_key: "",
-            unbound_api_key: "",
-            openai_api_key: "",
-            ollama_api_key: "",
-            lmstudio_api_key: "",
-            mistral_model: "mistral-small",
+            google_api_key: '',
+            mistral_api_key: '',
+            anthropic_api_key: '',
+            groq_api_key: '',
+            deepseek_api_key: '',
+            llama_api_key: '',
+            cohere_api_key: '',
+            gemini_api_key: '',
+            qwen_api_key: '',
+            openrouter_api_key: '',
+            cerebras_api_key: '',
+            xai_api_key: '',
+            unbound_api_key: '',
+            openai_api_key: '',
+            ollama_api_key: '',
+            lmstudio_api_key: '',
+            mistral_model: 'mistral-small',
             enabled: false,
             defaultModel: {
               provider: 'mistral' as AIProvider,
-              model: 'mistral-small' as AIModel
+              model: 'mistral-small' as AIModel,
             },
             enable_financial_insights: false,
-          }
+          },
         });
-        setMessage({ type: "success", text: "Profile updated successfully" });
+        setMessage({ type: 'success', text: 'Profile updated successfully' });
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      setMessage({ type: "error", text: "Failed to update profile. Please try again later." });
+      console.error('Error updating profile:', error);
+      setMessage({ type: 'error', text: 'Failed to update profile. Please try again later.' });
     } finally {
       setSaving(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -464,28 +488,43 @@ export default function SettingsPage() {
     });
   };
 
-  const handleNotificationChange = (field: keyof NonNullable<Profile['notification_preferences']>, checked: boolean) => {
+  const handleNotificationChange = (
+    field: keyof NonNullable<Profile['notification_preferences']>,
+    checked: boolean
+  ) => {
     setFormData({
       ...formData,
       notification_preferences: {
         ...formData.notification_preferences,
-        [field]: checked
-      } as Profile['notification_preferences']
+        [field]: checked,
+      } as Profile['notification_preferences'],
     });
   };
 
   const handleAiSettingsChange = (field: keyof NonNullable<Profile['ai_settings']>, value: any) => {
     const updatedAiSettings = {
       ...formData.ai_settings,
-      [field]: value
+      [field]: value,
     } as NonNullable<Profile['ai_settings']>;
 
     // Auto-enable AI when any API key is provided
     const apiKeyFields = [
-      'google_api_key', 'mistral_api_key', 'anthropic_api_key', 'groq_api_key',
-      'deepseek_api_key', 'llama_api_key', 'cohere_api_key', 'gemini_api_key',
-      'qwen_api_key', 'openrouter_api_key', 'cerebras_api_key', 'xai_api_key',
-      'unbound_api_key', 'openai_api_key', 'ollama_api_key', 'lmstudio_api_key'
+      'google_api_key',
+      'mistral_api_key',
+      'anthropic_api_key',
+      'groq_api_key',
+      'deepseek_api_key',
+      'llama_api_key',
+      'cohere_api_key',
+      'gemini_api_key',
+      'qwen_api_key',
+      'openrouter_api_key',
+      'cerebras_api_key',
+      'xai_api_key',
+      'unbound_api_key',
+      'openai_api_key',
+      'ollama_api_key',
+      'lmstudio_api_key',
     ];
 
     // If an API key field is being set with a non-empty value, auto-enable AI
@@ -494,8 +533,9 @@ export default function SettingsPage() {
     }
 
     // Also check if any existing API keys are present and auto-enable if so
-    const hasAnyApiKey = apiKeyFields.some(keyField => {
-      const keyValue = keyField === field ? value : updatedAiSettings[keyField as keyof typeof updatedAiSettings];
+    const hasAnyApiKey = apiKeyFields.some((keyField) => {
+      const keyValue =
+        keyField === field ? value : updatedAiSettings[keyField as keyof typeof updatedAiSettings];
       return keyValue && typeof keyValue === 'string' && keyValue.trim() !== '';
     });
 
@@ -505,7 +545,7 @@ export default function SettingsPage() {
 
     setFormData({
       ...formData,
-      ai_settings: updatedAiSettings
+      ai_settings: updatedAiSettings,
     });
   };
 
@@ -516,13 +556,13 @@ export default function SettingsPage() {
         ...formData.ai_settings,
         defaultModel: {
           provider: provider as AIProvider,
-          model: model
-        }
-      }
+          model: model,
+        },
+      },
     });
   };
 
-  const handleThemeChange = (value: "light" | "dark" | "system") => {
+  const handleThemeChange = (value: 'light' | 'dark' | 'system') => {
     setThemeChoice(value);
     setTheme(value);
   };
@@ -530,9 +570,9 @@ export default function SettingsPage() {
   const fetchAvailableModels = async (provider: string) => {
     // Don't fetch if we already have the models or if we're already fetching
     if (availableModels[provider] || loadingModels[provider]) return;
-    
-    setLoadingModels(prev => ({ ...prev, [provider]: true }));
-    
+
+    setLoadingModels((prev) => ({ ...prev, [provider]: true }));
+
     try {
       // Get the API key for this provider
       let apiKey = '';
@@ -556,7 +596,8 @@ export default function SettingsPage() {
           apiKey = formData.ai_settings?.cohere_api_key || '';
           break;
         case 'gemini':
-          apiKey = formData.ai_settings?.gemini_api_key || formData.ai_settings?.google_api_key || '';
+          apiKey =
+            formData.ai_settings?.gemini_api_key || formData.ai_settings?.google_api_key || '';
           break;
         case 'qwen':
           apiKey = formData.ai_settings?.qwen_api_key || '';
@@ -583,173 +624,237 @@ export default function SettingsPage() {
           apiKey = formData.ai_settings?.lmstudio_api_key || '';
           break;
       }
-      
+
       // If no API key, use default models
       if (!apiKey) {
-        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
-        setLoadingModels(prev => ({ ...prev, [provider]: false }));
+        setAvailableModels((prev) => ({ ...prev, [provider]: [] }));
+        setLoadingModels((prev) => ({ ...prev, [provider]: false }));
         return;
       }
-      
+
       // Fetch available models
       const models = await getAvailableModelsForProvider(provider as AIProvider, apiKey);
-      
+
       if (models) {
-        setAvailableModels(prev => ({ ...prev, [provider]: models }));
+        setAvailableModels((prev) => ({ ...prev, [provider]: models }));
       } else {
         // If fetching failed, use default models
-        setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+        setAvailableModels((prev) => ({ ...prev, [provider]: [] }));
       }
     } catch (error) {
       console.error(`Error fetching models for ${provider}:`, error);
-      setAvailableModels(prev => ({ ...prev, [provider]: [] }));
+      setAvailableModels((prev) => ({ ...prev, [provider]: [] }));
     } finally {
-      setLoadingModels(prev => ({ ...prev, [provider]: false }));
+      setLoadingModels((prev) => ({ ...prev, [provider]: false }));
     }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push('/auth/login');
     router.refresh();
   };
 
   const exportProfileToPDF = async () => {
     try {
       setSaving(true);
-      
+
       // Dynamic import to reduce bundle size
       let jsPDF;
       try {
         const jsPDFModule = await import('jspdf');
         jsPDF = jsPDFModule.default;
       } catch (importError) {
-        console.error("Failed to load jspdf:", importError);
-        toast.error("PDF export functionality is not available. Please try again later.");
+        console.error('Failed to load jspdf:', importError);
+        toast.error('PDF export functionality is not available. Please try again later.');
         return;
       }
-      
+
       // Create document
       const doc = new jsPDF();
-      
+
       // Add title and styling
       doc.setFontSize(20);
       doc.setTextColor(44, 62, 80);
-      doc.text("User Profile", 105, 20, { align: 'center' });
-      
+      doc.text('User Profile', 105, 20, { align: 'center' });
+
       // Add horizontal line
       doc.setDrawColor(52, 152, 219);
       doc.setLineWidth(0.5);
       doc.line(20, 25, 190, 25);
-      
+
       // Add profile information
       doc.setFontSize(12);
       doc.setTextColor(52, 73, 94);
-      
+
       let yPosition = 40;
       const leftMargin = 20;
       const lineHeight = 10;
-      
+
       // Add user details
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text("Personal Information", leftMargin, yPosition);
+      doc.text('Personal Information', leftMargin, yPosition);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      
+
       yPosition += lineHeight + 5;
       doc.text(`Name: ${formData.name || 'Not provided'}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight;
       doc.text(`Email: ${formData.email}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight;
       doc.text(`Phone: ${formData.phone || 'Not provided'}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight;
       doc.text(`Address: ${formData.address || 'Not provided'}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight + 10;
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text("Preferences", leftMargin, yPosition);
+      doc.text('Preferences', leftMargin, yPosition);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      
+
       yPosition += lineHeight + 5;
       doc.text(`Currency: ${formData.currency}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight;
       doc.text(`Language: ${formData.preferred_language || 'English'}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight;
       doc.text(`Theme: ${themeChoice}`, leftMargin, yPosition);
 
       yPosition += lineHeight;
-      doc.text(`Gender: ${formData.gender === 'prefer-not-to-say' ? 'Not specified' : formData.gender || 'Not specified'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Gender: ${formData.gender === 'prefer-not-to-say' ? 'Not specified' : formData.gender || 'Not specified'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
       doc.text(`Timezone: ${formData.timezone || 'UTC'}`, leftMargin, yPosition);
-      
+
       yPosition += lineHeight + 10;
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text("Notification Preferences", leftMargin, yPosition);
+      doc.text('Notification Preferences', leftMargin, yPosition);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      
+
       yPosition += lineHeight + 5;
-      doc.text(`Email notifications: ${formData.notification_preferences?.email ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Email notifications: ${formData.notification_preferences?.email ? 'Enabled' : 'Disabled'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Push notifications: ${formData.notification_preferences?.push ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Push notifications: ${formData.notification_preferences?.push ? 'Enabled' : 'Disabled'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`SMS notifications: ${formData.notification_preferences?.sms ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `SMS notifications: ${formData.notification_preferences?.sms ? 'Enabled' : 'Disabled'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight + 10;
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text("AI Assistant Settings", leftMargin, yPosition);
+      doc.text('AI Assistant Settings', leftMargin, yPosition);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      
+
       yPosition += lineHeight + 5;
-      doc.text(`AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `AI Assistant: ${formData.ai_settings?.enabled ? 'Enabled' : 'Disabled'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Google AI API Key: ${formData.ai_settings?.google_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Google AI API Key: ${formData.ai_settings?.google_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Mistral AI API Key: ${formData.ai_settings?.mistral_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Mistral AI API Key: ${formData.ai_settings?.mistral_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Claude (Anthropic) API Key: ${formData.ai_settings?.anthropic_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Claude (Anthropic) API Key: ${formData.ai_settings?.anthropic_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Groq API Key: ${formData.ai_settings?.groq_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Groq API Key: ${formData.ai_settings?.groq_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`DeepSeek API Key: ${formData.ai_settings?.deepseek_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `DeepSeek API Key: ${formData.ai_settings?.deepseek_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Llama API Key: ${formData.ai_settings?.llama_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Llama API Key: ${formData.ai_settings?.llama_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Cohere API Key: ${formData.ai_settings?.cohere_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Cohere API Key: ${formData.ai_settings?.cohere_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Gemini API Key: ${formData.ai_settings?.gemini_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Gemini API Key: ${formData.ai_settings?.gemini_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`Qwen API Key: ${formData.ai_settings?.qwen_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `Qwen API Key: ${formData.ai_settings?.qwen_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       yPosition += lineHeight;
-      doc.text(`OpenRouter API Key: ${formData.ai_settings?.openrouter_api_key ? '**********' : 'Not set'}`, leftMargin, yPosition);
-      
+      doc.text(
+        `OpenRouter API Key: ${formData.ai_settings?.openrouter_api_key ? '**********' : 'Not set'}`,
+        leftMargin,
+        yPosition
+      );
+
       // Add footer with generation date
       doc.setFontSize(10);
       doc.setTextColor(127, 140, 141);
@@ -759,14 +864,14 @@ export default function SettingsPage() {
         doc.internal.pageSize.getHeight() - 10,
         { align: 'center' }
       );
-      
+
       // Save PDF
-      doc.save(`user_profile_${new Date().toISOString().slice(0,10)}.pdf`);
-      
-      toast.success("Profile exported to PDF successfully");
+      doc.save(`user_profile_${new Date().toISOString().slice(0, 10)}.pdf`);
+
+      toast.success('Profile exported to PDF successfully');
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast.error("Failed to export profile. Please try again later.");
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to export profile. Please try again later.');
     } finally {
       setSaving(false);
     }
@@ -774,31 +879,47 @@ export default function SettingsPage() {
 
   const getDefaultModelForProvider = (provider: string): string => {
     switch (provider) {
-      case 'mistral': return 'mistral-small';
-      case 'anthropic': return 'claude-3-5-sonnet';
-      case 'groq': return 'llama-3.1-8b';
-      case 'deepseek': return 'deepseek-chat';
-      case 'llama': return 'llama-3.1-8b';
-      case 'cohere': return 'command-r';
-      case 'gemini': return 'gemini-2.0-flash-exp';
-      case 'qwen': return 'qwen-2.5-7b';
-      case 'openrouter': return 'openrouter-default';
-      case 'cerebras': return 'cerebras-llama-3.1-8b';
-      case 'xAI': return 'grok-2';
-      case 'unbound': return 'unbound-llama-3.1-8b';
-      case 'openai': return 'gpt-4o';
-      case 'ollama': return 'ollama-llama3.1';
-      case 'lmstudio': return 'lmstudio-llama3.1';
-      default: return 'mistral-small';
+      case 'mistral':
+        return 'mistral-small';
+      case 'anthropic':
+        return 'claude-3-5-sonnet';
+      case 'groq':
+        return 'llama-3.1-8b';
+      case 'deepseek':
+        return 'deepseek-chat';
+      case 'llama':
+        return 'llama-3.1-8b';
+      case 'cohere':
+        return 'command-r';
+      case 'gemini':
+        return 'gemini-2.0-flash-exp';
+      case 'qwen':
+        return 'qwen-2.5-7b';
+      case 'openrouter':
+        return 'openrouter-default';
+      case 'cerebras':
+        return 'cerebras-llama-3.1-8b';
+      case 'xAI':
+        return 'grok-2';
+      case 'unbound':
+        return 'unbound-llama-3.1-8b';
+      case 'openai':
+        return 'gpt-4o';
+      case 'ollama':
+        return 'ollama-llama3.1';
+      case 'lmstudio':
+        return 'lmstudio-llama3.1';
+      default:
+        return 'mistral-small';
     }
   };
-  
+
   const renderModelOptions = (provider: string) => {
     // Get available models for this provider, or use defaults if not fetched
     const models = availableModels[provider] || [];
     const hasFetchedModels = models.length > 0;
     const isLoading = loadingModels[provider];
-    
+
     // If we have fetched models, use them
     if (hasFetchedModels) {
       return (
@@ -811,12 +932,12 @@ export default function SettingsPage() {
         </>
       );
     }
-    
+
     // If we're loading, show a loading indicator
     if (isLoading) {
       return <SelectItem value="loading">Loading models...</SelectItem>;
     }
-    
+
     // Otherwise, use the default models based on provider
     switch (provider) {
       case 'mistral':
@@ -827,7 +948,9 @@ export default function SettingsPage() {
             <SelectItem value="mistral-small-latest">Mistral Small Latest</SelectItem>
             <SelectItem value="mistral-medium">Mistral Medium (Advanced)</SelectItem>
             <SelectItem value="mistral-large">Mistral Large</SelectItem>
-            <SelectItem value="mistral-large-latest">Mistral Large Latest (Most Powerful)</SelectItem>
+            <SelectItem value="mistral-large-latest">
+              Mistral Large Latest (Most Powerful)
+            </SelectItem>
             <SelectItem value="mistral-nemo">Mistral Nemo</SelectItem>
           </>
         );
@@ -929,12 +1052,16 @@ export default function SettingsPage() {
           <>
             <SelectItem value="openrouter-default">OpenRouter Default</SelectItem>
             <SelectItem value="anthropic/claude-3-opus">Claude 3 Opus</SelectItem>
-            <SelectItem value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Most Powerful)</SelectItem>
+            <SelectItem value="anthropic/claude-3.5-sonnet">
+              Claude 3.5 Sonnet (Most Powerful)
+            </SelectItem>
             <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
             <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
             <SelectItem value="google/gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
             <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
-            <SelectItem value="meta-llama/llama-3.1-405b">Llama 3.1 405B (Most Powerful)</SelectItem>
+            <SelectItem value="meta-llama/llama-3.1-405b">
+              Llama 3.1 405B (Most Powerful)
+            </SelectItem>
             <SelectItem value="meta-llama/llama-3.1-70b">Llama 3.1 70B</SelectItem>
             <SelectItem value="meta-llama/llama-3.1-8b">Llama 3.1 8B</SelectItem>
             <SelectItem value="mistralai/mistral-7b-instruct">Mistral 7B</SelectItem>
@@ -956,7 +1083,9 @@ export default function SettingsPage() {
             <SelectItem value="cerebras-gemma-2b">Cerebras Gemma 2B</SelectItem>
             <SelectItem value="cerebras-llama3-8b">Cerebras Llama 3 8B</SelectItem>
             <SelectItem value="cerebras-llama-3.1-8b">Cerebras Llama 3.1 8B</SelectItem>
-            <SelectItem value="cerebras-llama-3.1-70b">Cerebras Llama 3.1 70B (Most Powerful)</SelectItem>
+            <SelectItem value="cerebras-llama-3.1-70b">
+              Cerebras Llama 3.1 70B (Most Powerful)
+            </SelectItem>
           </>
         );
       case 'xAI':
@@ -974,7 +1103,9 @@ export default function SettingsPage() {
             <SelectItem value="unbound-llama-3-8b">Unbound Llama 3 8B</SelectItem>
             <SelectItem value="unbound-llama-3-70b">Unbound Llama 3 70B</SelectItem>
             <SelectItem value="unbound-llama-3.1-8b">Unbound Llama 3.1 8B</SelectItem>
-            <SelectItem value="unbound-llama-3.1-70b">Unbound Llama 3.1 70B (Most Powerful)</SelectItem>
+            <SelectItem value="unbound-llama-3.1-70b">
+              Unbound Llama 3.1 70B (Most Powerful)
+            </SelectItem>
           </>
         );
       case 'openai':
@@ -1027,12 +1158,7 @@ export default function SettingsPage() {
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="text-2xl font-bold md:text-3xl">Settings</h1>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={exportProfileToPDF}
-            disabled={saving}
-          >
+          <Button variant="outline" size="sm" onClick={exportProfileToPDF} disabled={saving}>
             {saving ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary mr-2"></div>
@@ -1060,11 +1186,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "profile"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                  activeTab === 'profile'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
                 }`}
-                onClick={() => setActiveTab("profile")}
+                onClick={() => setActiveTab('profile')}
               >
                 <User className="mr-2 h-4 w-4" />
                 Profile
@@ -1072,11 +1198,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "preferences"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                  activeTab === 'preferences'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
                 }`}
-                onClick={() => setActiveTab("preferences")}
+                onClick={() => setActiveTab('preferences')}
               >
                 <Palette className="mr-2 h-4 w-4" />
                 Preferences
@@ -1084,11 +1210,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "notifications"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                  activeTab === 'notifications'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
                 }`}
-                onClick={() => setActiveTab("notifications")}
+                onClick={() => setActiveTab('notifications')}
               >
                 <Bell className="mr-2 h-4 w-4" />
                 Notifications
@@ -1096,11 +1222,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "ai"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                  activeTab === 'ai'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
                 }`}
-                onClick={() => setActiveTab("ai")}
+                onClick={() => setActiveTab('ai')}
               >
                 <Bot className="mr-2 h-4 w-4" />
                 AI Assistant
@@ -1108,11 +1234,11 @@ export default function SettingsPage() {
               <button
                 type="button"
                 className={`flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === "dashboard"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted"
+                  activeTab === 'dashboard'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'
                 }`}
-                onClick={() => setActiveTab("dashboard")}
+                onClick={() => setActiveTab('dashboard')}
               >
                 <LayoutGrid className="mr-2 h-4 w-4" />
                 Dashboard
@@ -1122,13 +1248,11 @@ export default function SettingsPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Profile Tab */}
-            {activeTab === "profile" && (
+            {activeTab === 'profile' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>
-                    Update your personal details here
-                  </CardDescription>
+                  <CardDescription>Update your personal details here</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1142,21 +1266,13 @@ export default function SettingsPage() {
                         placeholder="Your name"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        disabled
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Email cannot be changed
-                      </p>
+                      <Input id="email" name="email" type="email" value={formData.email} disabled />
+                      <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number (optional)</Label>
                       <Input
@@ -1168,12 +1284,12 @@ export default function SettingsPage() {
                         placeholder="Your phone number"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="gender">Gender (optional)</Label>
                       <Select
                         value={formData.gender}
-                        onValueChange={(value) => setFormData({...formData, gender: value})}
+                        onValueChange={(value) => setFormData({ ...formData, gender: value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -1188,7 +1304,7 @@ export default function SettingsPage() {
                       </Select>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="address">Address (optional)</Label>
                     <Textarea
@@ -1205,14 +1321,12 @@ export default function SettingsPage() {
             )}
 
             {/* Preferences Tab */}
-            {activeTab === "preferences" && (
+            {activeTab === 'preferences' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Preferences</CardTitle>
-                    <CardDescription>
-                      Customize your app experience
-                    </CardDescription>
+                    <CardDescription>Customize your app experience</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1220,7 +1334,7 @@ export default function SettingsPage() {
                         <Label htmlFor="currency">Currency</Label>
                         <Select
                           value={formData.currency}
-                          onValueChange={(value) => setFormData({...formData, currency: value})}
+                          onValueChange={(value) => setFormData({ ...formData, currency: value })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select currency" />
@@ -1239,12 +1353,14 @@ export default function SettingsPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="preferred_language">Language</Label>
                         <Select
                           value={formData.preferred_language}
-                          onValueChange={(value) => setFormData({...formData, preferred_language: value})}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, preferred_language: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select language" />
@@ -1263,12 +1379,12 @@ export default function SettingsPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="timezone">Timezone</Label>
                         <Select
                           value={formData.timezone}
-                          onValueChange={(value) => setFormData({...formData, timezone: value})}
+                          onValueChange={(value) => setFormData({ ...formData, timezone: value })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select timezone" />
@@ -1282,8 +1398,12 @@ export default function SettingsPage() {
                             <SelectItem value="America/Anchorage">Alaska Time</SelectItem>
                             <SelectItem value="Pacific/Honolulu">Hawaii Time</SelectItem>
                             <SelectItem value="Europe/London">London (GMT/BST)</SelectItem>
-                            <SelectItem value="Europe/Paris">Central European (CET/CEST)</SelectItem>
-                            <SelectItem value="Europe/Helsinki">Eastern European (EET/EEST)</SelectItem>
+                            <SelectItem value="Europe/Paris">
+                              Central European (CET/CEST)
+                            </SelectItem>
+                            <SelectItem value="Europe/Helsinki">
+                              Eastern European (EET/EEST)
+                            </SelectItem>
                             <SelectItem value="Asia/Tokyo">Japan (JST)</SelectItem>
                             <SelectItem value="Asia/Shanghai">China (CST)</SelectItem>
                             <SelectItem value="Asia/Kolkata">India (IST)</SelectItem>
@@ -1294,20 +1414,18 @@ export default function SettingsPage() {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Theme</CardTitle>
-                    <CardDescription>
-                      Choose how the app looks to you
-                    </CardDescription>
+                    <CardDescription>Choose how the app looks to you</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Button
                         type="button"
-                        variant={themeChoice === "light" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("light")}
+                        variant={themeChoice === 'light' ? 'default' : 'outline'}
+                        onClick={() => handleThemeChange('light')}
                         className="h-auto py-4 flex flex-col items-center justify-center gap-2"
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 text-white">
@@ -1332,8 +1450,8 @@ export default function SettingsPage() {
                       </Button>
                       <Button
                         type="button"
-                        variant={themeChoice === "dark" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("dark")}
+                        variant={themeChoice === 'dark' ? 'default' : 'outline'}
+                        onClick={() => handleThemeChange('dark')}
                         className="h-auto py-4 flex flex-col items-center justify-center gap-2"
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
@@ -1357,8 +1475,8 @@ export default function SettingsPage() {
                       </Button>
                       <Button
                         type="button"
-                        variant={themeChoice === "system" ? "default" : "outline"}
-                        onClick={() => handleThemeChange("system")}
+                        variant={themeChoice === 'system' ? 'default' : 'outline'}
+                        onClick={() => handleThemeChange('system')}
                         className="h-auto py-4 flex flex-col items-center justify-center gap-2"
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-sky-500 text-white">
@@ -1384,13 +1502,11 @@ export default function SettingsPage() {
             )}
 
             {/* Notifications Tab */}
-            {activeTab === "notifications" && (
+            {activeTab === 'notifications' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>
-                    Choose how you want to be notified
-                  </CardDescription>
+                  <CardDescription>Choose how you want to be notified</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1403,10 +1519,10 @@ export default function SettingsPage() {
                     <Switch
                       id="email_notifications"
                       checked={formData.notification_preferences?.email ?? true}
-                      onCheckedChange={(checked) => handleNotificationChange("email", checked)}
+                      onCheckedChange={(checked) => handleNotificationChange('email', checked)}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label htmlFor="push_notifications">Push Notifications</Label>
@@ -1417,10 +1533,10 @@ export default function SettingsPage() {
                     <Switch
                       id="push_notifications"
                       checked={formData.notification_preferences?.push ?? false}
-                      onCheckedChange={(checked) => handleNotificationChange("push", checked)}
+                      onCheckedChange={(checked) => handleNotificationChange('push', checked)}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label htmlFor="sms_notifications">SMS Notifications</Label>
@@ -1431,7 +1547,7 @@ export default function SettingsPage() {
                     <Switch
                       id="sms_notifications"
                       checked={formData.notification_preferences?.sms ?? false}
-                      onCheckedChange={(checked) => handleNotificationChange("sms", checked)}
+                      onCheckedChange={(checked) => handleNotificationChange('sms', checked)}
                     />
                   </div>
                 </CardContent>
@@ -1439,13 +1555,11 @@ export default function SettingsPage() {
             )}
 
             {/* AI Assistant Tab */}
-            {activeTab === "ai" && (
+            {activeTab === 'ai' && (
               <Card>
                 <CardHeader>
                   <CardTitle>AI Assistant Settings</CardTitle>
-                  <CardDescription>
-                    Configure your AI-powered financial assistant
-                  </CardDescription>
+                  <CardDescription>Configure your AI-powered financial assistant</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -1458,7 +1572,7 @@ export default function SettingsPage() {
                     <Switch
                       id="ai_enabled"
                       checked={formData.ai_settings?.enabled ?? false}
-                      onCheckedChange={(checked) => handleAiSettingsChange("enabled", checked)}
+                      onCheckedChange={(checked) => handleAiSettingsChange('enabled', checked)}
                     />
                   </div>
 
@@ -1472,16 +1586,18 @@ export default function SettingsPage() {
                     <Switch
                       id="ai_financial_insights"
                       checked={formData.ai_settings?.enable_financial_insights ?? false}
-                      onCheckedChange={(checked) => handleAiSettingsChange("enable_financial_insights", checked)}
+                      onCheckedChange={(checked) =>
+                        handleAiSettingsChange('enable_financial_insights', checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Default AI Provider & Model</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Select
-                          value={formData.ai_settings?.defaultModel?.provider || "mistral"}
+                          value={formData.ai_settings?.defaultModel?.provider || 'mistral'}
                           onValueChange={(value) => {
                             handleAiModelChange(value, getDefaultModelForProvider(value));
                             fetchAvailableModels(value);
@@ -1508,16 +1624,23 @@ export default function SettingsPage() {
                             <SelectItem value="lmstudio">LM Studio</SelectItem>
                           </SelectContent>
                         </Select>
-                        
+
                         <Select
-                          value={formData.ai_settings?.defaultModel?.model || "mistral-small"}
-                          onValueChange={(value) => handleAiModelChange(formData.ai_settings?.defaultModel?.provider || "mistral", value)}
+                          value={formData.ai_settings?.defaultModel?.model || 'mistral-small'}
+                          onValueChange={(value) =>
+                            handleAiModelChange(
+                              formData.ai_settings?.defaultModel?.provider || 'mistral',
+                              value
+                            )
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select AI model" />
                           </SelectTrigger>
                           <SelectContent>
-                            {renderModelOptions(formData.ai_settings?.defaultModel?.provider || "mistral")}
+                            {renderModelOptions(
+                              formData.ai_settings?.defaultModel?.provider || 'mistral'
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -1526,198 +1649,212 @@ export default function SettingsPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4 pt-4 border-t">
                     <h3 className="text-lg font-medium">API Keys</h3>
                     <p className="text-sm text-muted-foreground">
                       Your API keys are stored securely and only used for AI feature processing
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="google_api_key">Google AI API Key</Label>
                         <Input
                           id="google_api_key"
                           type="password"
-                          value={formData.ai_settings?.google_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("google_api_key", e.target.value)}
+                          value={formData.ai_settings?.google_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('google_api_key', e.target.value)}
                           placeholder="Enter your Google AI API key"
                         />
                         <p className="text-xs text-muted-foreground">
                           Used for financial insights and analytics
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="mistral_api_key">Mistral AI API Key</Label>
                         <Input
                           id="mistral_api_key"
                           type="password"
-                          value={formData.ai_settings?.mistral_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("mistral_api_key", e.target.value)}
+                          value={formData.ai_settings?.mistral_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('mistral_api_key', e.target.value)
+                          }
                           placeholder="Enter your Mistral AI API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="anthropic_api_key">Claude (Anthropic) API Key</Label>
                         <Input
                           id="anthropic_api_key"
                           type="password"
-                          value={formData.ai_settings?.anthropic_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("anthropic_api_key", e.target.value)}
+                          value={formData.ai_settings?.anthropic_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('anthropic_api_key', e.target.value)
+                          }
                           placeholder="Enter your Claude API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="groq_api_key">Groq API Key</Label>
                         <Input
                           id="groq_api_key"
                           type="password"
-                          value={formData.ai_settings?.groq_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("groq_api_key", e.target.value)}
+                          value={formData.ai_settings?.groq_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('groq_api_key', e.target.value)}
                           placeholder="Enter your Groq API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="deepseek_api_key">DeepSeek API Key</Label>
                         <Input
                           id="deepseek_api_key"
                           type="password"
-                          value={formData.ai_settings?.deepseek_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("deepseek_api_key", e.target.value)}
+                          value={formData.ai_settings?.deepseek_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('deepseek_api_key', e.target.value)
+                          }
                           placeholder="Enter your DeepSeek API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="llama_api_key">Llama API Key</Label>
                         <Input
                           id="llama_api_key"
                           type="password"
-                          value={formData.ai_settings?.llama_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("llama_api_key", e.target.value)}
+                          value={formData.ai_settings?.llama_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('llama_api_key', e.target.value)}
                           placeholder="Enter your Llama API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="cohere_api_key">Cohere API Key</Label>
                         <Input
                           id="cohere_api_key"
                           type="password"
-                          value={formData.ai_settings?.cohere_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("cohere_api_key", e.target.value)}
+                          value={formData.ai_settings?.cohere_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('cohere_api_key', e.target.value)}
                           placeholder="Enter your Cohere API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="gemini_api_key">Gemini (Google) API Key</Label>
                         <Input
                           id="gemini_api_key"
                           type="password"
-                          value={formData.ai_settings?.gemini_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("gemini_api_key", e.target.value)}
+                          value={formData.ai_settings?.gemini_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('gemini_api_key', e.target.value)}
                           placeholder="Enter your Gemini API key"
                         />
                         <p className="text-xs text-muted-foreground">
                           Alternative to Google AI for financial insights
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="qwen_api_key">Qwen API Key</Label>
                         <Input
                           id="qwen_api_key"
                           type="password"
-                          value={formData.ai_settings?.qwen_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("qwen_api_key", e.target.value)}
+                          value={formData.ai_settings?.qwen_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('qwen_api_key', e.target.value)}
                           placeholder="Enter your Qwen API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="openrouter_api_key">OpenRouter API Key</Label>
                         <Input
                           id="openrouter_api_key"
                           type="password"
-                          value={formData.ai_settings?.openrouter_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("openrouter_api_key", e.target.value)}
+                          value={formData.ai_settings?.openrouter_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('openrouter_api_key', e.target.value)
+                          }
                           placeholder="Enter your OpenRouter API key"
                         />
                         <p className="text-xs text-muted-foreground">
                           Access to multiple AI models through a single API
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="cerebras_api_key">Cerebras API Key</Label>
                         <Input
                           id="cerebras_api_key"
                           type="password"
-                          value={formData.ai_settings?.cerebras_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("cerebras_api_key", e.target.value)}
+                          value={formData.ai_settings?.cerebras_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('cerebras_api_key', e.target.value)
+                          }
                           placeholder="Enter your Cerebras API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="xai_api_key">xAI (Grok) API Key</Label>
                         <Input
                           id="xai_api_key"
                           type="password"
-                          value={formData.ai_settings?.xai_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("xai_api_key", e.target.value)}
+                          value={formData.ai_settings?.xai_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('xai_api_key', e.target.value)}
                           placeholder="Enter your xAI API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="unbound_api_key">Unbound API Key</Label>
                         <Input
                           id="unbound_api_key"
                           type="password"
-                          value={formData.ai_settings?.unbound_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("unbound_api_key", e.target.value)}
+                          value={formData.ai_settings?.unbound_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('unbound_api_key', e.target.value)
+                          }
                           placeholder="Enter your Unbound API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="openai_api_key">OpenAI API Key</Label>
                         <Input
                           id="openai_api_key"
                           type="password"
-                          value={formData.ai_settings?.openai_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("openai_api_key", e.target.value)}
+                          value={formData.ai_settings?.openai_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('openai_api_key', e.target.value)}
                           placeholder="Enter your OpenAI API key"
                         />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="ollama_api_key">Ollama API Key/Endpoint</Label>
                         <Input
                           id="ollama_api_key"
                           type="password"
-                          value={formData.ai_settings?.ollama_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("ollama_api_key", e.target.value)}
+                          value={formData.ai_settings?.ollama_api_key ?? ''}
+                          onChange={(e) => handleAiSettingsChange('ollama_api_key', e.target.value)}
                           placeholder="Enter your Ollama API key or leave blank for local"
                         />
                         <p className="text-xs text-muted-foreground">
                           For hosted Ollama services. Leave blank for local Ollama.
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="lmstudio_api_key">LM Studio API Key/Endpoint</Label>
                         <Input
                           id="lmstudio_api_key"
                           type="password"
-                          value={formData.ai_settings?.lmstudio_api_key ?? ""}
-                          onChange={(e) => handleAiSettingsChange("lmstudio_api_key", e.target.value)}
+                          value={formData.ai_settings?.lmstudio_api_key ?? ''}
+                          onChange={(e) =>
+                            handleAiSettingsChange('lmstudio_api_key', e.target.value)
+                          }
                           placeholder="Enter your LM Studio API key or leave blank for local"
                         />
                         <p className="text-xs text-muted-foreground">
@@ -1731,20 +1868,19 @@ export default function SettingsPage() {
             )}
 
             {/* Dashboard Tab */}
-            {activeTab === "dashboard" && (
+            {activeTab === 'dashboard' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Dashboard Customization</CardTitle>
-                  <CardDescription>
-                    Personalize your dashboard layout and widgets
-                  </CardDescription>
+                  <CardDescription>Personalize your dashboard layout and widgets</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="text-center py-8">
                     <LayoutGrid className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-semibold mb-2">Customize Your Dashboard</h3>
                     <p className="text-muted-foreground mb-6">
-                      Add, remove, and rearrange widgets to create your perfect dashboard experience.
+                      Add, remove, and rearrange widgets to create your perfect dashboard
+                      experience.
                     </p>
                     <Button asChild>
                       <a href="/dashboard/customize" className="flex items-center gap-2">
@@ -1753,7 +1889,7 @@ export default function SettingsPage() {
                       </a>
                     </Button>
                   </div>
-                  
+
                   <div className="border-t pt-6">
                     <h4 className="font-medium mb-4">Available Widgets</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1763,20 +1899,24 @@ export default function SettingsPage() {
                         </div>
                         <div>
                           <p className="font-medium">Financial Insights</p>
-                          <p className="text-sm text-muted-foreground">Savings rate, expense ratio, and financial health</p>
+                          <p className="text-sm text-muted-foreground">
+                            Savings rate, expense ratio, and financial health
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 p-3 border rounded-lg">
                         <div className="p-2 bg-green-100 text-green-600 rounded-lg">
                           <LayoutGrid className="h-4 w-4" />
                         </div>
                         <div>
                           <p className="font-medium">Budget Progress</p>
-                          <p className="text-sm text-muted-foreground">Track monthly budget usage</p>
+                          <p className="text-sm text-muted-foreground">
+                            Track monthly budget usage
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 p-3 border rounded-lg">
                         <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
                           <LayoutGrid className="h-4 w-4" />
@@ -1786,7 +1926,7 @@ export default function SettingsPage() {
                           <p className="text-sm text-muted-foreground">Latest financial activity</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 p-3 border rounded-lg">
                         <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
                           <LayoutGrid className="h-4 w-4" />
@@ -1806,9 +1946,9 @@ export default function SettingsPage() {
             {message && (
               <div
                 className={`rounded-md p-4 ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-50"
-                    : "bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-50"
+                  message.type === 'success'
+                    ? 'bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-50'
+                    : 'bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-50'
                 }`}
               >
                 {message.text}
@@ -1816,11 +1956,19 @@ export default function SettingsPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
+            <div className="flex flex-wrap justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+                <Button type="button" variant="ghost" asChild>
+                  <a href="/dashboard/settings/sessions" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Manage Sessions
+                  </a>
+                </Button>
+              </div>
               <Button type="submit" disabled={saving}>
                 {saving ? (
                   <>
@@ -1828,7 +1976,7 @@ export default function SettingsPage() {
                     Saving...
                   </>
                 ) : (
-                  "Save Changes"
+                  'Save Changes'
                 )}
               </Button>
             </div>
