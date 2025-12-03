@@ -179,14 +179,14 @@ export function Header() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-40 md:hidden bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] md:hidden bg-black/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-50 flex flex-col shadow-2xl"
+              className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-[70] flex flex-col shadow-2xl"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -220,7 +220,7 @@ export function Header() {
                   </motion.a>
                 ))}
               </div>
-              <div className="mt-auto p-4 space-y-3">
+              <div className="mt-auto p-4 pb-safe pb-16 space-y-3">
                 <Button variant="outline" className="w-full justify-start" asChild>
                   <Link href="/auth/login" prefetch={true}>
                     <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>

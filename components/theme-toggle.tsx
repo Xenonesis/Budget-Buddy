@@ -1,9 +1,21 @@
-"use client";
+'use client';
 
-import { useTheme } from "next-themes";
-import { useThemeContext } from "./theme-provider";
-import { Moon, Sun, Palette, Contrast, Clock, ChevronDown, Settings, Zap, Calendar, BarChart3, Monitor } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useTheme } from 'next-themes';
+import { useThemeContext } from './theme-provider';
+import {
+  Moon,
+  Sun,
+  Palette,
+  Contrast,
+  Clock,
+  ChevronDown,
+  Settings,
+  Zap,
+  Calendar,
+  BarChart3,
+  Monitor,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -20,17 +32,24 @@ export function ThemeToggle() {
     applyPreset,
     scheduleTheme,
     scheduledThemes,
-    themeAnalytics
+    themeAnalytics,
   } = useThemeContext();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'themes' | 'presets' | 'schedule' | 'analytics'>('themes');
+  const [activeTab, setActiveTab] = useState<'themes' | 'presets' | 'schedule' | 'analytics'>(
+    'themes'
+  );
   const [showPreview, setShowPreview] = useState<string | null>(null);
   const [scheduleTime, setScheduleTime] = useState('');
   const [scheduleThemeType, setScheduleThemeType] = useState<'light' | 'dark'>('light');
 
   const colorSchemes = [
-    { value: 'default', label: 'Default', color: 'bg-primary', description: 'Classic purple theme' },
+    {
+      value: 'default',
+      label: 'Default',
+      color: 'bg-primary',
+      description: 'Classic purple theme',
+    },
     { value: 'blue', label: 'Blue', color: 'bg-blue-500', description: 'Professional blue' },
     { value: 'green', label: 'Green', color: 'bg-green-500', description: 'Calming green' },
     { value: 'purple', label: 'Purple', color: 'bg-purple-500', description: 'Creative purple' },
@@ -89,7 +108,7 @@ export function ThemeToggle() {
         aria-label="Theme settings"
         title="Theme Settings (Ctrl+Shift+T)"
       >
-        {theme === "light" ? (
+        {theme === 'light' ? (
           <Sun className="h-5 w-5 group-hover:rotate-12 transition-transform" />
         ) : (
           <Moon className="h-5 w-5 group-hover:rotate-12 transition-transform" />
@@ -176,9 +195,10 @@ export function ThemeToggle() {
                           }
                         }}
                         className={`flex flex-col items-center gap-2 p-3 rounded-md text-xs transition-all theme-preview ${
-                          (themeMode === value && value !== 'system') || (value === 'system' && themeMode === 'system')
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "hover:bg-muted"
+                          (themeMode === value && value !== 'system') ||
+                          (value === 'system' && themeMode === 'system')
+                            ? 'bg-primary text-primary-foreground shadow-md'
+                            : 'hover:bg-muted'
                         }`}
                         title={`${label} mode`}
                       >
@@ -201,13 +221,13 @@ export function ThemeToggle() {
                   <button
                     onClick={() => setAutoTheme(!autoTheme)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      autoTheme ? "bg-primary" : "bg-muted"
+                      autoTheme ? 'bg-primary' : 'bg-muted'
                     }`}
-                    title={autoTheme ? "Disable auto theme" : "Enable auto theme"}
+                    title={autoTheme ? 'Disable auto theme' : 'Enable auto theme'}
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        autoTheme ? "translate-x-6" : "translate-x-1"
+                        autoTheme ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />
                   </button>
@@ -225,8 +245,8 @@ export function ThemeToggle() {
                         onMouseLeave={() => setShowPreview(null)}
                         className={`flex items-center gap-3 p-3 rounded-md text-sm transition-all theme-preview ${
                           colorScheme === scheme.value
-                            ? "bg-primary text-primary-foreground shadow-md"
-                            : "hover:bg-muted"
+                            ? 'bg-primary text-primary-foreground shadow-md'
+                            : 'hover:bg-muted'
                         }`}
                         title={scheme.description}
                       >
@@ -249,13 +269,15 @@ export function ThemeToggle() {
                   <button
                     onClick={() => setContrastMode(contrastMode === 'normal' ? 'high' : 'normal')}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      contrastMode === 'high' ? "bg-primary" : "bg-muted"
+                      contrastMode === 'high' ? 'bg-primary' : 'bg-muted'
                     }`}
-                    title={contrastMode === 'high' ? "Disable high contrast" : "Enable high contrast"}
+                    title={
+                      contrastMode === 'high' ? 'Disable high contrast' : 'Enable high contrast'
+                    }
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        contrastMode === 'high' ? "translate-x-6" : "translate-x-1"
+                        contrastMode === 'high' ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />
                   </button>
@@ -274,8 +296,8 @@ export function ThemeToggle() {
                     onClick={() => applyPreset(preset.id as any)}
                     className={`w-full flex items-center gap-3 p-3 rounded-md text-left transition-all theme-preview ${
                       currentPreset === preset.id
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "hover:bg-muted"
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'hover:bg-muted'
                     }`}
                     title={preset.description}
                   >
@@ -291,9 +313,7 @@ export function ThemeToggle() {
 
             {activeTab === 'schedule' && (
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Schedule automatic theme changes
-                </p>
+                <p className="text-sm text-muted-foreground">Schedule automatic theme changes</p>
 
                 {/* Add Schedule */}
                 <div className="space-y-2">
@@ -329,10 +349,17 @@ export function ThemeToggle() {
                     <p className="text-xs text-muted-foreground">No scheduled themes</p>
                   ) : (
                     scheduledThemes.map((scheduled) => (
-                      <div key={scheduled.time} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
-                        <span className="text-sm">{scheduled.time} - {scheduled.theme}</span>
+                      <div
+                        key={scheduled.time}
+                        className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                      >
+                        <span className="text-sm">
+                          {scheduled.time} - {scheduled.theme}
+                        </span>
                         <button
-                          onClick={() => {/* Remove functionality would need to be implemented */}}
+                          onClick={() => {
+                            /* Remove functionality would need to be implemented */
+                          }}
                           className="text-xs text-muted-foreground hover:text-destructive"
                         >
                           Remove
@@ -346,17 +373,19 @@ export function ThemeToggle() {
 
             {activeTab === 'analytics' && (
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Your theme usage patterns
-                </p>
+                <p className="text-sm text-muted-foreground">Your theme usage patterns</p>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-muted/50 rounded-md">
-                    <div className="text-2xl font-bold text-primary">{themeAnalytics.totalSwitches}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {themeAnalytics.totalSwitches}
+                    </div>
                     <div className="text-xs text-muted-foreground">Total Switches</div>
                   </div>
                   <div className="p-3 bg-muted/50 rounded-md">
-                    <div className="text-2xl font-bold text-primary">{themeAnalytics.autoThemeUsage}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {themeAnalytics.autoThemeUsage}
+                    </div>
                     <div className="text-xs text-muted-foreground">Auto Theme Uses</div>
                   </div>
                 </div>
@@ -368,7 +397,9 @@ export function ThemeToggle() {
 
                 <div className="space-y-2">
                   <div className="text-sm font-medium">Preferred Time</div>
-                  <div className="text-lg">{themeAnalytics.preferredTime || 'Not analyzed yet'}</div>
+                  <div className="text-lg">
+                    {themeAnalytics.preferredTime || 'Not analyzed yet'}
+                  </div>
                 </div>
               </div>
             )}
@@ -389,12 +420,7 @@ export function ThemeToggle() {
       )}
 
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />}
     </div>
   );
-} 
+}
