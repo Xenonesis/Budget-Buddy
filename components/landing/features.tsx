@@ -1,14 +1,14 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BarChart, Sparkles } from 'lucide-react';
+import { Check, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { Button } from '@/components/ui/button';
 import { FinancialSpotlightCards } from './financial-spotlight-cards';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { ANALYTICS_FEATURES } from './config/landing-config';
 
 // Lazy load the heavy FinancialDataFlow component
 const FinancialDataFlow = dynamic(() => import('@/components/ui/financial-data-flow'), {
@@ -95,29 +95,6 @@ export const FeaturesSection = memo(function FeaturesSection() {
 
 // Memoized analytics section
 const AdvancedAnalyticsSection = memo(function AdvancedAnalyticsSection() {
-  // Memoize static data
-  const analyticsItems = useMemo(
-    () => [
-      {
-        title: 'Personalized Insights',
-        description: 'Tailored recommendations based on your spending habits',
-      },
-      {
-        title: 'Smart Categories',
-        description: 'Customizable and automatically organized expense groups',
-      },
-      {
-        title: 'Goal Tracking',
-        description: 'Visual progress meters toward your financial objectives',
-      },
-      {
-        title: 'Monthly Reports',
-        description: 'Detailed breakdowns and year-over-year comparisons',
-      },
-    ],
-    []
-  );
-
   return (
     <motion.div
       className="mt-12 sm:mt-16 md:mt-20 lg:mt-24 border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 transform-gpu"
@@ -137,7 +114,7 @@ const AdvancedAnalyticsSection = memo(function AdvancedAnalyticsSection() {
             decisions.
           </p>
           <div className="grid grid-cols-1 gap-3 mb-6 sm:mb-8">
-            {analyticsItems.map((item, idx) => (
+            {ANALYTICS_FEATURES.map((item, idx) => (
               <motion.div
                 key={idx}
                 className="flex items-start gap-2 group"

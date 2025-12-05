@@ -5,14 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
-
-// Static stats data
-const stats = [
-  { value: '94%', label: 'User satisfaction' },
-  { value: '30%', label: 'Average savings' },
-  { value: '15min', label: 'Setup time' },
-  { value: '100%', label: 'Data security' },
-] as const;
+import { CTA_STATS } from './config/landing-config';
 
 // Memoized bubbles component with reduced animations
 const CTABubbles = memo(function CTABubbles() {
@@ -88,7 +81,7 @@ const StatsCard = memo(function StatsCard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-6 mb-8">
-          {stats.map((stat, idx) => (
+          {CTA_STATS.map((stat, idx) => (
             <div key={idx} className="text-center">
               <div className="text-2xl font-bold">{stat.value}</div>
               <div className="text-sm text-white/70">{stat.label}</div>

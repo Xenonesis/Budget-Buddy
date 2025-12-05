@@ -7,18 +7,8 @@ import { Menu, X, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { cn } from '@/lib/utils';
-
-interface NavItem {
-  name: string;
-  href: string;
-}
-
-const navItems: NavItem[] = [
-  { name: 'Features', href: '#features' },
-  { name: 'Pricing', href: '#pricing' },
-  { name: 'Testimonials', href: '#testimonials' },
-  { name: 'About', href: '#about' },
-];
+import { NAV_ITEMS } from './config/landing-config';
+import { scrollToSection as scrollToSectionUtil } from './utils/scroll-utils';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,17 +23,7 @@ export function Header() {
   // Scroll to section smoothly
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 100; // Account for header height
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    }
+    scrollToSectionUtil(id, 100);
   };
 
   return (
@@ -90,7 +70,7 @@ export function Header() {
           {/* Desktop Navigation with pill design */}
           <nav className="hidden md:flex items-center">
             <div className="flex items-center gap-2 p-2 rounded-full bg-muted/30 backdrop-blur-sm border border-border/50">
-              {navItems.map((item, index) => (
+              {NAV_ITEMS.map((item, index) => (
                 <motion.button
                   key={item.name}
                   className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 rounded-full group"

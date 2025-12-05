@@ -4,6 +4,8 @@ import { Logo } from '@/components/ui/logo';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Heart, Sparkles } from 'lucide-react';
+import { SOCIAL_LINKS, FOOTER_SECTIONS, TRUST_INDICATORS } from './config/landing-config';
+import { scrollToTop } from './utils/scroll-utils';
 
 export function Footer() {
   return (
@@ -125,28 +127,7 @@ export function Footer() {
 
             {/* Enhanced social links */}
             <div className="flex space-x-3 mb-8">
-              {[
-                {
-                  href: 'mailto:itisaddy7@gmail.com',
-                  label: 'Email',
-                  icon: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22,6 12,13 2,6',
-                },
-                {
-                  href: 'https://www.linkedin.com/in/itisaddy/',
-                  label: 'LinkedIn',
-                  icon: 'M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z',
-                },
-                {
-                  href: 'https://www.instagram.com/i__aditya7/',
-                  label: 'Instagram',
-                  icon: 'M2 2h20v20H2z M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z M17.5 6.5h.01',
-                },
-                {
-                  href: 'https://github.com/itisaddy',
-                  label: 'GitHub',
-                  icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22',
-                },
-              ].map((social, index) => (
+              {SOCIAL_LINKS.map((social, index) => (
                 <motion.a
                   key={social.label}
                   href={social.href}
@@ -189,28 +170,23 @@ export function Footer() {
 
             {/* Trust indicators */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span>99.9% Uptime</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="w-3 h-3 text-red-500" />
-                <span>50k+ Users</span>
-              </div>
+              {TRUST_INDICATORS.map((indicator, idx) => (
+                <div key={idx} className="flex items-center gap-1">
+                  {indicator.icon === 'pulse' ? (
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  ) : (
+                    <Heart className="w-3 h-3 text-red-500" />
+                  )}
+                  <span>{indicator.label}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
 
           {/* Enhanced Navigation columns */}
-          {(
-            [
-              ['Product', ['Features', 'Integrations', 'Pricing', 'Changelog']],
-              ['Company', ['About Us', 'Careers', 'Blog', 'Press']],
-              ['Resources', ['Help Center', 'Contact Us', 'Community', 'Status']],
-              ['Legal', ['Terms of Service', 'Privacy Policy', 'Cookie Policy', 'Compliance']],
-            ] as [string, string[]][]
-          ).map(([section, items], sectionIndex) => (
+          {FOOTER_SECTIONS.map((section, sectionIndex) => (
             <motion.div
-              key={section}
+              key={section.title}
               className="space-y-4"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -218,7 +194,7 @@ export function Footer() {
               transition={{ duration: 0.6, delay: sectionIndex * 0.1 }}
             >
               <h3 className="font-semibold text-base text-foreground relative">
-                {section}
+                {section.title}
                 <motion.div
                   className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-primary to-transparent rounded-full"
                   initial={{ width: 0 }}
@@ -228,7 +204,7 @@ export function Footer() {
                 />
               </h3>
               <ul className="space-y-3">
-                {items.map((item, itemIndex) => (
+                {section.links.map((item, itemIndex) => (
                   <motion.li
                     key={item}
                     initial={{ opacity: 0, x: -10 }}
@@ -237,7 +213,7 @@ export function Footer() {
                     transition={{ duration: 0.4, delay: sectionIndex * 0.1 + itemIndex * 0.05 }}
                   >
                     <motion.a
-                      href={`/${section.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                      href={`/${section.title.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
                       className="text-sm text-muted-foreground hover:text-primary transition-all inline-block group relative"
                       whileHover={{ x: 5 }}
                     >
@@ -323,7 +299,7 @@ export function Footer() {
 
             {/* Back to top button */}
             <motion.button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={scrollToTop}
               className="h-10 w-10 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 flex items-center justify-center text-primary hover:text-primary transition-all group"
               whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}

@@ -5,80 +5,14 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Check, TrendingDown, DollarSign, Building, Mail, Phone, Minus } from 'lucide-react';
-
-// Static data defined outside component
-const pricingPlans = [
-  {
-    name: 'Starter',
-    price: 'Free',
-    period: 'forever',
-    description: 'Perfect for individuals starting their financial journey',
-    features: [
-      'Track up to 3 accounts',
-      'Basic expense categorization',
-      'Monthly budget creation',
-      'Simple reports and charts',
-      'Mobile app access',
-      'Email support',
-    ],
-    limitations: ['Limited to 100 transactions/month', 'Basic categories only'],
-    cta: 'Get Started Free',
-    popular: false,
-    color: 'from-gray-400 to-gray-600',
-  },
-  {
-    name: 'Pro',
-    price: '$9.99',
-    period: 'per month',
-    description: 'Advanced features for serious budgeters and savers',
-    features: [
-      'Unlimited accounts and transactions',
-      'AI-powered categorization',
-      'Advanced budget templates',
-      'Goal tracking and milestones',
-      'Bill reminders and alerts',
-      'Custom reports and exports',
-      'Investment tracking',
-      'Priority email support',
-      'Mobile and web access',
-    ],
-    limitations: [],
-    cta: 'Start 14-Day Free Trial',
-    popular: true,
-    color: 'from-blue-500 to-purple-600',
-    savings: 'Save $24 annually vs monthly billing',
-  },
-  {
-    name: 'Family',
-    price: '$19.99',
-    period: 'per month',
-    description: 'Comprehensive financial management for families',
-    features: [
-      'Everything in Pro',
-      'Up to 6 family member accounts',
-      'Shared budgets and goals',
-      "Kids' allowance tracking",
-      'Family spending insights',
-      'Multiple currency support',
-      'Advanced security controls',
-      'Dedicated account manager',
-      'Phone and chat support',
-      'Financial planning consultation',
-    ],
-    limitations: [],
-    cta: 'Start Family Trial',
-    popular: false,
-    color: 'from-emerald-500 to-teal-600',
-    savings: 'Save $48 annually vs monthly billing',
-  },
-] as const;
+import { PRICING_PLANS } from './config/landing-config';
 
 // Memoized pricing card component
 const PricingCard = memo(function PricingCard({
   plan,
   index,
 }: {
-  plan: (typeof pricingPlans)[number];
+  plan: (typeof PRICING_PLANS)[number];
   index: number;
 }) {
   return (
@@ -191,7 +125,7 @@ export const PricingSection = memo(function PricingSection() {
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {pricingPlans.map((plan, index) => (
+          {PRICING_PLANS.map((plan, index) => (
             <PricingCard key={plan.name} plan={plan} index={index} />
           ))}
         </div>
