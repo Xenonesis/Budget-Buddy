@@ -1,7 +1,10 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import ThemeProviderShell from '@/components/ThemeProviderShell';
 import { Inter } from 'next/font/google';
+import ThemeProviderShell from '@/components/ThemeProviderShell';
 
 // Optimize font loading with display swap and preload
 const inter = Inter({
@@ -96,8 +99,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
         {/* Preconnect to external domains for faster resource loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         {/* Preconnect to Supabase for faster API calls */}

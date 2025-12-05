@@ -113,6 +113,8 @@ export const iconMap = {
   warning: 'AlertTriangle',
   error: 'XCircle',
   info: 'Info',
+  clock: 'Clock',
+  pending: 'Clock',
 
   // Navigation
   menu: 'Menu',
@@ -170,6 +172,9 @@ export function responsive<T>(
 }
 
 // Generate consistent transition classes
-export function transition(property: string = 'all', duration: keyof typeof duration = 'normal') {
-  return `transition-${property} duration-${duration} ease-in-out`;
+export function transition(
+  property: string = 'all',
+  durationKey: keyof typeof duration = 'normal'
+) {
+  return `transition-${property} duration-${durationKey} ease-in-out`;
 }

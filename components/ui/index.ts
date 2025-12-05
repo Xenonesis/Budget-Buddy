@@ -1,9 +1,13 @@
 // This file exports all the UI components for easy importing
 
-export * from './badge';
 export * from './button';
 export * from './icon';
-export * from './professional-badge';
+export {
+  Badge as SimpleBadge,
+  badgeVariants as simpleBadgeVariants,
+  type BadgeProps as SimpleBadgeProps,
+} from './badge';
+export { Badge, badgeVariants, type BadgeProps } from './professional-badge';
 export * from './status-badge';
 export * from './card';
 export * from './collapsible';

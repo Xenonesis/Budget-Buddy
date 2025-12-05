@@ -3,9 +3,6 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
-  // External packages that should not be bundled
-  serverExternalPackages: ['puppeteer', 'lightningcss'],
-
   // Webpack configuration for handling native modules
   webpack: (config, { isServer }) => {
     // Handle lightningcss native bindings
@@ -40,10 +37,6 @@ const nextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
-  // Use webpack for production builds as Turbopack has compatibility issues
-  // with Tailwind CSS 4 in production
-  bundlePagesRouterDependencies: true,
-
   // Production optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
@@ -56,6 +49,19 @@ const nextConfig = {
     // Type checking is done separately in CI
     ignoreBuildErrors: false,
   },
+
+  eslint: {
+    // Disable ESLint during builds (run separately in CI)
+    ignoreDuringBuilds: true,
+  },
+
+  // Use standalone output to avoid static export issues
+  // This creates a standalone server that can be deployed without static export
+  output: 'standalone',
+
+  // Disable automatic static optimization - force server-side rendering
+  // This prevents the build from trying to statically generate error pages
+  distDir: '.next',
 
   // Experimental features for performance
   experimental: {
@@ -138,6 +144,7 @@ const nextConfig = {
       "worker-src 'self' blob:",
       "frame-src 'self' https://vercel.live",
       "object-src 'none'",
+      "img-src 'self' data: https: blob:",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'self'",

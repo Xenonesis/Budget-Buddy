@@ -1,24 +1,32 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Copy, Check, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useClipboard } from "@/lib/hooks/useClipboard"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import * as React from 'react';
+import { Copy, Check, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useClipboard } from '@/lib/hooks/useClipboard';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CopyButtonProps {
-  text: string
-  onCopy?: () => void
-  className?: string
-  iconSize?: number
-  variant?: "default" | "secondary" | "outline" | "ghost" | "link" | "destructive" | "gradient"
-  size?: "default" | "sm" | "lg" | "xl" | "icon"
+  text: string;
+  onCopy?: () => void;
+  className?: string;
+  iconSize?: number;
+  variant?:
+    | 'default'
+    | 'secondary'
+    | 'outline'
+    | 'ghost'
+    | 'link'
+    | 'destructive'
+    | 'success'
+    | 'warning';
+  size?: 'default' | 'sm' | 'lg' | 'xl' | 'icon';
   tooltipText?: {
-    idle?: string
-    copied?: string
-    error?: string
-  }
+    idle?: string;
+    copied?: string;
+    error?: string;
+  };
 }
 
 export function CopyButton({
@@ -26,13 +34,13 @@ export function CopyButton({
   onCopy,
   className,
   iconSize = 16,
-  variant = "ghost",
-  size = "icon",
+  variant = 'ghost',
+  size = 'icon',
   tooltipText = {
-    idle: "Copy to clipboard",
-    copied: "Copied!",
-    error: "Failed to copy"
-  }
+    idle: 'Copy to clipboard',
+    copied: 'Copied!',
+    error: 'Failed to copy',
+  },
 }: CopyButtonProps) {
   const { copyToClipboard, status, reset } = useClipboard();
 
@@ -52,14 +60,14 @@ export function CopyButton({
           <Button
             variant={variant}
             size={size}
-            className={cn("relative", className)}
+            className={cn('relative', className)}
             onClick={handleCopy}
             aria-label={
               status === 'copied'
-                ? "Copied"
+                ? 'Copied'
                 : status === 'error'
-                ? "Copy failed"
-                : "Copy to clipboard"
+                  ? 'Copy failed'
+                  : 'Copy to clipboard'
             }
           >
             {status === 'copied' ? (
@@ -75,10 +83,10 @@ export function CopyButton({
           {status === 'copied'
             ? tooltipText.copied
             : status === 'error'
-            ? tooltipText.error
-            : tooltipText.idle}
+              ? tooltipText.error
+              : tooltipText.idle}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-} 
+  );
+}
