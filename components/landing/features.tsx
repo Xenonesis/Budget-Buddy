@@ -53,16 +53,16 @@ export const FeaturesSection = memo(function FeaturesSection() {
           transition={{ duration: 0.5 }}
         >
           <div>
-            {/* Enhanced badge */}
+            {/* Professional badge */}
             <motion.div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20 mb-6"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
             >
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">AI-Powered Features</span>
+              <span className="text-sm font-semibold text-primary">AI-Powered Features</span>
             </motion.div>
 
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl mb-4 sm:mb-6 relative px-2 sm:px-0">

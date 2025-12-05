@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Filter, 
-  List, 
-  LayoutGrid, 
-  Search, 
+import {
+  Filter,
+  List,
+  LayoutGrid,
+  Search,
   Calendar,
   TrendingUp,
   TrendingDown,
@@ -15,7 +15,7 @@ import {
   Clock,
   X,
   ChevronDown,
-  SlidersHorizontal
+  SlidersHorizontal,
 } from 'lucide-react';
 
 interface DateRange {
@@ -45,7 +45,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   setViewMode,
 }) => {
   const [filtersOpen, setFiltersOpen] = useState(false);
-  
+
   const handleQuickFilter = (type: 'today' | 'week' | 'month' | 'year' | 'clear') => {
     const today = new Date().toISOString().split('T')[0];
 
@@ -59,7 +59,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         startOfWeek.setDate(today.getDate() - today.getDay());
         setDateRange({
           start: startOfWeek.toISOString().split('T')[0],
-          end: today.toISOString().split('T')[0]
+          end: today.toISOString().split('T')[0],
         });
         break;
       }
@@ -68,7 +68,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
         setDateRange({
           start: startOfMonth.toISOString().split('T')[0],
-          end: today.toISOString().split('T')[0]
+          end: today.toISOString().split('T')[0],
         });
         break;
       }
@@ -77,14 +77,14 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
         const startOfYear = new Date(today.getFullYear(), 0, 1);
         setDateRange({
           start: startOfYear.toISOString().split('T')[0],
-          end: today.toISOString().split('T')[0]
+          end: today.toISOString().split('T')[0],
         });
         break;
       }
       case 'clear':
-        setDateRange({ start: "", end: "" });
-        setSearchTerm("");
-        setFilterType("all");
+        setDateRange({ start: '', end: '' });
+        setSearchTerm('');
+        setFilterType('all');
         break;
     }
   };
@@ -93,14 +93,14 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   const activeFiltersCount = [
     filterType !== 'all',
     searchTerm !== '',
-    dateRange.start !== '' || dateRange.end !== ''
+    dateRange.start !== '' || dateRange.end !== '',
   ].filter(Boolean).length;
 
   // Get quick filter button variant
   const getQuickFilterVariant = (type: 'today' | 'week' | 'month' | 'year') => {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    
+
     switch (type) {
       case 'today':
         return dateRange.start === todayStr && dateRange.end === todayStr ? 'default' : 'outline';
@@ -137,7 +137,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-12 pr-12 py-3 text-base bg-gradient-to-r from-background to-muted/20 border border-border/50 rounded-2xl shadow-sm backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:shadow-lg placeholder:text-muted-foreground/60"
-          placeholder="🔍 Search transactions, descriptions, or categories..."
+          placeholder="Search transactions, descriptions, or categories..."
         />
         {searchTerm && (
           <button
@@ -156,7 +156,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
           <Clock className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium text-muted-foreground">Quick filters:</span>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           <Button
             variant={getQuickFilterVariant('today')}
@@ -164,7 +164,8 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             onClick={() => handleQuickFilter('today')}
             className="h-8 px-3 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105"
           >
-            📅 Today
+            <Calendar className="w-3 h-3 mr-1" />
+            Today
           </Button>
           <Button
             variant={getQuickFilterVariant('week')}
@@ -172,7 +173,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             onClick={() => handleQuickFilter('week')}
             className="h-8 px-3 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105"
           >
-            🗓️ This Week
+            This Week
           </Button>
           <Button
             variant={getQuickFilterVariant('month')}
@@ -180,7 +181,7 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             onClick={() => handleQuickFilter('month')}
             className="h-8 px-3 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105"
           >
-            📊 This Month
+            This Month
           </Button>
           <Button
             variant={getQuickFilterVariant('year')}
@@ -188,9 +189,9 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             onClick={() => handleQuickFilter('year')}
             className="h-8 px-3 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105"
           >
-            📈 This Year
+            This Year
           </Button>
-          
+
           {activeFiltersCount > 0 && (
             <Button
               variant="ghost"
@@ -226,10 +227,10 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                       </Badge>
                     )}
                   </div>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
                       filtersOpen ? 'rotate-180' : ''
-                    }`} 
+                    }`}
                   />
                 </Button>
               </CollapsibleTrigger>
@@ -242,16 +243,16 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant={viewMode === "table" ? "default" : "ghost"}
+                          variant={viewMode === 'table' ? 'default' : 'ghost'}
                           size="sm"
-                          onClick={() => setViewMode("table")}
+                          onClick={() => setViewMode('table')}
                           className="h-8 px-3 rounded-lg text-xs transition-all duration-200"
                         >
                           <List className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>📋 Table view</p>
+                        <p>Table view</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -260,16 +261,16 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant={viewMode === "card" ? "default" : "ghost"}
+                          variant={viewMode === 'card' ? 'default' : 'ghost'}
                           size="sm"
-                          onClick={() => setViewMode("card")}
+                          onClick={() => setViewMode('card')}
                           className="h-8 px-3 rounded-lg text-xs transition-all duration-200"
                         >
                           <LayoutGrid className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>🗃️ Card view</p>
+                        <p>Card view</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -296,9 +297,9 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                       onChange={(e) => setFilterType(e.target.value)}
                       className="w-full appearance-none rounded-xl border border-border/50 bg-gradient-to-r from-background to-muted/20 px-4 py-3 pr-10 text-sm font-medium backdrop-blur-sm transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 focus:shadow-lg"
                     >
-                      <option value="all">🔄 All Types</option>
-                      <option value="income">💰 Income Only</option>
-                      <option value="expense">💸 Expenses Only</option>
+                      <option value="all">All Types</option>
+                      <option value="income">Income Only</option>
+                      <option value="expense">Expenses Only</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       {filterType === 'income' ? (
@@ -316,7 +317,9 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                 <div className="space-y-3 sm:col-span-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
-                    <label className="text-sm font-semibold text-foreground">Custom Date Range</label>
+                    <label className="text-sm font-semibold text-foreground">
+                      Custom Date Range
+                    </label>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
@@ -351,10 +354,15 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
               {activeFiltersCount > 0 && (
                 <div className="mt-6 pt-4 border-t border-border/30">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Active filters:
+                    </span>
                     {filterType !== 'all' && (
-                      <Badge variant="secondary" className="h-7 px-3 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                        {filterType === 'income' ? '💰 Income' : '💸 Expenses'}
+                      <Badge
+                        variant="secondary"
+                        className="h-7 px-3 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                      >
+                        {filterType === 'income' ? 'Income' : 'Expenses'}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -366,8 +374,12 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                       </Badge>
                     )}
                     {searchTerm && (
-                      <Badge variant="secondary" className="h-7 px-3 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                        🔍 &quot;{searchTerm.substring(0, 15)}{searchTerm.length > 15 ? '...' : ''}&quot;
+                      <Badge
+                        variant="secondary"
+                        className="h-7 px-3 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                      >
+                        Search: &quot;{searchTerm.substring(0, 15)}
+                        {searchTerm.length > 15 ? '...' : ''}&quot;
                         <Button
                           variant="ghost"
                           size="sm"
@@ -379,8 +391,11 @@ export const TransactionFilters: React.FC<TransactionFiltersProps> = ({
                       </Badge>
                     )}
                     {(dateRange.start || dateRange.end) && (
-                      <Badge variant="secondary" className="h-7 px-3 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                        📅 {dateRange.start || '...'} → {dateRange.end || '...'}
+                      <Badge
+                        variant="secondary"
+                        className="h-7 px-3 bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                      >
+                        {dateRange.start || '...'} → {dateRange.end || '...'}
                         <Button
                           variant="ghost"
                           size="sm"

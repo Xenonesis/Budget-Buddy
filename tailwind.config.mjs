@@ -11,14 +11,25 @@ const config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: '1rem',
+        sm: '1.5rem',
+        md: '2rem',
+        lg: '3rem',
+        xl: '4rem',
+      },
       screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
         "2xl": "1400px",
       },
     },
     extend: {
       screens: {
         'xs': '475px',
+        '3xl': '1920px',
       },
       colors: {
         border: "hsl(var(--border))",
@@ -80,6 +91,20 @@ const config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        '2xl': "calc(var(--radius) + 8px)",
+        '3xl': "calc(var(--radius) + 12px)",
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '100': '25rem',
+        '112': '28rem',
+        '128': '32rem',
+      },
+      fontSize: {
+        '2xs': '0.625rem',
+        '3xs': '0.5rem',
       },
       keyframes: {
         "accordion-down": {

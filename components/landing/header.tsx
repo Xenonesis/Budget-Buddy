@@ -44,49 +44,36 @@ export function Header() {
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo with enhanced animation */}
+          {/* Logo - Professional and clean */}
           <motion.div
             className="flex items-center gap-3 relative z-50"
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             <Link href="/" className="flex items-center gap-3 group">
-              <motion.div
-                className="relative"
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-              >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-violet-500/20 blur-md group-hover:blur-lg transition-all duration-300" />
+              <div className="relative transition-transform duration-200 group-hover:scale-105">
                 <Logo size="sm" />
-              </motion.div>
-              <span className="font-bold text-xl bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent hover:from-primary hover:to-violet-500 transition-all duration-300">
+              </div>
+              <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-200">
                 Budget Buddy
               </span>
             </Link>
           </motion.div>
 
-          {/* Desktop Navigation with pill design */}
+          {/* Desktop Navigation - Clean and professional */}
           <nav className="hidden md:flex items-center">
-            <div className="flex items-center gap-2 p-2 rounded-full bg-muted/30 backdrop-blur-sm border border-border/50">
+            <div className="flex items-center gap-1">
               {NAV_ITEMS.map((item, index) => (
                 <motion.button
                   key={item.name}
-                  className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300 rounded-full group"
+                  className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md hover:bg-accent"
                   onClick={() => scrollToSection(item.href.substring(1))}
-                  initial={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <span className="relative z-10">{item.name}</span>
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-primary/10 opacity-0 group-hover:opacity-100"
-                    layoutId="navHover"
-                    transition={{ duration: 0.2 }}
-                  />
+                  {item.name}
                 </motion.button>
               ))}
             </div>
@@ -94,17 +81,11 @@ export function Header() {
 
           <div className="hidden md:flex items-center gap-3">
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <Button
-                variant="ghost"
-                asChild
-                className="relative border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
-              >
+              <Button variant="ghost" asChild className="font-medium">
                 <Link href="/auth/login" prefetch={true}>
                   Sign in
                 </Link>
@@ -112,23 +93,12 @@ export function Header() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
             >
-              <Button
-                asChild
-                className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 shadow-lg shadow-primary/25"
-              >
+              <Button asChild className="font-medium">
                 <Link href="/auth/register" prefetch={true} className="flex items-center gap-2">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  >
-                    <Sparkles className="w-4 h-4" />
-                  </motion.div>
                   Get Started
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -138,19 +108,13 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <motion.button
+            <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="relative p-2.5 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50 hover:bg-muted/70 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="relative p-2.5 rounded-lg border border-border hover:bg-accent transition-colors duration-200"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              <motion.div
-                animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-              </motion.div>
-            </motion.button>
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </div>
