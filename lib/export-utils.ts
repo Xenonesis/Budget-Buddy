@@ -1,10 +1,10 @@
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { toast } from "sonner";
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export interface Transaction {
   id: string;
   user_id: string;
-  type: "income" | "expense";
+  type: 'income' | 'expense';
   category_id: string;
   category_name?: string;
   amount: number;
@@ -34,59 +34,77 @@ export interface DateRange {
 }
 
 /**
- * Export transactions to CSV format
+ * Generate CSV content from transactions (testable)
  */
-export const exportToCSV = (
+export const generateCSVContent = (
   transactions: Transaction[],
   exportColumns: ExportColumns
-): void => {
+): string => {
   // Get selected columns
   const selectedColumns = Object.entries(exportColumns)
     .filter(([_, selected]) => selected)
     .map(([column]) => column);
 
   if (selectedColumns.length === 0) {
-    toast.error("Please select at least one column to export");
-    return;
+    throw new Error('Please select at least one column to export');
   }
 
   // Create headers based on selected columns
-  const headers = selectedColumns.map(col => {
-    switch(col) {
-      case 'date': return 'Date';
-      case 'type': return 'Type';
-      case 'category': return 'Category';
-      case 'description': return 'Description';
-      case 'amount': return 'Amount';
-      default: return '';
+  const headers = selectedColumns.map((col) => {
+    switch (col) {
+      case 'date':
+        return 'Date';
+      case 'type':
+        return 'Type';
+      case 'category':
+        return 'Category';
+      case 'description':
+        return 'Description';
+      case 'amount':
+        return 'Amount';
+      default:
+        return '';
     }
   });
 
   // Create CSV content with selected columns
   const csvContent = [
     headers.join(','),
-    ...transactions.map(t => {
+    ...transactions.map((t) => {
       const row: string[] = [];
 
       if (exportColumns.date) row.push(formatDate(t.date));
       if (exportColumns.type) row.push(t.type);
       if (exportColumns.category) row.push(t.category_name || 'Uncategorized');
       if (exportColumns.description) row.push(`"${t.description.replace(/"/g, '""')}"`); // Escape quotes
-      if (exportColumns.amount) row.push(t.amount.toString());
+      if (exportColumns.amount) row.push(t.amount.toFixed(2));
 
       return row.join(',');
-    })
+    }),
   ].join('\n');
 
-  // Create and download file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `transactions_${new Date().toISOString().slice(0,10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  return csvContent;
+};
+
+/**
+ * Export transactions to CSV format
+ */
+export const exportToCSV = (transactions: Transaction[], exportColumns: ExportColumns): void => {
+  try {
+    const csvContent = generateCSVContent(transactions, exportColumns);
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `transactions_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Failed to export CSV');
+  }
 };
 
 /**
@@ -98,7 +116,7 @@ export const exportToExcel = async (
 ): Promise<void> => {
   try {
     // Dynamic import to reduce bundle size
-    const ExcelJS = await import('exceljs').then(mod => mod.default);
+    const ExcelJS = await import('exceljs').then((mod) => mod.default);
 
     // Get selected columns
     const selectedColumns = Object.entries(exportColumns)
@@ -106,26 +124,27 @@ export const exportToExcel = async (
       .map(([column]) => column);
 
     if (selectedColumns.length === 0) {
-      toast.error("Please select at least one column to export");
+      toast.error('Please select at least one column to export');
       return;
     }
 
     // Create workbook and worksheet
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Transactions");
+    const worksheet = workbook.addWorksheet('Transactions');
 
     // Define columns
     const columns = [];
     if (exportColumns.date) columns.push({ header: 'Date', key: 'date', width: 15 });
     if (exportColumns.type) columns.push({ header: 'Type', key: 'type', width: 10 });
     if (exportColumns.category) columns.push({ header: 'Category', key: 'category', width: 20 });
-    if (exportColumns.description) columns.push({ header: 'Description', key: 'description', width: 30 });
+    if (exportColumns.description)
+      columns.push({ header: 'Description', key: 'description', width: 30 });
     if (exportColumns.amount) columns.push({ header: 'Amount', key: 'amount', width: 15 });
 
     worksheet.columns = columns;
 
     // Add rows
-    transactions.forEach(t => {
+    transactions.forEach((t) => {
       const rowData: any = {};
       if (exportColumns.date) rowData.date = formatDate(t.date);
       if (exportColumns.type) rowData.type = t.type;
@@ -141,19 +160,21 @@ export const exportToExcel = async (
 
     // Generate file and trigger download
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `transactions_${new Date().toISOString().slice(0,10)}.xlsx`;
+    link.download = `transactions_${new Date().toISOString().slice(0, 10)}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    toast.success("Excel file exported successfully");
+    toast.success('Excel file exported successfully');
   } catch (error) {
-    console.error("Error exporting to Excel:", error);
-    toast.error("Failed to export to Excel");
+    console.error('Error exporting to Excel:', error);
+    toast.error('Failed to export to Excel');
   }
 };
 
@@ -176,7 +197,7 @@ export const exportToPDF = async (
 
     // Add title
     doc.setFontSize(16);
-    doc.text("Transactions Report", 14, 15);
+    doc.text('Transactions Report', 14, 15);
 
     // Add date range if selected
     if (dateRange?.start && dateRange?.end) {
@@ -197,7 +218,7 @@ export const exportToPDF = async (
       .map(([column]) => column);
 
     if (selectedColumns.length === 0) {
-      toast.error("Please select at least one column to export");
+      toast.error('Please select at least one column to export');
       return;
     }
 
@@ -210,7 +231,7 @@ export const exportToPDF = async (
     if (exportColumns.amount) columns.push('Amount');
 
     // Prepare rows based on selected columns
-    const rows = transactions.map(t => {
+    const rows = transactions.map((t) => {
       const row = [];
       if (exportColumns.date) row.push(formatDate(t.date));
       if (exportColumns.type) row.push(t.type.charAt(0).toUpperCase() + t.type.slice(1));
@@ -233,8 +254,8 @@ export const exportToPDF = async (
         1: { cellWidth: 20 }, // Type
         2: { cellWidth: 30 }, // Category
         3: { cellWidth: 'auto' }, // Description (flexible)
-        4: { cellWidth: 25, halign: 'right' } // Amount (right-aligned)
-      }
+        4: { cellWidth: 25, halign: 'right' }, // Amount (right-aligned)
+      },
     });
 
     // Add footer with generation date
@@ -251,22 +272,19 @@ export const exportToPDF = async (
     }
 
     // Save PDF
-    doc.save(`transactions_${new Date().toISOString().slice(0,10)}.pdf`);
+    doc.save(`transactions_${new Date().toISOString().slice(0, 10)}.pdf`);
 
-    toast.success("PDF generated successfully");
+    toast.success('PDF generated successfully');
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    toast.error("Failed to generate PDF");
+    console.error('Error generating PDF:', error);
+    toast.error('Failed to generate PDF');
   }
 };
 
 /**
  * Calculate next export date for scheduling
  */
-export const calculateNextExportDate = (
-  frequency: 'weekly' | 'monthly',
-  day: number
-): Date => {
+export const calculateNextExportDate = (frequency: 'weekly' | 'monthly', day: number): Date => {
   const now = new Date();
   const result = new Date(now);
 
@@ -303,7 +321,7 @@ export const scheduleExport = (
   try {
     // Calculate next export date
     const nextExportDate = calculateNextExportDate(frequency, day);
-    
+
     // Store export schedule in localStorage for now
     // In a real application, this would be stored in a database
     const exportSchedule = {
@@ -312,14 +330,14 @@ export const scheduleExport = (
       format,
       exportColumns,
       nextExportDate: nextExportDate.toISOString(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    
+
     localStorage.setItem('scheduledExport', JSON.stringify(exportSchedule));
-    
+
     toast.success(`Export scheduled for ${nextExportDate.toLocaleDateString()}`);
   } catch (error) {
-    console.error("Error scheduling export:", error);
-    toast.error("Failed to schedule export");
+    console.error('Error scheduling export:', error);
+    toast.error('Failed to schedule export');
   }
 };

@@ -1,0 +1,240 @@
+npm warn Unknown cli config "--run". This will stop working in the next major version of npm.
+npm warn Unknown cli config "--reporter". This will stop working in the next major version of npm.
+
+> budget-buddy@27.00 test
+> vitest
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mC:/Users/addy/Downloads/Budget-Buddy[39m
+
+ [32mÔ£ô[39m lib/__tests__/notification-utils.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/colors.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/logger.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/validation.test.ts [2m([22m[2m72 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/transaction-utils.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/recurring-dates.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+[90mstdout[2m | lib/__tests__/api-response.test.ts[2m > [22m[2mapiSuccess[2m > [22m[2mshould create a successful response with data
+[22m[39m[2025-12-06T09:57:19.243Z] [DEBUG] API success response
+  Context: {
+  "requestId": "req_miu4dsei_iduzcxo"
+}
+
+[90mstdout[2m | lib/__tests__/api-response.test.ts[2m > [22m[2mapiSuccess[2m > [22m[2mshould include meta information
+[22m[39m[2025-12-06T09:57:19.254Z] [DEBUG] API success response
+  Context: {
+  "requestId": "req_miu4dseu_utgeyy8"
+}
+
+[90mstdout[2m | lib/__tests__/api-response.test.ts[2m > [22m[2mapiSuccess[2m > [22m[2mshould accept custom status code via options
+[22m[39m[2025-12-06T09:57:19.256Z] [DEBUG] API success response
+  Context: {
+  "requestId": "req_miu4dsew_80oygsq"
+}
+
+[90mstdout[2m | lib/__tests__/api-response.test.ts[2m > [22m[2mapiSuccess[2m > [22m[2mshould include pagination in meta if provided
+[22m[39m[2025-12-06T09:57:19.258Z] [DEBUG] API success response
+  Context: {
+  "requestId": "req_miu4dsey_ijfovww"
+}
+
+[90mstdout[2m | lib/__tests__/api-response.test.ts[2m > [22m[2mapiSuccess[2m > [22m[2mshould include request ID in headers
+[22m[39m[2025-12-06T09:57:19.259Z] [DEBUG] API success response
+  Context: {
+  "requestId": "req_miu4dsez_zbouber"
+}
+
+stderr | lib/__tests__/api-response.test.ts > apiError > should create an error response
+[2025-12-06T09:57:19.262Z] [ERROR] API error: NOT_FOUND
+  Context: {
+  "requestId": "req_miu4dsf2_lnb5bc3",
+  "status": 404,
+  "message": "Resource not found"
+}
+
+stderr | lib/__tests__/api-response.test.ts > apiError > should include error information
+[2025-12-06T09:57:19.264Z] [ERROR] API error: VALIDATION_ERROR
+  Context: {
+  "requestId": "req_miu4dsf4_e6ds8uq",
+  "status": 400,
+  "message": "Invalid input"
+}
+
+stderr | lib/__tests__/api-response.test.ts > apiError > should default to 500 status if not provided
+[2025-12-06T09:57:19.265Z] [ERROR] API error: INTERNAL_ERROR
+  Context: {
+  "requestId": "req_miu4dsf5_p8zxyxh",
+  "status": 500,
+  "message": "Something went wrong"
+}
+
+stderr | lib/__tests__/api-response.test.ts > apiError > should include request ID in headers
+[2025-12-06T09:57:19.266Z] [ERROR] API error: ERROR
+  Context: {
+  "requestId": "req_miu4dsf6_nln58gp",
+  "status": 500,
+  "message": "Test error"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create badRequest error
+[2025-12-06T09:57:19.268Z] [ERROR] API error: BAD_REQUEST
+  Context: {
+  "requestId": "req_miu4dsf8_ocg79ys",
+  "status": 400,
+  "message": "Bad request"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create unauthorized error
+[2025-12-06T09:57:19.270Z] [ERROR] API error: UNAUTHORIZED
+  Context: {
+  "requestId": "req_miu4dsfa_lznjatd",
+  "status": 401,
+  "message": "Unauthorized"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create forbidden error
+[2025-12-06T09:57:19.271Z] [ERROR] API error: FORBIDDEN
+  Context: {
+  "requestId": "req_miu4dsfb_e0b6tvx",
+  "status": 403,
+  "message": "Forbidden"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create notFound error
+[2025-12-06T09:57:19.273Z] [ERROR] API error: NOT_FOUND
+  Context: {
+  "requestId": "req_miu4dsfd_um5kvpz",
+  "status": 404,
+  "message": "User not found"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create validationError
+[2025-12-06T09:57:19.274Z] [ERROR] API error: VALIDATION_ERROR
+  Context: {
+  "requestId": "req_miu4dsfe_qh7gj9d",
+  "status": 422,
+  "message": "Validation failed"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create internalError
+[2025-12-06T09:57:19.275Z] [ERROR] API error: INTERNAL_ERROR
+  Context: {
+  "requestId": "req_miu4dsff_ykww8kw",
+  "status": 500,
+  "message": "Internal server error"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create conflict error
+[2025-12-06T09:57:19.276Z] [ERROR] API error: CONFLICT
+  Context: {
+  "requestId": "req_miu4dsfg_dr4hywv",
+  "status": 409,
+  "message": "Resource already exists"
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create rateLimited error
+[2025-12-06T09:57:19.277Z] [ERROR] API error: RATE_LIMITED
+  Context: {
+  "requestId": "req_miu4dsfh_kw8lywz",
+  "status": 429,
+  "message": "Too many requests. Please try again later."
+}
+
+stderr | lib/__tests__/api-response.test.ts > ApiErrors > should create serviceUnavailable error
+[2025-12-06T09:57:19.278Z] [ERROR] API error: SERVICE_UNAVAILABLE
+  Context: {
+  "requestId": "req_miu4dsfi_cyyupny",
+  "status": 503,
+  "message": "Service temporarily unavailable"
+}
+
+ [32mÔ£ô[39m lib/__tests__/api-response.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+stderr | lib/__tests__/local-storage.test.ts > Local Storage Utilities > getFromLocalStorage > should handle corrupted data gracefully
+Error retrieving from localStorage: SyntaxError: Unexpected token 'o', "not valid json {" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at Module.getFromLocalStorage (C:\Users\addy\Downloads\Budget-Buddy\lib\utils.ts:265:23)
+    at C:\Users\addy\Downloads\Budget-Buddy\lib\__tests__\local-storage.test.ts:126:25
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:146:14
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:533:11
+    at runWithTimeout (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:39:7)
+    at runTest (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1056:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+
+ [32mÔ£ô[39m lib/__tests__/local-storage.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+stderr | app/api/__tests__/finance-news.test.ts > Finance News API Routes > GET /api/finance-news > should handle errors gracefully
+Finance news API error: Error: Service unavailable
+    at Object.<anonymous> (C:\Users\addy\Downloads\Budget-Buddy\app\api\__tests__\finance-news.test.ts:76:52)
+    at Object.mockCall (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/spy/dist/index.js:61:17)
+    at Object.spy [as getFinanceNews] (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/tinyspy/dist/index.js:45:80)
+    at Module.GET (C:\Users\addy\Downloads\Budget-Buddy\app\api\finance-news\route.ts:10:40)
+    at C:\Users\addy\Downloads\Budget-Buddy\app\api\__tests__\finance-news.test.ts:80:30
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:533:5
+    at runTest (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1056:11)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+
+stderr | app/api/__tests__/finance-news.test.ts > Finance News API Routes > POST /api/finance-news > should handle refresh errors
+Finance news refresh API error: Error: Refresh failed
+    at Object.<anonymous> (C:\Users\addy\Downloads\Budget-Buddy\app\api\__tests__\finance-news.test.ts:104:52)
+    at Object.mockCall (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/spy/dist/index.js:61:17)
+    at Object.spy [as getFinanceNews] (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/tinyspy/dist/index.js:45:80)
+    at Module.POST (C:\Users\addy\Downloads\Budget-Buddy\app\api\finance-news\route.ts:36:40)
+    at C:\Users\addy\Downloads\Budget-Buddy\app\api\__tests__\finance-news.test.ts:107:30
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:533:5
+    at runTest (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1056:11)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+
+stderr | lib/__tests__/currency-formatting.test.ts > formatCurrency > should handle invalid currency by falling back to USD
+Error formatting currency: RangeError: Invalid currency code : INVALID
+    at new NumberFormat (<anonymous>)
+    at Module.formatCurrency (C:\Users\addy\Downloads\Budget-Buddy\lib\store.ts:383:12)
+    at C:\Users\addy\Downloads\Budget-Buddy\lib\__tests__\currency-formatting.test.ts:79:20
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:146:14
+    at file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:533:11
+    at runWithTimeout (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:39:7)
+    at runTest (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1056:17)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file:///C:/Users/addy/Downloads/Budget-Buddy/node_modules/@vitest/runner/dist/index.js:1205:15)
+
+ [32mÔ£ô[39m app/api/__tests__/finance-news.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 54[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/currency-formatting.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/export-utils.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/utils.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+ [32mÔ£ô[39m components/ui/__tests__/currency.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[90m 172[2mms[22m[39m
+ [32mÔ£ô[39m components/ui/__tests__/card.test.tsx [2m([22m[2m20 tests[22m[2m)[22m[90m 188[2mms[22m[39m
+ [32mÔ£ô[39m components/ui/__tests__/input.test.tsx [2m([22m[2m32 tests[22m[2m)[22m[33m 401[2mms[22m[39m
+ [32mÔ£ô[39m components/ui/__tests__/button.test.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 366[2mms[22m[39m
+ [32mÔ£ô[39m lib/__tests__/performance.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 386[2mms[22m[39m
+stderr | app/api/__tests__/health.test.ts > Health API Route > should include version and uptime
+GoTrueClient@sb-afxdmhqjbdqsuepojobb-auth-token:1 (2.86.2) 2025-12-06T09:57:22.735Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+stderr | app/api/__tests__/health.test.ts > Health API Route > should check database connectivity
+GoTrueClient@sb-afxdmhqjbdqsuepojobb-auth-token:2 (2.86.2) 2025-12-06T09:57:23.263Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+stderr | app/api/__tests__/health.test.ts > Health API Route > should check memory status
+GoTrueClient@sb-afxdmhqjbdqsuepojobb-auth-token:3 (2.86.2) 2025-12-06T09:57:23.773Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+stderr | app/api/__tests__/health.test.ts > Health API Route > should check environment configuration
+GoTrueClient@sb-afxdmhqjbdqsuepojobb-auth-token:4 (2.86.2) 2025-12-06T09:57:24.259Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+stderr | app/api/__tests__/health.test.ts > Health API Route > should return proper status codes
+GoTrueClient@sb-afxdmhqjbdqsuepojobb-auth-token:5 (2.86.2) 2025-12-06T09:57:24.758Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+
+ [32mÔ£ô[39m app/api/__tests__/health.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 5815[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould return health status [33m3298[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould include version and uptime [33m529[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould check database connectivity [33m510[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould check memory status [33m486[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould check environment configuration [33m499[2mms[22m[39m
+   [33m[2mÔ£ô[22m[39m Health API Route[2m > [22mshould return proper status codes [33m491[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m      Tests [22m [1m[32m353 passed[39m[22m[90m (353)[39m
+[2m   Start at [22m 15:27:14
+[2m   Duration [22m 10.67s[2m (transform 1.67s, setup 17.76s, collect 6.42s, tests 7.76s, environment 39.28s, prepare 6.45s)[22m
+
