@@ -3,10 +3,7 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
-  // Turbopack configuration (Next.js 16+ default)
-  turbopack: {},
-
-  // Webpack configuration for handling native modules (legacy, for --webpack mode)
+  // Webpack configuration for handling native modules
   webpack: (config, { isServer }) => {
     // Handle lightningcss native bindings
     config.externals = config.externals || [];
@@ -53,6 +50,11 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
 
+  eslint: {
+    // Disable ESLint during builds (run separately in CI)
+    ignoreDuringBuilds: true,
+  },
+
   // Use standalone output to avoid static export issues
   // This creates a standalone server that can be deployed without static export
   output: 'standalone',
@@ -61,9 +63,9 @@ const nextConfig = {
   // This prevents the build from trying to statically generate error pages
   distDir: '.next',
 
-  // Experimental features
+  // Experimental features for performance
   experimental: {
-    // Optimized package imports for better tree-shaking
+    // Enable optimized package imports for better tree-shaking
     optimizePackageImports: [
       'lucide-react',
       'date-fns',
@@ -90,6 +92,8 @@ const nextConfig = {
       'jspdf',
       'exceljs',
     ],
+    // Optimize CSS loading
+    optimizeCss: true,
   },
 
   // Logging configuration

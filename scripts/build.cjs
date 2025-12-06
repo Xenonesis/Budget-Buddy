@@ -13,8 +13,10 @@ console.log('Starting Next.js build...\n');
 
 try {
   // Run the Next.js build
+  // Note: Turbopack is default in Next.js 16, but has issues with Tailwind CSS v4 native bindings
+  // The build script handles errors gracefully
   execSync('next build', { stdio: 'inherit' });
-  console.log('\n✓ Build completed successfully!');
+  console.log('\\n✓ Build completed successfully!');
   process.exit(0);
 } catch (error) {
   // Check if the build created the necessary files

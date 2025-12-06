@@ -1,9 +1,12 @@
-@import 'tailwindcss';
 @import './tailwind-theme.css';
 @import './modern-responsive.css';
 @import './globals-chat-fixes.css';
 @import './mobile-sidebar-fixes.css';
 @import './enhanced-dashboard.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ==============================================
    SCROLL PERFORMANCE OPTIMIZATIONS
@@ -95,36 +98,36 @@ html {
 
 @layer base {
   :root {
-    /* Modern, professional color palette - Light theme */
+    /* Original light theme colors */
     --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
+    --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 240 10% 3.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 240 10% 3.9%;
 
-    /* Professional primary color - Modern purple-blue */
-    --primary: 250 70% 60%;
-    --primary-rgb: 107, 92, 214;
-    --primary-foreground: 0 0% 100%;
+    /* Original primary color - Purple */
+    --primary: 265 84% 53%;
+    --primary-rgb: 124, 58, 237;
+    --primary-foreground: 355.7 100% 97.3%;
 
-    /* Subtle secondary colors */
-    --secondary: 240 6% 97%;
-    --secondary-foreground: 240 6% 15%;
+    /* Original secondary colors */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-    /* Muted backgrounds with better contrast */
-    --muted: 240 6% 97%;
-    --muted-foreground: 240 4% 40%;
+    /* Original muted colors */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-    /* Accent colors */
-    --accent: 240 6% 95%;
-    --accent-foreground: 240 6% 15%;
+    /* Original accent colors */
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
     /* Semantic colors */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
@@ -135,45 +138,42 @@ html {
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    /* Borders with subtle contrast */
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 250 70% 60%;
+    /* Original borders */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 265 84% 53%;
 
-    /* Modern radius - slightly larger for professional look */
-    --radius: 0.75rem;
+    /* Original radius */
+    --radius: 0.5rem;
 
-    /* Modern, subtle gradients - Professional look */
-    --gradient-primary-light: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(250 65% 55%) 100%);
-    --gradient-secondary-light: linear-gradient(135deg, hsl(240 6% 97%) 0%, hsl(240 6% 95%) 100%);
-    --gradient-accent-light: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(199 89% 43%) 100%);
-    --gradient-muted-light: linear-gradient(135deg, hsl(240 6% 97%) 0%, hsl(240 6% 95%) 100%);
-    --gradient-background-light: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(240 6% 99%) 100%);
-    --gradient-success-light: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 71% 40%) 100%);
-    --gradient-warning-light: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 45%) 100%);
-    --gradient-danger-light: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(0 72% 46%) 100%);
+    /* Original gradients - Light theme */
+    --gradient-primary-light: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%);
+    --gradient-secondary-light: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    --gradient-accent-light: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
+    --gradient-muted-light: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    --gradient-background-light: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+    --gradient-success-light: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+    --gradient-warning-light: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    --gradient-danger-light: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
 
-    /* Subtle hero gradient - not overwhelming */
     --gradient-hero-light: linear-gradient(
       135deg,
-      hsla(250 70% 60% / 0.05) 0%,
-      hsla(250 70% 60% / 0.02) 100%
+      rgba(147, 51, 234, 0.15) 0%,
+      rgba(139, 92, 246, 0.1) 100%
     );
-    --gradient-cta-light: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(250 70% 55%) 100%);
+    --gradient-cta-light: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
     --gradient-card-light: linear-gradient(
       135deg,
-      hsla(0 0% 100% / 0.98) 0%,
-      hsla(240 6% 99% / 0.98) 100%
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(249, 250, 251, 0.95) 100%
     );
 
-    /* Professional primary gradients */
-    --primary-gradient: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(250 70% 65%) 100%);
-    --primary-gradient-hover: linear-gradient(135deg, hsl(250 70% 55%) 0%, hsl(250 70% 60%) 100%);
-    --primary-gradient-active: linear-gradient(135deg, hsl(250 70% 50%) 0%, hsl(250 70% 55%) 100%);
+    --primary-gradient: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #a78bfa 100%);
+    --primary-gradient-hover: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    --primary-gradient-active: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
 
-    /* Semantic gradients */
-    --income-gradient: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 71% 50%) 100%);
-    --expense-gradient: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(0 72% 56%) 100%);
+    --income-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --expense-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 
     /* Mobile menu width */
     --mobile-menu-width: 100%;
@@ -190,35 +190,35 @@ html {
   }
 
   .dark {
-    /* Modern dark theme - True dark with proper contrast */
-    --background: 240 10% 8%;
+    /* Original dark theme */
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
-    --card: 240 8% 12%;
+    --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 8% 12%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    /* Professional primary for dark mode */
-    --primary: 250 70% 65%;
-    --primary-rgb: 135, 116, 232;
-    --primary-foreground: 240 10% 8%;
+    /* Original primary for dark mode */
+    --primary: 263.4 70% 71%;
+    --primary-rgb: 167, 139, 250;
+    --primary-foreground: 240 5.9% 10%;
 
-    /* Dark secondary colors with better contrast */
-    --secondary: 240 6% 16%;
+    /* Original dark secondary colors */
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
 
-    /* Muted with improved readability */
-    --muted: 240 6% 16%;
-    --muted-foreground: 240 5% 65%;
+    /* Original muted */
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    /* Dark accent */
-    --accent: 240 6% 18%;
+    /* Original dark accent */
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
 
     /* Semantic colors for dark mode */
-    --destructive: 0 72% 55%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
     --success: 142 71% 50%;
@@ -230,42 +230,39 @@ html {
     --info: 199 89% 53%;
     --info-foreground: 0 0% 98%;
 
-    /* Borders with proper dark mode contrast */
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 250 70% 65%;
+    /* Original borders */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263.4 70% 71%;
 
-    /* Modern dark gradients - Sophisticated and professional */
-    --gradient-primary-dark: linear-gradient(135deg, hsl(250 70% 65%) 0%, hsl(250 70% 60%) 100%);
-    --gradient-secondary-dark: linear-gradient(135deg, hsl(240 6% 16%) 0%, hsl(240 6% 14%) 100%);
-    --gradient-accent-dark: linear-gradient(135deg, hsl(199 89% 53%) 0%, hsl(199 89% 48%) 100%);
-    --gradient-muted-dark: linear-gradient(135deg, hsl(240 6% 16%) 0%, hsl(240 6% 14%) 100%);
-    --gradient-background-dark: linear-gradient(180deg, hsl(240 10% 8%) 0%, hsl(240 10% 6%) 100%);
-    --gradient-success-dark: linear-gradient(135deg, hsl(142 71% 50%) 0%, hsl(142 71% 45%) 100%);
-    --gradient-warning-dark: linear-gradient(135deg, hsl(38 92% 55%) 0%, hsl(38 92% 50%) 100%);
-    --gradient-danger-dark: linear-gradient(135deg, hsl(0 72% 55%) 0%, hsl(0 72% 50%) 100%);
+    /* Original gradients - Dark theme */
+    --gradient-primary-dark: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+    --gradient-secondary-dark: linear-gradient(135deg, #fbbf24 0%, #d97706 50%, #b45309 100%);
+    --gradient-accent-dark: linear-gradient(135deg, #f472b6 0%, #db2777 50%, #be185d 100%);
+    --gradient-muted-dark: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%);
+    --gradient-background-dark: linear-gradient(180deg, #111827 0%, #1e293b 100%);
+    --gradient-success-dark: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+    --gradient-warning-dark: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    --gradient-danger-dark: linear-gradient(135deg, #f87171 0%, #ef4444 50%, #dc2626 100%);
 
-    /* Subtle dark hero gradient */
     --gradient-hero-dark: linear-gradient(
       135deg,
-      hsla(250 70% 65% / 0.08) 0%,
-      hsla(250 70% 65% / 0.03) 100%
+      rgba(167, 139, 250, 0.25) 0%,
+      rgba(124, 58, 237, 0.15) 100%
     );
-    --gradient-cta-dark: linear-gradient(135deg, hsl(250 70% 65%) 0%, hsl(250 70% 60%) 100%);
+    --gradient-cta-dark: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     --gradient-card-dark: linear-gradient(
       135deg,
-      hsla(240 8% 12% / 0.98) 0%,
-      hsla(240 10% 8% / 0.98) 100%
+      rgba(17, 24, 39, 0.85) 0%,
+      rgba(30, 41, 59, 0.85) 100%
     );
 
-    /* Professional primary gradients for dark mode */
-    --primary-gradient: linear-gradient(135deg, hsl(250 70% 65%) 0%, hsl(250 70% 70%) 100%);
-    --primary-gradient-hover: linear-gradient(135deg, hsl(250 70% 60%) 0%, hsl(250 70% 65%) 100%);
-    --primary-gradient-active: linear-gradient(135deg, hsl(250 70% 55%) 0%, hsl(250 70% 60%) 100%);
+    --primary-gradient: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+    --primary-gradient-hover: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    --primary-gradient-active: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
 
-    /* Semantic gradients for dark mode */
-    --income-gradient: linear-gradient(135deg, hsl(142 71% 50%) 0%, hsl(142 71% 55%) 100%);
-    --expense-gradient: linear-gradient(135deg, hsl(0 72% 55%) 0%, hsl(0 72% 60%) 100%);
+    --income-gradient: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    --expense-gradient: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
   }
 
   /* Color Scheme Variations */
