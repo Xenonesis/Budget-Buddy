@@ -1,0 +1,24 @@
+# Vercel ignore for Go functions
+
+# Documentation
+*.md
+README.md
+EXAMPLES.md
+
+# Tests
+*_test.go
+**/*_test.go
+
+# Development files
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

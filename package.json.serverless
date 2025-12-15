@@ -1,0 +1,24 @@
+{
+  "name": "budget-buddy-serverless",
+  "version": "1.0.0",
+  "description": "Serverless functions for Budget Buddy",
+  "main": "api/index.ts",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "logs": "vercel logs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.86.2",
+    "@vercel/node": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+# Vercel Ignore for Serverless Functions
+
+# Documentation
+README.md
+EXAMPLES.md
+QUICK_START.md
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+
+# Development
+*.md
+.git/
+.gitignore

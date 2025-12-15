@@ -3,6 +3,28 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30,
+      "memory": 1024,
+      "runtime": "@vercel/node@3"
+    },
+    "api/go/*.go": {
+      "maxDuration": 30,
+      "memory": 1024,
+      "runtime": "go1.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/go/(.*)",
+      "dest": "/api/go/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "GO_ENV": "production"
+  },
   "headers": [
     {
       "source": "/(.*)",

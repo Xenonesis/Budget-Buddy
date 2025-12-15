@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "name": "budget-buddy-go",
+  "builds": [
+    {
+      "src": "api/go/*.go",
+      "use": "@vercel/go"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/go",
+      "dest": "/api/go/index.go"
+    },
+    {
+      "src": "/api/go/health",
+      "dest": "/api/go/health.go"
+    },
+    {
+      "src": "/api/go/transactions",
+      "dest": "/api/go/transactions.go"
+    },
+    {
+      "src": "/api/go/budgets",
+      "dest": "/api/go/budgets.go"
+    },
+    {
+      "src": "/api/go/analytics",
+      "dest": "/api/go/analytics.go"
+    },
+    {
+      "src": "/api/go/users",
+      "dest": "/api/go/users.go"
+    }
+  ],
+  "env": {
+    "GO_ENV": "production"
+  },
+  "functions": {
+    "api/go/*.go": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
+}

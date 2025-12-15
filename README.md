@@ -1097,6 +1097,73 @@ describe('Currency Utilities', () => {
 
 ## 📚 API Documentation
 
+### 🚀 Serverless Functions
+
+Budget Buddy now includes **standalone serverless functions** that can be deployed to Vercel or any
+Node.js serverless platform!
+
+#### ✨ Features
+
+- ✅ **Full Node.js Support** - Built with Node.js for maximum compatibility
+- ✅ **Vercel Optimized** - Pre-configured for Vercel deployment
+- ✅ **Authentication Built-in** - Supabase auth integration
+- ✅ **Type-Safe** - Full TypeScript support
+- ✅ **CORS Enabled** - Ready for cross-origin requests
+- ✅ **Rate Limiting** - Built-in protection
+- ✅ **Production Ready** - Error handling, logging, and monitoring
+
+#### 📦 Quick Start
+
+```bash
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Start development
+npm run dev
+
+# Deploy to Vercel
+vercel --prod
+```
+
+#### 📂 Serverless API Structure
+
+```
+api/
+├── index.ts              # API entry point
+├── health.ts             # Health check endpoint
+├── transactions.ts       # Transaction CRUD operations
+├── budgets.ts            # Budget management
+├── analytics.ts          # Financial analytics
+├── users.ts              # User profile management
+└── _lib/
+    ├── serverless-helpers.ts  # Utilities & middleware
+    └── types.ts              # TypeScript types
+```
+
+#### 📖 Documentation
+
+- **[Quick Start Guide](./api/QUICK_START.md)** - Get started in 5 minutes
+- **[Full API Documentation](./api/README.md)** - Complete API reference
+- **[Deployment Guide](./SERVERLESS_DEPLOYMENT_GUIDE.md)** - Deploy to production
+- **[Code Examples](./api/EXAMPLES.md)** - Usage examples
+
+#### 🎯 Example Usage
+
+```bash
+# Health Check (no auth required)
+curl https://your-app.vercel.app/api/health
+
+# Get Transactions (authenticated)
+curl -H "Authorization: Bearer TOKEN" \
+  https://your-app.vercel.app/api/transactions?limit=10
+
+# Create Transaction
+curl -X POST https://your-app.vercel.app/api/transactions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{"amount": 50, "category": "Food", "type": "expense"}'
+```
+
 ### 🔗 API Endpoints
 
 #### Authentication Endpoints
