@@ -1,32 +1,32 @@
 /* Tailwind theme configuration using v3 syntax */
 
 .dark {
-  --color-background: hsl(240 10% 3.9%);
-  --color-foreground: hsl(0 0% 98%);
+  --color-background: hsl(0 0% 4.7%); /* #0C0C0C */
+  --color-foreground: hsl(0 0% 75%); /* Silver text - #BFBFBF */
 
-  --color-card: hsl(240 10% 3.9%);
-  --color-card-foreground: hsl(0 0% 98%);
+  --color-card: hsl(0 0% 7%); /* Slightly lighter than background - #121212 */
+  --color-card-foreground: hsl(0 0% 75%); /* Silver text */
 
-  --color-popover: hsl(240 10% 3.9%);
-  --color-popover-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(0 0% 7%);
+  --color-popover-foreground: hsl(0 0% 75%); /* Silver text */
 
   --color-primary: hsl(263.4 70% 71%);
-  --color-primary-foreground: hsl(240 5.9% 10%);
+  --color-primary-foreground: hsl(0 0% 10%);
 
-  --color-secondary: hsl(240 3.7% 15.9%);
-  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(0 0% 10%); /* Darker gray - #1A1A1A */
+  --color-secondary-foreground: hsl(0 0% 75%); /* Silver text */
 
-  --color-muted: hsl(240 3.7% 15.9%);
-  --color-muted-foreground: hsl(240 5% 64.9%);
+  --color-muted: hsl(0 0% 10%);
+  --color-muted-foreground: hsl(0 0% 60%); /* Muted silver - #999999 */
 
-  --color-accent: hsl(240 3.7% 15.9%);
-  --color-accent-foreground: hsl(0 0% 98%);
+  --color-accent: hsl(0 0% 12%); /* Subtle accent bg - #1F1F1F */
+  --color-accent-foreground: hsl(0 0% 85%); /* Brighter silver - #D9D9D9 */
 
   --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-destructive-foreground: hsl(0 0% 85%); /* Silver text */
 
-  --color-border: hsl(240 3.7% 15.9%);
-  --color-input: hsl(240 3.7% 15.9%);
+  --color-border: hsl(0 0% 15%); /* Subtle borders - #262626 */
+  --color-input: hsl(0 0% 12%); /* Input backgrounds - #1F1F1F */
   --color-ring: hsl(263.4 70% 71%);
 }
 
