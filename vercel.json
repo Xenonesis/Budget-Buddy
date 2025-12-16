@@ -15,12 +15,6 @@
       "runtime": "go1.x"
     }
   },
-  "routes": [
-    {
-      "src": "/api/go/(.*)",
-      "dest": "/api/go/$1"
-    }
-  ],
   "env": {
     "NODE_ENV": "production",
     "GO_ENV": "production"
