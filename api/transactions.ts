@@ -14,7 +14,7 @@ import {
   getSupabaseClient,
 } from './_lib/serverless-helpers';
 
-async function handler(req: AuthenticatedRequest, res: VercelResponse) {
+async function handler(req: AuthenticatedRequest, res: VercelResponse): Promise<void> {
   const supabase = getSupabaseClient(req);
 
   // GET: Fetch transactions
@@ -38,10 +38,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const { data, error, count } = await query;
 
     if (error) {
-      return errorResponse(res, 'Failed to fetch transactions', 500, error);
+      errorResponse(res, 'Failed to fetch transactions', 500, error);
     }
 
-    return successResponse(res, {
+    successResponse(res, {
       transactions: data,
       total: count,
       limit,
@@ -54,7 +54,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const body = await parseBody(req);
 
     if (!body || !body.amount || !body.category || !body.type) {
-      return errorResponse(res, 'Missing required fields', 400);
+      errorResponse(res, 'Missing required fields', 400);
     }
 
     const { data, error } = await supabase
@@ -73,10 +73,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to create transaction', 500, error);
+      errorResponse(res, 'Failed to create transaction', 500, error);
     }
 
-    return successResponse(res, { transaction: data }, 201);
+    successResponse(res, { transaction: data }, 201);
   }
 
   // PUT: Update transaction
@@ -86,7 +86,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return errorResponse(res, 'Transaction ID required', 400);
+      errorResponse(res, 'Transaction ID required', 400);
     }
 
     const { data, error } = await supabase
@@ -98,10 +98,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to update transaction', 500, error);
+      errorResponse(res, 'Failed to update transaction', 500, error);
     }
 
-    return successResponse(res, { transaction: data });
+    successResponse(res, { transaction: data });
   }
 
   // DELETE: Delete transaction
@@ -110,7 +110,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return errorResponse(res, 'Transaction ID required', 400);
+      errorResponse(res, 'Transaction ID required', 400);
     }
 
     const { error } = await supabase
@@ -120,13 +120,13 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .eq('user_id', req.user!.id);
 
     if (error) {
-      return errorResponse(res, 'Failed to delete transaction', 500, error);
+      errorResponse(res, 'Failed to delete transaction', 500, error);
     }
 
-    return successResponse(res, { message: 'Transaction deleted' });
+    successResponse(res, { message: 'Transaction deleted' });
   }
 
-  return errorResponse(res, 'Method not allowed', 405);
+  errorResponse(res, 'Method not allowed', 405);
 }
 
 export default createServerlessHandler(handler, {

@@ -13,7 +13,7 @@ import {
   getSupabaseClient,
 } from './_lib/serverless-helpers';
 
-async function handler(req: AuthenticatedRequest, res: VercelResponse) {
+async function handler(req: AuthenticatedRequest, res: VercelResponse): Promise<void> {
   const supabase = getSupabaseClient(req);
 
   // GET: Fetch user profile
@@ -25,10 +25,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to fetch user profile', 500, error);
+      errorResponse(res, 'Failed to fetch user profile', 500, error);
     }
 
-    return successResponse(res, { profile: data });
+    successResponse(res, { profile: data });
   }
 
   // PUT: Update user profile
@@ -36,7 +36,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const body = await parseBody(req);
 
     if (!body) {
-      return errorResponse(res, 'Invalid request body', 400);
+      errorResponse(res, 'Invalid request body', 400);
     }
 
     // Only allow specific fields to be updated
@@ -57,7 +57,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     });
 
     if (Object.keys(updates).length === 0) {
-      return errorResponse(res, 'No valid fields to update', 400);
+      errorResponse(res, 'No valid fields to update', 400);
     }
 
     updates.updated_at = new Date().toISOString();
@@ -70,10 +70,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to update profile', 500, error);
+      errorResponse(res, 'Failed to update profile', 500, error);
     }
 
-    return successResponse(res, { profile: data });
+    successResponse(res, { profile: data });
   }
 
   // DELETE: Delete user account
@@ -82,7 +82,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const body = await parseBody(req);
 
     if (!body || body.confirm !== true) {
-      return errorResponse(res, 'Account deletion requires confirmation', 400);
+      errorResponse(res, 'Account deletion requires confirmation', 400);
     }
 
     // Delete user data in order
@@ -100,13 +100,13 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const { error: authError } = await supabase.auth.admin.deleteUser(req.user!.id);
 
     if (authError) {
-      return errorResponse(res, 'Failed to delete user account', 500, authError);
+      errorResponse(res, 'Failed to delete user account', 500, authError);
     }
 
-    return successResponse(res, { message: 'Account deleted successfully' });
+    successResponse(res, { message: 'Account deleted successfully' });
   }
 
-  return errorResponse(res, 'Method not allowed', 405);
+  errorResponse(res, 'Method not allowed', 405);
 }
 
 export default createServerlessHandler(handler, {

@@ -12,9 +12,9 @@ import {
   getSupabaseClient,
 } from './_lib/serverless-helpers';
 
-async function handler(req: AuthenticatedRequest, res: VercelResponse) {
+async function handler(req: AuthenticatedRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {
-    return errorResponse(res, 'Method not allowed', 405);
+    errorResponse(res, 'Method not allowed', 405);
   }
 
   const supabase = getSupabaseClient(req);
@@ -35,10 +35,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
         return await getTrendAnalytics(req, res, supabase, startDate, endDate);
 
       default:
-        return errorResponse(res, 'Invalid analytics type', 400);
+        errorResponse(res, 'Invalid analytics type', 400);
     }
   } catch (error) {
-    return errorResponse(res, 'Failed to fetch analytics', 500, error);
+    errorResponse(res, 'Failed to fetch analytics', 500, error);
   }
 }
 
@@ -57,7 +57,7 @@ async function getSummaryAnalytics(
   const { data, error } = await query;
 
   if (error) {
-    return errorResponse(res, 'Failed to fetch summary', 500, error);
+    errorResponse(res, 'Failed to fetch summary', 500, error);
   }
 
   const summary = data.reduce(
@@ -77,7 +77,7 @@ async function getSummaryAnalytics(
   summary.savingsRate =
     summary.totalIncome > 0 ? ((summary.netSavings / summary.totalIncome) * 100).toFixed(2) : 0;
 
-  return successResponse(res, { summary });
+  successResponse(res, { summary });
 }
 
 async function getCategoryAnalytics(
@@ -98,7 +98,7 @@ async function getCategoryAnalytics(
   const { data, error } = await query;
 
   if (error) {
-    return errorResponse(res, 'Failed to fetch category analytics', 500, error);
+    errorResponse(res, 'Failed to fetch category analytics', 500, error);
   }
 
   const categoryBreakdown = data.reduce((acc: any, transaction: any) => {
@@ -124,7 +124,7 @@ async function getCategoryAnalytics(
 
   const categories = Object.values(categoryBreakdown);
 
-  return successResponse(res, { categories });
+  successResponse(res, { categories });
 }
 
 async function getTrendAnalytics(
@@ -146,7 +146,7 @@ async function getTrendAnalytics(
   const { data, error } = await query;
 
   if (error) {
-    return errorResponse(res, 'Failed to fetch trend analytics', 500, error);
+    errorResponse(res, 'Failed to fetch trend analytics', 500, error);
   }
 
   // Group by month
@@ -174,7 +174,7 @@ async function getTrendAnalytics(
 
   const trend = Object.values(monthlyTrend);
 
-  return successResponse(res, { trend });
+  successResponse(res, { trend });
 }
 
 export default createServerlessHandler(handler, {

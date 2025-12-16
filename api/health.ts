@@ -6,7 +6,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createServerlessHandler, successResponse } from './_lib/serverless-helpers';
 
-async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const health = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -16,7 +16,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     memory: process.memoryUsage(),
   };
 
-  return successResponse(res, health);
+  successResponse(res, health);
 }
 
 export default createServerlessHandler(handler, {

@@ -13,7 +13,7 @@ import {
   getSupabaseClient,
 } from './_lib/serverless-helpers';
 
-async function handler(req: AuthenticatedRequest, res: VercelResponse) {
+async function handler(req: AuthenticatedRequest, res: VercelResponse): Promise<void> {
   const supabase = getSupabaseClient(req);
 
   // GET: Fetch budgets
@@ -29,10 +29,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return errorResponse(res, 'Failed to fetch budgets', 500, error);
+      errorResponse(res, 'Failed to fetch budgets', 500, error);
     }
 
-    return successResponse(res, { budgets: data });
+    successResponse(res, { budgets: data });
   }
 
   // POST: Create budget
@@ -40,7 +40,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const body = await parseBody(req);
 
     if (!body || !body.category || !body.amount || !body.period) {
-      return errorResponse(res, 'Missing required fields', 400);
+      errorResponse(res, 'Missing required fields', 400);
     }
 
     const { data, error } = await supabase
@@ -58,10 +58,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to create budget', 500, error);
+      errorResponse(res, 'Failed to create budget', 500, error);
     }
 
-    return successResponse(res, { budget: data }, 201);
+    successResponse(res, { budget: data }, 201);
   }
 
   // PUT: Update budget
@@ -71,7 +71,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return errorResponse(res, 'Budget ID required', 400);
+      errorResponse(res, 'Budget ID required', 400);
     }
 
     const { data, error } = await supabase
@@ -83,10 +83,10 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      return errorResponse(res, 'Failed to update budget', 500, error);
+      errorResponse(res, 'Failed to update budget', 500, error);
     }
 
-    return successResponse(res, { budget: data });
+    successResponse(res, { budget: data });
   }
 
   // DELETE: Delete budget
@@ -95,7 +95,7 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return errorResponse(res, 'Budget ID required', 400);
+      errorResponse(res, 'Budget ID required', 400);
     }
 
     const { error } = await supabase
@@ -105,13 +105,13 @@ async function handler(req: AuthenticatedRequest, res: VercelResponse) {
       .eq('user_id', req.user!.id);
 
     if (error) {
-      return errorResponse(res, 'Failed to delete budget', 500, error);
+      errorResponse(res, 'Failed to delete budget', 500, error);
     }
 
-    return successResponse(res, { message: 'Budget deleted' });
+    successResponse(res, { message: 'Budget deleted' });
   }
 
-  return errorResponse(res, 'Method not allowed', 405);
+  errorResponse(res, 'Method not allowed', 405);
 }
 
 export default createServerlessHandler(handler, {
