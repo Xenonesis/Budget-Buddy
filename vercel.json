@@ -6,13 +6,7 @@
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 30,
-      "memory": 1024,
-      "runtime": "@vercel/node@3"
-    },
-    "api/go/*.go": {
-      "maxDuration": 30,
-      "memory": 1024,
-      "runtime": "go1.x"
+      "memory": 1024
     }
   },
   "env": {
