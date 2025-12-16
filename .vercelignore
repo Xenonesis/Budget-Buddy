@@ -1,19 +1,42 @@
-node_modules
-.git
-.env
-.env.local
-.env.development
-.env.development.local
-.env.test
-.env.test.local
-.env.production
-.env.production.local
-# README.md
-# .gitignore
-.vercel
-*.log
-*.lock
+# Vercel Ignore File
+# Files and directories to exclude from Vercel deployment
+
+# Go functions (not compatible with Vercel's auto-wrapper)
+api/go/
+api/go/**
+
+# Go module files
+go.mod
+go.sum
+
+# Go binaries
+bin/
+*.exe
+
+# Documentation (not needed for deployment)
+*.md
+!README.md
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.test.js
+**/*.spec.ts
+**/*.spec.tsx
+**/*.spec.js
+__tests__/
+test-results-detailed.txt
+
+# Development files
+.git/
+.github/
+.husky/
+scripts/
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+tmp_*
 *.tmp
-*.temp
-.DS_Store
-Thumbs.db
