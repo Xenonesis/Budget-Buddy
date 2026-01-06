@@ -97,7 +97,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-window": "^1.8.8",
     "@types/three": "^0.181.0",
-    "@vercel/node": "^2.3.0",
+    "@vercel/node": "^2.15.10",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
