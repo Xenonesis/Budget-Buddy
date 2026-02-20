@@ -248,13 +248,30 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
     onStart?.(); // Notify parent component that login has started
 
     try {
+      // DEBUG: Log environment check
+      console.log('[LoginForm] Attempting login with:', { email });
+      console.log(
+        '[LoginForm] Supabase URL:',
+        process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING'
+      );
+      console.log(
+        '[LoginForm] Supabase Key:',
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+      );
+
       // Reset preferences to ensure a clean state
       resetPreferences();
+
+      // DEBUG: Log before signInWithPassword call
+      console.log('[LoginForm] Calling supabase.auth.signInWithPassword...');
 
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
+      // DEBUG: Log response
+      console.log('[LoginForm] SignIn response:', { error });
 
       if (error) throw error;
 
