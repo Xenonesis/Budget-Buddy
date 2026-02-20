@@ -127,16 +127,16 @@ interface DashboardStats {
 
 // Enhanced colors for better visualization
 const COLORS = [
-  '#3B82F6', // Blue
-  '#10B981', // Green
-  '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#8B5CF6', // Purple
-  '#EC4899', // Pink
-  '#F97316', // Orange
-  '#6366F1', // Indigo
-  '#14B8A6', // Teal
-  '#A855F7', // Violet
+  '#DFFF00', // Chartreuse
+  '#FF3366', // Sharp Red
+  '#00E5FF', // Cyan
+  '#FF9900', // Sharp Orange
+  '#CC00FF', // Neon Purple
+  '#00FF66', // Neon Green
+  '#FF0099', // Hot Pink
+  '#FFFF00', // Pure Yellow
+  '#0066FF', // Sharp Blue
+  '#FFFFFF', // Pure White
 ];
 
 // Memoized chart components to prevent unnecessary re-renders
@@ -202,16 +202,16 @@ function getMonthlyData(transactions: any[]) {
 // Optimize category data calculation with a single pass through transactions
 function getCategoryData(transactions: any[]) {
   const colors = [
-    '#FF6384',
-    '#36A2EB',
-    '#FFCE56',
-    '#4BC0C0',
-    '#9966FF',
-    '#FF9F40',
-    '#8AC926',
-    '#1982C4',
-    '#6A4C93',
-    '#F15BB5',
+    '#FF3366', // Sharp Red
+    '#00E5FF', // Cyan
+    '#DFFF00', // Chartreuse
+    '#FF9900', // Sharp Orange
+    '#CC00FF', // Neon Purple
+    '#00FF66', // Neon Green
+    '#FF0099', // Hot Pink
+    '#FFFF00', // Pure Yellow
+    '#0066FF', // Sharp Blue
+    '#FFFFFF', // Pure White
   ];
 
   // Only consider expenses for the category chart
@@ -246,16 +246,16 @@ function getCategoryData(transactions: any[]) {
 // Generate top categories by usage and spending - optimized to reduce iterations
 const getTopCategories = (transactions: any[]) => {
   const colors = [
-    '#FF6384',
-    '#36A2EB',
-    '#FFCE56',
-    '#4BC0C0',
-    '#9966FF',
-    '#FF9F40',
-    '#8AC926',
-    '#1982C4',
-    '#6A4C93',
-    '#F15BB5',
+    '#FF3366', // Sharp Red
+    '#00E5FF', // Cyan
+    '#DFFF00', // Chartreuse
+    '#FF9900', // Sharp Orange
+    '#CC00FF', // Neon Purple
+    '#00FF66', // Neon Green
+    '#FF0099', // Hot Pink
+    '#FFFF00', // Pure Yellow
+    '#0066FF', // Sharp Blue
+    '#FFFFFF', // Pure White
   ];
 
   // Only consider expenses for the category analysis
@@ -306,13 +306,13 @@ const StatCard = memo(
     icon?: React.ReactNode;
     className?: string;
   }) => (
-    <div className={`p-4 rounded-lg border bg-card ${className}`}>
-      <div className="flex justify-between">
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-1">{title}</h3>
-          <p className="text-2xl font-bold">{value}</p>
+    <div className={cn(`p-4 border-4 border-foreground bg-paper shadow-[4px_4px_0px_hsl(var(--foreground))] ${className}`, 'transition-all hover:-translate-y-1 hover:translate-x-1 hover:shadow-[0px_0px_0px_transparent]')}>
+      <div className="flex justify-between items-start">
+        <div className="flex flex-col">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground bg-foreground/5 px-2 py-1 inline-block mb-2 self-start border-2 border-foreground">{title}</h3>
+          <p className="text-3xl font-mono font-black tracking-tight">{value}</p>
         </div>
-        {icon && <div className="p-2 rounded-full bg-primary/10 text-primary">{icon}</div>}
+        {icon && <div className="p-3 border-2 border-foreground bg-background text-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">{icon}</div>}
       </div>
     </div>
   )
@@ -741,35 +741,35 @@ export default function DashboardPage() {
       role="main"
       aria-label="Dashboard"
     >
-      {/* Enhanced Mobile-Optimized Header */}
-      <header className="mb-8 md:mb-10">
+      {/* Enhanced Brutalist Header */}
+      <header className="mb-8 md:mb-10 w-full border-b-4 border-foreground pb-4 lg:pb-6">
         <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-violet-400/20 border border-primary/20">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center p-3 border-4 border-foreground bg-foreground text-background shadow-[4px_4px_0px_hsl(var(--primary))] shrink-0 hover:translate-x-1 hover:-translate-y-1 transition-transform">
                 <svg
-                  className="h-6 w-6 text-primary"
+                  className="h-8 w-8"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  strokeWidth={3}
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                   />
                 </svg>
               </div>
-              <div>
+              <div className="flex flex-col">
                 <h1
-                  className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary via-blue-600 to-violet-600 bg-clip-text text-transparent"
+                  className="text-3xl sm:text-4xl lg:text-5xl font-display font-black uppercase tracking-tight text-foreground"
                   tabIndex={0}
                 >
                   Dashboard
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1" tabIndex={0}>
-                  Your financial overview at a glance
+                <p className="text-sm font-mono font-bold tracking-widest uppercase mt-1 px-1 bg-foreground text-background inline-block self-start" tabIndex={0}>
+                  Financial Overview
                 </p>
               </div>
             </div>
@@ -792,29 +792,18 @@ export default function DashboardPage() {
               <div className="flex items-center">
                 {isOffline ? (
                   <div
-                    className="flex items-center text-amber-600 text-sm rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1.5 border border-amber-200 dark:border-amber-800"
+                    className="flex items-center text-background text-sm font-bold tracking-widest uppercase bg-amber-600 px-3 py-1.5 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]"
                     role="status"
                     aria-live="polite"
                   >
-                    <svg
-                      className="h-3 w-3 mr-2 animate-pulse"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="font-medium">Offline</span>
+                    <span className="font-mono">Offline</span>
                   </div>
                 ) : (
-                  <div className="flex items-center text-green-600 text-sm rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1.5 border border-green-200 dark:border-green-800">
-                    <div className="h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
-                    <span className="font-medium">Online</span>
+                  <div className="flex items-center text-foreground text-sm font-bold tracking-widest uppercase bg-green-500/20 px-3 py-1.5 border-2 border-green-500 shadow-[2px_2px_0px_hsl(var(--green-500))]">
+                    <div className="h-2 w-2 bg-green-500 mr-2 animate-pulse border border-foreground"></div>
+                    <span className="font-mono text-green-600">Online</span>
                     {lastSynced && (
-                      <span className="ml-2 text-muted-foreground text-xs hidden lg:inline">
+                      <span className="ml-2 text-foreground text-xs hidden lg:inline font-mono">
                         • {lastSynced}
                       </span>
                     )}
@@ -827,11 +816,11 @@ export default function DashboardPage() {
                 variant="outline"
                 size="sm"
                 asChild
-                className="shrink-0 hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="shrink-0 border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 rounded-none font-mono font-bold uppercase transition-all"
               >
                 <Link href="/dashboard/customize" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden sm:inline">Customize</span>
+                  <Settings className="h-4 w-4" strokeWidth={3} />
+                  <span className="hidden sm:inline tracking-widest">Customize</span>
                 </Link>
               </Button>
             </div>
@@ -840,24 +829,22 @@ export default function DashboardPage() {
 
         {/* Offline Sync Button */}
         {isOffline && (
-          <div className="mt-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-blue-700 dark:text-blue-300 text-sm">
-                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+          <div className="mt-4 p-4 border-4 border-amber-500 bg-amber-500/10 shadow-[4px_4px_0px_hsl(var(--amber-500))]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center text-foreground font-bold tracking-widest uppercase text-sm">
+                <svg className="h-5 w-5 mr-3 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>You&apos;re viewing cached data. Connect to sync latest information.</span>
+                <div className="flex flex-col">
+                  <span>Viewing Cached Data</span>
+                  <span className="text-xs font-mono font-medium opacity-80">Connect to sync latest information</span>
+                </div>
               </div>
               <Button
                 onClick={syncData}
                 size="sm"
                 variant="outline"
-                className="bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:border-blue-700 dark:text-blue-300"
+                className="shrink-0 border-2 border-amber-500 bg-amber-500/20 text-foreground hover:bg-amber-500 hover:text-black shadow-[2px_2px_0px_hsl(var(--amber-500))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 rounded-none font-mono font-bold uppercase transition-all"
                 aria-label="Sync data when online"
               >
                 <svg
@@ -866,11 +853,11 @@ export default function DashboardPage() {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  strokeWidth={3}
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
@@ -1566,35 +1553,25 @@ export default function DashboardPage() {
       )}
 
       {/* Enhanced Performance and Accessibility Notice */}
-      <div className="mt-8 md:mt-10 pt-6 border-t border-border/50">
-        <div className="flex items-center justify-center text-xs text-muted-foreground space-x-4">
+      <div className="mt-8 md:mt-10 pt-6 border-t-4 border-foreground w-full mb-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center text-xs font-mono font-bold uppercase tracking-widest text-foreground gap-4 bg-foreground/5 p-4 border-2 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]">
           <div className="flex items-center">
-            <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
-            <span>Real-time data</span>
+            <div className="w-3 h-3 bg-green-500 mr-2 animate-pulse border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--green-500))]"></div>
+            <span>Real-time Data</span>
           </div>
-          <span>•</span>
+          <span className="hidden sm:inline text-foreground/30">|</span>
           <div className="flex items-center">
-            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span>Bank-grade security</span>
+            <span>Bank-grade Security</span>
           </div>
-          <span>•</span>
+          <span className="hidden sm:inline text-foreground/30">|</span>
           <div className="flex items-center">
-            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
+            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <span>Lightning fast</span>
+            <span>Lightning Fast</span>
           </div>
         </div>
       </div>

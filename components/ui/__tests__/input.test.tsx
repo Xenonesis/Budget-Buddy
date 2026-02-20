@@ -12,7 +12,7 @@ describe('Input Component', () => {
     it('should apply default styles', () => {
       const { container } = render(<Input />);
       const input = container.querySelector('input');
-      expect(input).toHaveClass('rounded-md', 'border', 'border-input');
+      expect(input).toHaveClass('border-2', 'border-foreground', 'bg-paper/50');
     });
 
     it('should apply custom className', () => {
@@ -151,7 +151,7 @@ describe('Textarea Component', () => {
     it('should apply default styles', () => {
       const { container } = render(<Textarea />);
       const textarea = container.querySelector('textarea');
-      expect(textarea).toHaveClass('rounded-md', 'border', 'min-h-[80px]');
+      expect(textarea).toHaveClass('min-h-[80px]', 'border-2', 'border-foreground', 'bg-paper/50');
     });
 
     it('should apply custom className', () => {

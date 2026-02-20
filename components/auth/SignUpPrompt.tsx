@@ -1,33 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { UserPlus } from "lucide-react";
 
 export const SignUpPrompt = () => {
   return (
-    <motion.div 
-      className="text-center text-sm bg-muted/30 rounded-lg p-4 border border-muted"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.7, duration: 0.3 }}
+    <div 
+      className="text-center text-sm bg-paper p-4 border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] mt-8"
     >
-      <p className="text-muted-foreground mb-2">
+      <p className="text-foreground font-mono font-bold uppercase tracking-widest mb-4">
         Don&apos;t have an account?
       </p>
       <Link
         href="/auth/register"
-        className="text-primary hover:text-primary/80 font-medium transition-colors inline-flex items-center gap-2 group"
+        className="text-background bg-foreground hover:bg-[#00E5FF] hover:text-foreground border-4 border-transparent hover:border-foreground font-mono font-bold uppercase tracking-widest px-4 py-2 transition-colors inline-flex items-center gap-2 group shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-0.5 hover:translate-y-0.5"
       >
-        <UserPlus className="h-4 w-4 transition-transform group-hover:scale-110" />
-        <motion.span 
-          whileHover={{ x: 3 }}
-          transition={{ duration: 0.2 }}
-          className="inline-block"
-        >
-          Create your account
-        </motion.span>
+        <UserPlus className="h-4 w-4 stroke-[3]" />
+        <span className="inline-block mt-0.5">
+          Create account
+        </span>
       </Link>
-    </motion.div>
+    </div>
   );
 };

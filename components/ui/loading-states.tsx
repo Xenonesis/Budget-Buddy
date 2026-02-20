@@ -8,15 +8,15 @@ import { cn } from "@/lib/utils";
 // Skeleton for stats cards
 export function StatsCardSkeleton({ className }: { className?: string }) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))]", className)}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <Skeleton className="h-10 w-10 rounded-lg" />
-          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-10 w-10 rounded-none" />
+          <Skeleton className="h-6 w-16 rounded-none" />
         </div>
-        <Skeleton className="h-4 w-24 mb-2" />
-        <Skeleton className="h-8 w-32 mb-2" />
-        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-4 w-24 mb-2 rounded-none" />
+        <Skeleton className="h-8 w-32 mb-2 rounded-none" />
+        <Skeleton className="h-3 w-20 rounded-none" />
       </CardContent>
     </Card>
   );
@@ -25,18 +25,18 @@ export function StatsCardSkeleton({ className }: { className?: string }) {
 // Skeleton for transaction items
 export function TransactionItemSkeleton() {
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border">
+    <div className="flex items-center justify-between p-4 rounded-none border-4 border-foreground bg-paper shadow-[4px_4px_0px_hsl(var(--foreground))] mb-4 last:mb-0">
       <div className="flex items-center gap-4">
-        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-10 w-10 rounded-none" />
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-none" />
           </div>
-          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-24 rounded-none" />
         </div>
       </div>
       <div className="text-right space-y-1">
-        <Skeleton className="h-6 w-20" />
+        <Skeleton className="h-6 w-20 rounded-none" />
       </div>
     </div>
   );
@@ -45,13 +45,13 @@ export function TransactionItemSkeleton() {
 // Skeleton for recent transactions card
 export function RecentTransactionsSkeleton() {
   return (
-    <Card>
-      <CardHeader className="pb-4">
+    <Card className="rounded-none border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))]">
+      <CardHeader className="pb-4 border-b-4 border-foreground bg-foreground/5">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-6 w-40 rounded-none" />
           <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-24 rounded-lg" />
-            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-24 rounded-none" />
+            <Skeleton className="h-8 w-20 rounded-none" />
           </div>
         </div>
       </CardHeader>
@@ -70,64 +70,64 @@ export function RecentTransactionsSkeleton() {
 export function CategoryInsightsSkeleton() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="col-span-1 lg:col-span-2">
-        <CardHeader>
+      <Card className="col-span-1 lg:col-span-2 rounded-none border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))]">
+        <CardHeader className="border-b-4 border-foreground bg-foreground/5">
           <div className="flex items-center justify-between">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-8 w-32 rounded-lg" />
+            <Skeleton className="h-6 w-40 rounded-none" />
+            <Skeleton className="h-8 w-32 rounded-none" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="pt-6">
+          <div className="space-y-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="p-4 rounded-lg border">
+              <div key={i} className="p-4 rounded-none border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-paper">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <Skeleton className="w-4 h-4 rounded-full" />
+                    <Skeleton className="w-6 h-6 rounded-none" />
                     <div>
-                      <Skeleton className="h-4 w-20 mb-1" />
-                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-4 w-20 mb-1 rounded-none" />
+                      <Skeleton className="h-3 w-16 rounded-none" />
                     </div>
                   </div>
                   <div className="text-right">
-                    <Skeleton className="h-4 w-16 mb-1" />
-                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-4 w-16 mb-1 rounded-none" />
+                    <Skeleton className="h-3 w-12 rounded-none" />
                   </div>
                 </div>
-                <Skeleton className="h-2 w-full rounded-full" />
+                <Skeleton className="h-4 w-full rounded-none" />
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32" />
+      <Card className="rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))]">
+        <CardHeader className="pb-3 border-b-4 border-foreground bg-foreground/5">
+          <Skeleton className="h-5 w-32 rounded-none" />
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-8 h-8 rounded-full" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-10 h-10 rounded-none border-2 border-foreground" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-32" />
-              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-4 w-24 rounded-none" />
+              <Skeleton className="h-3 w-32 rounded-none" />
+              <Skeleton className="h-3 w-28 rounded-none" />
             </div>
           </div>
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32" />
+      <Card className="rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))]">
+        <CardHeader className="pb-3 border-b-4 border-foreground bg-foreground/5">
+          <Skeleton className="h-5 w-32 rounded-none" />
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-8 h-8 rounded-full" />
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-10 h-10 rounded-none border-2 border-foreground" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-3 w-32" />
-              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-4 w-24 rounded-none" />
+              <Skeleton className="h-3 w-32 rounded-none" />
+              <Skeleton className="h-3 w-28 rounded-none" />
             </div>
           </div>
         </CardContent>
@@ -162,19 +162,19 @@ export function DashboardSkeleton() {
 
       {/* Tabs skeleton */}
       <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-10 w-64 rounded-none" />
         
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2">
             <RecentTransactionsSkeleton />
           </div>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
+          <Card className="rounded-none border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))]">
+            <CardHeader className="border-b-4 border-foreground bg-foreground/5">
+              <Skeleton className="h-5 w-32 rounded-none" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4 pt-6">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
+                <Skeleton key={i} className="h-10 w-full rounded-none" />
               ))}
             </CardContent>
           </Card>
@@ -187,10 +187,10 @@ export function DashboardSkeleton() {
 // Animated loading dots
 export function LoadingDots({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+    <div className={cn("flex items-center gap-2", className)}>
+      <div className="w-3 h-3 bg-foreground border-2 border-background animate-bounce [animation-delay:-0.3s] shadow-[2px_2px_0px_hsl(var(--foreground))]" />
+      <div className="w-3 h-3 bg-foreground border-2 border-background animate-bounce [animation-delay:-0.15s] shadow-[2px_2px_0px_hsl(var(--foreground))]" />
+      <div className="w-3 h-3 bg-foreground border-2 border-background animate-bounce shadow-[2px_2px_0px_hsl(var(--foreground))]" />
     </div>
   );
 }
@@ -198,8 +198,8 @@ export function LoadingDots({ className }: { className?: string }) {
 // Pulse loading indicator
 export function PulseLoader({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center justify-center", className)}>
-      <div className="w-8 h-8 bg-primary rounded-full animate-pulse" />
+    <div className={cn("flex items-center justify-center p-4 border-4 border-foreground border-dashed bg-foreground/5", className)}>
+      <div className="w-10 h-10 bg-chartreuse border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] animate-pulse" />
     </div>
   );
 }

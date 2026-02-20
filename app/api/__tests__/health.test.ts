@@ -1,12 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET } from '../health/route';
 
 // Mock Supabase client
-vi.mock('@supabase/ssr', () => ({
-  createServerClient: vi.fn(() => ({
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: vi.fn(() => ({
     from: vi.fn(() => ({
       select: vi.fn(() => ({
-        limit: vi.fn(() => Promise.resolve({ data: [{ id: 1 }], error: null })),
+        limit: vi.fn(() => ({
+          maybeSingle: vi.fn(() => Promise.resolve({ data: { id: 1 }, error: null })),
+        })),
       })),
     })),
     auth: {
@@ -28,11 +30,21 @@ vi.mock('next/headers', () => ({
 describe('Health API Route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://mock.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'mock-key');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('should return health status', async () => {
     const response = await GET();
     const data = await response.json();
+
+    if (response.status !== 200) {
+      console.log('Health Check Failed:', JSON.stringify(data, null, 2));
+    }
 
     expect(response.status).toBe(200);
     expect(data).toHaveProperty('status');

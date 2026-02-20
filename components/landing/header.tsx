@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { Menu, X, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/ui/logo';
 import { cn } from '@/lib/utils';
 import { NAV_ITEMS } from './config/landing-config';
 import { scrollToSection as scrollToSectionUtil } from './utils/scroll-utils';
@@ -15,175 +14,129 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
 
-  // Handle scroll effect for background changes only
   useMotionValueEvent(scrollY, 'change', (latest) => {
-    setScrolled(latest > 100);
+    setScrolled(latest > 50);
   });
 
-  // Scroll to section smoothly
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
-    scrollToSectionUtil(id, 100);
+    scrollToSectionUtil(id, 80);
   };
 
   return (
-    <motion.header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-        // Force solid background on mobile, conditional on desktop
-        'bg-background md:bg-transparent',
-        scrolled
-          ? 'md:bg-background/80 md:backdrop-blur-xl border-b border-border/50 shadow-lg'
-          : 'md:bg-gradient-to-r md:from-background/20 md:via-background/10 md:to-background/20 md:backdrop-blur-sm',
-        // Always solid on mobile when menu is open
-        mobileMenuOpen ? 'bg-background shadow-lg border-b' : ''
-      )}
-      initial={{ y: -100 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-    >
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo - Professional and clean */}
-          <motion.div
-            className="flex items-center gap-3 relative z-50"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          >
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative transition-transform duration-200 group-hover:scale-105">
-                <Logo size="sm" />
-              </div>
-              <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-200">
-                Budget Buddy
-              </span>
-            </Link>
-          </motion.div>
+    <>
+      {/* Top Marquee for Editorial feel */}
+      <div className="bg-primary text-primary-foreground border-b-2 border-foreground py-1 overflow-hidden relative z-[60]">
+        <div className="whitespace-nowrap animate-marquee flex items-center font-mono text-xs font-bold tracking-widest uppercase">
+          <span className="mx-4">🔥 NEXT GEN FINTECH</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">ZERO SOFT SHADOWS</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">100% BRUTAL</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">OWN YOUR WEALTH</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">🔥 NEXT GEN FINTECH</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">ZERO SOFT SHADOWS</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">100% BRUTAL</span>
+          <span className="mx-4">•</span>
+          <span className="mx-4">OWN YOUR WEALTH</span>
+        </div>
+      </div>
 
-          {/* Desktop Navigation - Clean and professional */}
-          <nav className="hidden md:flex items-center">
-            <div className="flex items-center gap-1">
+      <motion.header
+        className={cn(
+          'fixed w-full z-50 transition-all duration-300 border-b-2 border-foreground bg-paper/90 backdrop-blur-md',
+          scrolled ? 'top-0' : 'top-6'
+        )}
+      >
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-stretch justify-between h-16 md:h-20">
+            {/* Logo */}
+            <div className="flex items-center border-r-2 border-transparent md:border-foreground pr-8">
+              <Link href="/" className="flex items-center group">
+                <span className="font-display font-bold text-2xl uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors bg-foreground text-background px-3 py-1 group-hover:bg-primary group-hover:text-primary-foreground">
+                  Budget Buddy
+                </span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex flex-1 items-stretch">
               {NAV_ITEMS.map((item, index) => (
-                <motion.button
+                <button
                   key={item.name}
-                  className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md hover:bg-accent"
+                  className="px-6 flex items-center text-sm font-bold uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors border-r-2 border-foreground"
                   onClick={() => scrollToSection(item.href.substring(1))}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
                   {item.name}
-                </motion.button>
+                </button>
               ))}
-            </div>
-          </nav>
+            </nav>
 
-          <div className="hidden md:flex items-center gap-3">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <Button variant="ghost" asChild className="font-medium">
-                <Link href="/auth/login" prefetch={true}>
-                  Sign in
-                </Link>
-              </Button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.25 }}
-            >
-              <Button asChild className="font-medium">
-                <Link href="/auth/register" prefetch={true} className="flex items-center gap-2">
+            <div className="hidden md:flex items-center pl-6 gap-4 border-l-2 border-transparent md:border-foreground ml-auto">
+              <Link href="/auth/login" className="text-sm font-bold uppercase hover:underline underline-offset-4 tracking-widest mr-4">
+                Sign in
+              </Link>
+              <Button asChild className="rounded-none border-2 border-transparent md:border-l-foreground h-full shadow-none hover:translate-y-0 active:translate-y-0 active:shadow-none hover:shadow-none bg-primary text-primary-foreground hover:bg-foreground hover:text-background border-y-0 border-r-0">
+                <Link href="/auth/register" prefetch={true} className="flex flex-row items-center gap-2 h-full">
                   Get Started
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
-            </motion.div>
-          </div>
+            </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="relative p-2.5 rounded-lg border border-border hover:bg-accent transition-colors duration-200"
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center border-l-2 border-foreground pl-4 ml-4">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 border-2 border-foreground bg-primary text-primary-foreground focus:outline-none shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? <X size={24} strokeWidth={3} /> : <Menu size={24} strokeWidth={3} />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile menu (sliding panel) */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            className="fixed inset-0 z-[60] md:hidden bg-black/80 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setMobileMenuOpen(false)}
-          >
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-64 bg-background border-l z-[70] flex flex-col shadow-2xl"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ backgroundColor: 'hsl(var(--background))' }} // Force solid background
+              className="fixed inset-x-0 top-full bg-paper border-b-2 border-foreground z-[60] flex flex-col md:hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
             >
-              <div className="p-4 border-b flex justify-between items-center">
-                <div className="font-bold">Navigation</div>
-                <motion.button
-                  onClick={() => setMobileMenuOpen(false)}
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <X size={20} />
-                </motion.button>
-              </div>
-              <div className="flex flex-col p-4 space-y-4">
-                {['Features', 'Pricing', 'Testimonials', 'About', 'Contact'].map((item, i) => (
-                  <motion.a
-                    key={item}
-                    href={`#${item.toLowerCase()}`}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground py-2 border-b border-muted/40"
-                    onClick={() => setMobileMenuOpen(false)}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1, duration: 0.3 }}
-                    whileHover={{ x: 5, color: 'var(--primary)' }}
+              <div className="flex flex-col border-t-2 border-foreground">
+                {NAV_ITEMS.map((item, i) => (
+                  <button
+                    key={item.name}
+                    className="flex text-left p-4 border-b-2 border-foreground text-lg font-bold uppercase tracking-widest hover:bg-foreground hover:text-background"
+                    onClick={() => scrollToSection(item.href.substring(1))}
                   >
-                    <ChevronRight size={16} className="text-primary" /> {item}
-                  </motion.a>
+                    {item.name}
+                  </button>
                 ))}
               </div>
-              <div className="mt-auto p-4 pb-safe pb-16 space-y-3">
-                <Button variant="outline" className="w-full justify-start" asChild>
+              <div className="p-6 bg-primary flex flex-col gap-4">
+                <Button variant="outline" className="w-full justify-center bg-background border-2 border-foreground" asChild>
                   <Link href="/auth/login" prefetch={true}>
-                    <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
-                      Sign in
-                    </motion.span>
+                    Sign in
                   </Link>
                 </Button>
-                <Button className="w-full justify-start" asChild>
+                <Button className="w-full justify-center border-2 border-foreground bg-foreground text-background" asChild>
                   <Link href="/auth/register" prefetch={true}>
-                    <motion.span className="flex items-center gap-2" whileHover={{ x: 5 }}>
-                      Get started
-                    </motion.span>
+                    Get started
                   </Link>
                 </Button>
               </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+          )}
+        </AnimatePresence>
+      </motion.header>
+    </>
   );
 }

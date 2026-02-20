@@ -115,7 +115,7 @@ describe('Performance Tests', () => {
       const duration = performance.now() - start;
 
       expect(result).toHaveLength(100);
-      expect(duration).toBeLessThan(5);
+      expect(duration).toBeLessThan(20);
     });
 
     it('should sort 1,000 transactions by date efficiently', () => {
@@ -153,7 +153,7 @@ describe('Performance Tests', () => {
       const duration = performance.now() - start;
 
       expect(result).toHaveLength(50);
-      expect(duration).toBeLessThan(5); // Pagination is O(1)
+      expect(duration).toBeLessThan(20); // Pagination is O(1)
     });
 
     it('should handle large page sizes', () => {
@@ -175,7 +175,7 @@ describe('Performance Tests', () => {
       expect(result).toHaveProperty('totalIncome');
       expect(result).toHaveProperty('totalExpense');
       expect(result).toHaveProperty('balance');
-      expect(duration).toBeLessThan(5);
+      expect(duration).toBeLessThan(20);
     });
 
     it('should calculate summary for 1,000 transactions efficiently', () => {

@@ -255,17 +255,17 @@ export function AlertNotificationSystem() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error': return 'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/20 dark:border-red-800';
-      case 'warning': return 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/20 dark:border-amber-800';
-      default: return 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/20 dark:border-blue-800';
+      case 'error': return 'bg-red-500 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
+      case 'warning': return 'bg-[#DFFF00] border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
+      default: return 'bg-blue-400 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'error': return <AlertTriangle className="h-4 w-4" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4" />;
-      default: return <Bell className="h-4 w-4" />;
+      case 'error': return <AlertTriangle className="h-5 w-5 stroke-[3]" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 stroke-[3]" />;
+      default: return <Bell className="h-5 w-5 stroke-[3]" />;
     }
   };
 
@@ -278,13 +278,13 @@ export function AlertNotificationSystem() {
         variant="outline"
         size="sm"
         onClick={() => setShowPanel(!showPanel)}
-        className="relative mb-2"
+        className="relative mb-2 h-14 w-14 rounded-none border-4 border-foreground bg-background hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-7 w-7 stroke-[3]" />
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
+            className="absolute -top-3 -right-3 h-7 w-7 p-0 flex items-center justify-center text-xs font-mono font-black border-2 border-foreground rounded-none bg-[#DFFF00] text-foreground"
           >
             {unreadCount}
           </Badge>
@@ -293,67 +293,70 @@ export function AlertNotificationSystem() {
 
       {/* Notification Panel */}
       {showPanel && (
-        <Card className="w-80 max-h-96 overflow-y-auto">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center justify-between">
+        <Card className="w-80 max-h-96 overflow-y-auto rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))] mb-4 bg-paper">
+          <CardHeader className="pb-3 border-b-4 border-foreground bg-foreground/5 p-4">
+            <CardTitle className="text-lg font-mono font-black uppercase tracking-widest flex items-center justify-between text-foreground">
               <span className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
+                <Bell className="h-5 w-5 stroke-[3]" />
                 Alerts
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPanel(false)}
+                className="rounded-none border-2 border-transparent hover:border-foreground"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5 stroke-[3]" />
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4 p-4">
             {notifications.length === 0 ? (
-              <div className="text-center text-muted-foreground py-4">
-                <CheckCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No alerts at this time</p>
+              <div className="text-center text-foreground py-6 border-4 border-foreground border-dashed bg-foreground/5">
+                <CheckCircle className="h-10 w-10 mx-auto mb-3 stroke-[3]" />
+                <p className="font-mono font-bold uppercase tracking-widest text-xs">No alerts at this time</p>
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={cn(
-                    "p-3 rounded-lg border text-sm",
+                    "p-0 rounded-none text-sm mb-4 last:mb-0 transition-all",
                     getSeverityColor(notification.severity),
-                    !notification.read && "ring-2 ring-primary/20"
+                    !notification.read && "outline outline-4 outline-foreground outline-offset-2"
                   )}
                 >
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between border-b-4 border-foreground bg-background/20 p-2">
                     <div className="flex items-center gap-2">
                       {getSeverityIcon(notification.severity)}
-                      <span className="font-medium">{notification.title}</span>
+                      <span className="font-mono font-black uppercase tracking-widest text-xs">{notification.title}</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => dismissNotification(notification.id)}
-                      className="h-6 w-6 p-0"
+                      className="h-6 w-6 p-0 rounded-none border-2 border-transparent hover:border-foreground hover:bg-foreground hover:text-background"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4 stroke-[3]" />
                     </Button>
                   </div>
-                  <p className="text-xs mb-2">{notification.message}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs opacity-70">
-                      {notification.triggeredAt.toLocaleTimeString()}
-                    </span>
-                    {!notification.read && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => markAsRead(notification.id)}
-                        className="h-6 px-2 text-xs"
-                      >
-                        Mark Read
-                      </Button>
-                    )}
+                  <div className="p-3 bg-background">
+                    <p className="font-mono text-xs font-bold mb-3">{notification.message}</p>
+                    <div className="flex items-center justify-between border-t-2 border-foreground pt-2">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
+                        {notification.triggeredAt.toLocaleTimeString()}
+                      </span>
+                      {!notification.read && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => markAsRead(notification.id)}
+                          className="h-6 px-2 text-[10px] font-mono font-bold uppercase tracking-widest border-2 border-foreground rounded-none hover:bg-foreground hover:text-background transition-colors"
+                        >
+                          Mark Read
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))

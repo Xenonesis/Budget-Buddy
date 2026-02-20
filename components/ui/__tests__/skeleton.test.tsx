@@ -12,7 +12,7 @@ describe('Skeleton Component', () => {
     it('should apply default styles', () => {
       const { container } = render(<Skeleton />);
       const skeleton = container.firstChild as HTMLElement;
-      expect(skeleton).toHaveClass('rounded-md', 'bg-muted', 'fast-skeleton');
+      expect(skeleton).toHaveClass('rounded-none', 'bg-foreground/5', 'fast-skeleton', 'border-2', 'border-foreground', 'border-dashed');
     });
 
     it('should apply custom className', () => {

@@ -55,12 +55,9 @@ function LoginContent() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden overflow-x-hidden">
-      <AnimatedBackground />
-
-      {/* Enhanced background elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-background relative overflow-hidden overflow-x-hidden">
+      {/* Brutalist Pattern Background */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
       {/* Success message from URL params */}
       <AnimatePresence>
@@ -71,13 +68,13 @@ function LoginContent() {
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4"
           >
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+            <div className="bg-[#00FF66] border-4 border-foreground p-4 shadow-[8px_8px_0px_hsl(var(--foreground))]">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <CheckCircle2 className="h-6 w-6 text-foreground stroke-[3]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  <p className="text-sm font-mono font-bold uppercase tracking-widest text-foreground">
                     {successMessage}
                   </p>
                 </div>
@@ -90,34 +87,34 @@ function LoginContent() {
       <AnimatePresence>
         {showSuccessAnimation && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/90 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="bg-card/90 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-primary/20"
+              className="bg-paper border-4 border-foreground p-8 shadow-[16px_16px_0px_hsl(var(--foreground))]"
             >
               <div className="text-center space-y-4">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-                  className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center"
+                  className="mx-auto w-16 h-16 bg-[#DFFF00] border-4 border-foreground flex items-center justify-center shadow-[4px_4px_0px_hsl(var(--foreground))]"
                 >
-                  <CheckCircle2 className="w-8 h-8 text-primary" />
+                  <CheckCircle2 className="w-8 h-8 text-foreground stroke-[3]" />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <h3 className="text-xl font-semibold text-gradient">Welcome back!</h3>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    Redirecting to your dashboard...
+                  <h3 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">Welcome back!</h3>
+                  <p className="font-mono font-bold text-sm tracking-widest text-foreground mt-2">
+                    Redirecting to dashboard...
                   </p>
                 </motion.div>
               </div>
@@ -134,60 +131,27 @@ function LoginContent() {
       >
         <BackToHomeLink />
 
-        {/* Enhanced header with floating elements */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="relative"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-            className="absolute -top-4 -right-4 w-8 h-8 text-primary/20"
-          >
-            <Sparkles className="w-full h-full" />
-          </motion.div>
-
+        <div className="relative">
           <AuthCard
             title="Welcome back"
-            subtitle="Sign in to your account to continue your financial journey"
+            subtitle="Sign in to your account"
             error={error}
           >
             <AuthLogo />
           </AuthCard>
-        </motion.div>
+        </div>
 
-        {/* Enhanced form container */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="relative group"
-        >
-          {/* Glow effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="relative border-4 border-foreground bg-paper shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 mt-4 overflow-hidden transition-all duration-300">
+          <LoginForm
+            onSuccess={handleLoginSuccess}
+            onError={handleLoginError}
+            onStart={handleLoginStart}
+          />
 
-          <div className="relative bg-background/70 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8 overflow-hidden">
-            {/* Subtle animated border */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-50" />
-
-            <LoginForm
-              onSuccess={handleLoginSuccess}
-              onError={handleLoginError}
-              onStart={handleLoginStart}
-            />
-
-            <motion.div
-              className="mt-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.3 }}
-            >
-              <ForgotPasswordLink />
-            </motion.div>
+          <div className="mt-6 pt-4 border-t-4 border-foreground">
+            <ForgotPasswordLink />
           </div>
-        </motion.div>
+        </div>
 
         <SignUpPrompt />
       </motion.div>

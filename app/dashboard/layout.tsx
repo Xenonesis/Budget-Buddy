@@ -266,10 +266,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const itemRef = isLast ? lastNavItemRef : null;
 
       const commonProps = {
-        className: `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 relative group overflow-hidden ${
+        className: `flex items-center gap-3 px-4 py-3 font-mono font-bold text-sm uppercase transition-all duration-200 group border-2 ${
           isActive
-            ? 'bg-primary/15 text-primary shadow-sm'
-            : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'
+            ? 'bg-primary text-primary-foreground border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] scale-[1.02] z-10'
+            : 'bg-transparent text-foreground border-transparent hover:bg-foreground hover:text-background hover:border-foreground hover:shadow-[4px_4px_0px_hsl(var(--primary))] hover:-translate-y-1 hover:translate-x-1'
         }`,
         onClick,
         title: collapsed ? item.title : undefined,
@@ -280,21 +280,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       };
 
       return (
-        <li>
+        <li className="mb-2">
           {isExternal ? (
             <a href={item.href} target="_blank" rel="noopener noreferrer" {...commonProps}>
-              {/* Hover animation background */}
+              {/* Icon */}
               <span
-                className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`}
-                aria-hidden="true"
-              ></span>
-
-              {/* Icon with animation */}
-              <span
-                className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
+                className={`relative z-10 flex items-center justify-center transition-all duration-200 ${
                   isActive
-                    ? 'scale-110 text-primary'
-                    : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
+                    ? 'text-primary-foreground'
+                    : 'text-foreground group-hover:text-background'
                 }`}
                 aria-hidden="true"
               >
@@ -303,32 +297,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Title text */}
               <span
-                className={`relative z-10 transition-all duration-300 ${
+                className={`relative z-10 transition-all duration-200 tracking-widest ${
                   collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
                 }`}
               >
                 {item.title}
               </span>
 
-              {/* Active indicator */}
-              {isActive && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
-                  aria-hidden="true"
-                ></span>
-              )}
-
-              {/* Collapsed hover indicator */}
-              {collapsed && (
-                <span
-                  className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300"
-                  aria-hidden="true"
-                ></span>
-              )}
-
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
-                <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
+                <kbd className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}>
                   {item.shortcutKey}
                 </kbd>
               )}
@@ -340,18 +318,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               aria-current={isActive ? 'page' : undefined}
               ref={itemRef}
             >
-              {/* Hover animation background */}
+              {/* Icon */}
               <span
-                className={`absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-30' : ''}`}
-                aria-hidden="true"
-              ></span>
-
-              {/* Icon with animation */}
-              <span
-                className={`relative z-10 flex items-center justify-center transition-all duration-300 ${
+                className={`relative z-10 flex items-center justify-center transition-all duration-200 ${
                   isActive
-                    ? 'scale-110 text-primary'
-                    : 'text-muted-foreground group-hover:scale-110 group-hover:text-primary/80'
+                    ? 'text-primary-foreground'
+                    : 'text-foreground group-hover:text-background'
                 }`}
                 aria-hidden="true"
               >
@@ -360,32 +332,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Title text */}
               <span
-                className={`relative z-10 transition-all duration-300 ${
+                className={`relative z-10 transition-all duration-200 tracking-widest ${
                   collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
                 }`}
               >
                 {item.title}
               </span>
 
-              {/* Active indicator */}
-              {isActive && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
-                  aria-hidden="true"
-                ></span>
-              )}
-
-              {/* Collapsed hover indicator */}
-              {collapsed && (
-                <span
-                  className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-primary/0 group-hover:bg-primary rounded-l-full transition-all duration-300"
-                  aria-hidden="true"
-                ></span>
-              )}
-
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
-                <kbd className="relative z-10 hidden sm:flex items-center justify-center ml-auto rounded bg-muted/70 text-muted-foreground px-1.5 py-0.5 text-[10px] font-mono font-medium">
+                <kbd className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}>
                   {item.shortcutKey}
                 </kbd>
               )}
@@ -402,8 +358,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (collapsed) return null;
 
       return (
-        <div className="mb-2 px-4 transition-all duration-300">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+        <div className="mb-4 px-4 transition-all duration-300 py-1 bg-foreground text-background border-y-2 border-foreground mt-4">
+          <p className="text-xs font-bold uppercase tracking-widest">
             {title}
           </p>
         </div>
@@ -620,30 +576,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </a>
 
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-14 md:h-16 items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-md pt-safe md:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <div className="flex flex-col items-center">
-            <Logo
-              size="sm"
-              className="transition-transform duration-300 hover:scale-105"
-              animated
-            />
-            <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 tracking-wide">
-              Smart Money Management
-            </span>
-          </div>
+      <header className="sticky top-0 z-30 flex h-16 md:h-16 items-center justify-between border-b-4 border-foreground bg-paper px-4 shadow-[0px_4px_0px_hsl(var(--foreground))] pt-safe md:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2 font-display font-black uppercase tracking-widest text-foreground bg-foreground text-background px-3 py-1 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">
+          <Logo size="sm" /> BUDGET BUDDY
         </Link>
         <div className="flex items-center gap-3">
           <NotificationCenter />
           <ThemeToggle iconOnly />
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-transform"
+            className="flex h-10 w-10 items-center justify-center border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[0px_0px_0px_transparent] transition-all focus:outline-none"
             onClick={toggleSidebar}
             aria-label="Toggle menu"
             aria-expanded={isMobileSidebarOpen}
             aria-controls="mobile-sidebar"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-6 w-6" strokeWidth={3} />
           </button>
         </div>
       </header>
@@ -662,7 +609,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ref={sidebarRef}
         id="mobile-sidebar"
         className={cn(
-          'fixed top-0 left-0 z-[70] h-full bg-background/95 border-r backdrop-blur-sm md:hidden',
+          'fixed top-0 left-0 z-[70] h-full bg-paper border-r-4 border-foreground md:hidden',
           'transition-transform duration-300 ease-in-out transform',
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
@@ -671,42 +618,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         aria-modal="true"
         aria-label="Navigation"
       >
-        <div className="flex flex-col h-full w-72 pt-5 pb-4 px-4 overflow-y-auto overflow-x-hidden">
+        <div className="flex flex-col h-full w-80 pt-5 pb-4 px-4 overflow-y-auto overflow-x-hidden">
           <div className="flex items-center justify-between mb-6 px-3">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center bg-foreground text-background border-2 border-foreground px-4 py-2 shadow-[4px_4px_0px_hsl(var(--foreground))]">
               <Logo
                 size="md"
                 className="transition-transform duration-300 hover:scale-105"
                 animated
               />
-              <span className="text-[10px] sm:text-xs text-muted-foreground mt-1 tracking-wide">
-                Smart Money Management
+              <span className="text-[10px] sm:text-xs font-mono font-bold tracking-widest mt-1 uppercase">
+                SMM
               </span>
             </div>
             <button
               type="button"
-              className="text-muted-foreground rounded-full p-2 hover:bg-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 transition-colors"
+              className="border-2 border-foreground bg-background text-foreground rounded-none p-2 hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 focus:outline-none transition-all"
               onClick={() => setIsMobileSidebarOpen(false)}
               aria-label="Close sidebar"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" strokeWidth={3} />
             </button>
           </div>
 
           {/* User section */}
-          <div className="flex items-center justify-between px-3 py-4 mb-2 bg-accent/20 rounded-lg border border-accent/10">
+          <div className="flex items-center justify-between px-4 py-4 mb-4 bg-primary text-primary-foreground border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))] relative">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary transition-all duration-300 hover:bg-primary/20 user-avatar ring-2 ring-primary/20">
+                <div className="flex h-12 w-12 items-center justify-center border-2 border-foreground bg-background text-foreground font-display font-black text-xl">
                   {user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}
                 </div>
-                <div className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
               </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium truncate max-w-[150px]">
+              <div className="flex flex-col gap-0">
+                <p className="text-sm font-bold font-mono uppercase truncate max-w-[120px] bg-background text-foreground px-1 py-0.5">
                   {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
                 </p>
-                <p className="text-xs text-muted-foreground truncate max-w-[150px]">
+                <p className="text-xs font-mono font-bold mt-1 truncate max-w-[120px] opacity-80">
                   {user?.email || ''}
                 </p>
               </div>
@@ -714,12 +660,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center gap-2">
               <ThemeToggle iconOnly size="sm" />
               <button
-                className="rounded-full p-2 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
+                className="border-2 border-foreground bg-background text-foreground p-2 hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[2px_2px_0px_hsl(var(--foreground))] hover:translate-x-1 hover:-translate-y-1 transition-all"
                 onClick={handleSignOut}
                 title="Sign out"
                 aria-label="Sign out"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4" strokeWidth={3} />
               </button>
             </div>
           </div>
@@ -763,8 +709,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           <div className="pt-4 mt-auto">
-            <div className="px-3 py-3 bg-primary/5 rounded-lg text-center">
-              <span className="text-xs text-muted-foreground">Budget Buddy v{appVersion}</span>
+            <div className="px-4 py-3 bg-foreground text-background border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] text-center">
+              <span className="text-xs font-mono font-bold uppercase tracking-widest">BUDGET BUDDY V{appVersion}</span>
             </div>
           </div>
         </div>
@@ -773,7 +719,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Desktop sidebar */}
       <div
         className={cn(
-          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col border-r z-30 bg-background/95 backdrop-blur-sm shadow-sm',
+          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col z-30 bg-paper border-r-4 border-foreground shadow-[8px_0px_0px_hsl(var(--foreground))]',
           'transition-all duration-300 ease-in-out',
           collapsed ? 'w-[90px]' : 'w-64'
         )}
@@ -816,19 +762,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Toggle button - always visible */}
             <button
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-md bg-accent/30 hover:bg-accent/60 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 group relative sidebar-toggle-enhanced overflow-visible',
-                collapsed ? 'sidebar-collapsed-toggle bg-background hover:bg-accent/50' : ''
+                'flex h-10 w-10 items-center justify-center border-2 border-foreground bg-foreground text-background focus:outline-none hover:bg-primary hover:text-primary-foreground hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-200 group relative overflow-visible shadow-[2px_2px_0px_hsl(var(--primary))]',
+                collapsed ? 'bg-background text-foreground' : ''
               )}
               onClick={toggleCollapsed}
               aria-label="Toggle sidebar"
               aria-expanded={!collapsed}
               title={collapsed ? 'Expand sidebar (Alt+S)' : 'Collapse sidebar (Alt+S)'}
             >
-              {/* Background highlight effect */}
-              <span
-                className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                aria-hidden="true"
-              ></span>
 
               <div className="relative z-10">
                 <ChevronLeft
@@ -856,19 +797,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* User section */}
-          <div className={cn('px-3 py-4 flex', collapsed ? 'justify-center mt-2' : '')}>
+          <div className={cn('px-4 py-6 flex border-b-4 border-foreground mb-4', collapsed ? 'justify-center' : '')}>
             <div
               className={cn(
                 'flex items-center',
                 collapsed
                   ? 'flex-col'
-                  : 'space-x-3 bg-accent/20 rounded-lg border border-accent/10 p-3 w-full'
+                  : 'space-x-3 bg-primary text-primary-foreground border-2 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] p-3 w-full'
               )}
             >
               <div className="relative">
                 <div
                   className={cn(
-                    'rounded-full overflow-hidden border-2 border-primary/30',
+                    'border-2 border-foreground bg-background text-foreground flex items-center justify-center font-display font-black',
                     collapsed ? 'w-10 h-10' : 'w-12 h-12'
                   )}
                 >
@@ -881,19 +822,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className="object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-primary/15 text-primary">
+                    <span>
                       {user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}
-                    </div>
+                    </span>
                   )}
                 </div>
-                <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-primary animate-pulse" />
               </div>
               {!collapsed && (
-                <div className="flex flex-col gap-1">
-                  <div className="font-medium truncate max-w-[150px]">
+                <div className="flex flex-col gap-0 overflow-hidden">
+                  <div className="font-mono font-bold uppercase truncate max-w-[130px] text-sm tracking-tight text-foreground bg-background px-1">
                     {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
                   </div>
-                  <div className="text-sm text-muted-foreground truncate max-w-[150px]">
+                  <div className="text-xs font-mono truncate max-w-[130px] mt-1 line-clamp-1">
                     {user?.email || ''}
                   </div>
                 </div>
@@ -947,34 +887,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sidebar footer */}
-          <div className={cn('py-4 flex-shrink-0', collapsed ? 'text-center px-2' : 'px-4')}>
+          <div className={cn('py-6 flex-shrink-0 border-t-4 border-foreground mt-auto bg-foreground text-background', collapsed ? 'text-center px-2' : 'px-4')}>
             {collapsed ? (
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-4">
                 <NotificationCenter />
                 <ThemeToggle iconOnly size="sm" />
-                <div className="text-xs text-muted-foreground bg-primary/5 py-2 rounded-md">
-                  v{appVersion}
+                <div className="text-[10px] font-mono font-bold uppercase py-2">
+                  V{appVersion}
                 </div>
               </div>
             ) : (
               <>
-                <div className="text-xs text-muted-foreground bg-primary/5 rounded-lg py-3 text-center">
-                  Budget Buddy v{appVersion} •{' '}
-                  <Link href="/dashboard/about" className="hover:underline text-primary/80">
-                    About
-                  </Link>
+                <div className="text-xs font-mono font-bold uppercase py-2 text-center border-2 border-transparent hover:border-background hover:bg-background/20 transition-colors cursor-pointer mb-4">
+                  Budget Buddy v{appVersion}
                 </div>
 
-                <div className="flex items-center justify-between mt-4 px-2">
+                <div className="flex items-center justify-between px-2">
                   <NotificationCenter />
                   <ThemeToggle iconOnly size="sm" />
                   <button
-                    className="rounded-full p-2 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 active:scale-95 transition-all duration-200"
+                    className="border-2 border-background p-2 hover:bg-primary hover:text-primary-foreground hover:border-foreground hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-200"
                     onClick={handleSignOut}
-                    title="Sign out"
+                    title="SIGN OUT"
                     aria-label="Sign out"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-4 w-4" strokeWidth={3} />
                   </button>
                 </div>
               </>

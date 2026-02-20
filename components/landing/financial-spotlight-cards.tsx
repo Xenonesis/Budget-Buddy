@@ -1,7 +1,6 @@
 'use client';
 
 import { memo } from 'react';
-import { CardSpotlight } from '@/components/ui/card-spotlight';
 import {
   Wallet,
   PieChart,
@@ -96,7 +95,7 @@ const financialFeatures = [
   },
 ] as const;
 
-// Memoized individual card component for better performance
+// Brutalist individual card component for maximum impact
 const FeatureCard = memo(function FeatureCard({
   feature,
   index,
@@ -107,94 +106,66 @@ const FeatureCard = memo(function FeatureCard({
   const Icon = feature.icon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="w-full group transform-gpu"
+    <div
+      className="w-full group"
     >
-      <CardSpotlight
-        className="h-full bg-background/95 border-border/50 backdrop-blur-sm hover:bg-background/98 transition-all duration-300 p-4 sm:p-6 hover:shadow-xl hover:shadow-primary/5 group-hover:border-primary/30"
-        color={feature.color}
-        radius={300}
+      <div
+        className="h-full bg-paper border-2 border-foreground p-6 sm:p-8 relative transition-transform duration-200 hover:-translate-y-1 shadow-[8px_8px_0px_hsl(var(--foreground))] hover:shadow-[12px_12px_0px_hsl(var(--foreground))] active:translate-y-1 active:shadow-[0px_0px_0px_hsl(var(--foreground))]"
       >
-        {/* Highlight Badge - simplified animation */}
-        <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-10 transform group-hover:scale-105 transition-transform duration-300">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-violet-500 rounded-full blur-sm opacity-70"></div>
-            <div className="relative bg-gradient-to-r from-primary to-violet-500 text-white text-xs font-semibold px-2 py-1 sm:px-3 sm:py-1 rounded-full shadow-lg border border-white/20">
-              {feature.highlight}
-            </div>
+        {/* Highlight Badge */}
+        <div className="absolute -top-3 -right-3 z-10 transition-transform duration-200 group-hover:scale-105">
+          <div className="bg-primary text-primary-foreground font-mono text-xs font-bold uppercase tracking-widest px-3 py-1 border-2 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]">
+            {feature.highlight}
           </div>
         </div>
 
-        {/* Icon with simplified hover effects */}
+        {/* Brutalist Icon Block */}
         <div
-          className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-xl mb-4 sm:mb-6 relative overflow-hidden transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
-          style={{ backgroundColor: `${feature.color}15` }}
+          className="flex h-16 w-16 items-center justify-center mb-6 border-2 border-foreground bg-foreground text-background shadow-[4px_4px_0px_hsl(var(--primary))] group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200"
         >
-          <div
-            className="relative z-10 transition-colors duration-300 [&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6"
-            style={{ color: feature.color }}
-          >
-            <Icon className="h-8 w-8" />
-          </div>
+          <Icon className="h-8 w-8" strokeWidth={2} />
         </div>
 
         {/* Content */}
         <div className="relative z-20">
-          <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-foreground">
+          <h3 className="text-xl font-bold mb-3 text-foreground font-display uppercase tracking-wider">
             {feature.title}
           </h3>
 
-          <p className="text-muted-foreground mb-4 sm:mb-6 text-sm leading-relaxed">
+          <p className="text-foreground font-medium mb-6 text-sm leading-relaxed border-l-4 border-primary pl-4 bg-primary/5 py-2">
             {feature.description}
           </p>
 
-          {/* Steps List - simplified animations */}
-          <div className="space-y-3">
+          {/* Steps List */}
+          <div className="space-y-4 font-mono text-sm border-t-2 border-foreground/20 pt-6">
             {feature.steps.map((step, stepIndex) => (
               <div
                 key={stepIndex}
-                className="flex items-start gap-3 group/step transition-transform duration-200 hover:translate-x-1"
+                className="flex items-start gap-3 group/step"
               >
                 <div
-                  className="flex-shrink-0 rounded-full p-1 mt-0.5 transition-colors duration-200 group-hover/step:scale-110"
-                  style={{ backgroundColor: `${feature.color}20` }}
+                  className="flex-shrink-0 border-2 border-foreground bg-paper group-hover/step:bg-primary group-hover/step:text-primary-foreground transition-colors duration-200"
                 >
                   <Check
-                    size={12}
-                    className="transition-colors duration-200"
-                    style={{ color: feature.color }}
+                    size={16}
+                    strokeWidth={3}
                   />
                 </div>
-                <span className="text-sm text-muted-foreground group-hover/step:text-foreground transition-colors duration-200">
+                <span className="text-foreground font-semibold uppercase tracking-tight">
                   {step}
                 </span>
               </div>
             ))}
           </div>
-
-          {/* Bottom accent line - simplified */}
-          <div
-            className="mt-6 h-1 rounded-full w-full"
-            style={{ backgroundColor: `${feature.color}30` }}
-          >
-            <div
-              className="h-full rounded-full w-2/5 transition-all duration-300 group-hover:w-3/5"
-              style={{ backgroundColor: feature.color }}
-            />
-          </div>
         </div>
-      </CardSpotlight>
-    </motion.div>
+      </div>
+    </div>
   );
 });
 
 export const FinancialSpotlightCards = memo(function FinancialSpotlightCards() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 md:mt-16">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 sm:gap-12 mt-12 sm:mt-16 relative z-20">
       {financialFeatures.map((feature, index) => (
         <FeatureCard key={feature.title} feature={feature} index={index} />
       ))}

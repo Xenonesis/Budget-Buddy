@@ -466,7 +466,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         {magicLinkMode ? (
           <Button
             type="submit"
-            className="w-full h-12 relative overflow-hidden group"
+            className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-background hover:text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-0.5 font-mono font-bold uppercase transition-all rounded-none tracking-widest"
             disabled={loading || isLockedOut || !isEmailValid}
           >
             {loading ? (
@@ -500,7 +500,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => setMagicLinkMode(!magicLinkMode)}
-          className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1.5"
+          className="text-xs font-mono font-bold uppercase tracking-widest text-foreground bg-foreground/5 px-4 py-2 hover:bg-foreground hover:text-background border-2 border-transparent hover:border-foreground transition-all inline-flex items-center gap-2"
         >
           {magicLinkMode ? (
             <span>Use password instead</span>
@@ -520,10 +520,10 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         transition={{ delay: 0.8, duration: 0.3 }}
       >
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-muted-foreground/20" />
+          <span className="w-full border-t-2 border-foreground" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+        <div className="relative flex justify-center">
+          <span className="bg-paper px-4 font-mono font-bold uppercase tracking-widest text-foreground text-xs border-2 border-foreground">Or continue with</span>
         </div>
       </motion.div>
 

@@ -39,7 +39,7 @@ describe('Button Component', () => {
 
     it('should apply outline variant styles', () => {
       const { container } = render(<Button variant="outline">Outline</Button>);
-      expect(container.firstChild).toHaveClass('border');
+      expect(container.firstChild).toHaveClass('border-2', 'bg-background');
     });
 
     it('should apply secondary variant styles', () => {
@@ -59,12 +59,12 @@ describe('Button Component', () => {
 
     it('should apply success variant styles', () => {
       const { container } = render(<Button variant="success">Success</Button>);
-      expect(container.firstChild).toHaveClass('shadow-sm');
+      expect(container.firstChild).toHaveClass('bg-[hsl(var(--success))]');
     });
 
     it('should apply warning variant styles', () => {
       const { container } = render(<Button variant="warning">Warning</Button>);
-      expect(container.firstChild).toHaveClass('shadow-sm');
+      expect(container.firstChild).toHaveClass('bg-[hsl(var(--warning))]');
     });
   });
 

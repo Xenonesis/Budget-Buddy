@@ -17,10 +17,10 @@ export function FastSkeleton({
   const baseClasses = "fast-skeleton";
   
   const variants = {
-    default: "h-4 w-full rounded",
-    card: "h-24 w-full rounded-lg",
-    text: "h-4 rounded",
-    circle: "h-12 w-12 rounded-full"
+    default: "h-4 w-full rounded-none border-2 border-foreground border-dashed bg-foreground/5",
+    card: "h-24 w-full rounded-none border-4 border-foreground border-dashed bg-foreground/5 shadow-[4px_4px_0px_hsl(var(--foreground))]",
+    text: "h-4 rounded-none border-2 border-foreground border-dashed bg-foreground/5",
+    circle: "h-12 w-12 rounded-none border-2 border-foreground border-dashed bg-foreground/5"
   };
 
   if (lines > 1) {
@@ -67,8 +67,8 @@ export function FastDashboardSkeleton() {
       
       {/* Main content area */}
       <div className="space-y-6">
-        <FastSkeleton className="h-64 rounded-xl" />
-        <FastSkeleton className="h-48 rounded-xl" />
+        <FastSkeleton className="h-64 rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))]" />
+        <FastSkeleton className="h-48 rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))]" />
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ export function FastDashboardSkeleton() {
 // Fast transaction skeleton
 export function FastTransactionSkeleton() {
   return (
-    <div className="rounded-xl border bg-card p-5">
+    <div className="rounded-none border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-card p-5">
       <div className="flex items-center justify-between mb-4">
         <FastSkeleton className="h-6 w-48" />
         <FastSkeleton className="h-8 w-20" />

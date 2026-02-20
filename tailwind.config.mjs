@@ -27,6 +27,11 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-manrope)', 'sans-serif'],
+        display: ['var(--font-syne)', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'monospace'],
+      },
       screens: {
         'xs': '475px',
         '3xl': '1920px',
@@ -65,6 +70,23 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        chartreuse: {
+          DEFAULT: "#D4FF14",
+          50: '#fdffe5',
+          100: '#fafecc',
+          200: '#f5fe99',
+          300: '#effd66',
+          400: '#eaff33',
+          500: '#d4ff14',
+          600: '#aacc00',
+          700: '#809900',
+          800: '#556600',
+          900: '#2a3300',
+        },
+        obsidian: "#0A0A0A",
+        paper: "#F4F4F0",
+        vermilion: "#FF3300",
+        "int-blue": "#040DBF",
         // Color scheme variations
         blue: {
           primary: "hsl(221.2 83.2% 53.3%)",
@@ -139,6 +161,10 @@ const config = {
           from: { opacity: 0 },
           to: { opacity: 1 },
         },
+        "marquee": {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -146,6 +172,7 @@ const config = {
         "slide-in-left": "slide-in-left 0.3s ease-out forwards",
         "slide-out-left": "slide-out-left 0.3s ease-in forwards",
         "fade-in": "fade-in 0.3s ease-in-out",
+        "marquee": "marquee 25s linear infinite",
       },
     },
   },

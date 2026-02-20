@@ -38,23 +38,23 @@ export function useNotifications() {
 const notificationStyles = {
   success: {
     icon: CheckCircle,
-    colors: "bg-green-50 border-green-200 text-green-800 dark:bg-green-950/50 dark:border-green-800 dark:text-green-300",
-    iconColor: "text-green-600 dark:text-green-400"
+    colors: "bg-green-400 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] rounded-none",
+    iconColor: "text-foreground stroke-[3]"
   },
   error: {
     icon: AlertCircle,
-    colors: "bg-red-50 border-red-200 text-red-800 dark:bg-red-950/50 dark:border-red-800 dark:text-red-300",
-    iconColor: "text-red-600 dark:text-red-400"
+    colors: "bg-red-500 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] rounded-none",
+    iconColor: "text-foreground stroke-[3]"
   },
   warning: {
     icon: AlertTriangle,
-    colors: "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-950/50 dark:border-yellow-800 dark:text-yellow-300",
-    iconColor: "text-yellow-600 dark:text-yellow-400"
+    colors: "bg-[#DFFF00] border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] rounded-none",
+    iconColor: "text-foreground stroke-[3]"
   },
   info: {
     icon: Info,
-    colors: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/50 dark:border-blue-800 dark:text-blue-300",
-    iconColor: "text-blue-600 dark:text-blue-400"
+    colors: "bg-blue-400 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] rounded-none",
+    iconColor: "text-foreground stroke-[3]"
   }
 };
 
@@ -80,17 +80,19 @@ function NotificationItem({
 
   return (
     <Card className={cn(
-      "border shadow-lg transition-all duration-300 animate-in slide-in-from-right-full",
+      "transition-all duration-300 animate-in slide-in-from-right-full rounded-none overflow-hidden",
       style.colors
     )}>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <Icon className={cn("h-5 w-5 mt-0.5 flex-shrink-0", style.iconColor)} />
+      <CardContent className="p-0">
+        <div className="flex items-stretch">
+          <div className="flex items-center justify-center p-4 border-r-4 border-foreground bg-background/20">
+            <Icon className={cn("h-6 w-6 flex-shrink-0", style.iconColor)} />
+          </div>
           
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-sm">{notification.title}</h4>
+          <div className="flex-1 min-w-0 p-4">
+            <h4 className="font-mono font-black uppercase tracking-widest text-sm text-foreground">{notification.title}</h4>
             {notification.message && (
-              <p className="text-sm opacity-90 mt-1">{notification.message}</p>
+              <p className="font-mono font-bold text-xs text-foreground/90 mt-1">{notification.message}</p>
             )}
             
             {notification.action && (
@@ -98,21 +100,23 @@ function NotificationItem({
                 variant="ghost"
                 size="sm"
                 onClick={notification.action.onClick}
-                className="mt-2 h-8 px-3 text-xs hover:bg-white/20"
+                className="mt-3 h-8 px-3 text-xs font-mono font-bold uppercase border-2 border-foreground bg-foreground text-background hover:bg-background hover:text-foreground rounded-none"
               >
                 {notification.action.label}
               </Button>
             )}
           </div>
           
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onRemove(notification.id)}
-            className="h-6 w-6 p-0 hover:bg-white/20 flex-shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="p-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(notification.id)}
+              className="h-8 w-8 p-0 rounded-none border-2 border-transparent hover:border-foreground hover:bg-foreground hover:text-background text-foreground flex-shrink-0"
+            >
+              <X className="h-5 w-5 stroke-[3]" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

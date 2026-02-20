@@ -12,29 +12,16 @@ import { Mail, ArrowLeft, CheckCircle, AlertCircle, Shield, Clock, RefreshCw } f
 // AuthLogo component
 const AuthLogo = () => (
   <div className="flex items-center justify-center">
-    <motion.div
-      className="relative"
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="relative flex items-center justify-center h-16 w-16 transition-all duration-300">
-        <Image 
-          src="/logo.svg" 
-          alt="Budget Buddy Logo" 
-          width={48} 
-          height={48} 
-          className="h-12 w-12 transition-all duration-300"
-          priority={true} 
-        />
-      </div>
-      <motion.div 
-        className="absolute inset-0 rounded-full bg-primary/10 blur-sm -z-10"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+    <div className="relative border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-[#DFFF00] p-3 transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+      <Image 
+        src="/logo.svg" 
+        alt="Budget Buddy Logo" 
+        width={48} 
+        height={48} 
+        className="h-12 w-12"
+        priority={true} 
       />
-    </motion.div>
+    </div>
   </div>
 );
 
@@ -69,74 +56,25 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-gradient-to-br from-background via-background/95 to-primary/5 relative overflow-hidden overflow-x-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <motion.div 
-          className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/8 rounded-full blur-3xl opacity-60"
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.6, 0.4]
-          }}
-          transition={{ 
-            duration: 8, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-1/4 left-1/4 w-48 h-48 bg-violet-500/8 rounded-full blur-3xl opacity-60"
-          animate={{ 
-            scale: [1.2, 1, 1.2],
-            opacity: [0.6, 0.4, 0.6]
-          }}
-          transition={{ 
-            duration: 6, 
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 bg-background relative overflow-hidden overflow-x-hidden">
+      {/* Brutalist Pattern Background */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+      <div 
         className="w-full max-w-md space-y-8 relative z-10"
       >
         {/* Back to home link */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
-        >
+        <div>
           <Link 
             href="/auth/login" 
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            className="inline-flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors group border-2 border-transparent hover:border-foreground px-2 py-1"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            <ArrowLeft className="h-4 w-4 stroke-[3]" />
             Back to login
           </Link>
-        </motion.div>
+        </div>
 
-        <div className="bg-background/85 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8 relative overflow-hidden">
-          {/* Background animation */}
-          <div className="absolute inset-0 -z-10">
-            <motion.div 
-              className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 via-transparent to-violet-500/5 rounded-2xl"
-              animate={{ 
-                backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-              }}
-              transition={{ 
-                duration: 15, 
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              style={{
-                backgroundSize: '400% 400%'
-              }}
-            />
-          </div>
+        <div className="bg-paper border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 relative overflow-hidden">
 
           <AnimatePresence mode="wait">
             {!showSuccessState ? (
@@ -148,46 +86,33 @@ export default function ResetPasswordPage() {
                 transition={{ duration: 0.3 }}
               >
                 {/* Header */}
-                <div className="space-y-4 text-center mb-8">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  >
+                <div className="space-y-4 text-center mb-8 border-b-4 border-foreground pb-6">
+                  <div className="mx-auto mb-6">
                     <AuthLogo />
-                  </motion.div>
+                  </div>
                   <div>
-                    <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary via-violet-500 to-indigo-500 bg-clip-text text-transparent">
+                    <h1 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">
                       Reset your password
                     </h1>
-                    <p className="text-muted-foreground text-sm mt-2 leading-relaxed">
-                      Enter your email address and we&apos;ll send you a link to reset your password
+                    <p className="text-foreground font-mono font-bold text-sm tracking-wide mt-4">
+                      Enter your email address and we'll send you a link to reset your password
                     </p>
                   </div>
                 </div>
 
                 {/* Error display */}
                 {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0, y: -10 }}
-                    animate={{ opacity: 1, height: "auto", y: 0 }}
-                    className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-sm border border-red-200 dark:border-red-800 flex items-center gap-3"
-                  >
-                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0" />
-                    <span className="text-red-700 dark:text-red-300">{error}</span>
-                  </motion.div>
+                  <div className="mb-6 bg-red-600/10 p-4 text-sm font-mono font-bold uppercase border-4 border-red-600 flex items-center gap-3 shadow-[4px_4px_0px_hsl(var(--red-600))]">
+                    <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 stroke-[3]" />
+                    <span className="text-red-700">{error}</span>
+                  </div>
                 )}
 
                 <form onSubmit={handleResetPassword} className="space-y-6">
-                  <motion.div 
-                    className="space-y-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.3 }}
-                  >
+                  <div className="space-y-2">
                     <label
                       htmlFor="email"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-xs font-mono font-bold uppercase tracking-widest text-foreground bg-foreground/5 py-1 px-2 inline-block border-2 border-transparent"
                     >
                       Email Address
                     </label>
@@ -196,58 +121,35 @@ export default function ResetPasswordPage() {
                         id="email"
                         type="email"
                         placeholder="name@example.com"
-                        className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-14 pl-4 pr-4 bg-background border-4 border-foreground rounded-none transition-all duration-200 text-base font-mono font-bold shadow-[4px_4px_0px_hsl(var(--foreground))] focus:shadow-[0px_0px_0px_transparent] focus:translate-x-1 focus:translate-y-1 outline-none w-full"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
-                      <motion.div 
-                        className="absolute bottom-0 left-0 h-[2px] bg-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: email ? "100%" : "0%" }}
-                        transition={{ duration: 0.3 }}
-                      />
                     </div>
-                  </motion.div>
+                  </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4, duration: 0.3 }}
-                    whileHover={{ scale: loading ? 1 : 1.02 }}
-                    whileTap={{ scale: loading ? 1 : 0.98 }}
-                  >
+                  <div className="pt-2">
                     <Button 
                       type="submit" 
-                      className="w-full h-11 relative overflow-hidden group"
+                      className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-primary hover:text-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                       disabled={loading || !email}
                     >
-                      <span className="relative z-10 flex items-center justify-center gap-2">
+                      <span className="relative z-10 flex items-center justify-center gap-3">
                         {loading ? (
                           <>
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                            Sending reset link...
+                            <RefreshCw className="h-6 w-6 animate-spin stroke-[3]" />
+                            <span className="text-base text-inherit">Sending link...</span>
                           </>
                         ) : (
                           <>
-                            <Mail className="h-4 w-4" />
-                            Send Reset Link
+                            <Mail className="h-6 w-6 stroke-[3]" />
+                            <span className="text-base text-inherit">Send Reset Link</span>
                           </>
                         )}
                       </span>
-                      {!loading && (
-                        <motion.div 
-                          className="absolute inset-0 bg-gradient-to-r from-primary to-violet-600"
-                          animate={{ x: ["0%", "100%"] }}
-                          transition={{ 
-                            duration: 2, 
-                            repeat: Infinity,
-                            repeatType: "reverse"
-                          }}
-                        />
-                      )}
                     </Button>
-                  </motion.div>
+                  </div>
                 </form>
               </motion.div>
             ) : (
@@ -258,86 +160,65 @@ export default function ResetPasswordPage() {
                 transition={{ duration: 0.4 }}
                 className="text-center space-y-6"
               >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center"
-                >
-                  <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
-                </motion.div>
+                <div className="mx-auto w-20 h-20 bg-green-500 border-4 border-foreground flex items-center justify-center shadow-[6px_6px_0px_hsl(var(--foreground))]">
+                  <CheckCircle className="w-10 h-10 text-foreground stroke-[3]" />
+                </div>
                 
-                <div className="space-y-3">
-                  <h2 className="text-xl font-semibold text-foreground">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">
                     Check your email
                   </h2>
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground text-sm">
-                      We've sent a password reset link to
+                  <div className="space-y-2 p-4 border-l-4 border-foreground bg-foreground/5 text-left font-mono font-bold text-sm">
+                    <p className="text-foreground">
+                      We've sent a password reset link to:
                     </p>
-                    <p className="font-medium text-foreground">{email}</p>
+                    <p className="text-primary bg-primary/10 px-2 py-1 inline-block border-2 border-primary">{email}</p>
                   </div>
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                <div className="bg-blue-300 border-4 border-foreground p-4 shadow-[4px_4px_0px_hsl(var(--foreground))] text-left mt-8">
+                  <div className="flex items-start gap-4">
+                    <Clock className="h-6 w-6 text-foreground flex-shrink-0 stroke-[3]" />
+                    <div>
+                      <p className="font-mono font-black uppercase tracking-widest text-foreground text-sm mb-1">
                         Link expires in 60 minutes
                       </p>
-                      <p className="text-blue-700 dark:text-blue-300 text-xs">
+                      <p className="font-mono text-foreground font-bold text-xs">
                         Didn't receive the email? Check your spam folder or request a new link.
                       </p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="space-y-3"
-                >
+                <div className="space-y-4 pt-6">
                   <Button 
                     onClick={() => setShowSuccessState(false)}
-                    variant="outline"
-                    className="w-full"
+                    className="w-full h-14 border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                   >
                     Send Another Link
                   </Button>
                   <Button 
                     onClick={() => router.push("/auth/login")}
-                    className="w-full"
+                    className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-primary hover:text-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                   >
                     Back to Login
                   </Button>
-                </motion.div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
         {/* Trust indicator */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.4 }}
-          className="text-center"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
-            <span className="text-xs text-green-700 dark:text-green-300 font-medium">
+        <div className="text-center mt-6">
+          <div className="inline-flex items-center gap-3 px-4 py-3 bg-green-500 border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]">
+            <Shield className="w-5 h-5 text-foreground stroke-[3]" />
+            <span className="text-sm font-mono font-black uppercase tracking-widest text-foreground">
               Secure Password Reset
             </span>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 } 

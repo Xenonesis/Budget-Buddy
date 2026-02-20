@@ -7,7 +7,7 @@ describe('Card Components', () => {
     it('should render card component', () => {
       const { container } = render(<Card>Card content</Card>);
       expect(container.firstChild).toBeInTheDocument();
-      expect(container.firstChild).toHaveClass('rounded-lg', 'border', 'bg-card');
+      expect(container.firstChild).toHaveClass('border-2', 'border-foreground', 'bg-card');
     });
 
     it('should apply custom className', () => {
@@ -22,12 +22,12 @@ describe('Card Components', () => {
 
     it('should apply shadow styles', () => {
       const { container } = render(<Card>Content</Card>);
-      expect(container.firstChild).toHaveClass('shadow-sm');
+      expect(container.firstChild).toHaveClass('shadow-[4px_4px_0px_hsl(var(--foreground))]');
     });
 
     it('should have hover effect', () => {
       const { container } = render(<Card>Content</Card>);
-      expect(container.firstChild).toHaveClass('hover:shadow-md');
+      expect(container.firstChild).toHaveClass('hover:shadow-[8px_8px_0px_hsl(var(--foreground))]');
     });
   });
 

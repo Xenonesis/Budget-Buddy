@@ -3,23 +3,31 @@ export const revalidate = 0;
 
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Syne, Manrope, JetBrains_Mono } from 'next/font/google';
 import ThemeProviderShell from '@/components/ThemeProviderShell';
 
-// Optimize font loading with display swap and preload
-const inter = Inter({
+// Display font - high impact, editorial
+const syne = Syne({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-syne',
   display: 'swap',
   preload: true,
-  fallback: [
-    'system-ui',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Segoe UI',
-    'Roboto',
-    'sans-serif',
-  ],
+});
+
+// Body font - clean, readable
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+  preload: true,
+});
+
+// Monospace - for financial data
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  preload: true,
 });
 
 // Define viewport config separately
@@ -96,7 +104,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="en" suppressHydrationWarning className={`${syne.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
       <head>
         {/* Preconnect to external domains for faster resource loading */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
