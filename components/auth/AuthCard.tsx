@@ -1,8 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
 
 interface AuthCardProps {
   title: string;
@@ -20,23 +18,33 @@ export const AuthCard = ({
   showBackLink = true,
 }: AuthCardProps) => {
   return (
-    <div className="relative group w-full max-w-md mx-auto">
-      <div className="bg-background border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 overflow-hidden transition-all duration-300">
-        <div className="space-y-4 text-center">
-          <div className="mx-auto mb-8 border-b-4 border-foreground pb-4">{children}</div>
-          <h1 className="text-4xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">
+    <motion.div
+      className="relative w-full max-w-md mx-auto"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="bg-card/80 backdrop-blur-xl rounded-2xl border border-border/60 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_32px_rgba(0,0,0,0.06)] p-8 sm:p-10 overflow-hidden">
+        <div className="space-y-2 text-center mb-8">
+          <div className="mb-6">{children}</div>
+          <h1 className="text-2xl sm:text-[1.75rem] font-display font-bold tracking-tight text-foreground">
             {title}
           </h1>
-          <p className="text-foreground font-mono font-bold text-sm uppercase tracking-widest bg-foreground/5 p-2 border-2 border-transparent">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             {subtitle}
           </p>
         </div>
 
         {error && (
-          <div className="mt-6 border-4 border-red-500 bg-red-500/10 p-4 text-sm font-mono font-bold uppercase tracking-widest flex items-center gap-3 text-red-600 shadow-[4px_4px_0px_hsl(var(--red-500))]">
+          <motion.div
+            className="mb-6 rounded-lg bg-destructive/8 border border-destructive/20 px-4 py-3 text-sm flex items-start gap-2.5 text-destructive"
+            initial={{ opacity: 0, height: 0, y: -8 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 flex-shrink-0"
+              className="h-4 w-4 flex-shrink-0 mt-0.5"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -46,10 +54,10 @@ export const AuthCard = ({
                 clipRule="evenodd"
               />
             </svg>
-            <span>{error}</span>
-          </div>
+            <span className="font-medium">{error}</span>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

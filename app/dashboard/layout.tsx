@@ -266,11 +266,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const itemRef = isLast ? lastNavItemRef : null;
 
       const commonProps = {
-        className: `flex items-center gap-3 px-4 py-3 font-mono font-bold text-sm uppercase transition-all duration-200 group border-2 ${
+        className: cn(
+          "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group relative overflow-hidden",
           isActive
-            ? 'bg-primary text-primary-foreground border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] scale-[1.02] z-10'
-            : 'bg-transparent text-foreground border-transparent hover:bg-foreground hover:text-background hover:border-foreground hover:shadow-[4px_4px_0px_hsl(var(--primary))] hover:-translate-y-1 hover:translate-x-1'
-        }`,
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+        ),
         onClick,
         title: collapsed ? item.title : undefined,
         'data-testid': `nav-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`,
@@ -280,16 +281,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       };
 
       return (
-        <li className="mb-2">
+        <li className="mb-1">
           {isExternal ? (
             <a href={item.href} target="_blank" rel="noopener noreferrer" {...commonProps}>
+              {/* Active indicator */}
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+              )}
+              
               {/* Icon */}
               <span
-                className={`relative z-10 flex items-center justify-center transition-all duration-200 ${
-                  isActive
-                    ? 'text-primary-foreground'
-                    : 'text-foreground group-hover:text-background'
-                }`}
+                className={cn(
+                  "relative z-10 flex items-center justify-center transition-colors duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )}
                 aria-hidden="true"
               >
                 {item.icon}
@@ -297,9 +302,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Title text */}
               <span
-                className={`relative z-10 transition-all duration-200 tracking-widest ${
-                  collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-                }`}
+                className={cn(
+                  "relative z-10 transition-all duration-200",
+                  collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                )}
               >
                 {item.title}
               </span>
@@ -307,7 +313,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
                 <kbd
-                  className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}
+                  className="relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-0.5 text-[10px] font-medium rounded-md bg-muted text-muted-foreground border border-border"
                 >
                   {item.shortcutKey}
                 </kbd>
@@ -320,13 +326,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               aria-current={isActive ? 'page' : undefined}
               ref={itemRef}
             >
+              {/* Active indicator */}
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+              )}
+
               {/* Icon */}
               <span
-                className={`relative z-10 flex items-center justify-center transition-all duration-200 ${
-                  isActive
-                    ? 'text-primary-foreground'
-                    : 'text-foreground group-hover:text-background'
-                }`}
+                className={cn(
+                  "relative z-10 flex items-center justify-center transition-colors duration-200",
+                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )}
                 aria-hidden="true"
               >
                 {item.icon}
@@ -334,9 +344,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Title text */}
               <span
-                className={`relative z-10 transition-all duration-200 tracking-widest ${
-                  collapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-                }`}
+                className={cn(
+                  "relative z-10 transition-all duration-200",
+                  collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                )}
               >
                 {item.title}
               </span>
@@ -344,7 +355,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
                 <kbd
-                  className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}
+                  className="relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-0.5 text-[10px] font-medium rounded-md bg-muted text-muted-foreground border border-border"
                 >
                   {item.shortcutKey}
                 </kbd>
@@ -362,8 +373,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (collapsed) return null;
 
       return (
-        <div className="mb-4 px-4 transition-all duration-300 py-1 bg-foreground text-background border-y-2 border-foreground mt-4">
-          <p className="text-xs font-bold uppercase tracking-widest">{title}</p>
+        <div className="mb-2 px-4 transition-all duration-300 py-1 mt-4">
+          <p className="text-xs font-semibold tracking-wider text-muted-foreground">{title}</p>
         </div>
       );
     },
@@ -578,18 +589,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </a>
 
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-16 md:h-16 items-center justify-between border-b-4 border-foreground bg-background px-4 shadow-[0px_4px_0px_hsl(var(--foreground))] pt-safe md:hidden">
+      <header className="sticky top-0 z-30 flex h-16 md:h-18 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 pt-safe md:hidden">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 font-display font-black uppercase tracking-widest text-foreground bg-foreground text-background px-3 py-1 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]"
+          className="flex items-center gap-2 font-display font-semibold tracking-tight text-foreground"
         >
-          <Logo size="sm" /> BUDGET BUDDY
+          <Logo size="sm" /> Budget Buddy
         </Link>
         <div className="flex items-center gap-3">
           <NotificationCenter />
           <ThemeToggle iconOnly />
           <button
-            className="flex h-10 w-10 items-center justify-center border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[0px_0px_0px_transparent] transition-all focus:outline-none"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors focus:outline-none"
             onClick={toggleSidebar}
             aria-label="Toggle menu"
             aria-expanded={isMobileSidebarOpen}
@@ -614,8 +625,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ref={sidebarRef}
         id="mobile-sidebar"
         className={cn(
-          'fixed top-0 left-0 z-[70] h-full bg-background border-r-4 border-foreground md:hidden',
-          'transition-transform duration-300 ease-in-out transform',
+          'fixed top-0 left-0 z-[70] h-full bg-background border-r border-border md:hidden',
+          'transition-transform duration-300 ease-in-out transform shadow-xl',
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         aria-hidden={!isMobileSidebarOpen}
@@ -623,49 +634,49 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         aria-modal="true"
         aria-label="Navigation"
       >
-        <div className="flex flex-col h-full w-80 pt-5 pb-4 px-4 overflow-y-auto overflow-x-hidden">
-          <div className="flex items-center justify-between mb-6 px-3">
-            <div className="flex flex-col items-center bg-foreground text-background border-2 border-foreground px-4 py-2 shadow-[4px_4px_0px_hsl(var(--foreground))]">
+        <div className="flex flex-col h-full w-[280px] pt-5 pb-4 px-4 overflow-y-auto overflow-x-hidden">
+          <div className="flex items-center justify-between mb-6 px-2">
+            <div className="flex items-center gap-2">
               <Logo
                 size="md"
                 className="transition-transform duration-300 hover:scale-105"
                 animated
               />
-              <span className="text-[10px] sm:text-xs font-mono font-bold tracking-widest mt-1 uppercase">
-                SMM
+              <span className="font-display font-semibold tracking-tight">
+                Budget Buddy
               </span>
             </div>
             <button
               type="button"
-              className="border-2 border-foreground bg-background text-foreground rounded-none p-2 hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 focus:outline-none transition-all"
+              className="rounded-lg text-muted-foreground p-2 hover:bg-muted/50 hover:text-foreground focus:outline-none transition-all"
               onClick={() => setIsMobileSidebarOpen(false)}
               aria-label="Close sidebar"
             >
-              <X className="h-5 w-5" strokeWidth={3} />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* User section */}
-          <div className="flex items-center justify-between px-4 py-4 mb-4 bg-primary text-primary-foreground border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))] relative">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="flex h-12 w-12 items-center justify-center border-2 border-foreground bg-background text-foreground font-display font-black text-xl">
+          <div className="flex items-center justify-between px-3 py-3 mb-6 rounded-xl bg-muted/30 border border-border/50">
+            <div className="flex items-center gap-3 w-full">
+              <div className="relative flex-shrink-0">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-display font-semibold text-lg">
                   {user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}
                 </div>
               </div>
-              <div className="flex flex-col gap-0">
-                <p className="text-sm font-bold font-mono uppercase truncate max-w-[120px] bg-background text-foreground px-1 py-0.5">
+              <div className="flex flex-col min-w-0 flex-1">
+                <p className="text-sm font-medium truncate text-foreground">
                   {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
                 </p>
-                <p className="text-xs font-mono font-bold mt-1 truncate max-w-[120px] opacity-80">
+                <p className="text-xs text-muted-foreground truncate">
                   {user?.email || ''}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 pl-2 border-l border-border/50">
               <ThemeToggle iconOnly size="sm" />
               <button
-                className="border-2 border-foreground bg-background text-foreground p-2 hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[2px_2px_0px_hsl(var(--foreground))] hover:translate-x-1 hover:-translate-y-1 transition-all"
+                className="rounded-md text-muted-foreground p-1.5 hover:bg-muted hover:text-foreground transition-all"
                 onClick={handleSignOut}
                 title="Sign out"
                 aria-label="Sign out"
@@ -675,9 +686,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          <nav className="flex-1 space-y-2 py-2">
-            <div className="mb-1 px-4 py-1 bg-accent/10 rounded-md">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+          <nav className="flex-1 px-2 space-y-4">
+            <div>
+              <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
                 MAIN NAVIGATION
               </p>
             </div>
@@ -694,8 +705,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               ))}
             </ul>
 
-            <div className="mb-1 px-4 py-1 mt-6 bg-accent/10 rounded-md">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+            <div className="mt-6">
+              <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
                 SYSTEM
               </p>
             </div>
@@ -714,9 +725,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           <div className="pt-4 mt-auto">
-            <div className="px-4 py-3 bg-foreground text-background border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] text-center">
-              <span className="text-xs font-mono font-bold uppercase tracking-widest">
-                BUDGET BUDDY V{appVersion}
+            <div className="px-4 py-3 text-center opacity-60">
+              <span className="text-xs font-medium">
+                v{appVersion}
               </span>
             </div>
           </div>
@@ -726,9 +737,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Desktop sidebar */}
       <div
         className={cn(
-          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col z-30 bg-background border-r-4 border-foreground shadow-[8px_0px_0px_hsl(var(--foreground))]',
+          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col z-30 bg-background border-r border-border',
           'transition-all duration-300 ease-in-out',
-          collapsed ? 'w-[90px]' : 'w-64'
+          collapsed ? 'w-[80px]' : 'w-64'
         )}
         role="navigation"
         aria-label="Main navigation"
@@ -769,8 +780,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Toggle button - always visible */}
             <button
               className={cn(
-                'flex h-10 w-10 items-center justify-center border-2 border-foreground bg-foreground text-background focus:outline-none hover:bg-primary hover:text-primary-foreground hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-200 group relative overflow-visible shadow-[2px_2px_0px_hsl(var(--primary))]',
-                collapsed ? 'bg-background text-foreground' : ''
+                'flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground focus:outline-none hover:bg-muted/50 hover:text-foreground transition-all duration-200 group relative',
+                collapsed ? '' : ''
               )}
               onClick={toggleCollapsed}
               aria-label="Toggle sidebar"
@@ -785,7 +796,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   )}
                 />
                 {collapsed && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full opacity-70 group-hover:animate-ping"></span>
+                  <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 bg-primary rounded-full opacity-70 group-hover:animate-ping"></span>
                 )}
               </div>
 
@@ -805,8 +816,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* User section */}
           <div
             className={cn(
-              'px-4 py-6 flex border-b-4 border-foreground mb-4',
-              collapsed ? 'justify-center' : ''
+              'px-4 py-4 flex border-b border-border/50 mb-4 mx-2 rounded-xl bg-muted/20',
+              collapsed ? 'justify-center p-2' : ''
             )}
           >
             <div
@@ -814,23 +825,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 'flex items-center',
                 collapsed
                   ? 'flex-col'
-                  : 'space-x-3 bg-primary text-primary-foreground border-2 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] p-3 w-full'
+                  : 'space-x-3 w-full'
               )}
             >
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <div
                   className={cn(
-                    'border-2 border-foreground bg-background text-foreground flex items-center justify-center font-display font-black',
-                    collapsed ? 'w-10 h-10' : 'w-12 h-12'
+                    'rounded-full bg-primary/10 text-primary flex items-center justify-center font-display font-semibold',
+                    collapsed ? 'w-8 h-8' : 'w-10 h-10'
                   )}
                 >
                   {user?.user_metadata?.avatar_url ? (
                     <Image
                       src={user.user_metadata.avatar_url}
                       alt="User avatar"
-                      width={collapsed ? 40 : 48}
-                      height={collapsed ? 40 : 48}
-                      className="object-cover"
+                      width={collapsed ? 32 : 40}
+                      height={collapsed ? 32 : 40}
+                      className="object-cover rounded-full"
                     />
                   ) : (
                     <span>{user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}</span>
@@ -838,11 +849,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               </div>
               {!collapsed && (
-                <div className="flex flex-col gap-0 overflow-hidden">
-                  <div className="font-mono font-bold uppercase truncate max-w-[130px] text-sm tracking-tight text-foreground bg-background px-1">
+                <div className="flex flex-col min-w-0 overflow-hidden">
+                  <div className="font-medium truncate text-sm text-foreground">
                     {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}
                   </div>
-                  <div className="text-xs font-mono truncate max-w-[130px] mt-1 line-clamp-1">
+                  <div className="text-xs text-muted-foreground truncate mt-0.5">
                     {user?.email || ''}
                   </div>
                 </div>
@@ -851,10 +862,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* Navigation Items */}
-          <nav className="flex-1 px-3 py-2">
+          <nav className="flex-1 px-3 py-2 space-y-4">
             {!collapsed && (
-              <div className="mb-1 px-4 py-1 bg-accent/10 rounded-md">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+              <div>
+                <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
                   MAIN NAVIGATION
                 </p>
               </div>
@@ -874,8 +885,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </ul>
 
             {!collapsed && (
-              <div className="mb-1 px-4 py-1 mt-6 bg-accent/10 rounded-md">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">
+              <div className="mt-6">
+                <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
                   SYSTEM
                 </p>
               </div>
@@ -898,7 +909,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Sidebar footer */}
           <div
             className={cn(
-              'py-6 flex-shrink-0 border-t-4 border-foreground mt-auto bg-foreground text-background',
+              'py-4 flex-shrink-0 border-t border-border mt-auto bg-muted/10',
               collapsed ? 'text-center px-2' : 'px-4'
             )}
           >
@@ -906,11 +917,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="flex flex-col items-center gap-4">
                 <NotificationCenter />
                 <ThemeToggle iconOnly size="sm" />
-                <div className="text-[10px] font-mono font-bold uppercase py-2">V{appVersion}</div>
+                <div className="text-[10px] font-medium py-2 opacity-60">v{appVersion}</div>
               </div>
             ) : (
               <>
-                <div className="text-xs font-mono font-bold uppercase py-2 text-center border-2 border-transparent hover:border-background hover:bg-background/20 transition-colors cursor-pointer mb-4">
+                <div className="text-xs font-medium py-2 text-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer mb-2">
                   Budget Buddy v{appVersion}
                 </div>
 
@@ -918,12 +929,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <NotificationCenter />
                   <ThemeToggle iconOnly size="sm" />
                   <button
-                    className="border-2 border-background p-2 hover:bg-primary hover:text-primary-foreground hover:border-foreground hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_hsl(var(--foreground))] transition-all duration-200"
+                    className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
                     onClick={handleSignOut}
-                    title="SIGN OUT"
+                    title="Sign Out"
                     aria-label="Sign out"
                   >
-                    <LogOut className="h-4 w-4" strokeWidth={3} />
+                    <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               </>
@@ -934,7 +945,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <main
-        className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${collapsed ? 'md:ml-[90px]' : 'md:ml-64'}`}
+        className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${collapsed ? 'md:ml-[80px]' : 'md:ml-64'}`}
       >
         <div id="main-content" tabIndex={-1}>
           {children}

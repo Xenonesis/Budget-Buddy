@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Check,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 // Memoize static feature data outside component
 const financialFeatures = [
@@ -95,7 +94,7 @@ const financialFeatures = [
   },
 ] as const;
 
-// Brutalist individual card component for maximum impact
+// Feature card component
 const FeatureCard = memo(function FeatureCard({
   feature,
   index,
@@ -106,52 +105,49 @@ const FeatureCard = memo(function FeatureCard({
   const Icon = feature.icon;
 
   return (
-    <div
-      className="w-full group"
-    >
+    <div className="w-full group">
       <div
-        className="h-full bg-paper border-2 border-foreground p-6 sm:p-8 relative transition-transform duration-200 hover:-translate-y-1 shadow-[8px_8px_0px_hsl(var(--foreground))] hover:shadow-[12px_12px_0px_hsl(var(--foreground))] active:translate-y-1 active:shadow-[0px_0px_0px_hsl(var(--foreground))]"
+        className="h-full bg-card rounded-2xl border border-border p-6 sm:p-8 relative transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
       >
         {/* Highlight Badge */}
-        <div className="absolute -top-3 -right-3 z-10 transition-transform duration-200 group-hover:scale-105">
-          <div className="bg-primary text-primary-foreground font-mono text-xs font-bold uppercase tracking-widest px-3 py-1 border-2 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]">
+        <div className="absolute -top-3 right-4 z-10">
+          <div className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
             {feature.highlight}
           </div>
         </div>
 
-        {/* Brutalist Icon Block */}
+        {/* Icon */}
         <div
-          className="flex h-16 w-16 items-center justify-center mb-6 border-2 border-foreground bg-foreground text-background shadow-[4px_4px_0px_hsl(var(--primary))] group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200"
+          className="flex h-12 w-12 items-center justify-center mb-5 rounded-xl transition-colors duration-200"
+          style={{ backgroundColor: `${feature.color}15`, color: feature.color }}
         >
-          <Icon className="h-8 w-8" strokeWidth={2} />
+          <Icon className="h-6 w-6" strokeWidth={1.5} />
         </div>
 
         {/* Content */}
         <div className="relative z-20">
-          <h3 className="text-xl font-bold mb-3 text-foreground font-display uppercase tracking-wider">
+          <h3 className="text-lg font-semibold mb-2 text-foreground">
             {feature.title}
           </h3>
 
-          <p className="text-foreground font-medium mb-6 text-sm leading-relaxed border-l-4 border-primary pl-4 bg-primary/5 py-2">
+          <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
             {feature.description}
           </p>
 
           {/* Steps List */}
-          <div className="space-y-4 font-mono text-sm border-t-2 border-foreground/20 pt-6">
+          <div className="space-y-3 text-sm border-t border-border pt-5">
             {feature.steps.map((step, stepIndex) => (
               <div
                 key={stepIndex}
-                className="flex items-start gap-3 group/step"
+                className="flex items-start gap-2.5"
               >
                 <div
-                  className="flex-shrink-0 border-2 border-foreground bg-paper group-hover/step:bg-primary group-hover/step:text-primary-foreground transition-colors duration-200"
+                  className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `${feature.color}15`, color: feature.color }}
                 >
-                  <Check
-                    size={16}
-                    strokeWidth={3}
-                  />
+                  <Check size={12} strokeWidth={2.5} />
                 </div>
-                <span className="text-foreground font-semibold uppercase tracking-tight">
+                <span className="text-foreground/80">
                   {step}
                 </span>
               </div>
@@ -165,7 +161,7 @@ const FeatureCard = memo(function FeatureCard({
 
 export const FinancialSpotlightCards = memo(function FinancialSpotlightCards() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 sm:gap-12 mt-12 sm:mt-16 relative z-20">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 mt-12 sm:mt-16 relative z-20">
       {financialFeatures.map((feature, index) => (
         <FeatureCard key={feature.title} feature={feature} index={index} />
       ))}

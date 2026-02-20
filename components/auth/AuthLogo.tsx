@@ -1,28 +1,27 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { Logo } from "@/components/ui/logo";
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 export const AuthLogo = () => (
-  <div className="flex items-center gap-4">
-    <div className="relative">
-      <div className="relative flex items-center justify-center h-16 w-16 bg-[#00E5FF] border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]">
-        <Image 
-          src="/logo.svg" 
-          alt="Budget Buddy Logo" 
-          width={40} 
-          height={40} 
-          className="h-10 w-10 text-foreground"
-          priority={true} 
-        />
-      </div>
+  <motion.div
+    className="flex items-center gap-3"
+    initial={{ opacity: 0, y: -8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+  >
+    <div className="relative flex items-center justify-center h-11 w-11 rounded-xl bg-primary/10 border border-primary/20">
+      <Image
+        src="/logo.svg"
+        alt="Budget Buddy Logo"
+        width={28}
+        height={28}
+        className="h-7 w-7"
+        priority={true}
+      />
     </div>
-    <div className="relative">
-      <span
-        className="font-display font-black uppercase tracking-tight text-foreground text-2xl sm:text-3xl bg-foreground/5 px-2 py-1 border-4 border-transparent"
-      >
-        Budget Buddy
-      </span>
-    </div>
-  </div>
+    <span className="font-display font-bold text-foreground text-[1.35rem] tracking-tight">
+      Budget Buddy
+    </span>
+  </motion.div>
 );

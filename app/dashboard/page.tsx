@@ -306,13 +306,13 @@ const StatCard = memo(
     icon?: React.ReactNode;
     className?: string;
   }) => (
-    <div className={cn(`p-4 border-4 border-foreground bg-paper shadow-[4px_4px_0px_hsl(var(--foreground))] ${className}`, 'transition-all hover:-translate-y-1 hover:translate-x-1 hover:shadow-[0px_0px_0px_transparent]')}>
+    <div className={cn('p-5 rounded-2xl border bg-card shadow-sm hover:shadow-md transition-all', className)}>
       <div className="flex justify-between items-start">
-        <div className="flex flex-col">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground bg-foreground/5 px-2 py-1 inline-block mb-2 self-start border-2 border-foreground">{title}</h3>
-          <p className="text-3xl font-mono font-black tracking-tight">{value}</p>
+        <div className="flex flex-col pt-1">
+          <h3 className="text-sm font-medium text-muted-foreground mb-1">{title}</h3>
+          <p className="text-2xl font-bold tracking-tight">{value}</p>
         </div>
-        {icon && <div className="p-3 border-2 border-foreground bg-background text-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">{icon}</div>}
+        {icon && <div className="p-2.5 rounded-xl bg-primary/10 text-primary">{icon}</div>}
       </div>
     </div>
   )
@@ -741,18 +741,18 @@ export default function DashboardPage() {
       role="main"
       aria-label="Dashboard"
     >
-      {/* Enhanced Brutalist Header */}
-      <header className="mb-8 md:mb-10 w-full border-b-4 border-foreground pb-4 lg:pb-6">
+      {/* Header */}
+      <header className="mb-8 md:mb-10 w-full pb-4 lg:pb-6 border-b border-border">
         <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center p-3 border-4 border-foreground bg-foreground text-background shadow-[4px_4px_0px_hsl(var(--primary))] shrink-0 hover:translate-x-1 hover:-translate-y-1 transition-transform">
+              <div className="flex items-center justify-center p-3 rounded-xl bg-primary/10 text-primary shrink-0">
                 <svg
-                  className="h-8 w-8"
+                  className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={3}
+                  strokeWidth={2}
                 >
                   <path
                     strokeLinecap="round"
@@ -763,12 +763,12 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-col">
                 <h1
-                  className="text-3xl sm:text-4xl lg:text-5xl font-display font-black uppercase tracking-tight text-foreground"
+                  className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-foreground"
                   tabIndex={0}
                 >
                   Dashboard
                 </h1>
-                <p className="text-sm font-mono font-bold tracking-widest uppercase mt-1 px-1 bg-foreground text-background inline-block self-start" tabIndex={0}>
+                <p className="text-sm font-medium text-muted-foreground mt-0.5" tabIndex={0}>
                   Financial Overview
                 </p>
               </div>
@@ -792,18 +792,18 @@ export default function DashboardPage() {
               <div className="flex items-center">
                 {isOffline ? (
                   <div
-                    className="flex items-center text-background text-sm font-bold tracking-widest uppercase bg-amber-600 px-3 py-1.5 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                    className="flex items-center text-amber-600 bg-amber-500/10 px-3 py-1.5 rounded-full text-xs font-semibold"
                     role="status"
                     aria-live="polite"
                   >
-                    <span className="font-mono">Offline</span>
+                    <span>Offline</span>
                   </div>
                 ) : (
-                  <div className="flex items-center text-foreground text-sm font-bold tracking-widest uppercase bg-green-500/20 px-3 py-1.5 border-2 border-green-500 shadow-[2px_2px_0px_hsl(var(--green-500))]">
-                    <div className="h-2 w-2 bg-green-500 mr-2 animate-pulse border border-foreground"></div>
-                    <span className="font-mono text-green-600">Online</span>
+                  <div className="flex items-center text-emerald-600 bg-emerald-500/10 px-3 py-1.5 rounded-full text-xs font-semibold">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></div>
+                    <span>Online</span>
                     {lastSynced && (
-                      <span className="ml-2 text-foreground text-xs hidden lg:inline font-mono">
+                      <span className="ml-2 opacity-70 hidden lg:inline font-medium">
                         • {lastSynced}
                       </span>
                     )}
@@ -816,11 +816,11 @@ export default function DashboardPage() {
                 variant="outline"
                 size="sm"
                 asChild
-                className="shrink-0 border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[2px_2px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 rounded-none font-mono font-bold uppercase transition-all"
+                className="shrink-0 rounded-full font-medium"
               >
                 <Link href="/dashboard/customize" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" strokeWidth={3} />
-                  <span className="hidden sm:inline tracking-widest">Customize</span>
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Customize</span>
                 </Link>
               </Button>
             </div>
@@ -829,31 +829,31 @@ export default function DashboardPage() {
 
         {/* Offline Sync Button */}
         {isOffline && (
-          <div className="mt-4 p-4 border-4 border-amber-500 bg-amber-500/10 shadow-[4px_4px_0px_hsl(var(--amber-500))]">
+          <div className="mt-4 p-3 rounded-xl border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center text-foreground font-bold tracking-widest uppercase text-sm">
-                <svg className="h-5 w-5 mr-3 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="flex items-center text-sm">
+                <svg className="h-5 w-5 mr-2 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div className="flex flex-col">
-                  <span>Viewing Cached Data</span>
-                  <span className="text-xs font-mono font-medium opacity-80">Connect to sync latest information</span>
+                  <span className="font-medium text-amber-800 dark:text-amber-200">Viewing Cached Data</span>
+                  <span className="text-xs text-amber-600 dark:text-amber-400 opacity-80">Connect to sync latest information</span>
                 </div>
               </div>
               <Button
                 onClick={syncData}
                 size="sm"
                 variant="outline"
-                className="shrink-0 border-2 border-amber-500 bg-amber-500/20 text-foreground hover:bg-amber-500 hover:text-black shadow-[2px_2px_0px_hsl(var(--amber-500))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1 hover:translate-y-1 rounded-none font-mono font-bold uppercase transition-all"
+                className="shrink-0 rounded-full border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-900 focus:ring-amber-500"
                 aria-label="Sync data when online"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-2"
+                  className="h-4 w-4 mr-1.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={3}
+                  strokeWidth={2}
                 >
                   <path
                     strokeLinecap="round"

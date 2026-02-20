@@ -40,10 +40,10 @@ export function RecentTransactions({ transactions, loading = false }: RecentTran
   }
 
   return (
-    <div className="border-4 border-foreground bg-paper shadow-[8px_8px_0px_hsl(var(--foreground))] p-5 md:p-6 mb-8" role="region" aria-labelledby="recent-transactions-title">
-      <div className="flex items-center justify-between mb-6 pb-4 border-b-4 border-foreground">
-        <h2 className="text-2xl md:text-3xl font-display font-black uppercase tracking-tight" id="recent-transactions-title" tabIndex={0}>Recent Transactions</h2>
-        <Button asChild variant="outline" size="sm" className="border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-1 hover:translate-x-1 transition-all rounded-none font-mono font-bold uppercase tracking-widest">
+    <div className="rounded-2xl border bg-card p-5 md:p-6 mb-8 shadow-sm hover:shadow-md transition-all" role="region" aria-labelledby="recent-transactions-title">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h2 className="text-xl md:text-2xl font-display font-semibold tracking-tight" id="recent-transactions-title" tabIndex={0}>Recent Transactions</h2>
+        <Button asChild variant="outline" size="sm" className="rounded-full font-medium transition-all">
           <Link href="/dashboard/transactions" aria-label="View all transactions">View All</Link>
         </Button>
       </div>
@@ -53,25 +53,25 @@ export function RecentTransactions({ transactions, loading = false }: RecentTran
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full border-collapse" aria-labelledby="recent-transactions-title">
               <thead>
-                <tr className="border-b-4 border-foreground text-left text-xs font-mono font-bold uppercase tracking-widest text-foreground">
-                  <th className="pb-4 pr-4 pl-2" scope="col">Date</th>
-                  <th className="pb-4 pr-4" scope="col">Category</th>
-                  <th className="pb-4 pr-4" scope="col">Amount</th>
-                  <th className="pb-4 pr-2" scope="col">Type</th>
+                <tr className="border-b text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="pb-4 pr-4 pl-2 font-medium" scope="col">Date</th>
+                  <th className="pb-4 pr-4 font-medium" scope="col">Category</th>
+                  <th className="pb-4 pr-4 font-medium" scope="col">Amount</th>
+                  <th className="pb-4 pr-2 font-medium" scope="col">Type</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((transaction) => (
-                  <tr key={transaction.id} className="border-b-2 border-foreground/30 text-sm font-medium hover:bg-foreground/5 transition-colors">
-                    <td className="py-4 pr-4 pl-2 font-mono whitespace-nowrap">{formatDate(new Date(transaction.date))}</td>
-                    <td className="py-4 pr-4 capitalize font-bold">{transaction.category}</td>
-                    <td className="py-4 pr-4 font-mono font-bold text-base">{formatCurrency(transaction.amount)}</td>
+                  <tr key={transaction.id} className="border-b border-border/50 text-sm hover:bg-muted/30 transition-colors">
+                    <td className="py-4 pr-4 pl-2 text-muted-foreground whitespace-nowrap">{formatDate(new Date(transaction.date))}</td>
+                    <td className="py-4 pr-4 capitalize font-medium">{transaction.category}</td>
+                    <td className="py-4 pr-4 font-semibold text-base">{formatCurrency(transaction.amount)}</td>
                     <td className="py-4 pr-2">
                       <span
-                        className={`inline-flex items-center border-2 border-foreground px-2 py-1 text-xs font-mono font-bold uppercase tracking-widest ${
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           transaction.type === "income"
-                            ? "bg-[#DFFF00] text-black shadow-[2px_2px_0px_hsl(var(--foreground))]"
-                            : "bg-[#FF3366] text-white shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                         }`}
                       >
                         {transaction.type}
@@ -86,22 +86,22 @@ export function RecentTransactions({ transactions, loading = false }: RecentTran
           {/* Mobile card view - show on small screens only */}
           <div className="sm:hidden space-y-4 mt-2">
             {transactions.map((transaction) => (
-              <div key={transaction.id} className="border-4 border-foreground bg-background p-4 text-sm shadow-[4px_4px_0px_hsl(var(--foreground))]">
-                <div className="flex justify-between items-start mb-3 border-b-2 border-foreground pb-2">
-                  <span className="text-foreground font-mono font-bold text-xs bg-foreground/10 px-2 py-1 border-2 border-foreground">{formatDate(new Date(transaction.date))}</span>
+              <div key={transaction.id} className="rounded-xl border bg-card p-4 text-sm shadow-sm">
+                <div className="flex justify-between items-start mb-3 border-b border-border/50 pb-3">
+                  <span className="text-muted-foreground font-medium text-xs">{formatDate(new Date(transaction.date))}</span>
                   <span
-                    className={`inline-flex items-center border-2 border-foreground px-2 py-1 text-xs font-mono font-bold uppercase tracking-widest ${
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       transaction.type === "income"
-                        ? "bg-[#DFFF00] text-black shadow-[2px_2px_0px_hsl(var(--foreground))]"
-                        : "bg-[#FF3366] text-white shadow-[2px_2px_0px_hsl(var(--foreground))]"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                     }`}
                   >
                     {transaction.type}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="capitalize font-bold text-lg">{transaction.category}</span>
-                  <span className="font-mono font-black text-xl">
+                  <span className="capitalize font-medium text-lg text-foreground">{transaction.category}</span>
+                  <span className="font-semibold text-xl">
                     {formatCurrency(transaction.amount)}
                   </span>
                 </div>

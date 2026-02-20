@@ -255,17 +255,17 @@ export function AlertNotificationSystem() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error': return 'bg-red-500 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
-      case 'warning': return 'bg-[#DFFF00] border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
-      default: return 'bg-blue-400 border-4 border-foreground text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))]';
+      case 'error': return 'border border-destructive/30 bg-destructive/5';
+      case 'warning': return 'border border-amber-500/30 bg-amber-500/5';
+      default: return 'border border-blue-500/30 bg-blue-500/5';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'error': return <AlertTriangle className="h-5 w-5 stroke-[3]" />;
-      case 'warning': return <AlertTriangle className="h-5 w-5 stroke-[3]" />;
-      default: return <Bell className="h-5 w-5 stroke-[3]" />;
+      case 'error': return <AlertTriangle className="h-4 w-4 text-destructive" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;
+      default: return <Bell className="h-4 w-4 text-blue-500" />;
     }
   };
 
@@ -278,13 +278,13 @@ export function AlertNotificationSystem() {
         variant="outline"
         size="sm"
         onClick={() => setShowPanel(!showPanel)}
-        className="relative mb-2 h-14 w-14 rounded-none border-4 border-foreground bg-background hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+        className="relative mb-2 h-12 w-12 rounded-full shadow-lg"
       >
-        <Bell className="h-7 w-7 stroke-[3]" />
+        <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -top-3 -right-3 h-7 w-7 p-0 flex items-center justify-center text-xs font-mono font-black border-2 border-foreground rounded-none bg-[#DFFF00] text-foreground"
+            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] font-semibold rounded-full bg-primary text-primary-foreground"
           >
             {unreadCount}
           </Badge>
@@ -293,70 +293,68 @@ export function AlertNotificationSystem() {
 
       {/* Notification Panel */}
       {showPanel && (
-        <Card className="w-80 max-h-96 overflow-y-auto rounded-none border-4 border-foreground shadow-[8px_8px_0px_hsl(var(--foreground))] mb-4 bg-paper">
-          <CardHeader className="pb-3 border-b-4 border-foreground bg-foreground/5 p-4">
-            <CardTitle className="text-lg font-mono font-black uppercase tracking-widest flex items-center justify-between text-foreground">
+        <Card className="w-80 max-h-96 overflow-y-auto rounded-xl shadow-xl mb-4">
+          <CardHeader className="pb-3 border-b border-border p-4">
+            <CardTitle className="text-base font-semibold flex items-center justify-between text-foreground">
               <span className="flex items-center gap-2">
-                <Bell className="h-5 w-5 stroke-[3]" />
+                <Bell className="h-4 w-4" />
                 Alerts
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowPanel(false)}
-                className="rounded-none border-2 border-transparent hover:border-foreground"
+                className="h-7 w-7 p-0 rounded-md"
               >
-                <X className="h-5 w-5 stroke-[3]" />
+                <X className="h-4 w-4" />
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 p-4">
+          <CardContent className="space-y-3 p-4">
             {notifications.length === 0 ? (
-              <div className="text-center text-foreground py-6 border-4 border-foreground border-dashed bg-foreground/5">
-                <CheckCircle className="h-10 w-10 mx-auto mb-3 stroke-[3]" />
-                <p className="font-mono font-bold uppercase tracking-widest text-xs">No alerts at this time</p>
+              <div className="text-center py-6">
+                <CheckCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No alerts at this time</p>
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={cn(
-                    "p-0 rounded-none text-sm mb-4 last:mb-0 transition-all",
+                    "p-3 rounded-lg text-sm transition-all",
                     getSeverityColor(notification.severity),
-                    !notification.read && "outline outline-4 outline-foreground outline-offset-2"
+                    !notification.read && "ring-2 ring-primary/30"
                   )}
                 >
-                  <div className="flex items-start justify-between border-b-4 border-foreground bg-background/20 p-2">
+                  <div className="flex items-start justify-between mb-1">
                     <div className="flex items-center gap-2">
                       {getSeverityIcon(notification.severity)}
-                      <span className="font-mono font-black uppercase tracking-widest text-xs">{notification.title}</span>
+                      <span className="font-medium text-sm">{notification.title}</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => dismissNotification(notification.id)}
-                      className="h-6 w-6 p-0 rounded-none border-2 border-transparent hover:border-foreground hover:bg-foreground hover:text-background"
+                      className="h-6 w-6 p-0 rounded-md text-muted-foreground hover:text-foreground"
                     >
-                      <X className="h-4 w-4 stroke-[3]" />
+                      <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  <div className="p-3 bg-background">
-                    <p className="font-mono text-xs font-bold mb-3">{notification.message}</p>
-                    <div className="flex items-center justify-between border-t-2 border-foreground pt-2">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                        {notification.triggeredAt.toLocaleTimeString()}
-                      </span>
-                      {!notification.read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markAsRead(notification.id)}
-                          className="h-6 px-2 text-[10px] font-mono font-bold uppercase tracking-widest border-2 border-foreground rounded-none hover:bg-foreground hover:text-background transition-colors"
-                        >
-                          Mark Read
-                        </Button>
-                      )}
-                    </div>
+                  <p className="text-xs text-muted-foreground mb-2 pl-6">{notification.message}</p>
+                  <div className="flex items-center justify-between pl-6">
+                    <span className="text-[10px] text-muted-foreground">
+                      {notification.triggeredAt.toLocaleTimeString()}
+                    </span>
+                    {!notification.read && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => markAsRead(notification.id)}
+                        className="h-6 px-2 text-[10px] font-medium"
+                      >
+                        Mark Read
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))

@@ -98,46 +98,46 @@ html {
 
 @layer base {
   :root {
-    /* Brutalist Light Theme */
-    --background: 60 14% 95%; /* #F4F4F0 - Paper */
-    --foreground: 0 0% 4%; /* #0A0A0A - Obsidian */
+    /* Refined Light Theme */
+    --background: 0 0% 100%; /* Pure white */
+    --foreground: 0 0% 9%; /* Near black */
 
-    --card: 60 14% 95%;
-    --card-foreground: 0 0% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
 
-    --popover: 60 14% 95%;
-    --popover-foreground: 0 0% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
 
-    --primary: 69 100% 54%; /* Chartreuse */
-    --primary-rgb: 212, 255, 20;
+    --primary: 69 100% 44%; /* Refined Chartreuse - slightly deeper */
+    --primary-rgb: 180, 224, 0;
     --primary-foreground: 0 0% 4%;
 
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 4%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 46%;
 
-    --accent: 69 100% 54%;
+    --accent: 69 100% 44%;
     --accent-foreground: 0 0% 4%;
 
-    --destructive: 12 100% 50%; /* Vermilion */
-    --destructive-foreground: 60 14% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 69 100% 54%;
-    --success-foreground: 0 0% 4%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 4%;
 
-    --info: 236 96% 38%; /* International Blue */
-    --info-foreground: 60 14% 95%;
+    --info: 221 83% 53%;
+    --info-foreground: 0 0% 100%;
 
-    --border: 0 0% 4%;
-    --input: 0 0% 4%;
-    --ring: 236 96% 38%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 69 100% 44%;
 
-    --radius: 0rem;
+    --radius: 0.625rem;
 
     --gradient-background-light: none;
     --gradient-success-light: none;
@@ -164,44 +164,44 @@ html {
   }
 
   .dark {
-    /* Brutalist Dark Theme */
-    --background: 0 0% 4%; /* #0A0A0A - Obsidian */
-    --foreground: 60 14% 95%; /* #F4F4F0 - Paper */
+    /* Refined Dark Theme */
+    --background: 0 0% 4%; /* Deep black */
+    --foreground: 0 0% 95%; /* Near white */
 
-    --card: 0 0% 4%;
-    --card-foreground: 60 14% 95%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 4%;
-    --popover-foreground: 60 14% 95%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 69 100% 54%; /* Chartreuse */
-    --primary-rgb: 212, 255, 20;
+    --primary: 69 100% 50%; /* Chartreuse - slightly brighter in dark */
+    --primary-rgb: 204, 255, 0;
     --primary-foreground: 0 0% 4%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 60 14% 95%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 69 100% 54%;
+    --accent: 69 100% 50%;
     --accent-foreground: 0 0% 4%;
 
-    --destructive: 12 100% 50%;
-    --destructive-foreground: 60 14% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 95%;
 
-    --success: 69 100% 54%;
-    --success-foreground: 0 0% 4%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 95%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 4%;
 
-    --info: 236 96% 38%;
-    --info-foreground: 60 14% 95%;
+    --info: 221 83% 53%;
+    --info-foreground: 0 0% 95%;
 
-    --border: 60 14% 95%;
-    --input: 60 14% 95%;
-    --ring: 69 100% 54%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 69 100% 50%;
 
     --gradient-background-dark: none;
     --gradient-success-dark: none;

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { LogIn, Loader2 } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { LogIn, Loader2 } from 'lucide-react';
 
 interface LoginButtonProps {
   loading: boolean;
@@ -11,20 +11,20 @@ interface LoginButtonProps {
 
 export const LoginButton = ({ loading, isSubmitting, disabled }: LoginButtonProps) => {
   return (
-    <div className="relative group w-full pt-4">
-      <Button 
-        type="submit" 
-        className="w-full h-14 border-4 border-foreground bg-[#DFFF00] text-foreground hover:bg-foreground hover:text-[#DFFF00] shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-x-1.5 hover:translate-y-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
+    <div className="pt-1">
+      <Button
+        type="submit"
+        className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-all duration-200 shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
         disabled={loading || disabled}
       >
-        <span className="relative z-10 flex items-center justify-center gap-3">
+        <span className="flex items-center justify-center gap-2">
           {loading ? (
-            <Loader2 className="h-6 w-6 animate-spin stroke-[3]" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <LogIn className="h-6 w-6 stroke-[3]" />
+            <LogIn className="h-4 w-4" />
           )}
-          <span className="text-base font-black">
-            {loading ? "Signing in..." : "Sign in"}
+          <span className="text-sm">
+            {loading ? 'Signing in…' : 'Sign in'}
           </span>
         </span>
       </Button>

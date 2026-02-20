@@ -9,85 +9,72 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="relative bg-paper border-t-4 border-foreground overflow-hidden pt-20 pb-8">
-      {/* Brutalist structural background */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-5 z-0"
-        style={{
-          backgroundImage: `linear-gradient(45deg, hsl(var(--foreground)) 25%, transparent 25%, transparent 75%, hsl(var(--foreground)) 75%, hsl(var(--foreground))), linear-gradient(45deg, hsl(var(--foreground)) 25%, transparent 25%, transparent 75%, hsl(var(--foreground)) 75%, hsl(var(--foreground)))`,
-          backgroundSize: `20px 20px`,
-          backgroundPosition: `0 0, 10px 10px`
-        }}
-      />
-
+    <footer className="relative bg-muted/30 border-t border-border overflow-hidden pt-20 pb-8">
       <div className="container mx-auto px-4 relative z-10">
         {/* Newsletter section */}
-        <div className="mb-16 border-4 border-foreground bg-primary text-primary-foreground p-8 md:p-12 shadow-[16px_16px_0px_hsl(var(--foreground))] relative">
-          <div className="absolute top-0 right-0 bg-foreground text-background font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 border-b-4 border-l-4 border-foreground">
-            TRANSMISSION SECURE
+        <div className="mb-16 rounded-2xl bg-card border border-border p-8 md:p-12 shadow-sm relative overflow-hidden">
+          {/* Subtle gradient accent */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+          
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-sm font-medium mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span>Stay Updated</span>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 border-2 border-foreground bg-background text-foreground font-mono font-bold text-sm uppercase tracking-widest mb-6 shadow-[4px_4px_0px_hsl(var(--foreground))]">
-            <Sparkles className="w-4 h-4 text-action-primary" strokeWidth={3} />
-            Stay Updated
-          </div>
-
-          <h3 className="text-4xl md:text-5xl font-display font-black mb-4 uppercase tracking-tighter text-foreground bg-background inline-block px-4 py-1 border-2 border-foreground">INTELLIGENCE BRIEFING</h3>
-          <p className="font-bold font-mono mb-8 max-w-xl text-lg relative z-10 text-primary-foreground">
-            SUBSCRIBE TO OUR SECURE NETWORK FOR PRODUCT UPDATES, TACTICAL FINANCIAL INSIGHTS, AND EARLY ACCESS TO NEW CAPABILITIES.
+          <h3 className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight">Stay in the loop</h3>
+          <p className="text-muted-foreground mb-8 max-w-xl text-base">
+            Subscribe for product updates, financial insights, and early access to new features.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-0 max-w-2xl">
+          <div className="flex flex-col sm:flex-row gap-3 max-w-lg">
             <input
               type="email"
-              placeholder="ENTER YOUR EMAIL"
-              className="flex-1 px-6 py-4 border-4 border-foreground bg-background text-foreground font-mono font-bold uppercase placeholder:text-muted-foreground focus:outline-none focus:bg-paper transition-colors"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary/60 transition-all"
             />
             <button
-              className="px-8 py-4 bg-foreground text-background font-display font-black uppercase text-xl border-y-4 border-r-4 border-l-4 sm:border-l-0 border-foreground hover:bg-background hover:text-foreground transition-all flex items-center justify-center gap-3"
+              className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
             >
-              SUBSCRIBE
-              <ArrowUpRight className="w-6 h-6" strokeWidth={3} />
+              Subscribe
+              <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Footer top section with logo and quick links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 border-t-4 border-foreground pt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 border-t border-border pt-12">
           {/* Brand column */}
-          <div className="lg:col-span-4 lg:pr-8 lg:border-r-4 border-foreground">
-            <div className="flex flex-col items-start gap-4 mb-8">
-              <div className="flex items-center gap-3 bg-foreground text-background px-4 py-2 border-2 border-foreground">
-                <Logo size="sm" />
-                <span className="font-display font-black text-2xl uppercase tracking-widest">
-                  BUDGET BUDDY
-                </span>
-              </div>
+          <div className="lg:col-span-4 lg:pr-8">
+            <div className="flex items-center gap-3 mb-6">
+              <Logo size="sm" />
+              <span className="font-display font-bold text-xl tracking-tight">
+                Budget Buddy
+              </span>
             </div>
 
-            <p className="font-mono font-bold text-foreground mb-8 text-sm uppercase border-l-4 border-primary pl-4 bg-foreground/5 py-2">
-              THE FINANCIAL ARCHITECTURE FOR VISIONARIES WHO DEMAND ABSOLUTE CONTROL OVER THEIR CAPITAL DEPLOYMENT.
+            <p className="text-muted-foreground mb-8 text-sm leading-relaxed">
+              The financial management platform for people who want clarity and control over their money.
             </p>
 
             {/* Social links */}
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-wrap gap-3 mb-8">
               {SOCIAL_LINKS.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 border-2 border-foreground bg-paper flex items-center justify-center text-foreground hover:bg-foreground hover:text-background shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_hsl(var(--foreground))] hover:translate-y-1 hover:translate-x-1 transition-all"
+                  className="w-10 h-10 rounded-lg border border-border bg-background flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
                   aria-label={social.label}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.5"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
@@ -98,13 +85,13 @@ export function Footer() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap items-center gap-4 text-xs font-mono font-bold uppercase">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               {TRUST_INDICATORS.map((indicator, idx) => (
-                <div key={idx} className="flex items-center gap-2 border-2 border-foreground bg-background px-3 py-1">
+                <div key={idx} className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-md">
                   {indicator.icon === 'pulse' ? (
-                    <div className="w-3 h-3 bg-action-primary border border-foreground" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   ) : (
-                    <Heart className="w-3 h-3 text-vermilion" strokeWidth={3} />
+                    <Heart className="w-3 h-3 text-rose-500" />
                   )}
                   <span>{indicator.label}</span>
                 </div>
@@ -117,17 +104,17 @@ export function Footer() {
             {FOOTER_SECTIONS.map((section) => (
               <div
                 key={section.title}
-                className="space-y-6"
+                className="space-y-4"
               >
-                <h3 className="font-display font-black text-lg uppercase tracking-widest text-foreground border-b-4 border-foreground pb-2 inline-block">
+                <h3 className="font-semibold text-sm text-foreground">
                   {section.title}
                 </h3>
-                <ul className="space-y-4 font-mono font-bold text-sm uppercase">
+                <ul className="space-y-3 text-sm">
                   {section.links.map((item) => (
                     <li key={item}>
                       <a
                         href={`/${section.title.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
-                        className="text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background px-2 py-1 -ml-2 transition-colors inline-block"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {item}
                       </a>
@@ -140,24 +127,24 @@ export function Footer() {
         </div>
 
         {/* Footer bottom */}
-        <div className="mt-16 pt-8 border-t-4 border-foreground flex flex-col lg:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-            <p className="font-mono font-bold text-sm uppercase flex items-center gap-2 flex-wrap justify-center">
-              © 2025 BUDGET BUDDY. FORGED WITH
-              <Heart className="w-4 h-4 text-vermilion fill-vermilion" strokeWidth={2} />
-              FOR ABSOLUTE DOMINANCE.
+        <div className="mt-16 pt-8 border-t border-border flex flex-col lg:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5 flex-wrap justify-center">
+              © 2025 Budget Buddy. Made with
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+              for your finances.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 md:border-l-4 border-foreground md:pl-6 text-xs font-mono font-bold uppercase">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
               {[
-                { href: '/legal/privacy-policy', text: 'PRIVACY' },
-                { href: '/legal/terms-of-service', text: 'TERMS' },
-                { href: '/legal/cookie-policy', text: 'COOKIES' },
+                { href: '/legal/privacy-policy', text: 'Privacy' },
+                { href: '/legal/terms-of-service', text: 'Terms' },
+                { href: '/legal/cookie-policy', text: 'Cookies' },
               ].map((link) => (
                 <a
                   key={link.text}
                   href={link.href}
-                  className="bg-foreground text-background px-2 py-1 hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   {link.text}
                 </a>
@@ -165,18 +152,18 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Theme toggle */}
-            <div className="border-2 border-foreground bg-paper p-1 shadow-[4px_4px_0px_hsl(var(--foreground))]">
+            <div className="rounded-lg border border-border p-0.5">
               <ThemeToggle iconOnly />
             </div>
 
             {/* Back to top button */}
             <button
               onClick={scrollToTop}
-              className="h-12 w-12 border-2 border-foreground bg-primary text-primary-foreground flex items-center justify-center hover:bg-foreground hover:text-background transition-colors shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:translate-y-1 hover:translate-x-1"
+              className="h-10 w-10 rounded-lg border border-border bg-background text-foreground flex items-center justify-center hover:bg-muted/50 transition-all active:scale-[0.98]"
             >
-              <ArrowUpRight className="w-6 h-6 -rotate-45" strokeWidth={3} />
+              <ArrowUpRight className="w-4 h-4 -rotate-45" />
             </button>
           </div>
         </div>

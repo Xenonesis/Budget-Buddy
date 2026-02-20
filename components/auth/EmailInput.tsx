@@ -37,19 +37,19 @@ export const EmailInput = ({
   const showSuccess = isValidFormat && !error && touched;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <label
         htmlFor="email"
-        className="text-xs font-mono font-bold uppercase tracking-widest text-foreground bg-foreground/5 py-1 px-2 inline-block border-2 border-transparent"
+        className="text-sm font-medium text-foreground/80 block"
       >
-        Email Address
+        Email address
       </label>
-      <div className="relative group">
+      <div className="relative">
         <ValidatedInput
           ref={inputRef}
           id="email"
           type="email"
-          placeholder="Enter your email address"
+          placeholder="you@example.com"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={handleFocus}
@@ -57,21 +57,21 @@ export const EmailInput = ({
           required
           aria-invalid={hasError ? 'true' : 'false'}
           aria-describedby={hasError ? 'email-error' : undefined}
-          className={`h-14 pl-4 pr-12 bg-background border-4 rounded-none transition-all duration-200 text-base font-mono font-bold shadow-[4px_4px_0px_hsl(var(--foreground))] focus:shadow-[0px_0px_0px_transparent] focus:translate-x-1 focus:translate-y-1 outline-none w-full ${
+          className={`h-11 px-3.5 pr-10 bg-background border rounded-lg transition-all duration-200 text-sm outline-none w-full placeholder:text-muted-foreground/50 ${
             hasError
-              ? 'border-red-500 focus:border-red-600'
+              ? 'border-destructive/60 focus:border-destructive focus:ring-2 focus:ring-destructive/15'
               : showSuccess
-                ? 'border-green-500 focus:border-green-600'
-                : 'border-foreground focus:border-foreground'
+                ? 'border-success/60 focus:border-success focus:ring-2 focus:ring-success/15'
+                : 'border-border focus:border-primary/60 focus:ring-2 focus:ring-primary/10'
           }`}
         />
 
         {/* Status indicator */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
           {hasError ? (
-            <AlertCircle className="w-6 h-6 text-red-500 stroke-[3]" />
+            <AlertCircle className="w-4 h-4 text-destructive/70" />
           ) : showSuccess ? (
-            <CheckCircle2 className="w-6 h-6 text-green-500 stroke-[3]" />
+            <CheckCircle2 className="w-4 h-4 text-success/70" />
           ) : null}
         </div>
       </div>
@@ -81,9 +81,9 @@ export const EmailInput = ({
           id="email-error"
           role="alert"
           aria-live="polite"
-          className="flex items-center gap-1.5 text-red-500 text-xs font-mono font-bold uppercase tracking-widest mt-2"
+          className="flex items-center gap-1.5 text-destructive text-xs mt-1"
         >
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-3 h-3 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}

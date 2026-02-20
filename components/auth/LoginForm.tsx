@@ -74,12 +74,9 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         const parsed = JSON.parse(stored) as RateLimitState;
         const now = Date.now();
 
-        // Check if lockout has expired
         if (parsed.lockedUntil && parsed.lockedUntil <= now) {
-          // Reset if lockout expired
           localStorage.removeItem('login_rate_limit');
         } else if (parsed.firstAttemptTime + RATE_LIMIT_CONFIG.windowMs < now) {
-          // Reset if window expired
           localStorage.removeItem('login_rate_limit');
         } else {
           setRateLimitState(parsed);
@@ -98,7 +95,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         setCountdown(remaining);
 
         if (remaining <= 0) {
-          // Reset rate limit state after lockout expires
           setRateLimitState({ attempts: 0, firstAttemptTime: 0, lockedUntil: null });
           localStorage.removeItem('login_rate_limit');
         }
@@ -113,7 +109,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
   // Email validation
   const validateEmail = useCallback((value: string) => {
     if (!value) {
-      return null; // Don't show error for empty field
+      return null;
     }
     if (!EMAIL_REGEX.test(value)) {
       return 'Please enter a valid email address';
@@ -121,7 +117,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
     return null;
   }, []);
 
-  // Handle email change with validation
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (emailTouched) {
@@ -129,28 +124,23 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
     }
   };
 
-  // Handle email blur for validation
   const handleEmailBlur = () => {
     setEmailTouched(true);
     setEmailError(validateEmail(email));
   };
 
-  // Check rate limit before submission
   const checkRateLimit = (): boolean => {
     const now = Date.now();
 
-    // Check if currently locked out
     if (rateLimitState.lockedUntil && rateLimitState.lockedUntil > now) {
       return false;
     }
 
-    // Check if window has expired, reset if so
     if (rateLimitState.firstAttemptTime + RATE_LIMIT_CONFIG.windowMs < now) {
       setRateLimitState({ attempts: 0, firstAttemptTime: 0, lockedUntil: null });
       return true;
     }
 
-    // Check if max attempts reached
     if (rateLimitState.attempts >= RATE_LIMIT_CONFIG.maxAttempts) {
       const lockedUntil = now + RATE_LIMIT_CONFIG.lockoutMs;
       const newState = { ...rateLimitState, lockedUntil };
@@ -162,7 +152,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
     return true;
   };
 
-  // Record failed attempt
   const recordFailedAttempt = () => {
     const now = Date.now();
     const newState: RateLimitState = {
@@ -171,7 +160,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
       lockedUntil: null,
     };
 
-    // Check if this attempt triggers lockout
     if (newState.attempts >= RATE_LIMIT_CONFIG.maxAttempts) {
       newState.lockedUntil = now + RATE_LIMIT_CONFIG.lockoutMs;
     }
@@ -180,13 +168,11 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
     localStorage.setItem('login_rate_limit', JSON.stringify(newState));
   };
 
-  // Reset rate limit on successful login
   const resetRateLimit = () => {
     setRateLimitState({ attempts: 0, firstAttemptTime: 0, lockedUntil: null });
     localStorage.removeItem('login_rate_limit');
   };
 
-  // Magic link login handler
   const handleMagicLinkLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -226,7 +212,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate email before submission
     const emailValidationError = validateEmail(email);
     if (emailValidationError) {
       setEmailTouched(true);
@@ -234,7 +219,6 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
       return;
     }
 
-    // Check rate limit
     if (!checkRateLimit()) {
       onError(
         `Too many login attempts. Please try again in ${Math.ceil(countdown / 60)} minute(s).`
@@ -244,11 +228,10 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
 
     setLoading(true);
     setIsSubmitting(true);
-    onError(''); // Clear previous errors
-    onStart?.(); // Notify parent component that login has started
+    onError('');
+    onStart?.();
 
     try {
-      // DEBUG: Log environment check
       console.log('[LoginForm] Attempting login with:', { email });
       console.log(
         '[LoginForm] Supabase URL:',
@@ -259,10 +242,8 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
       );
 
-      // Reset preferences to ensure a clean state
       resetPreferences();
 
-      // DEBUG: Log before signInWithPassword call
       console.log('[LoginForm] Calling supabase.auth.signInWithPassword...');
 
       const { error } = await supabase.auth.signInWithPassword({
@@ -270,15 +251,12 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
         password,
       });
 
-      // DEBUG: Log response
       console.log('[LoginForm] SignIn response:', { error });
 
       if (error) throw error;
 
-      // Reset rate limit on success
       resetRateLimit();
 
-      // Store remember me preference
       if (rememberMe) {
         localStorage.setItem('rememberMe', 'true');
         localStorage.setItem('lastEmail', email);
@@ -317,25 +295,27 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
   if (magicLinkSent) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center space-y-4 py-8"
+        className="text-center space-y-4 py-6"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, delay: 0.1 }}
-          className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center"
+          className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"
         >
-          <Mail className="w-8 h-8 text-green-600 dark:text-green-400" />
+          <Mail className="w-5 h-5 text-primary" />
         </motion.div>
-        <h3 className="text-lg font-semibold">Check your email</h3>
-        <p className="text-muted-foreground text-sm">
-          We sent a magic link to <strong className="text-foreground">{email}</strong>
-        </p>
-        <p className="text-muted-foreground text-xs">
-          Click the link in the email to sign in. The link will expire in 1 hour.
-        </p>
+        <div>
+          <h3 className="text-lg font-display font-semibold text-foreground">Check your email</h3>
+          <p className="text-muted-foreground text-sm mt-1">
+            We sent a magic link to <strong className="text-foreground">{email}</strong>
+          </p>
+          <p className="text-muted-foreground text-xs mt-2">
+            Click the link in the email to sign in. Expires in 1 hour.
+          </p>
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -343,7 +323,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
             setMagicLinkSent(false);
             setMagicLinkMode(false);
           }}
-          className="mt-4"
+          className="mt-3 text-sm text-muted-foreground hover:text-foreground"
         >
           Back to login
         </Button>
@@ -357,7 +337,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
       className="space-y-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
+      transition={{ delay: 0.2, duration: 0.35 }}
       aria-describedby="form-instructions"
     >
       {/* Screen reader announcements */}
@@ -376,12 +356,12 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3"
+            className="rounded-lg bg-destructive/8 border border-destructive/20 px-4 py-3"
             role="alert"
           >
-            <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm font-medium">
+            <div className="flex items-center gap-2 text-destructive text-sm">
+              <Clock className="w-4 h-4 flex-shrink-0" />
+              <span>
                 Too many attempts. Try again in {Math.floor(countdown / 60)}:
                 {String(countdown % 60).padStart(2, '0')}
               </span>
@@ -400,12 +380,12 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3"
+              className="rounded-lg bg-amber-500/8 border border-amber-500/20 px-4 py-3"
               role="alert"
             >
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="text-sm">
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>
                   {remainingAttempts} attempt{remainingAttempts === 1 ? '' : 's'} remaining
                 </span>
               </div>
@@ -413,12 +393,7 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
           )}
       </AnimatePresence>
 
-      <motion.div
-        className="space-y-2"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.3 }}
-      >
+      <div className="space-y-4">
         <EmailInput
           value={email}
           onChange={handleEmailChange}
@@ -426,58 +401,53 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
           error={emailTouched ? emailError : null}
           inputRef={emailInputRef}
         />
-      </motion.div>
 
-      <AnimatePresence mode="wait">
-        {!magicLinkMode && (
-          <motion.div
-            key="password-field"
-            className="space-y-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ delay: 0.5, duration: 0.3 }}
-          >
-            <PasswordInput value={password} onChange={setPassword} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence mode="wait">
+          {!magicLinkMode && (
+            <motion.div
+              key="password-field"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <PasswordInput value={password} onChange={setPassword} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <AnimatePresence mode="wait">
         {!magicLinkMode && (
           <motion.div
             key="remember-me"
             className="flex items-center justify-between"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            transition={{ delay: 0.6, duration: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
             <RememberMeCheckbox checked={rememberMe} onChange={setRememberMe} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7, duration: 0.3 }}
-      >
+      <div>
         {magicLinkMode ? (
           <Button
             type="submit"
-            className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-background hover:text-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-0.5 font-mono font-bold uppercase transition-all rounded-none tracking-widest"
+            className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium transition-all duration-200"
             disabled={loading || isLockedOut || !isEmailValid}
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Sending magic link...
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                Sending…
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <Wand2 className="w-4 h-4" />
-                Send Magic Link
+                Send magic link
               </span>
             )}
           </Button>
@@ -488,19 +458,14 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
             disabled={!isFormValid || !!isLockedOut}
           />
         )}
-      </motion.div>
+      </div>
 
       {/* Toggle between magic link and password login */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.75, duration: 0.3 }}
-        className="text-center"
-      >
+      <div className="text-center">
         <button
           type="button"
           onClick={() => setMagicLinkMode(!magicLinkMode)}
-          className="text-xs font-mono font-bold uppercase tracking-widest text-foreground bg-foreground/5 px-4 py-2 hover:bg-foreground hover:text-background border-2 border-transparent hover:border-foreground transition-all inline-flex items-center gap-2"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5"
         >
           {magicLinkMode ? (
             <span>Use password instead</span>
@@ -511,31 +476,20 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
             </>
           )}
         </button>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="relative"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.3 }}
-      >
+      <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t-2 border-foreground" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-background px-4 font-mono font-bold uppercase tracking-widest text-foreground text-xs border-2 border-foreground">
-            Or continue with
+          <span className="bg-card px-3 text-xs text-muted-foreground">
+            or continue with
           </span>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9, duration: 0.3 }}
-      >
-        <SocialLoginButtons onError={onError} />
-      </motion.div>
+      <SocialLoginButtons onError={onError} />
     </motion.form>
   );
 };

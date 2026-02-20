@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { ValidatedInput } from "@/components/ui/validated-input";
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { ValidatedInput } from '@/components/ui/validated-input';
 
 interface PasswordInputProps {
   value: string;
@@ -14,14 +14,14 @@ interface PasswordInputProps {
   getStrengthColor?: () => string;
 }
 
-export const PasswordInput = ({ 
-  value, 
-  onChange, 
+export const PasswordInput = ({
+  value,
+  onChange,
   onFocus,
   showPasswordStrength = false,
   passwordStrength,
   getStrengthText,
-  getStrengthColor
+  getStrengthColor,
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -32,48 +32,48 @@ export const PasswordInput = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <label
           htmlFor="password"
-          className="text-xs font-mono font-bold uppercase tracking-widest text-foreground bg-foreground/5 py-1 px-2 inline-block border-2 border-transparent"
+          className="text-sm font-medium text-foreground/80"
         >
           Password
         </label>
-        {showPasswordStrength && passwordStrength && getStrengthText && getStrengthColor && (
-          <div className="text-xs font-mono font-bold uppercase tracking-widest bg-foreground/10 px-2 py-1">
+        {showPasswordStrength && passwordStrength && getStrengthText && (
+          <span className="text-xs font-medium text-muted-foreground">
             {getStrengthText()}
-          </div>
+          </span>
         )}
       </div>
-      
-      <div className="relative group">
+
+      <div className="relative">
         <ValidatedInput
           id="password"
-          type={showPassword ? "text" : "password"}
+          type={showPassword ? 'text' : 'password'}
           placeholder="Enter your password"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={handleFocus}
           required
-          className="h-14 pl-4 pr-16 bg-background border-4 border-foreground rounded-none shadow-[4px_4px_0px_hsl(var(--foreground))] focus:shadow-[0px_0px_0px_transparent] focus:translate-x-1 focus:translate-y-1 transition-all duration-200 text-base font-mono font-bold outline-none w-full"
+          className="h-11 px-3.5 pr-11 bg-background border border-border rounded-lg transition-all duration-200 text-sm outline-none w-full placeholder:text-muted-foreground/50 focus:border-primary/60 focus:ring-2 focus:ring-primary/10"
         />
-        
-        <button 
+
+        <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background transition-colors"
-          aria-label={showPassword ? "Hide password" : "Show password"}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
-          {showPassword ? <EyeOff size={20} strokeWidth={3} /> : <Eye size={20} strokeWidth={3} />}
+          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
-      
-      {showPasswordStrength && passwordStrength && getStrengthText && getStrengthColor && (
-        <div className="pt-2">
-          <div className="h-3 w-full bg-background border-2 border-foreground overflow-hidden">
-            <div 
-              className={`h-full ${getStrengthColor()}`}
+
+      {showPasswordStrength && passwordStrength && getStrengthColor && (
+        <div className="pt-1">
+          <div className="h-1 w-full bg-border/40 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${getStrengthColor()}`}
               style={{ width: `${passwordStrength()}%` }}
             />
           </div>
