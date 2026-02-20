@@ -549,7 +549,7 @@ export default function RegisterPage() {
             <div className="pt-4">
               <Button
                 type="submit"
-                className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-[#DFFF00] hover:text-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
+                className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-primary hover:text-primary-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                 disabled={
                   loading ||
                   !acceptedTerms ||
@@ -568,30 +568,29 @@ export default function RegisterPage() {
               </Button>
             </div>
 
-            {/* Benefits highlight */}
             <div className="mt-8 pt-6 border-t-4 border-foreground">
-              <div className="bg-[#DFFF00] p-6 border-4 border-foreground shadow-[6px_6px_0px_hsl(var(--foreground))]">
+              <div className="bg-primary text-primary-foreground p-6 border-4 border-foreground shadow-[6px_6px_0px_hsl(var(--foreground))]">
                 <div className="flex items-center gap-3 mb-4 border-b-4 border-foreground pb-4">
                   <CreditCard className="h-8 w-8 stroke-[3]" />
-                  <h3 className="font-display font-black uppercase text-xl text-foreground">
+                  <h3 className="font-display font-black uppercase text-xl">
                     Start Managing Your Money Today
                   </h3>
                 </div>
                 <ul className="text-sm font-mono font-bold uppercase tracking-wider space-y-3">
                   <li className="flex gap-2">
-                    <span className="text-foreground shrink-0 mt-0.5">●</span>
+                    <span className="shrink-0 mt-0.5">●</span>
                     <span>Track expenses automatically</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-foreground shrink-0 mt-0.5">●</span>
+                    <span className="shrink-0 mt-0.5">●</span>
                     <span>Set budgets and savings goals</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-foreground shrink-0 mt-0.5">●</span>
+                    <span className="shrink-0 mt-0.5">●</span>
                     <span>Get personalized insights</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-foreground shrink-0 mt-0.5">●</span>
+                    <span className="shrink-0 mt-0.5">●</span>
                     <span>Bank-level security protection</span>
                   </li>
                 </ul>

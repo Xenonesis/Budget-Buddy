@@ -103,7 +103,7 @@ function LoginContent() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-                  className="mx-auto w-16 h-16 bg-[#DFFF00] border-4 border-foreground flex items-center justify-center shadow-[4px_4px_0px_hsl(var(--foreground))]"
+                  className="mx-auto w-16 h-16 bg-primary border-4 border-foreground flex items-center justify-center shadow-[4px_4px_0px_hsl(var(--foreground))]"
                 >
                   <CheckCircle2 className="w-8 h-8 text-foreground stroke-[3]" />
                 </motion.div>

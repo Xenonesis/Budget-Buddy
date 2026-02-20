@@ -12,7 +12,7 @@ import { Mail, ArrowLeft, CheckCircle, AlertCircle, Shield, Clock, RefreshCw } f
 // AuthLogo component
 const AuthLogo = () => (
   <div className="flex items-center justify-center">
-    <div className="relative border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-[#DFFF00] p-3 transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+    <div className="relative border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-primary p-3 transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
       <Image
         src="/logo.svg"
         alt="Budget Buddy Logo"

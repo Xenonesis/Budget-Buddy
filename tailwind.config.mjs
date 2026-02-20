@@ -83,8 +83,8 @@ const config = {
           800: '#556600',
           900: '#2a3300',
         },
-        obsidian: "#0A0A0A",
-        paper: "#F4F4F0",
+        obsidian: "hsl(var(--foreground))",
+        paper: "hsl(var(--background))",
         vermilion: "#FF3300",
         "int-blue": "#040DBF",
         // Color scheme variations
