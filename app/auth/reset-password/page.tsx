@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, Shield, Clock, RefreshCw } from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Shield, Clock, RefreshCw } from 'lucide-react';
 
 // AuthLogo component
 const AuthLogo = () => (
   <div className="flex items-center justify-center">
     <div className="relative border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] bg-[#DFFF00] p-3 transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
-      <Image 
-        src="/logo.svg" 
-        alt="Budget Buddy Logo" 
-        width={48} 
-        height={48} 
+      <Image
+        src="/logo.svg"
+        alt="Budget Buddy Logo"
+        width={48}
+        height={48}
         className="h-12 w-12"
-        priority={true} 
+        priority={true}
       />
     </div>
   </div>
@@ -27,7 +27,7 @@ const AuthLogo = () => (
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +45,11 @@ export default function ResetPasswordPage() {
       });
 
       if (error) throw error;
-      
+
       setShowSuccessState(true);
-      setMessage("Check your email for a password reset link");
+      setMessage('Check your email for a password reset link');
     } catch (error: any) {
-      setError(error.message || "Failed to send reset link");
+      setError(error.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
@@ -60,13 +60,11 @@ export default function ResetPasswordPage() {
       {/* Brutalist Pattern Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
 
-      <div 
-        className="w-full max-w-md space-y-8 relative z-10"
-      >
+      <div className="w-full max-w-md space-y-8 relative z-10">
         {/* Back to home link */}
         <div>
-          <Link 
-            href="/auth/login" 
+          <Link
+            href="/auth/login"
             className="inline-flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors group border-2 border-transparent hover:border-foreground px-2 py-1"
           >
             <ArrowLeft className="h-4 w-4 stroke-[3]" />
@@ -74,8 +72,7 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
 
-        <div className="bg-paper border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 relative overflow-hidden">
-
+        <div className="bg-background border-4 border-foreground shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 relative overflow-hidden">
           <AnimatePresence mode="wait">
             {!showSuccessState ? (
               <motion.div
@@ -95,7 +92,7 @@ export default function ResetPasswordPage() {
                       Reset your password
                     </h1>
                     <p className="text-foreground font-mono font-bold text-sm tracking-wide mt-4">
-                      Enter your email address and we'll send you a link to reset your password
+                      Enter your email address and we&apos;ll send you a link to reset your password
                     </p>
                   </div>
                 </div>
@@ -130,8 +127,8 @@ export default function ResetPasswordPage() {
                   </div>
 
                   <div className="pt-2">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-primary hover:text-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                       disabled={loading || !email}
                     >
@@ -163,16 +160,16 @@ export default function ResetPasswordPage() {
                 <div className="mx-auto w-20 h-20 bg-green-500 border-4 border-foreground flex items-center justify-center shadow-[6px_6px_0px_hsl(var(--foreground))]">
                   <CheckCircle className="w-10 h-10 text-foreground stroke-[3]" />
                 </div>
-                
+
                 <div className="space-y-4">
                   <h2 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">
                     Check your email
                   </h2>
                   <div className="space-y-2 p-4 border-l-4 border-foreground bg-foreground/5 text-left font-mono font-bold text-sm">
-                    <p className="text-foreground">
-                      We've sent a password reset link to:
+                    <p className="text-foreground">We&apos;ve sent a password reset link to:</p>
+                    <p className="text-primary bg-primary/10 px-2 py-1 inline-block border-2 border-primary">
+                      {email}
                     </p>
-                    <p className="text-primary bg-primary/10 px-2 py-1 inline-block border-2 border-primary">{email}</p>
                   </div>
                 </div>
 
@@ -184,21 +181,21 @@ export default function ResetPasswordPage() {
                         Link expires in 60 minutes
                       </p>
                       <p className="font-mono text-foreground font-bold text-xs">
-                        Didn't receive the email? Check your spam folder or request a new link.
+                        Didn&apos;t receive the email? Check your spam folder or request a new link.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-6">
-                  <Button 
+                  <Button
                     onClick={() => setShowSuccessState(false)}
                     className="w-full h-14 border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                   >
                     Send Another Link
                   </Button>
-                  <Button 
-                    onClick={() => router.push("/auth/login")}
+                  <Button
+                    onClick={() => router.push('/auth/login')}
                     className="w-full h-14 border-4 border-foreground bg-foreground text-background hover:bg-primary hover:text-foreground shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[0px_0px_0px_transparent] hover:-translate-y-0.5 hover:translate-x-1.5 font-mono font-black uppercase tracking-widest transition-all rounded-none"
                   >
                     Back to Login
@@ -221,4 +218,4 @@ export default function ResetPasswordPage() {
       </div>
     </div>
   );
-} 
+}

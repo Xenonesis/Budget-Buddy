@@ -17,9 +17,9 @@ const PricingCard = memo(function PricingCard({
 }) {
   return (
     <div
-      className={`relative border-2 bg-paper transition-transform duration-200 hover:-translate-y-2 ${
-        plan.popular 
-          ? 'border-foreground shadow-[16px_16px_0px_hsl(var(--primary))] scale-100 md:scale-105 z-10' 
+      className={`relative border-2 bg-background transition-transform duration-200 hover:-translate-y-2 ${
+        plan.popular
+          ? 'border-foreground shadow-[16px_16px_0px_hsl(var(--primary))] scale-100 md:scale-105 z-10'
           : 'border-foreground/80 shadow-[8px_8px_0px_hsl(var(--foreground))] hover:shadow-[16px_16px_0px_hsl(var(--foreground))]'
       }`}
     >
@@ -33,10 +33,16 @@ const PricingCard = memo(function PricingCard({
 
       <div className={`p-8 md:p-10 flex flex-col h-full ${plan.popular ? 'pt-12' : ''}`}>
         <div className="text-center mb-8 border-b-2 border-foreground pb-8">
-          <h3 className="text-2xl font-bold font-display uppercase tracking-widest mb-4 bg-foreground text-background inline-block px-4 py-1">{plan.name}</h3>
+          <h3 className="text-2xl font-bold font-display uppercase tracking-widest mb-4 bg-foreground text-background inline-block px-4 py-1">
+            {plan.name}
+          </h3>
           <div className="flex items-baseline justify-center gap-1 mb-4">
             <span className="text-6xl font-display font-black tracking-tighter">{plan.price}</span>
-            {plan.period && <span className="font-mono font-bold text-muted-foreground uppercase">/{plan.period}</span>}
+            {plan.period && (
+              <span className="font-mono font-bold text-muted-foreground uppercase">
+                /{plan.period}
+              </span>
+            )}
           </div>
           <p className="text-base font-medium mb-4 p-2 bg-primary/10 border-l-4 border-primary text-left">
             {plan.description}
@@ -51,10 +57,7 @@ const PricingCard = memo(function PricingCard({
 
         <div className="space-y-4 mb-10 flex-grow font-mono">
           {plan.features.map((feature, idx) => (
-            <div
-              key={idx}
-              className="flex items-start gap-3 text-sm"
-            >
+            <div key={idx} className="flex items-start gap-3 text-sm">
               <div className="mt-0.5 flex-shrink-0 w-6 h-6 border-2 border-foreground bg-primary flex items-center justify-center text-primary-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">
                 <Check className="h-4 w-4" strokeWidth={3} />
               </div>
@@ -65,7 +68,10 @@ const PricingCard = memo(function PricingCard({
           {plan.limitations && plan.limitations.length > 0 && (
             <div className="pt-6 mt-6 border-t-2 border-foreground/20 space-y-4">
               {plan.limitations.map((limitation, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-sm text-foreground/50 line-through decoration-2">
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 text-sm text-foreground/50 line-through decoration-2"
+                >
                   <div className="mt-0.5 flex-shrink-0 w-6 h-6 border-2 border-foreground/30 bg-foreground/10 flex items-center justify-center">
                     <Minus className="h-4 w-4 text-foreground/50" strokeWidth={3} />
                   </div>
@@ -79,9 +85,9 @@ const PricingCard = memo(function PricingCard({
         <Button
           asChild
           className={`w-full py-8 text-lg font-bold uppercase tracking-widest border-2 border-foreground rounded-none shadow-[6px_6px_0px_hsl(var(--foreground))] hover:shadow-[2px_2px_0px_hsl(var(--foreground))] hover:translate-y-1 transition-all ${
-            plan.popular 
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-              : 'bg-paper text-foreground hover:bg-foreground hover:text-background border-foreground shadow-[6px_6px_0px_hsl(var(--primary))] hover:shadow-[2px_2px_0px_hsl(var(--primary))]'
+            plan.popular
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'bg-background text-foreground hover:bg-foreground hover:text-background border-foreground shadow-[6px_6px_0px_hsl(var(--primary))] hover:shadow-[2px_2px_0px_hsl(var(--primary))]'
           }`}
         >
           <Link href="/auth/register">{plan.cta}</Link>
@@ -95,20 +101,20 @@ export const PricingSection = memo(function PricingSection() {
   return (
     <section
       id="pricing"
-      className="py-24 md:py-32 bg-paper relative overflow-hidden border-t-2 border-foreground border-b-2"
+      className="py-24 md:py-32 bg-background relative overflow-hidden border-t-2 border-foreground border-b-2"
     >
       {/* Brutalist Grid Background */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `linear-gradient(to right, hsl(var(--foreground)) 2px, transparent 2px), linear-gradient(to bottom, hsl(var(--foreground)) 2px, transparent 2px)`,
           backgroundSize: `80px 80px`,
-          opacity: 0.05
+          opacity: 0.05,
         }}
       />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center mb-20 bg-paper p-8 border-2 border-foreground shadow-[12px_12px_0px_hsl(var(--primary))]">
+        <div className="max-w-4xl mx-auto text-center mb-20 bg-background p-8 border-2 border-foreground shadow-[12px_12px_0px_hsl(var(--primary))]">
           <div className="inline-flex items-center justify-center gap-2 px-6 py-2 border-2 border-foreground bg-primary text-primary-foreground mb-8 font-mono font-bold uppercase tracking-widest shadow-[4px_4px_0px_hsl(var(--foreground))]">
             <DollarSign className="h-5 w-5" strokeWidth={3} />
             Simple, Transparent Pricing
@@ -132,10 +138,13 @@ export const PricingSection = memo(function PricingSection() {
           <div className="absolute -top-6 -left-6 bg-primary text-primary-foreground border-2 border-foreground w-12 h-12 flex items-center justify-center shadow-[4px_4px_0px_hsl(var(--foreground))]">
             <Building className="h-6 w-6" strokeWidth={2.5} />
           </div>
-          
-          <h3 className="text-3xl font-display font-bold uppercase tracking-wider mb-4 text-primary">Enterprise Solutions</h3>
+
+          <h3 className="text-3xl font-display font-bold uppercase tracking-wider mb-4 text-primary">
+            Enterprise Solutions
+          </h3>
           <p className="font-mono font-bold text-lg mb-8 max-w-2xl mx-auto p-4 border-l-4 border-primary bg-background/10">
-            Need custom infrastructure, dedicated support, or enterprise-grade security architecture? We forge tailored solutions for organizations scaling relentlessly.
+            Need custom infrastructure, dedicated support, or enterprise-grade security
+            architecture? We forge tailored solutions for organizations scaling relentlessly.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button

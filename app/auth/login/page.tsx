@@ -96,7 +96,7 @@ function LoginContent() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="bg-paper border-4 border-foreground p-8 shadow-[16px_16px_0px_hsl(var(--foreground))]"
+              className="bg-background border-4 border-foreground p-8 shadow-[16px_16px_0px_hsl(var(--foreground))]"
             >
               <div className="text-center space-y-4">
                 <motion.div
@@ -112,7 +112,9 @@ function LoginContent() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <h3 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">Welcome back!</h3>
+                  <h3 className="text-2xl font-display font-black uppercase tracking-tight text-foreground bg-foreground/5 inline-block px-2">
+                    Welcome back!
+                  </h3>
                   <p className="font-mono font-bold text-sm tracking-widest text-foreground mt-2">
                     Redirecting to dashboard...
                   </p>
@@ -132,16 +134,12 @@ function LoginContent() {
         <BackToHomeLink />
 
         <div className="relative">
-          <AuthCard
-            title="Welcome back"
-            subtitle="Sign in to your account"
-            error={error}
-          >
+          <AuthCard title="Welcome back" subtitle="Sign in to your account" error={error}>
             <AuthLogo />
           </AuthCard>
         </div>
 
-        <div className="relative border-4 border-foreground bg-paper shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 mt-4 overflow-hidden transition-all duration-300">
+        <div className="relative border-4 border-foreground bg-background shadow-[12px_12px_0px_hsl(var(--foreground))] p-8 mt-4 overflow-hidden transition-all duration-300">
           <LoginForm
             onSuccess={handleLoginSuccess}
             onError={handleLoginError}

@@ -306,7 +306,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
-                <kbd className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}>
+                <kbd
+                  className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}
+                >
                   {item.shortcutKey}
                 </kbd>
               )}
@@ -341,7 +343,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               {/* Keyboard shortcut */}
               {item.shortcutKey && !collapsed && (
-                <kbd className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}>
+                <kbd
+                  className={`relative z-10 hidden sm:flex items-center justify-center ml-auto px-2 py-1 text-[10px] font-mono font-bold border-2 ${isActive ? 'bg-background text-foreground border-foreground' : 'bg-transparent text-foreground border-foreground group-hover:bg-background group-hover:text-foreground'}`}
+                >
                   {item.shortcutKey}
                 </kbd>
               )}
@@ -359,9 +363,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       return (
         <div className="mb-4 px-4 transition-all duration-300 py-1 bg-foreground text-background border-y-2 border-foreground mt-4">
-          <p className="text-xs font-bold uppercase tracking-widest">
-            {title}
-          </p>
+          <p className="text-xs font-bold uppercase tracking-widest">{title}</p>
         </div>
       );
     },
@@ -576,8 +578,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </a>
 
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-16 md:h-16 items-center justify-between border-b-4 border-foreground bg-paper px-4 shadow-[0px_4px_0px_hsl(var(--foreground))] pt-safe md:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2 font-display font-black uppercase tracking-widest text-foreground bg-foreground text-background px-3 py-1 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]">
+      <header className="sticky top-0 z-30 flex h-16 md:h-16 items-center justify-between border-b-4 border-foreground bg-background px-4 shadow-[0px_4px_0px_hsl(var(--foreground))] pt-safe md:hidden">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 font-display font-black uppercase tracking-widest text-foreground bg-foreground text-background px-3 py-1 border-2 border-foreground shadow-[2px_2px_0px_hsl(var(--foreground))]"
+        >
           <Logo size="sm" /> BUDGET BUDDY
         </Link>
         <div className="flex items-center gap-3">
@@ -609,7 +614,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ref={sidebarRef}
         id="mobile-sidebar"
         className={cn(
-          'fixed top-0 left-0 z-[70] h-full bg-paper border-r-4 border-foreground md:hidden',
+          'fixed top-0 left-0 z-[70] h-full bg-background border-r-4 border-foreground md:hidden',
           'transition-transform duration-300 ease-in-out transform',
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
@@ -710,7 +715,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div className="pt-4 mt-auto">
             <div className="px-4 py-3 bg-foreground text-background border-4 border-foreground shadow-[4px_4px_0px_hsl(var(--foreground))] text-center">
-              <span className="text-xs font-mono font-bold uppercase tracking-widest">BUDGET BUDDY V{appVersion}</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-widest">
+                BUDGET BUDDY V{appVersion}
+              </span>
             </div>
           </div>
         </div>
@@ -719,7 +726,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Desktop sidebar */}
       <div
         className={cn(
-          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col z-30 bg-paper border-r-4 border-foreground shadow-[8px_0px_0px_hsl(var(--foreground))]',
+          'hidden md:flex h-screen fixed left-0 top-0 bottom-0 flex-col z-30 bg-background border-r-4 border-foreground shadow-[8px_0px_0px_hsl(var(--foreground))]',
           'transition-all duration-300 ease-in-out',
           collapsed ? 'w-[90px]' : 'w-64'
         )}
@@ -770,7 +777,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               aria-expanded={!collapsed}
               title={collapsed ? 'Expand sidebar (Alt+S)' : 'Collapse sidebar (Alt+S)'}
             >
-
               <div className="relative z-10">
                 <ChevronLeft
                   className={cn(
@@ -797,7 +803,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {/* User section */}
-          <div className={cn('px-4 py-6 flex border-b-4 border-foreground mb-4', collapsed ? 'justify-center' : '')}>
+          <div
+            className={cn(
+              'px-4 py-6 flex border-b-4 border-foreground mb-4',
+              collapsed ? 'justify-center' : ''
+            )}
+          >
             <div
               className={cn(
                 'flex items-center',
@@ -822,9 +833,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       className="object-cover"
                     />
                   ) : (
-                    <span>
-                      {user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}
-                    </span>
+                    <span>{user?.user_metadata?.name?.[0] || user?.email?.[0] || 'U'}</span>
                   )}
                 </div>
               </div>
@@ -887,14 +896,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </nav>
 
           {/* Sidebar footer */}
-          <div className={cn('py-6 flex-shrink-0 border-t-4 border-foreground mt-auto bg-foreground text-background', collapsed ? 'text-center px-2' : 'px-4')}>
+          <div
+            className={cn(
+              'py-6 flex-shrink-0 border-t-4 border-foreground mt-auto bg-foreground text-background',
+              collapsed ? 'text-center px-2' : 'px-4'
+            )}
+          >
             {collapsed ? (
               <div className="flex flex-col items-center gap-4">
                 <NotificationCenter />
                 <ThemeToggle iconOnly size="sm" />
-                <div className="text-[10px] font-mono font-bold uppercase py-2">
-                  V{appVersion}
-                </div>
+                <div className="text-[10px] font-mono font-bold uppercase py-2">V{appVersion}</div>
               </div>
             ) : (
               <>

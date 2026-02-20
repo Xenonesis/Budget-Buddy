@@ -523,7 +523,9 @@ export const LoginForm = ({ onSuccess, onError, onStart }: LoginFormProps) => {
           <span className="w-full border-t-2 border-foreground" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-paper px-4 font-mono font-bold uppercase tracking-widest text-foreground text-xs border-2 border-foreground">Or continue with</span>
+          <span className="bg-background px-4 font-mono font-bold uppercase tracking-widest text-foreground text-xs border-2 border-foreground">
+            Or continue with
+          </span>
         </div>
       </motion.div>
 
