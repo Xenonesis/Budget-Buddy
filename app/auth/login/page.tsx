@@ -68,13 +68,13 @@ function LoginContent() {
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4"
           >
-            <div className="bg-[#00FF66] border-4 border-foreground p-4 shadow-[8px_8px_0px_hsl(var(--foreground))]">
+            <div className="bg-primary text-primary-foreground border-4 border-foreground p-4 shadow-[8px_8px_0px_hsl(var(--foreground))]">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
-                  <CheckCircle2 className="h-6 w-6 text-foreground stroke-[3]" />
+                  <CheckCircle2 className="h-6 w-6 stroke-[3]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-mono font-bold uppercase tracking-widest text-foreground">
+                  <p className="text-sm font-mono font-bold uppercase tracking-widest text-primary-foreground">
                     {successMessage}
                   </p>
                 </div>

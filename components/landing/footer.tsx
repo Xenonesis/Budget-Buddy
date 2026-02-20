@@ -33,7 +33,7 @@ export function Footer() {
           </div>
 
           <h3 className="text-4xl md:text-5xl font-display font-black mb-4 uppercase tracking-tighter text-foreground bg-background inline-block px-4 py-1 border-2 border-foreground">INTELLIGENCE BRIEFING</h3>
-          <p className="text-primary-foreground font-bold font-mono mb-8 max-w-xl text-lg relative z-10">
+          <p className="font-bold font-mono mb-8 max-w-xl text-lg relative z-10 text-primary-foreground">
             SUBSCRIBE TO OUR SECURE NETWORK FOR PRODUCT UPDATES, TACTICAL FINANCIAL INSIGHTS, AND EARLY ACCESS TO NEW CAPABILITIES.
           </p>
 
