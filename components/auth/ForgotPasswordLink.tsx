@@ -8,9 +8,9 @@ export const ForgotPasswordLink = () => {
     <div className="text-center mt-2">
       <Link
         href="/auth/reset-password"
-        className="text-xs font-mono font-bold uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background px-2 py-1 border-2 border-transparent hover:border-foreground transition-all inline-flex items-center gap-2 group"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 group hover:underline decoration-foreground/30 underline-offset-4"
       >
-        <KeyRound className="h-3 w-3 stroke-[3]" />
+        <KeyRound className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5" />
         <span>
           Forgot password?
         </span>

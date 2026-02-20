@@ -108,9 +108,9 @@ html {
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
 
-    --primary: 69 100% 44%; /* Refined Chartreuse - slightly deeper */
-    --primary-rgb: 180, 224, 0;
-    --primary-foreground: 0 0% 4%;
+    --primary: 69 60% 50%; /* Softer, refined yellow-green */
+    --primary-rgb: 167, 204, 51;
+    --primary-foreground: 0 0% 10%;
 
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 9%;
@@ -118,8 +118,8 @@ html {
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 46%;
 
-    --accent: 69 100% 44%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 69 60% 50%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -135,7 +135,7 @@ html {
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 69 100% 44%;
+    --ring: 69 60% 50%;
 
     --radius: 0.625rem;
 
@@ -174,9 +174,9 @@ html {
     --popover: 0 0% 7%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 69 100% 50%; /* Chartreuse - slightly brighter in dark */
-    --primary-rgb: 204, 255, 0;
-    --primary-foreground: 0 0% 4%;
+    --primary: 69 60% 60%; /* Softer Chartreuse in dark mode */
+    --primary-rgb: 184, 214, 92;
+    --primary-foreground: 0 0% 10%;
 
     --secondary: 0 0% 14%;
     --secondary-foreground: 0 0% 95%;
@@ -184,8 +184,8 @@ html {
     --muted: 0 0% 14%;
     --muted-foreground: 0 0% 55%;
 
-    --accent: 69 100% 50%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 69 60% 60%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 95%;
@@ -201,7 +201,7 @@ html {
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 69 100% 50%;
+    --ring: 69 60% 60%;
 
     --gradient-background-dark: none;
     --gradient-success-dark: none;

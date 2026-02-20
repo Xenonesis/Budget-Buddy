@@ -688,8 +688,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <nav className="flex-1 px-2 space-y-4">
             <div>
-              <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
-                MAIN NAVIGATION
+              <p className="px-4 text-xs font-medium tracking-wide text-muted-foreground mb-2">
+                Main Navigation
               </p>
             </div>
             <ul className="space-y-1">
@@ -706,8 +706,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </ul>
 
             <div className="mt-6">
-              <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
-                SYSTEM
+              <p className="px-4 text-xs font-medium tracking-wide text-muted-foreground mb-2">
+                System
               </p>
             </div>
             <ul className="space-y-1">
@@ -865,8 +865,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <nav className="flex-1 px-3 py-2 space-y-4">
             {!collapsed && (
               <div>
-                <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
-                  MAIN NAVIGATION
+                <p className="px-4 text-xs font-medium tracking-wide text-muted-foreground mb-2">
+                  Main Navigation
                 </p>
               </div>
             )}
@@ -886,8 +886,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {!collapsed && (
               <div className="mt-6">
-                <p className="px-4 text-xs font-semibold tracking-wider text-muted-foreground mb-2">
-                  SYSTEM
+                <p className="px-4 text-xs font-medium tracking-wide text-muted-foreground mb-2">
+                  System
                 </p>
               </div>
             )}

@@ -103,15 +103,15 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
   if (transactions.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-card via-card/95 to-muted/20 rounded-2xl border border-border/50 shadow-lg backdrop-blur-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-muted/30 to-muted/10 p-6 border-b border-border/50">
+      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="bg-muted/30 p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-xl">
-              <FileText className="w-6 h-6 text-primary" />
+              <FileText className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">Transaction History</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-base font-semibold text-foreground">Transaction History</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Your financial activity will appear here
               </p>
             </div>
@@ -119,39 +119,42 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         </div>
 
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="mb-6 p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-full">
-            <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full">
-              <DollarSign className="w-12 h-12 text-primary" />
-            </div>
+          <div className="mb-6 p-4 bg-muted/50 rounded-full border border-border/50">
+            <DollarSign className="w-10 h-10 text-muted-foreground/50" />
           </div>
 
-          <h3 className="text-2xl font-bold text-foreground mb-3">No transactions yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md leading-relaxed">
+          <h3 className="text-xl font-semibold text-foreground mb-2">No transactions yet</h3>
+          <p className="text-muted-foreground text-sm mb-8 max-w-sm">
             Start tracking your finances by adding your first transaction. Whether it&apos;s income
-            or an expense, every journey begins with a single step!
+            or an expense, every journey begins with a single step.
           </p>
 
           <Button
             onClick={onAddTransaction}
-            size="lg"
-            className="min-h-[48px] px-8 rounded-xl font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="rounded-full px-6 transition-all"
           >
-            <PlusCircle className="mr-3 h-5 w-5" />
-            Add Your First Transaction
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Transaction
           </Button>
 
-          <div className="mt-8 grid grid-cols-3 gap-4 text-center max-w-md">
-            <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl border border-green-200/50">
-              <TrendingUp className="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <p className="text-xs font-medium text-green-700 dark:text-green-300">Track Income</p>
+          <div className="mt-12 grid grid-cols-3 gap-6 text-center max-w-md">
+            <div className="flex flex-col items-center gap-2">
+              <div className="p-2 border border-border/50 rounded-lg text-muted-foreground">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-muted-foreground">Track Income</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 rounded-xl border border-red-200/50">
-              <TrendingDown className="w-6 h-6 text-red-600 mx-auto mb-2" />
-              <p className="text-xs font-medium text-red-700 dark:text-red-300">Monitor Expenses</p>
+            <div className="flex flex-col items-center gap-2">
+              <div className="p-2 border border-border/50 rounded-lg text-muted-foreground">
+                <TrendingDown className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-muted-foreground">Monitor Expenses</p>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 rounded-xl border border-blue-200/50">
-              <Calendar className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <p className="text-xs font-medium text-blue-700 dark:text-blue-300">View Insights</p>
+            <div className="flex flex-col items-center gap-2">
+              <div className="p-2 border border-border/50 rounded-lg text-muted-foreground">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-muted-foreground">View Insights</p>
             </div>
           </div>
         </div>

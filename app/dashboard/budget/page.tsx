@@ -897,13 +897,13 @@ export default function BudgetPage() {
             onDelete={handleDelete}
           />
         ) : budgets.length > 0 ? (
-          <div className="p-8 text-center">
-            <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-4">
-              <DollarSign className="h-6 w-6 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div className="mb-6 p-4 bg-muted/50 rounded-full border border-border/50">
+              <DollarSign className="w-8 h-8 text-muted-foreground/50" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No budgets match your filters</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters to see more results
+            <h3 className="text-xl font-semibold text-foreground mb-2">No budgets match your filters</h3>
+            <p className="text-muted-foreground text-sm mb-8 max-w-sm">
+              Try adjusting your search terms or filters to see more results.
             </p>
             <Button
               onClick={() => {
@@ -912,22 +912,23 @@ export default function BudgetPage() {
                 setPeriodFilter('all');
               }}
               variant="outline"
+              className="rounded-full px-6 transition-all"
             >
               Clear Filters
             </Button>
           </div>
         ) : (
-          <div className="p-8 text-center">
-            <div className="rounded-full bg-muted h-12 w-12 flex items-center justify-center mx-auto mb-4">
-              <DollarSign className="h-6 w-6 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div className="mb-6 p-4 bg-muted/50 rounded-full border border-border/50">
+              <DollarSign className="w-8 h-8 text-muted-foreground/50" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No budgets set yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Start by creating your first budget to track your spending
+            <h3 className="text-xl font-semibold text-foreground mb-2">No budgets set yet</h3>
+            <p className="text-muted-foreground text-sm mb-8 max-w-sm">
+              Start by creating your first budget to track your spending effectively.
             </p>
             {!showForm && (
-              <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" /> Add Your First Budget
+              <Button onClick={() => setShowForm(true)} className="rounded-full px-6 transition-all">
+                <Plus className="mr-2 h-4 w-4" /> Add Budget
               </Button>
             )}
           </div>

@@ -20,13 +20,6 @@ export const HERO_CONFIG = {
     light: '/hero-banner.png',
     dark: '/hero-banner.png',
   },
-  gridOptions: {
-    angle: 65,
-    opacity: 0.4,
-    cellSize: 50,
-    lightLineColor: '#4a4a4a',
-    darkLineColor: '#2a2a2a',
-  },
 } as const;
 
 // Navigation Items

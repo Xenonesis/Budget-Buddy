@@ -802,15 +802,15 @@ export default function AddTransactionForm({
         <div className="overflow-y-auto flex-grow py-4 px-4 pb-24">
           {/* OCR Upload Section */}
           {!isEditing && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="mb-6 p-4 bg-muted/40 rounded-xl border border-border/60 shadow-sm transition-all hover:bg-muted/60">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2.5 bg-primary/10 rounded-lg text-primary">
+                    <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Smart Invoice Processing</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Upload receipts to auto-fill transaction details</p>
+                    <h3 className="text-sm font-semibold text-foreground">Smart Invoice Processing</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Upload receipts to auto-fill transaction details</p>
                   </div>
                 </div>
                 <Button
