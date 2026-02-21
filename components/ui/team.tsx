@@ -79,7 +79,13 @@ export default function TeamSection() {
                                                 onError={(e) => {
                                                     // Fallback to a placeholder if image fails to load
                                                     const target = e.currentTarget;
-                                                    if (!target.src.includes('ui-avatars.com')) {
+                                                    try {
+                                                        const url = new URL(target.src);
+                                                        if (url.hostname !== 'ui-avatars.com') {
+                                                            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=6366f1&color=fff&size=200&bold=true`;
+                                                        }
+                                                    } catch (error) {
+                                                        // If the URL constructor fails, fall back to setting the default
                                                         target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=6366f1&color=fff&size=200&bold=true`;
                                                     }
                                                 }}
